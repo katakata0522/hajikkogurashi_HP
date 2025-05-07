@@ -1,0 +1,2 @@
+# hajikkogurashi_HP
+はじっこぐらしのオフィシャルホームページ
