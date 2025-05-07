@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>はじっこぐらし</title>
+  <script src="https://unpkg.com/tabletop@1.6.4/tabletop.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #fefefe;
+      color: #333;
+    }
+    header {
+      background: #ffe066;
+      padding: 1em;
+      text-align: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 2em;
+    }
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 1em;
+      background: #fff3cd;
+      padding: 0.5em;
+    }
+    nav a {
+      text-decoration: none;
+      color: #444;
+      font-weight: bold;
+    }
+    .hero {
+      padding: 2em;
+      background: #f1f8ff;
+      text-align: center;
+    }
+    .social {
+      margin-top: 1em;
+    }
+    .social a {
+      margin: 0 0.5em;
+      text-decoration: none;
+      font-weight: bold;
+      color: #1da1f2;
+    }
+    section {
+      padding: 2em;
+      max-width: 960px;
+      margin: auto;
+    }
+    .member-card, .portfolio-item, .news-item {
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 1em;
+      margin: 1em 0;
+      white-space: pre-line;
+    }
+    .portfolio-item iframe {
+      width: 100%;
+      height: 315px;
+      margin-top: 1em;
+    }
+    .portfolio-item img {
+      max-width: 100%;
+      border-radius: 8px;
+    }
+    .portfolio-item a {
+      display: inline-block;
+      margin-top: 0.5em;
+      color: #007bff;
+      text-decoration: none;
+    }
+    .news-item h3 {
+      margin-top: 0;
+    }
+    .news-item small {
+      color: #888;
+    }
+    footer {
+      text-align: center;
+      padding: 1em;
+      background: #ddd;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>はじっこぐらし</h1>
+  </header>
+  <nav>
+    <a href="#about">サークル紹介</a>
+    <a href="#portfolio">作品</a>
+    <a href="#members">メンバー</a>
+    <a href="#news">お知らせ</a>
+  </nav>
+  <section class="hero">
+    <h2>Re:青春！ 好奇心あふれる仲間とゲーム開発</h2>
+    <p>目指せ東京ゲームショウ！</p>
+    <div class="social">
+      <a href="https://note.com/hajikkogurashi01" target="_blank">note</a>
+      <a href="https://x.com/@otameshigurashi" target="_blank">Twitter</a>
+    </div>
+  </section>
+
+  <section id="portfolio">
+    <h2>作品ポートフォリオ</h2>
+    <div id="portfolio-list">
+      <p>スプレッドシートから読み込み中...</p>
+    </div>
+  </section>
+
+  <section id="members">
+    <h2>メンバー紹介</h2>
+    <div id="member-list">
+      <p>スプレッドシートから読み込み中...</p>
+    </div>
+  </section>
+
+  <section id="news">
+    <h2>最新のお知らせ</h2>
+    <div id="news-list">
+      <p>スプレッドシートから読み込み中...</p>
+    </div>
+  </section>
+
+  <footer>
+    &copy; 2025 Hajikkogurashi. All rights reserved.
+  </footer>
+
+  <script>
+    const spreadsheetURLs = {
+      portfolio: 'https://docs.google.com/spreadsheets/d/1p-zhH3nChxjO8uBbo-ZjVDilTApzzaZmk_T9t-nAvj4/pubhtml',
+      members: 'https://docs.google.com/spreadsheets/d/12FvxLxUdALoJM2cNsn78XN1MDxpXoPFYQ0jB-JfArkM/pubhtml',
+      news: 'https://docs.google.com/spreadsheets/d/1jk2sLMSZGpg5W9s2JwC2WXZ9h84Edw3qiqfQ9aO0sEk/pubhtml'
+    };
+
+    function loadSpreadsheet(url, sheetName, callback) {
+      Tabletop.init({
+        key: url,
+        simpleSheet: false,
+        wanted: [sheetName],
+        callback: function(data, tabletop) {
+          callback(tabletop.sheets(sheetName).elements);
+        }
+      });
+    }
+
+    function renderPortfolio(items) {
+      const container = document.getElementById("portfolio-list");
+      container.innerHTML = "";
+      items.forEach(item => {
+        container.innerHTML += `
+          <div class="portfolio-item">
+            <h3>${item.タイトル}</h3>
+            <img src="${item["画像URL"]}" alt="${item.タイトル}" />
+            <p>${item.説明}</p>
+            <iframe src="${item["YouTube埋め込みURL"]}" frameborder="0" allowfullscreen></iframe>
+            <a href="${item["ダウンロードURL"]}" target="_blank">ダウンロードページへ</a>
+          </div>`;
+      });
+    }
+
+    function renderNews(items) {
+      const container = document.getElementById("news-list");
+      container.innerHTML = "";
+      items.forEach(item => {
+        container.innerHTML += `
+          <div class="news-item">
+            <h3>${item.タイトル}</h3>
+            <small>${item.日付}</small>
+            <p>${item.本文}</p>
+          </div>`;
+      });
+    }
+
+    function renderMembers(items) {
+      const container = document.getElementById("member-list");
+      container.innerHTML = "";
+      items.forEach(item => {
+        container.innerHTML += `
+          <div class="member-card">
+            <strong>${item.名前}（${item.役割}）</strong>
+            <p>${item.紹介文}</p>
+          </div>`;
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadSpreadsheet(spreadsheetURLs.portfolio, "portfolio", renderPortfolio);
+      loadSpreadsheet(spreadsheetURLs.news, "news", renderNews);
+      loadSpreadsheet(spreadsheetURLs.members, "members", renderMembers);
+    });
+  </script>
+</body>
+</html>
