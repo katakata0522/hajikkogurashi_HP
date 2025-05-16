@@ -130,3 +130,93 @@
 			opacity: 0.25;
 		}
 	}
+
+// ★★★★★ ここから下がフォーム関連のスタイル ★★★★★
+// 元のファイルにあった form, label, input などのスタイルは、
+// この button.scss には含まれていなかったと記憶しています。
+// もし船長の元の button.scss に form 関連のスタイルがあった場合は、
+// この下の部分を、船長の元のコードに置き換えてください。
+// ここでは、actions の部分のみを修正しています。
+
+	form {
+		margin: 0 0 _size(element-margin) 0; // これは元のテーマにあったスタイルかもしれません
+
+		.field { // これも元のテーマにあったスタイルかもしれません
+			margin: 0 0 (_size(element-margin) * 1) 0;
+
+			&.half {
+				width: 50%;
+				float: left;
+				padding: 0 0 0 (_size(element-margin) * 1 * 0.5);
+
+				&.first {
+					padding: 0 (_size(element-margin) * 1 * 0.5) 0 0;
+				}
+			}
+		}
+
+		> .actions {
+			margin: (_size(element-margin) * 1.25) 0 0 0 !important;
+			display: flex;         // ★ Flexboxコンテナにする
+			// justify-content: flex-start; // 左寄せはデフォルトなので省略可
+
+			& > li { // form > .actions > li のセレクタ
+				&:last-child { // 最後のli要素 (Clearボタンを想定)
+					margin-left: auto; // ★ これで最後の要素だけ右に寄る
+				}
+			}
+		}
+
+		@include breakpoint(small) {
+			.field { // これも元のテーマにあったスタイルかもしれません
+				margin: 0 0 (_size(element-margin) * 0.75) 0;
+
+				&.half {
+					padding: 0 0 0 (_size(element-margin) * 0.75 * 0.5);
+
+					&.first {
+						padding: 0 (_size(element-margin) * 0.75 * 0.5) 0 0;
+					}
+				}
+			}
+
+			> .actions {
+				margin: (_size(element-margin) * 1) 0 0 0 !important;
+				display: flex;         // ★ small breakpoint でもFlexboxを適用
+				// justify-content: flex-start;
+
+				& > li {
+					&:last-child {
+						margin-left: auto;
+					}
+				}
+			}
+		}
+
+		@include breakpoint(xsmall) {
+			.field { // これも元のテーマにあったスタイルかもしれません
+				&.half {
+					width: 100%;
+					float: none;
+					padding: 0;
+
+					&.first {
+						padding: 0;
+					}
+				}
+			}
+			// xsmall の .actions にも必要であればFlexbox関連のスタイルを追加
+			// > .actions {
+			//   display: flex;
+			//   & > li {
+			//     &:last-child {
+			//       margin-left: auto;
+			//     }
+			//   }
+			// }
+		}
+	}
+
+// ★★★★★ フォーム関連のスタイルここまで ★★★★★
+// もし船長の元の button.scss に label や input のスタイルが
+// この下に続いていた場合は、それらは変更せずにそのままにしてください。

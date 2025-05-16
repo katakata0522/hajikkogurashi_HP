@@ -6,172 +6,184 @@
 
 /* Banner */
 
-	#banner {
-		@include vendor('align-items', 'center');
-		@include vendor('background-image', 'url("../images/banner.jpg")');
-		@include vendor('display', 'flex');
-		@include padding(4em, 0, (2em, 0, 0, 0));
-		background-attachment: fixed;
-		background-position: center;
-		background-repeat: no-repeat;
-		background-size: cover;
-		border-bottom: 0 !important;
-		cursor: default;
-		height: 60vh;
-		margin-bottom: -3.25em;
-		max-height: 32em;
-		min-height: 22em;
-		position: relative;
-		top: -3.25em;
+#banner {
+	@include vendor('align-items', 'center');
+	@include vendor('background-image', 'url("../images/banner.jpg")');
+	@include vendor('display', 'flex');
+	@include padding(4em, 0, (2em, 0, 0, 0));
+	background-attachment: fixed;
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+	border-bottom: 0 !important;
+	cursor: default;
+	height: 30vh; // これらの値は船長が調整した後のもののはず
+	margin-bottom: -3.25em;
+	max-height: 16em; // これらの値は船長が調整した後のもののはず
+	min-height: 10em; // これらの値は船長が調整した後のもののはず
+	position: relative;
+	top: -3.25em;
 
-		&:after {
-			@include vendor('transition', 'opacity #{_duration(banner)} ease');
-			@include vendor('transition-delay', '0.75s');
-			@include vendor('pointer-events', 'none');
-			background-color: _palette(bg);
-			content: '';
-			display: block;
-			height: 100%;
-			left: 0;
-			opacity: 0.85;
-			position: absolute;
-			top: 0;
-			width: 100%;
-			z-index: 1;
+	&:after {
+		@include vendor('transition', 'opacity #{_duration(banner)} ease');
+		@include vendor('transition-delay', '0.75s');
+		@include vendor('pointer-events', 'none');
+		background-color: _palette(bg);
+		content: '';
+		display: block;
+		height: 100%;
+		left: 0;
+		opacity: 0.85;
+		position: absolute;
+		top: 0;
+		width: 100%;
+		z-index: 1;
+	}
+
+	h1 {
+		font-size: 3.25em;
+	}
+
+	#wrapper & > .inner {
+		@include vendor('transition', (
+			'opacity 1.5s ease',
+			'transform 0.5s ease-out',
+			'filter 0.5s ease',
+			'-webkit-filter 0.5s ease'
+		));
+		padding: 0 !important;
+		position: relative;
+		z-index: 2;
+		max-width: 60em !important;
+
+		.image {
+			display: none;
 		}
 
-		h1 {
-			font-size: 3.25em;
+		header {
+			width: auto;
+
+			> :first-child {
+				width: auto;
+
+				&:after {
+					max-width: 100%;
+				}
+			}
+		}
+
+		.content {
+			@include vendor('display', 'flex');
+			@include vendor('align-items', 'center');
+			margin: 0 0 _size(element-margin) 0; // .content 全体の下のマージン
+
+			> * {
+				margin-left: 1.5em;
+				margin-bottom: 0; // .content 直下要素の下マージンを0に
+			}
+
+			> :first-child {
+				margin-left: 0;
+			}
+
+			p { // バナー内の <p> タグのスタイル
+				font-size: 1.2em; // サブタイトル用に調整したサイズ
+				font-weight: _font(weight-bold);
+				letter-spacing: _font(letter-spacing-alt);
+				text-transform: uppercase;
+
+				// ↓↓↓↓ ここから追加・変更 ↓↓↓↓
+				line-height: 1.6;     // 行の高さを少し詰める (標準的な値に)
+				margin-bottom: 0.5em; // 段落の下の余白を少し詰める
+				// ↑↑↑↑ ここまで追加・変更 ↑↑↑↑
+			}
+		}
+	}
+
+	// ... (以下、&.major やメディアクエリなどは変更なし) ...
+
+	&.major {
+		height: 40vh;
+		min-height: 25em;
+		max-height: 120em;
+
+		&.alt {
+			  opacity: 0.75;
+		}
+	}
+
+	&.style1 { &:after { background-color: _palette(accent1); } }
+	&.style2 { &:after { background-color: _palette(accent2); } }
+	&.style3 { &:after { background-color: _palette(accent3); } }
+	&.style4 { &:after { background-color: _palette(accent4); } }
+	&.style5 { &:after { background-color: _palette(accent5); } }
+	&.style6 { &:after { background-color: _palette(accent6); } }
+
+	body.is-loading & {
+		&:after {
+			opacity: 1.0;
 		}
 
 		> .inner {
-			@include vendor('transition', (
-				'opacity 1.5s ease',
-				'transform 0.5s ease-out',
-				'filter 0.5s ease',
-				'-webkit-filter 0.5s ease'
-			));
-			padding: 0 !important;
-			position: relative;
-			z-index: 2;
+			@include vendor('filter', 'blur(0.125em)');
+			@include vendor('transform', 'translateX(-0.5em)');
+			opacity: 0;
+		}
+	}
 
-			.image {
-				display: none;
-			}
+	@include breakpoint(large) {
+		background-attachment: scroll;
+	}
 
-			header {
-				width: auto;
+	@include breakpoint(small) {
+		@include padding(3em, 0, (2em, 0, 0, 0));
+		height: auto;
+		margin-bottom: -2.75em;
+		max-height: none;
+		min-height: 0;
+		top: -2.75em;
 
-				> :first-child {
-					width: auto;
+		h1 {
+			font-size: 2em;
+		}
 
-					&:after {
-						max-width: 100%;
-					}
-				}
-			}
-
+		> .inner {
 			.content {
-				@include vendor('display', 'flex');
-				@include vendor('align-items', 'center');
-				margin: 0 0 _size(element-margin) 0;
+				display: block;
 
 				> * {
-					margin-left: 1.5em;
-					margin-bottom: 0;
-				}
-
-				> :first-child {
 					margin-left: 0;
-				}
-
-				p {
-					font-size: 0.7em;
-					font-weight: _font(weight-bold);
-					letter-spacing: _font(letter-spacing-alt);
-					text-transform: uppercase;
+					margin-bottom: _size(element-margin);
 				}
 			}
 		}
 
 		&.major {
-			height: 75vh;
-			min-height: 30em;
-			max-height: 50em;
-
-			&.alt {
-				  opacity: 0.75;
-			}
-		}
-
-		&.style1 { &:after { background-color: _palette(accent1); } }
-		&.style2 { &:after { background-color: _palette(accent2); } }
-		&.style3 { &:after { background-color: _palette(accent3); } }
-		&.style4 { &:after { background-color: _palette(accent4); } }
-		&.style5 { &:after { background-color: _palette(accent5); } }
-		&.style6 { &:after { background-color: _palette(accent6); } }
-
-		body.is-loading & {
-			&:after {
-				opacity: 1.0;
-			}
-
-			> .inner {
-				@include vendor('filter', 'blur(0.125em)');
-				@include vendor('transform', 'translateX(-0.5em)');
-				opacity: 0;
-			}
-		}
-
-		@include breakpoint(large) {
-			background-attachment: scroll;
-		}
-
-		@include breakpoint(small) {
-			@include padding(3em, 0, (2em, 0, 0, 0));
 			height: auto;
-			margin-bottom: -2.75em;
-			max-height: none;
 			min-height: 0;
-			top: -2.75em;
-
-			h1 {
-				font-size: 2em;
-			}
-
-			> .inner {
-				.content {
-					display: block;
-
-					> * {
-						margin-left: 0;
-						margin-bottom: _size(element-margin);
-					}
-				}
-			}
-
-			&.major {
-				height: auto;
-				min-height: 0;
-				max-height: none;
-			}
-		}
-
-		@include breakpoint(xsmall) {
-			@include padding(4em, 0, (2em, 0, 0, 0));
-
-			> .inner {
-				.content {
-					p {
-						br {
-							display: none;
-						}
-					}
-				}
-			}
-
-			&.major {
-				@include padding(6em, 0, (2em, 0, 0, 0));
-			}
+			max-height: none;
 		}
 	}
+
+	@include breakpoint(xsmall) {
+		@include padding(4em, 0, (2em, 0, 0, 0));
+
+		> .inner {
+			.content {
+				p {
+					br {
+						display: none;
+					}
+					// ↓↓↓↓ スマホ表示でも行間とマージンを適用 ↓↓↓↓
+					line-height: 1.6;
+					margin-bottom: 0.5em;
+					// ↑↑↑↑ スマホ表示でも行間とマージンを適用 ↑↑↑↑
+				}
+			}
+		}
+
+		&.major {
+			@include padding(6em, 0, (2em, 0, 0, 0));
+		}
+	}
+}

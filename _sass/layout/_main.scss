@@ -6,21 +6,19 @@
 
 /* Main */
 
-	#main {
-		background-color: _palette(bg-alt);
-
-		> * {
-			border-top: solid 1px _palette(border);
-
-			&:first-child {
-				border-top: 0;
-			}
-
-			@include inner;
-		}
-
-		&.alt {
-			background-color: transparent;
-			border-bottom: solid 1px _palette(border);
-		}
-	}
+#main {
+    background-color: _palette(bg-alt);
+    > * {
+        border-top: solid 1px _palette(border);
+        &:first-child {
+            border-top: 0;
+        }
+        @include inner;
+        padding-top: 0em;    // ← この値を調整 (例: 2em, 1.5em)
+        padding-bottom: 0em; // ← この値を調整 (例: 1em, 0.5em)
+		& > header.major { // #main の直下の子要素 (例: section) の中の header.major
+			text-align: center;
+		  }
+    }
+    // ...
+}

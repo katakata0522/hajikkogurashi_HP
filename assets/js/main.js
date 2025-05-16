@@ -347,6 +347,30 @@
 
 				});
 
-	});
+		// ↓↓↓↓ ここからが追加されたコードです ↓↓↓↓
+		// Scroll to Top Button
+		var $scrollToTopBtn = $('#scrollToTopBtn');
 
-})(jQuery);
+		if ($scrollToTopBtn.length) { // ボタン要素が存在する場合のみ実行
+
+			$(window).on('scroll', function() {
+				if ($(this).scrollTop() > 200) { // 200px以上スクロールしたら
+					$scrollToTopBtn.fadeIn();    // ボタンをフェードイン表示
+				} else {
+					$scrollToTopBtn.fadeOut();   // それ以外はフェードアウト非表示
+				}
+			});
+
+			$scrollToTopBtn.on('click', function(event) {
+				event.preventDefault(); // aタグのデフォルトの動作（#へのジャンプ）をキャンセル
+				$('html, body').animate({
+					scrollTop: 0
+				}, 800); // 800ミリ秒（0.8秒）かけてスムーズにトップへスクロール
+			});
+
+		}
+		// ↑↑↑↑ ここまでが追加されたコードです ↑↑↑↑
+
+	}); // この $(function() { ... }); の閉じ括弧の直前に追加しました
+
+})(jQuery); // この行がファイルの最後です

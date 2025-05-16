@@ -6,89 +6,147 @@
 
 /* Contact */
 
-	#contact {
-		border-bottom: solid 1px _palette(border);
-		overflow-x: hidden;
+#contact {
+	border-bottom: solid 1px _palette(border);
+	overflow-x: hidden;
 
-		> .inner {
-			@include vendor('display', 'flex');
-			padding: 0 !important;
+	> .inner {
+		@include vendor('display', 'flex');
+		padding: 0 !important; // これは変更なし
 
-			> :nth-child(2n - 1) {
-				@include padding(4em, 0, (0, 3em, 0, 0));
-				border-right: solid 1px _palette(border);
-				width: 60%;
-				z-index: 1;
+		// ↓↓↓↓ フォーム側の上下パディングを調整 ↓↓↓↓
+		> :nth-child(2n - 1) { // フォームセクション (左側)
+			// 元の @include padding(4em, 0, (0, 3em, 0, 0)); から上下を調整
+			// 上4em, 右0, 下(0, 3em, 0, 0) → 上4em, 右3em, 下0, 左0
+			// これを上下3割減に (padding-top と padding-bottom を直接指定する方が分かりやすいかも)
+			padding-top: 2.8em;    // 4em の7割 (約)
+			padding-right: 3em;    // 左右は元のまま
+			padding-bottom: 0em;   // 下は元々0に近いので、そのままでも
+			padding-left: 0;       //
+			border-right: solid 1px _palette(border);
+			width: 60%;
+			z-index: 1;
+			header.major {
+				margin-left: auto;  // 左マージンを自動
+				margin-right: auto; // 右マージンを自動
+				// width: max-content; はそのままでOK (h2の幅になる)
+			  }
+		}
+
+		// ↓↓↓↓ 連絡先情報側の上下パディングを調整 (ここは主に左パディングなので、上下は中の要素で調整) ↓↓↓↓
+		> :nth-child(2n) { // 連絡先セクション (右側)
+			padding-left: 3em;
+			width: 40%;
+			// この要素自体の上下パディングは元々ないので、中の .split > * で調整
+		}
+
+		> .split { // 連絡先情報 (Email, Phone, Address) のコンテナ
+			padding: 0;
+
+			> * { // Email, Phone, Address の各ブロック
+				// 元の @include padding(3em, 0, (0, 0, 0, 3em)); から上下を調整
+				// 上3em, 右0, 下(0,0,0,3em) → 上3em, 右0, 下0, 左3em
+				// これを上下3割減に
+				padding-top: 3.2em;    // 3em の7割 (約)
+				padding-right: 0;      //
+				padding-bottom: 0em;   //
+				padding-left: 3em;     // 左右は元のまま
+				position: relative;
+
+				&:before {
+					border-top: solid 1px _palette(border);
+					content: '';
+					display: block;
+					margin-left: -3em;
+					position: absolute;
+					top: 0;
+					width: calc(100vw + 3em);
+				}
 			}
 
-			> :nth-child(2n) {
-				padding-left: 3em;
-				width: 40%;
+			> :first-child {
+				&:before {
+					display: none;
+				}
+			}
+		}
+	}
+
+	@include breakpoint(medium) {
+		> .inner {
+			display: block;
+
+			> :nth-child(2n - 1) { // フォームセクション
+				// 元の @include padding(4em, 0, (0, 0, 0, 0)); から上下を調整
+				padding-top: 2.8em;
+				padding-bottom: 0em; // 元々0に近い
+				border-right: 0;
+				width: 100%;
+			}
+
+			> :nth-child(2n) { // 連絡先セクション
+				padding-left: 0;
+				width: 100%;
 			}
 
 			> .split {
-				padding: 0;
-
-				> * {
-					@include padding(3em, 0, (0, 0, 0, 3em));
-					position: relative;
+				> * { // Email, Phone, Address の各ブロック
+					// 元の @include padding(3em, 0, (0, 0, 0, 0)); から上下を調整
+					padding-top: 2.3em;
+					padding-bottom: 0em; // 元々0に近い
 
 					&:before {
-						border-top: solid 1px _palette(border);
-						content: '';
-						display: block;
-						margin-left: -3em;
-						position: absolute;
-						top: 0;
-						width: calc(100vw + 3em);
 					}
 				}
 
 				> :first-child {
 					&:before {
-						display: none;
+						display: block;
 					}
-				}
-			}
-		}
-
-		@include breakpoint(medium) {
-			> .inner {
-				display: block;
-
-				> :nth-child(2n - 1) {
-					@include padding(4em, 0, (0, 0, 0, 0));
-					border-right: 0;
-					width: 100%;
-				}
-
-				> :nth-child(2n) {
-					padding-left: 0;
-					width: 100%;
-				}
-
-				> .split {
-					> * {
-						@include padding(3em, 0, (0, 0, 0, 0));
-
-						&:before {
-						}
-					}
-
-					> :first-child {
-						&:before {
-							display: block;
-						}
-					}
-				}
-			}
-		}
-
-		@include breakpoint(small) {
-			> .inner {
-				> :nth-child(2n - 1) {
-					@include padding(3em, 0, (0, 0, 0, 0));
 				}
 			}
 		}
 	}
+
+	@include breakpoint(small) {
+		> .inner {
+			> :nth-child(2n - 1) { // フォームセクション
+				// 元の @include padding(3em, 0, (0, 0, 0, 0)); から上下を調整
+				padding-top: 2.1em;
+				padding-bottom: 0em; // 元々0に近い
+			}
+		}
+	}
+}
+// Follow Us セクションのSNSアイコンの重なりを解消
+.contact-method.follow-us-icons {
+  .icons {
+    li {
+      .icon,
+      a.icon {
+        position: relative; // absolute を解除し、通常のフローに戻す
+        left: auto;
+        top: auto;
+      }
+    }
+  }
+}
+.contact-method.phone-display-text-only {
+	a {
+		pointer-events: none;  // クリックイベントを無効化
+		cursor: default;       // マウスカーソルを通常に
+		text-decoration: none; // 下線を消す
+		color: inherit;        // 親要素の文字色を継承
+		border-bottom: none;   // Fortyテーマ特有の点線の下線を消す
+
+		&:hover { // ホバー時のスタイルもリセット
+			color: inherit;
+			text-decoration: none;
+			border-bottom: none;
+		}
+
+		&:active { // クリック時のスタイルもリセット
+			color: inherit;
+		}
+	}
+}

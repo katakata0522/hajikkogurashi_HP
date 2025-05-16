@@ -21,3 +21,16 @@
 			margin: 0 0 (_size(element-margin) * 0.25) 0;
 		}
 	}
+	// Follow Us セクションのSNSアイコンの重なりを解消
+.contact-method.follow-us-icons {
+  .icons {
+    li {
+      .icon,
+      a.icon {
+        position: relative; // absolute を解除し、通常のフローに戻す
+        left: auto;
+        top: auto;
+      }
+    }
+  }
+}

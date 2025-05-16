@@ -2,7 +2,8 @@
 layout: page
 title: Elements
 image: assets/images/pic01.jpg
-nav-menu: true
+nav-menu: false  #
+published: false # ← これを追加
 ---
 
 <!-- Main -->

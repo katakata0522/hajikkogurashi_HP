@@ -1,7 +1,10 @@
 <!-- Contact -->
 <section id="contact">
 	<div class="inner">
-		<section>
+		<section> <!-- フォームを囲むセクション -->
+			<header class="major">
+				<h2>お問い合わせ</h2>
+			</header>
 			<form action="https://formspree.io/{{ site.email }}" method="POST">
 				<div class="field half first">
 					<label for="name">Name</label>
@@ -21,7 +24,7 @@
 				</ul>
 			</form>
 		</section>
-		<section class="split">
+		<section class="split"> <!-- 連絡先情報を囲むセクション -->
 			<section>
 				<div class="contact-method">
 					<span class="icon alt fa-envelope"></span>
@@ -30,13 +33,13 @@
 				</div>
 			</section>
 			<section>
-				<div class="contact-method">
+				<div class="contact-method phone-display-text-only">
 					<span class="icon alt fa-phone"></span>
 					<h3>Phone</h3>
 					<a href="tel:{{ site.phone }}">{{ site.phone }}</a>
 				</div>
 			</section>
-			<section>
+			<section> <!-- Address セクション -->
 				<div class="contact-method">
 					<span class="icon alt fa-home"></span>
 					<h3>Address</h3>
@@ -59,35 +62,49 @@
 					</span>
 				</div>
 			</section>
-		</section>
+
+			<!-- ↓↓↓↓ ここから新しいSNSセクションを追加 ↓↓↓↓ -->
+			<section>
+				<div class="contact-method">
+					<span class="icon alt fa-share-nodes"></span> <!-- Font Awesome 5以降なら fa-share-nodes, 古いなら fa-share-alt -->
+					<h3>Follow Us</h3>
+					<ul class="icons" style="list-style: none; padding-left: 0; margin-top: 0.5em; margin-bottom: 0;">
+						{% for key_value in site.socials %}
+							{% if key_value[1] %}
+								<li style="display: inline-block; margin-right: 1em;"> <!-- アイコン間のマージン調整 -->
+									<a href="{{ key_value[1] }}" class="icon alt fa-{{ key_value[0] | downcase }}" target="_blank" rel="noopener noreferrer" aria-label="{{ key_value[0] }}">
+										<span class="label">{{ key_value[0] }}</span>
+									</a>
+								</li>
+							{% endif %}
+						{% endfor %}
+					</ul>
+				</div>
+			</section>
+			<!-- ↑↑↑↑ ここまで新しいSNSセクションを追加 ↑↑↑↑ -->
+
+		</section> <!-- class="split" の閉じタグ -->
 	</div>
 </section>
 
 <!-- Footer -->
 	<footer id="footer">
 		<div class="inner">
-			<ul class="icons">
-				{% for key_value in site.socials %}
-					{% if key_value[1] %}
-						<li>
-							<a href="{{ key_value[1] }}" class="icon alt fa-{{ key_value[0] | downcase }}" target="_blank" rel="noopener noreferrer" aria-label="{{ key_value[0] }}">
-								<span class="label">{{ key_value[0] }}</span>
-							</a>
-						</li>
-					{% endif %}
-				{% endfor %}
-			</ul>
-			<ul class="copyright">
-				<li>&copy; {{ site.title }} {{ site.subtitle }}</li>
+			
+			<ul class="copyright"> <!-- ← 1つの ul にまとめる -->
+				<li>© {{ site.title }}</li>
 				<li>Design: <a href="https://html5up.net" target="_blank">HTML5 UP</a></li>
 				<li>Jekyll integration: <a href="https://github.com/andrewbanchich" target="_blank">Andrew Banchich</a></li>
-
+				<!-- ↓↓↓↓ リンクの記述方法を変更 ↓↓↓↓ -->
+				<li><a href="{{ 'privacy-policy.html' | relative_url }}">プライバシーポリシー</a></li>
+				<li><a href="{{ 'terms-of-service.html' | relative_url }}">利用規約</a></li>
+				<!-- ↑↑↑↑ リンクの記述方法を変更 ↑↑↑↑ -->
 			</ul>
 		</div>
 	</footer>
 
-</div>
-
+</div> <!-- この </div> は #wrapper の閉じタグです -->
+<a href="#" id="scrollToTopBtn" title="ページトップへ戻る">▲</a>
 <!-- Scripts -->
 	<script src="{{ "assets/js/jquery.min.js" | absolute_url }}"></script>
 	<script src="{{ "assets/js/jquery.scrolly.min.js" | absolute_url }}"></script>

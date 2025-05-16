@@ -6,37 +6,67 @@
 
 /* Footer */
 
-	#footer {
-		.copyright {
-			font-size: 0.8em;
-			list-style: none;
-			padding-left: 0;
+#footer {
+	// ↓↓↓↓ #footer 直下の .inner に専用のパディングを設定 ↓↓↓↓
+	> .inner {
+		padding-top: 1.4em !important;    // 元の汎用スタイル(上4em想定)の約3割減よりさらに小さく
+		padding-bottom: 1.4em !important; // 元の汎用スタイル(下2em想定)の約3割減よりさらに小さく
+	}
+	// ↑↑↑↑ ここまで追加 ↑↑↑↑
 
-			li {
-				border-left: solid 1px _palette(border);
-				color: _palette(fg-light);
-				display: inline-block;
-				line-height: 1;
-				margin-left: 1em;
-				padding-left: 1em;
+	.copyright {
+		font-size: 0.8em;
+		list-style: none;
+		padding-left: 0;
 
-				&:first-child {
-					border-left: 0;
-					margin-left: 0;
-					padding-left: 0;
+		li {
+			border-left: solid 1px _palette(border);
+			color: #bbbbbb; // li 要素自体の文字色 (リンクでないテキスト用)
+			display: inline-block;
+			line-height: 1;
+			margin-left: 1em;
+			padding-left: 1em;
+
+			&:first-child {
+				border-left: 0;
+				margin-left: 0;
+				padding-left: 0;
+			}
+
+			// ↓↓↓↓ ここからリンクのスタイルを追加・変更 ↓↓↓↓
+			a {
+				color: #bbbbbb; // 通常時のリンク色を明るめのグレーに
+				text-decoration: none; // 通常時は下線を消す (テーマのデフォルトに合わせるかはお好みで)
+
+				&:hover {
+					// ホバー時の色はテーマのデフォルト (_palette(highlight) やブラウザデフォルト) を活かす
+					// もし明示的に色を指定したい場合はここに color プロパティを追加
+					// 例: color: _palette(highlight);
+					text-decoration: underline; // ホバー時に下線を表示 (テーマのデフォルト動作の再現)
 				}
 			}
+			// ↑↑↑↑ ここまでリンクのスタイルを追加・変更 ↑↑↑↑
 		}
+	}
 
-		@include breakpoint(xsmall) {
-			.copyright {
-				li {
-					display: block;
-					border-left: 0;
-					margin-left: 0;
-					padding-left: 0;
-					line-height: inherit;
-				}
+	@include breakpoint(xsmall) {
+		// ↓↓↓↓ スマホ表示時の #footer 直下の .inner にも専用パディングを設定 ↓↓↓↓
+		> .inner {
+			padding-top: 1em !important;
+			padding-bottom: 1em !important;
+		}
+		// ↑↑↑↑ ここまで追加 ↑↑↑↑
+
+		.copyright {
+			li {
+				display: block;
+				border-left: 0;
+				margin-left: 0;
+				padding-left: 0;
+				line-height: inherit;
+
+				// スマホ表示時もリンクスタイルは共通で適用される
 			}
 		}
 	}
+}

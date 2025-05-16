@@ -1,0 +1,27 @@
+// _sass/components/_scroll-to-top.scss (ファイル全体の内容)
+
+#scrollToTopBtn {
+    display: none; /* 初期状態では非表示 */
+    position: fixed; /* 画面に固定 */
+    bottom: 20px;    /* 下から20pxの位置 */
+    right: 30px;     /* 右から30pxの位置 */
+    z-index: 999;    /* 他の要素より手前に表示 */
+    border: none;
+    outline: none;
+    background-color: _palette(accent1); /* テーマのアクセントカラー1を使用 */
+    color: white;
+    cursor: pointer;
+    padding: 12px 15px; /* 上下左右の余白 */
+    border-radius: 8px;  /* 角を少し丸くする */
+    font-size: 18px;     /* 文字サイズ */
+    line-height: 1;      /* 行の高さを文字サイズに合わせる */
+    text-decoration: none; /* テキストの下線を消す */
+    opacity: 0.8; /* 少し透明にする */
+  
+    @include vendor('transition', 'opacity 0.3s ease-in-out, background-color 0.3s ease-in-out'); /* ホバー時のアニメーション */
+  
+    &:hover {
+      background-color: darken(_palette(accent1), 10%); /* ホバー時に少し暗い色に */
+      opacity: 1; /* ホバー時に不透明にする */
+    }
+  }

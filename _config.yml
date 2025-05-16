@@ -1,17 +1,14 @@
 # site settings
-title: Forty
-subtitle: by HTML5 UP
-email: youremailaddress@gmail.com
-description: A responsive site template designed by HTML5 Up<br /> and released under the Creative Commons.
-baseurl: "/forty-jekyll-theme" # the subpath of your site, e.g. /blog
-url: # the base hostname & protocol for your site
-author:
-street_address: 1234 Somewhere Road
-city: Nashville
-state: TN
-zip_code: 55555
-country: United States of America
-phone: (716) 555-5555
+title: はじっこぐらし公式ホームページ
+header_tagline: Unreal Engineでまったりゲームを作るサークル！ # ← ヘッダー用の短い文言を追加
+subtitle: あなたの帰りを待ってたよ。ゆっくりしていってね。
+email: hajikkogurashi.official@gmail.com
+description: 'Unreal Engineでゲームを制作するサークル「はじっこぐらし」の公式サイトです！まだ初心者ですが私たちが作ったインディーゲームの作品紹介や活動記録を載せていきます！' # ← これはサイト全体の詳細説明
+url: 
+author: はじっこぐらし
+city: '日本のどこかのはじっこ'
+phone: 'もしもし、こちらはじっこ'
+phone_display_text: "もしもし、こちらはじっこ"
 
 # homepage tiles
 tiles-source: pages # accepts "posts" or "pages"
@@ -21,15 +18,19 @@ tiles-count: 6
 # see https://fontawesome.com/icons?d=gallery&p=2&s=brands
 # Icons are not shown if value is empty
 # You need to restart jekyll for changes to have an effect
+# _config.yml (socials セクションのみ抜粋)
+
+# _config.yml (socials セクションの修正案)
+
 socials:
-  GitHub: https://github.com/andrewbanchich
-  GitLab:
-  Google-Plus: https://plus.google.com/u/0/+AndrewBanchich
-  Instagram:
-  LinkedIn: https://www.linkedin.com/in/andrew-banchich-a4ba1195
-  Twitter: https://twitter.com/andrewbanchich
-  Facebook:
-  Slack:
+  # GitHub: https://github.com/your-org # v4では fa-github
+  # GitLab: # v4では fa-gitlab (もしあれば)
+  sticky-note-o: https://note.com/hajikkogurashi01 # noteの代替として fa-sticky-note-o (アウトライン版付箋) を使用
+  # Instagram: # v4では fa-instagram
+  # LinkedIn: # v4では fa-linkedin
+  twitter: https://x.com/hajikko_games    # v4では fa-twitter
+  youtube-play: https://www.youtube.com/@hajikkogurashi # v4では fa-youtube-play (再生ボタン付き) を使用
+  # Slack: # v4では fa-slack
 
 # build settings
 markdown: kramdown
@@ -42,3 +43,4 @@ exclude:
 - LICENSE.md
 - CONTRIBUTING.md
 - README.md 
+- _backups
