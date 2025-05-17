@@ -19,7 +19,7 @@
         {% endfor %}
         {% assign nav_pages = site.html_pages | where_exp: "item", "item.layout != 'home' and item.nav-menu == true" | sort: "nav_order" %}
         {% for page in nav_pages %}
-            {% comment %} <!-- お問い合わせページの場合のみリンク先を変更 --> {% endcomment %}
+            {% comment %} お問い合わせページの場合のみリンク先を変更  {% endcomment %}
             {% if page.title == "お問い合わせ" %}
                 <li><a href="{{ site.baseurl }}/#contact" class="scrolly">{{ page.title }}</a></li>
             {% else %}
