@@ -3,7 +3,7 @@
 
   <!-- Header -->
   <header id="header"{% if page.layout == "landing" %} class="alt style2"{% endif %}{% if page.layout == "home" %} class="alt"{% endif %}>
-    <a href="{{ "" | absolute_url }}/" class="logo">
+    <a href="{{ "/" | absolute_url }}" class="logo">
       <strong>{{ site.title }}</strong>
       <span>{{ site.header_tagline }}</span>
     </a>
@@ -15,24 +15,14 @@
   <!-- Menu -->
   <nav id="menu">
     <ul class="links">
-      {%- for page in site.pages -%}
-        {%- if page.layout == "home" -%}
-          <li><a href="{{ "" | absolute_url }}/">{{ page.title }}</a></li>
-        {%- endif -%}
-      {%- endfor -%}
-
-      {%- assign nav_pages = site.html_pages | where_exp: "item", "item.layout != 'home' and item.nav-menu == true" | sort: "nav_order" -%}
-      {%- for page in nav_pages -%}
-        {% comment %}
-          お問い合わせページの場合のみリンク先を変更
-        {% endcomment %}
-        {% if page.title == "お問い合わせ" %}
-          <li><a href="{{ site.baseurl }}/#contact" class="scrolly">{{ page.title }}</a></li>
-        {% else %}
-          <li><a href="{{ page.url | relative_url }}">{{ page.title }}</a></li>
-        {% endif %}
-      {%- endfor -%}
+      <!-- トップページへのリンク -->
+      <li><a href="{{ "/" | absolute_url }}">Home</a></li>
+      <!-- 主要ページのリンク（必要に応じて編集してください） -->
+      <li><a href="{{ "/aboutus.html" | relative_url }}">私たちについて</a></li>
+      <li><a href="{{ "/members.html" | relative_url }}">メンバー紹介</a></li>
+      <li><a href="{{ "/news.html" | relative_url }}">お知らせ</a></li>
+      <li><a href="{{ "/portfolio.html" | relative_url }}">作品一覧</a></li>
+      <li><a href="{{ "/contact.html" | relative_url }}">お問い合わせ</a></li>
     </ul>
   </nav>
-
 </div>
