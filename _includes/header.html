@@ -1,30 +1,38 @@
 <!-- Wrapper -->
 <div id="wrapper">
 
-<!-- Header -->
-<header id="header"{% if page.layout == "landing" %} class="alt style2"{% endif %}{% if page.layout == "home" %} class="alt"{% endif %}>
-	<a href="{{ "" | absolute_url }}/" class="logo"><strong>{{ site.title }}</strong> <span>{{ site.header_tagline }}</span></a>
-	<nav>
-		<a href="#menu">Menu</a>
-	</nav>
-</header>
+  <!-- Header -->
+  <header id="header"{% if page.layout == "landing" %} class="alt style2"{% endif %}{% if page.layout == "home" %} class="alt"{% endif %}>
+    <a href="{{ "" | absolute_url }}/" class="logo">
+      <strong>{{ site.title }}</strong>
+      <span>{{ site.header_tagline }}</span>
+    </a>
+    <nav>
+      <a href="#menu">Menu</a>
+    </nav>
+  </header>
 
-<!-- Menu -->
-<nav id="menu">
+  <!-- Menu -->
+  <nav id="menu">
     <ul class="links">
-        {% for page in site.pages %}
-            {% if page.layout == "home" %}
-                <li><a href="{{ "" | absolute_url }}/">{{ page.title }}</a></li>
-            {% endif %}
-        {% endfor %}
-        {% assign nav_pages = site.html_pages | where_exp: "item", "item.layout != 'home' and item.nav-menu == true" | sort: "nav_order" %}
-        {% for page in nav_pages %}
-            {% comment %} お問い合わせページの場合のみリンク先を変更  {% endcomment %}
-            {% if page.title == "お問い合わせ" %}
-                <li><a href="{{ site.baseurl }}/#contact" class="scrolly">{{ page.title }}</a></li>
-            {% else %}
-                <li><a href="{{ page.url | relative_url }}">{{ page.title }}</a></li>
-            {% endif %}
-        {% endfor %}
+      {%- for page in site.pages -%}
+        {%- if page.layout == "home" -%}
+          <li><a href="{{ "" | absolute_url }}/">{{ page.title }}</a></li>
+        {%- endif -%}
+      {%- endfor -%}
+
+      {%- assign nav_pages = site.html_pages | where_exp: "item", "item.layout != 'home' and item.nav-menu == true" | sort: "nav_order" -%}
+      {%- for page in nav_pages -%}
+        {% comment %}
+          お問い合わせページの場合のみリンク先を変更
+        {% endcomment %}
+        {% if page.title == "お問い合わせ" %}
+          <li><a href="{{ site.baseurl }}/#contact" class="scrolly">{{ page.title }}</a></li>
+        {% else %}
+          <li><a href="{{ page.url | relative_url }}">{{ page.title }}</a></li>
+        {% endif %}
+      {%- endfor -%}
     </ul>
-</nav>
+  </nav>
+
+</div>
