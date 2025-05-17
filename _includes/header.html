@@ -2,10 +2,10 @@
 <div id="wrapper">
 
   <!-- Header -->
-  <header id="header"{% if page.layout == "landing" %} class="alt style2"{% endif %}{% if page.layout == "home" %} class="alt"{% endif %}>
-    <a href="{{ "/" | absolute_url }}" class="logo">
-      <strong>{{ site.title }}</strong>
-      <span>{{ site.header_tagline }}</span>
+  <header id="header">
+    <a href="/" class="logo">
+      <strong>はじっこぐらし</strong>
+      <span>Unreal Engineでまったりゲームを作るサークル！</span>
     </a>
     <nav>
       <a href="#menu">Menu</a>
@@ -15,14 +15,12 @@
   <!-- Menu -->
   <nav id="menu">
     <ul class="links">
-      <!-- トップページへのリンク -->
-      <li><a href="{{ "/" | absolute_url }}">Home</a></li>
-      <!-- 主要ページのリンク（必要に応じて編集してください） -->
-      <li><a href="{{ "/aboutus.html" | relative_url }}">私たちについて</a></li>
-      <li><a href="{{ "/members.html" | relative_url }}">メンバー紹介</a></li>
-      <li><a href="{{ "/news.html" | relative_url }}">お知らせ</a></li>
-      <li><a href="{{ "/portfolio.html" | relative_url }}">作品一覧</a></li>
-      <li><a href="{{ "/contact.html" | relative_url }}">お問い合わせ</a></li>
+      <li><a href="/">Home</a></li>
+      <li><a href="/aboutus.html">私たちについて</a></li>
+      <li><a href="/members.html">メンバー紹介</a></li>
+      <li><a href="/news.html">お知らせ</a></li>
+      <li><a href="/portfolio.html">作品一覧</a></li>
+      <li><a href="/contact.html">お問い合わせ</a></li>
     </ul>
   </nav>
 </div>
