@@ -1,0 +1,40 @@
+# site settings
+title: はじっこぐらし公式ホームページ
+subtitle: あなたの帰りを待ってたよ。ゆっくりしていってね。
+email: hajikkogurashi.official@gmail.com
+description: 'Unreal Engineでゲームを制作するサークル「はじっこぐらし」の公式サイトです！作品紹介や活動記録を載せていきます！'
+url: 
+author: はじっこぐらし
+city: 日本のどこかのはじっこ
+phone: 
+
+# homepage tiles
+tiles-source: pages # accepts "posts" or "pages"
+tiles-count: 6
+
+# social settings (key must match name of font awesome icon)
+# see https://fontawesome.com/icons?d=gallery&p=2&s=brands
+# Icons are not shown if value is empty
+# You need to restart jekyll for changes to have an effect
+socials:
+  GitHub: 
+  GitLab:
+  note: https://note.com/hajikkogurashi01
+  Instagram:
+  LinkedIn: 
+  Twitter: https://x.com/@otameshigurashi
+  Facebook:
+  Slack:
+
+# build settings
+markdown: kramdown
+
+sass:
+  style: compressed
+
+exclude:
+- "*.gemspec"
+- LICENSE.md
+- CONTRIBUTING.md
+- README.md 
+- _backups
