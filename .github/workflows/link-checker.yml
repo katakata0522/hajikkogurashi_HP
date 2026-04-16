@@ -1,0 +1,32 @@
+name: Weekly Broken Link Patrol
+
+on:
+  schedule:
+    # Run every Sunday at midnight (UTC)
+    - cron: '0 0 * * 0'
+  workflow_dispatch: # Allow manual trigger for testing
+
+jobs:
+  link-checker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Run Lychee Link Checker
+        uses: lycheeverse/lychee-action@v2
+        id: lychee
+        with:
+          # Check all local HTML files, plus the homepages of the other main sites.
+          # It fetches these targets, parses HTML, and checks if any outgoing/internal links result in 404.
+          args: --no-progress --timeout 10 --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" './**/*.html' 'https://playpoint-sim.com/' 'https://katakatalab.com/'
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Fail the workflow if broken links are found
+        # lychee-action sets exit_code to 0 if all links are healthy.
+        if: steps.lychee.outputs.exit_code != '0'
+        run: |
+          echo "⚠️ リンク切れ（404エラーなど）が検出されました！"
+          echo "GitHub Actionsの実行ログから、どのリンクが切れているかを確認してください。"
+          exit 1
