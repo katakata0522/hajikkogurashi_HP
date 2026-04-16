@@ -1,4 +1,4 @@
-name: Deploy to Xserver
+name: Deploy Static Site to Xserver
 
 on:
   push:
@@ -13,16 +13,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.1' # 必要に応じてバージョンを調整
-          bundler-cache: true
-
-      - name: Build Jekyll site
+      - name: Validate static site
         run: |
-          bundle install
-          bundle exec jekyll build
+          pwsh -File ./scripts/static-site-smoke-test.ps1
+          pwsh -File ./scripts/home-asset-smoke-test.ps1
+          pwsh -File ./scripts/structure-smoke-test.ps1
+          pwsh -File ./scripts/local-reference-check.ps1
 
       - name: Deploy to Xserver via Rsync
         env:
@@ -40,9 +36,13 @@ jobs:
           # 既知のホストとして登録（対話モード回避）
           ssh-keyscan -p $XS_PORT -H $XS_HOST >> ~/.ssh/known_hosts
 
-          # rsyncで転送
-          # -a: アーカイブモード（属性維持）
-          # -v: 詳細表示
-          # -z: 圧縮転送
-          # --delete: ローカルにないファイルはサーバーからも削除（同期）
-          rsync -avz --delete -e "ssh -p $XS_PORT -i ~/.ssh/id_rsa" ./_site/ $XS_USER@$XS_HOST:$XS_REMOTE_DIR
+          # 静的ファイルだけを公開先へ同期する
+          rsync -avz --delete \
+            --exclude ".git/" \
+            --exclude ".github/" \
+            --exclude "scripts/" \
+            --exclude "*.md" \
+            --exclude ".gitignore" \
+            --exclude ".gitlab-ci.yml" \
+            -e "ssh -p $XS_PORT -i ~/.ssh/id_rsa" \
+            ./ $XS_USER@$XS_HOST:$XS_REMOTE_DIR

@@ -1,0 +1,183 @@
+.portfolio-page {
+  display: grid;
+  gap: 3.5rem;
+  padding-bottom: 1rem;
+}
+
+.portfolio-intro {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.portfolio-intro__lead {
+  font-size: 1.15rem;
+  line-height: 1.9;
+  max-width: 44rem;
+  color: rgba(244, 244, 255, 0.92);
+}
+
+.portfolio-pillars {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.portfolio-pillar,
+.portfolio-card,
+.portfolio-cta {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
+    linear-gradient(135deg, rgba(243, 162, 59, 0.18), rgba(71, 183, 201, 0.1));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 1.25rem;
+  box-shadow: 0 1.25rem 2.5rem rgba(8, 13, 29, 0.18);
+}
+
+.portfolio-pillar {
+  padding: 1.5rem;
+}
+
+.portfolio-pillar__label,
+.portfolio-card__kicker,
+.portfolio-timeline__date {
+  display: inline-block;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  color: #f3a23b;
+}
+
+.portfolio-pillar__value {
+  display: block;
+  margin-top: 0.7rem;
+  font-size: 1.4rem;
+  line-height: 1.3;
+  color: #ffffff;
+}
+
+.portfolio-pillar p,
+.portfolio-card p,
+.portfolio-timeline__content p,
+.portfolio-cta p {
+  margin: 0.9rem 0 0;
+  color: rgba(244, 244, 255, 0.82);
+}
+
+.portfolio-section > .major {
+  margin-bottom: 1.8rem;
+}
+
+.portfolio-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.portfolio-card {
+  padding: 1.7rem;
+  min-height: 100%;
+}
+
+.portfolio-card h3,
+.portfolio-timeline__content h3,
+.portfolio-cta h2 {
+  margin-top: 0.7rem;
+  margin-bottom: 0;
+}
+
+.portfolio-card--featured {
+  grid-column: span 2;
+  background:
+    radial-gradient(circle at top right, rgba(243, 162, 59, 0.22), transparent 35%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
+    linear-gradient(140deg, rgba(71, 183, 201, 0.16), rgba(243, 162, 59, 0.1));
+}
+
+.portfolio-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 1.5rem;
+}
+
+.portfolio-links .button {
+  margin: 0;
+}
+
+.portfolio-section--timeline {
+  position: relative;
+}
+
+.portfolio-timeline {
+  display: grid;
+  gap: 1rem;
+}
+
+.portfolio-timeline__item {
+  display: grid;
+  grid-template-columns: 8rem 1fr;
+  gap: 1rem;
+  align-items: start;
+  padding: 1.4rem 0 1.4rem 1.4rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.portfolio-timeline__content {
+  padding: 0.2rem 1.4rem 1.3rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.portfolio-cta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.8rem;
+}
+
+.portfolio-cta__body {
+  max-width: 38rem;
+}
+
+@media screen and (max-width: 980px) {
+  .portfolio-pillars,
+  .portfolio-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .portfolio-card--featured {
+    grid-column: auto;
+  }
+
+  .portfolio-timeline__item {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+    padding-left: 1rem;
+  }
+
+  .portfolio-cta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media screen and (max-width: 736px) {
+  .portfolio-page {
+    gap: 2.5rem;
+  }
+
+  .portfolio-intro__lead {
+    font-size: 1rem;
+  }
+
+  .portfolio-pillar,
+  .portfolio-card,
+  .portfolio-cta {
+    padding: 1.25rem;
+  }
+
+  .portfolio-timeline__content {
+    padding: 0.2rem 1rem 1rem;
+  }
+}

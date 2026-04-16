@@ -1,15 +1,18 @@
-name: Deploy to GitHub Pages
+name: Static Site Check on Push
 
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
-  github-pages:
+  static-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses:  helaili/jekyll-action@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v4
+      - name: Run smoke tests
+        run: |
+          pwsh -File ./scripts/static-site-smoke-test.ps1
+          pwsh -File ./scripts/home-asset-smoke-test.ps1
+          pwsh -File ./scripts/structure-smoke-test.ps1
+          pwsh -File ./scripts/local-reference-check.ps1

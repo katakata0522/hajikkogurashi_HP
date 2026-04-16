@@ -1,71 +1,89 @@
-# Forty - Jekyll Theme
+# はじっこぐらし公式サイト
 
-A Jekyll version of the "Forty" theme by [HTML5 UP](https://html5up.net/).  
+このリポジトリは、`HTML + CSS + JavaScript` だけで管理する静的サイトです。  
+今後は **Jekyll 用の `.md` や `_includes` は触らず**、公開用の `html` を直接編集します。
 
-![Forty Theme](assets/images/forty.jpg "Forty Theme")
+## まず触る場所
 
-# How to Use
+- `index.html`
+  トップページ
+- `aboutus.html`
+  私たちについて
+- `members.html`
+  メンバー紹介
+- `news.html`
+  お知らせ
+- `portfolio.html`
+  作品一覧
+- `coming-soon.html`
+  制作中ページ
+- `privacy-policy.html`
+  プライバシーポリシー
+- `terms-of-service.html`
+  利用規約
+- `404.html`
+  404ページ
 
-For those unfamiliar with how Jekyll works, check out [jekyllrb.com](https://jekyllrb.com/) for all the details, 
-or read up on just the basics of [front matter](https://jekyllrb.com/docs/frontmatter/), [writing posts](https://jekyllrb.com/docs/posts/), 
-and [creating pages](https://jekyllrb.com/docs/pages/).
+## デザインを変える場所
 
-Simply fork this repository and start editing the `_config.yml` file!
+- `assets/css/main.css`
+  サイト全体の共通デザイン
+- `assets/css/index.css`
+  トップページ専用の見た目
+- `assets/css/portfolio.css`
+  作品一覧ページ専用の見た目
+- `assets/images/`
+  画像
+- `assets/js/`
+  メニューや演出などのJavaScript
 
-> NOTE: GitHub Actions is required to deploy to GitHub Pages because GitHub [refuses to update their version of Jekyll](https://github.com/github/pages-gem/issues/651).
+## 更新の基本手順
 
-# Added Features
+1. 編集したい `html` を直接開いて内容を直す
+2. 必要なら `assets/css/*.css` で見た目を調整する
+3. ローカル確認をする
+4. スモークテストを実行する
+5. サーバーへ反映する
 
-* **[Formspree.io](https://formspree.io/) contact form integration** - just add your email to the `_config.yml` and it works!
-* Use `_config.yml` to **set whether the homepage tiles should pull pages or posts**, as well as how many to display.
-* Add your **social profiles** easily in `_config.yml`. Only social profiles buttons you enter in `config.yml` show up on the site footer!
-* Set **featured images** in front matter.
+## ローカル確認
 
-# Credits
+このサイトは `/aboutus.html` のような絶対パスを使っているため、ファイルを直接ダブルクリックするより、ローカルサーバーで見る方が安全です。
 
-Original README from HTML5 UP:
+PowerShell で次を実行します。
 
-```
-Forty by HTML5 UP
-html5up.net | @ajlkn
-Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
-
-
-This is Forty, my latest and greatest addition to HTML5 UP and, per its incredibly
-creative name, my 40th (woohoo)! It's built around a grid of "image tiles" that are
-set up to smoothly transition to secondary landing pages (for which a separate page
-template is provided), and includes a number of neat effects (check out the menu!),
-extra features, and all the usual stuff you'd expect. Hope you dig it!
-
-Demo images* courtesy of Unsplash, a radtastic collection of CC0 (public domain) images
-you can use for pretty much whatever.
-
-(* = not included)
-
-AJ
-aj@lkn.io | @ajlkn
-
-
-Credits:
-
-	Demo Images:
-		Unsplash (unsplash.com)
-
-	Icons:
-		Font Awesome (fortawesome.github.com/Font-Awesome)
-
-	Other:
-		jQuery (jquery.com)
-		html5shiv.js (@afarkas @jdalton @jon_neal @rem)
-		background-size polyfill (github.com/louisremi)
-		Misc. Sass functions (@HugoGiraudel)
-		Respond.js (j.mp/respondjs)
-		Skel (skel.io)
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\start-local-preview.ps1
 ```
 
-Repository [Jekyll logo](https://github.com/jekyll/brand) icon licensed under a [Creative Commons Attribution 4.0 International License](http://choosealicense.com/licenses/cc-by-4.0/).
+起動後は `http://localhost:8000/` をブラウザで開きます。
 
----
+## 動作確認コマンド
 
-Last updated: 2025-07-21
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\static-site-smoke-test.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\home-asset-smoke-test.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\structure-smoke-test.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\local-reference-check.ps1
+```
 
+## 反映時の考え方
+
+Xserver に置くのは、基本的にこのリポジトリ直下の静的ファイルです。
+
+- `*.html`
+- `assets/`
+- `.nojekyll`
+
+逆に、以下は公開先へ置く必要がありません。
+
+- `.github/`
+- `scripts/`
+- `README.md`
+- `CONTRIBUTING.md`
+- `LICENSE.md`
+- `.gitignore`
+
+## 補足
+
+旧 Jekyll ソース一式は、このリポジトリの外へ退避済みです。  
+必要になった場合は、ローカルバックアップか Git 履歴から戻せます。

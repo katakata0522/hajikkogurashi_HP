@@ -1,12 +1,15 @@
-image: ruby
+image: mcr.microsoft.com/powershell:7.4-ubuntu-22.04
 
-pages:
-  stage: build
+stages:
+  - test
+
+static_site_check:
+  stage: test
   script:
-  - gem install jekyll
-  - jekyll build -d public
-  artifacts:
-    paths:
-    - public
+    - pwsh -File ./scripts/static-site-smoke-test.ps1
+    - pwsh -File ./scripts/home-asset-smoke-test.ps1
+    - pwsh -File ./scripts/structure-smoke-test.ps1
+    - pwsh -File ./scripts/local-reference-check.ps1
   only:
-  - master
+    - main
+    - merge_requests
