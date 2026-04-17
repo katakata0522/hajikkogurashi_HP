@@ -20,7 +20,7 @@ jobs:
           pwsh -File ./scripts/structure-smoke-test.ps1
           pwsh -File ./scripts/local-reference-check.ps1
 
-      - name: Generate Sitemap
+      - name: Generate sitemap.xml
         run: pwsh -File ./scripts/generate-sitemap.ps1
 
       - name: Deploy to Xserver via Rsync
@@ -50,5 +50,10 @@ jobs:
             -e "ssh -p $XS_PORT -i ~/.ssh/id_rsa" \
             ./ $XS_USER@$XS_HOST:$XS_REMOTE_DIR
 
-      - name: Auto SEO Ping to Google
-        run: curl -s "https://www.google.com/ping?sitemap=https://hajikkoroom.xsrv.jp/sitemap.xml"
+      - name: Ping Google with updated sitemap
+        if: success()
+        run: |
+          echo "🔔 Googleへサイトマップ更新を通知中..."
+          curl -s -o /dev/null -w "Google Ping: HTTP %{http_code}\n" \
+            "https://www.google.com/ping?sitemap=https://hajikkoroom.xsrv.jp/sitemap.xml"
+          echo "✅ SEO Ping 完了！"

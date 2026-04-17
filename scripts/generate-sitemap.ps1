@@ -1,39 +1,59 @@
+#!/usr/bin/env pwsh
+# ============================================================
+# generate-sitemap.ps1
+# リポジトリ内の全 HTML ファイルから sitemap.xml を自動生成する
+# ============================================================
 $ErrorActionPreference = 'Stop'
 
-# Get the path of the repository root, assuming this script is in /scripts
-$repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
-$baseUrl = "https://hajikkoroom.xsrv.jp"
+$repoRoot  = (git -C $PSScriptRoot rev-parse --show-toplevel).Trim()
+$baseUrl   = 'https://hajikkoroom.xsrv.jp'
+$today     = (Get-Date).ToString('yyyy-MM-dd')
 
-# Find all HTML files, excluding templates or error pages
-$htmlFiles = Get-ChildItem -Path $repoRoot -File -Filter "*.html" | Where-Object { $_.Name -notmatch "^404\.html$" }
-$sitemapPath = Join-Path $repoRoot "sitemap.xml"
+# 除外対象（検索エンジンに登録しないページ）
+$excludes = @('404.html')
 
-# Begin constructing the expected sitemap payload.
-$xml = '<?xml version="1.0" encoding="UTF-8"?>' + "`n"
-$xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + "`n"
+# HTML ファイルを収集
+$htmlFiles = Get-ChildItem -Path $repoRoot -Filter '*.html' -File |
+    Where-Object { $excludes -notcontains $_.Name }
 
-# In highly secure environments or static generators we might use git commit time, but today's date works best for automated generation on push
-$lastmod = (Get-Date).ToString("yyyy-MM-dd")
-
-foreach ($file in $htmlFiles) {
-    $filename = $file.Name
-    
-    # Normally "index.html" implies the root level / of a server
-    if ($filename -eq "index.html") {
-        $url = "$baseUrl/"
-    } else {
-        $url = "$baseUrl/$filename"
+# 優先度の定義（トップページは最重要、他はやや低め）
+function Get-Priority($fileName) {
+    switch ($fileName) {
+        'index.html'          { '1.0' }
+        'portfolio.html'      { '0.8' }
+        'aboutus.html'        { '0.8' }
+        'news.html'           { '0.7' }
+        'members.html'        { '0.6' }
+        'coming-soon.html'    { '0.5' }
+        default               { '0.4' }
     }
-
-    $xml += "  <url>`n"
-    $xml += "    <loc>$url</loc>`n"
-    $xml += "    <lastmod>$lastmod</lastmod>`n"
-    $xml += "  </url>`n"
 }
 
-$xml += "</urlset>"
+# sitemap.xml を組み立て
+$entries = foreach ($file in $htmlFiles) {
+    $loc = if ($file.Name -eq 'index.html') {
+        "$baseUrl/"
+    } else {
+        "$baseUrl/$($file.Name)"
+    }
+    $priority = Get-Priority $file.Name
 
-# Set the generated XML to the root as sitemap.xml
-Set-Content -Path $sitemapPath -Value $xml -Encoding UTF8
+    @"
+  <url>
+    <loc>$loc</loc>
+    <lastmod>$today</lastmod>
+    <priority>$priority</priority>
+  </url>
+"@
+}
 
-Write-Host "✅ sitemap.xml successfully generated at: $sitemapPath"
+$sitemap = @"
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+$($entries -join "`n")
+</urlset>
+"@
+
+$outPath = Join-Path $repoRoot 'sitemap.xml'
+$sitemap | Out-File -FilePath $outPath -Encoding utf8NoBOM -Force
+Write-Output "sitemap.xml generated with $($htmlFiles.Count) URLs -> $outPath"
