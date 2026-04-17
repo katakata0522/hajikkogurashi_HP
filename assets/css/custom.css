@@ -1,15 +1,22 @@
 /* ======================================
    HAJIKKOGURASHI — Custom Overrides
-   custom.css  v20260417-2
+   custom.css  v20260417-3
    ====================================== */
 
-/* 1. Header Logo — ボックス廃止 → テキストロゴ化
-   テーマデフォルトは白背景ボックスだが、
-   テキストのみの方がモダンで主張できる */
+/* 1. Header — ロゴ・ナビ・ハンバーガーの垂直揃え */
+#header {
+    align-items: center;
+}
+
+#header .logo {
+    padding-top: 1em !important;
+    padding-bottom: 1em !important;
+}
+
 #header .logo strong {
     background-color: transparent !important;
     color: #ffffff !important;
-    font-size: 1.6em !important;
+    font-size: 2em !important;
     letter-spacing: .15em;
     padding: 0 !important;
     text-shadow: 0 1px 4px rgba(0, 0, 0, .3);
@@ -18,7 +25,7 @@
 #header .logo span {
     color: rgba(255, 255, 255, 0.85) !important;
     font-size: 1em !important;
-    margin-top: .4em !important;
+    margin-top: .3em !important;
     letter-spacing: .05em;
 }
 
@@ -28,6 +35,19 @@
     color: #9bf1ff !important;
 }
 
+/* ハンバーガーメニューをロゴと垂直中央揃え */
+#header nav {
+    align-self: center !important;
+}
+
+#header nav a[href="#menu"] {
+    display: flex;
+    align-items: center;
+    height: auto;
+    padding-top: 0.5em !important;
+    padding-bottom: 0.5em !important;
+}
+
 /* 2. Fix Mobile Horizontal Overflow Layout Bug */
 body, #wrapper {
     overflow-x: hidden !important;
@@ -35,19 +55,30 @@ body, #wrapper {
     max-width: 100vw;
 }
 
-/* 3. Fix Banner Title Overflow (Especially for Japanese Text) */
+/* 3. Banner — タイトル折り返し + ボタン高さ揃え */
 #banner h1 {
     word-break: auto-phrase;
     overflow-wrap: break-word;
+}
+
+/* 「見ていく →」ボタンの高さを隣のテキストと揃える */
+#banner .content {
+    align-items: center !important;
+}
+
+#banner .content .button.next {
+    height: 2.8em;
+    line-height: 2.8em;
+    font-size: .75em;
+    padding: 0 4em 0 1.5em;
 }
 
 @media screen and (max-width: 736px) {
     #banner h1 {
         font-size: 1.8em !important;
     }
-    /* モバイルでもロゴを主張 */
     #header .logo strong {
-        font-size: 1.3em !important;
+        font-size: 1.5em !important;
     }
     #header .logo span {
         display: block !important;
@@ -59,7 +90,6 @@ body, #wrapper {
     #banner h1 {
         font-size: 1.5em !important;
     }
-    /* 超小画面でもサブタイトルを表示 */
     #header .logo span {
         display: block !important;
         font-size: .75em !important;
@@ -77,8 +107,7 @@ body, #wrapper {
     text-align: center;
 }
 
-/* 5. Contact Form — 入力欄のコントラスト向上
-   テーマデフォルトの背景が暗すぎて入力欄の境界が見えない */
+/* 5. Contact Form — 入力欄のコントラスト向上 */
 #contact input[type="text"],
 #contact input[type="email"],
 #contact textarea {
@@ -95,7 +124,18 @@ body, #wrapper {
     box-shadow: 0 0 0 2px rgba(155, 241, 255, .15);
 }
 
-/* 6. SNS Icons — 視認性とタップ領域の改善 */
+/* 6. Contact Form — 送信/リセットボタンのサイズ適正化
+   テーマデフォルトのボタンが巨大すぎるため縮小 */
+#contact .actions input[type="submit"],
+#contact .actions input[type="reset"] {
+    font-size: .7em;
+    height: 3em;
+    line-height: 3em;
+    padding: 0 1.5em;
+    letter-spacing: .15em;
+}
+
+/* 7. SNS Icons — 視認性とタップ領域の改善 */
 .contact-method--social .social-links {
     display: flex;
     gap: 0.8em;
