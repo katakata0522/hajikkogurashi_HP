@@ -50,10 +50,18 @@ jobs:
             -e "ssh -p $XS_PORT -i ~/.ssh/id_rsa" \
             ./ $XS_USER@$XS_HOST:$XS_REMOTE_DIR
 
-      - name: Ping Google with updated sitemap
+      - name: Notify search engines of sitemap update
         if: success()
         run: |
-          echo "🔔 Googleへサイトマップ更新を通知中..."
-          curl -s -o /dev/null -w "Google Ping: HTTP %{http_code}\n" \
-            "https://www.google.com/ping?sitemap=https://hajikkoroom.xsrv.jp/sitemap.xml"
-          echo "✅ SEO Ping 完了！"
+          echo "🔔 検索エンジンへサイトマップ更新を通知中..."
+          
+          # Bing / Yandex への Ping（現在も稼働中）
+          BING_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://www.bing.com/ping?sitemap=https://hajikkoroom.xsrv.jp/sitemap.xml")
+          echo "Bing Ping: HTTP $BING_STATUS"
+          
+          # Google は Search Console に sitemap.xml を登録済みであれば
+          # sitemap.xml の更新を検知して自動的にクロールしてくれます。
+          # （Google の /ping エンドポイントは 2023 年に廃止されました）
+          echo "ℹ️  Google: sitemap.xml が更新されました。Search Console 経由で自動クロールされます。"
+          echo "✅ SEO 通知完了！"
