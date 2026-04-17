@@ -1,28 +1,41 @@
 /* ======================================
    HAJIKKOGURASHI — Custom Overrides
-   custom.css  v20260417-1
+   custom.css  v20260417-2
    ====================================== */
 
-/* 1. Fix Logo Color
-   テンプレートデフォルトだとロゴの色が暗いため、
-   白色に強制上書きして視認性を確保 */
+/* 1. Header Logo — ボックス廃止 → テキストロゴ化
+   テーマデフォルトは白背景ボックスだが、
+   テキストのみの方がモダンで主張できる */
 #header .logo strong {
+    background-color: transparent !important;
     color: #ffffff !important;
-}
-#header .logo span {
-    color: rgba(255, 255, 255, 0.7) !important;
+    font-size: 1.6em !important;
+    letter-spacing: .15em;
+    padding: 0 !important;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, .3);
 }
 
-/* 2. Fix Mobile Horizontal Overflow Layout Bug
-   特定のスクリーン幅でbodyが横にはみ出す問題を抑制 */
+#header .logo span {
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-size: 1em !important;
+    margin-top: .4em !important;
+    letter-spacing: .05em;
+}
+
+/* ホバー時もボックスを出さない */
+#header .logo:hover strong {
+    background-color: transparent !important;
+    color: #9bf1ff !important;
+}
+
+/* 2. Fix Mobile Horizontal Overflow Layout Bug */
 body, #wrapper {
     overflow-x: hidden !important;
     width: 100%;
     max-width: 100vw;
 }
 
-/* 3. Fix Banner Title Overflow (Especially for Japanese Text)
-   日本語のh1が長い場合に折り返しが正しく行われるよう設定 */
+/* 3. Fix Banner Title Overflow (Especially for Japanese Text) */
 #banner h1 {
     word-break: auto-phrase;
     overflow-wrap: break-word;
@@ -32,11 +45,24 @@ body, #wrapper {
     #banner h1 {
         font-size: 1.8em !important;
     }
+    /* モバイルでもロゴを主張 */
+    #header .logo strong {
+        font-size: 1.3em !important;
+    }
+    #header .logo span {
+        display: block !important;
+        font-size: .85em !important;
+    }
 }
 
 @media screen and (max-width: 480px) {
     #banner h1 {
         font-size: 1.5em !important;
+    }
+    /* 超小画面でもサブタイトルを表示 */
+    #header .logo span {
+        display: block !important;
+        font-size: .75em !important;
     }
 }
 
@@ -49,4 +75,36 @@ body, #wrapper {
 
 .error-guide {
     text-align: center;
+}
+
+/* 5. Contact Form — 入力欄のコントラスト向上
+   テーマデフォルトの背景が暗すぎて入力欄の境界が見えない */
+#contact input[type="text"],
+#contact input[type="email"],
+#contact textarea {
+    background: rgba(212, 212, 255, .08);
+    border: 1px solid rgba(212, 212, 255, .15);
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+#contact input[type="text"]:focus,
+#contact input[type="email"]:focus,
+#contact textarea:focus {
+    background: rgba(212, 212, 255, .12);
+    border-color: #9bf1ff;
+    box-shadow: 0 0 0 2px rgba(155, 241, 255, .15);
+}
+
+/* 6. SNS Icons — 視認性とタップ領域の改善 */
+.contact-method--social .social-links {
+    display: flex;
+    gap: 0.8em;
+    margin-top: 0.5em;
+}
+
+.contact-method--social .social-links .icon.alt:before {
+    width: 2.4em;
+    height: 2.4em;
+    line-height: 2.4em;
+    font-size: 1.1em;
 }
