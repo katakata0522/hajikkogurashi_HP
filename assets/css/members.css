@@ -1,0 +1,150 @@
+/* ======================================
+   Members Card UI  — members.css
+   ====================================== */
+
+.member-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 28rem), 1fr));
+  gap: 1.5rem;
+  margin: 2em 0;
+}
+
+.member-card {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  border: 1px solid rgba(212, 212, 255, 0.1);
+  border-radius: 0.55rem;
+  box-shadow: 0 1.2rem 2.6rem rgba(1, 4, 12, 0.3);
+  overflow: hidden;
+  transition: transform 0.25s ease, box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.member-card:hover {
+  border-color: rgba(155, 241, 255, 0.24);
+  box-shadow: 0 1.6rem 3.4rem rgba(1, 4, 12, 0.45);
+  transform: translateY(-3px);
+}
+
+.member-card__header {
+  align-items: center;
+  background: linear-gradient(
+    135deg,
+    rgba(111, 195, 223, 0.18) 0%,
+    rgba(36, 41, 67, 0.6) 100%
+  );
+  display: flex;
+  gap: 1rem;
+  padding: 1.2rem 1.4rem;
+  position: relative;
+}
+
+.member-card__header::before {
+  background: linear-gradient(
+    90deg,
+    #9bf1ff 0%,
+    rgba(154, 167, 255, 0.12) 100%
+  );
+  content: "";
+  height: 2px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+/* Color accents per card position */
+.member-card:nth-child(6n + 1) .member-card__header::before {
+  background: linear-gradient(90deg, #6fc3df, transparent);
+}
+.member-card:nth-child(6n + 2) .member-card__header::before {
+  background: linear-gradient(90deg, #8d82c4, transparent);
+}
+.member-card:nth-child(6n + 3) .member-card__header::before {
+  background: linear-gradient(90deg, #ec8d81, transparent);
+}
+.member-card:nth-child(6n + 4) .member-card__header::before {
+  background: linear-gradient(90deg, #e7b788, transparent);
+}
+.member-card:nth-child(6n + 5) .member-card__header::before {
+  background: linear-gradient(90deg, #8ea9e8, transparent);
+}
+.member-card:nth-child(6n + 6) .member-card__header::before {
+  background: linear-gradient(90deg, #87c5a4, transparent);
+}
+
+.member-card__avatar {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(212, 212, 255, 0.15);
+  border-radius: 50%;
+  display: flex;
+  flex-shrink: 0;
+  font-size: 1.4rem;
+  height: 3.2rem;
+  justify-content: center;
+  width: 3.2rem;
+}
+
+.member-card__name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.member-card__role {
+  color: #9bf1ff;
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  margin-top: 0.25rem;
+  text-transform: uppercase;
+}
+
+.member-card__body {
+  padding: 1.2rem 1.4rem 1.4rem;
+}
+
+.member-card__body p {
+  color: rgba(230, 242, 255, 0.82);
+  font-size: 0.95rem;
+  line-height: 1.85;
+  margin: 0;
+}
+
+.member-card__tag {
+  background: rgba(155, 241, 255, 0.08);
+  border: 1px solid rgba(155, 241, 255, 0.14);
+  border-radius: 0.3rem;
+  color: rgba(155, 241, 255, 0.88);
+  display: inline-block;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  margin-top: 1rem;
+  padding: 0.3rem 0.7rem;
+}
+
+/* Responsive */
+@media screen and (max-width: 736px) {
+  .member-grid {
+    gap: 1rem;
+  }
+
+  .member-card__header {
+    padding: 1rem 1.1rem;
+  }
+
+  .member-card__body {
+    padding: 1rem 1.1rem 1.2rem;
+  }
+
+  .member-card__name {
+    font-size: 1.1rem;
+  }
+}

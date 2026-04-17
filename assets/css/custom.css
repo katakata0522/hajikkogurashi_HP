@@ -1,0 +1,41 @@
+/* ======================================
+   HAJIKKOGURASHI — Custom Overrides
+   custom.css  v20260417-1
+   ====================================== */
+
+/* 1. Fix Logo Color
+   テンプレートデフォルトだとロゴの色が暗いため、
+   白色に強制上書きして視認性を確保 */
+#header .logo strong {
+    color: #ffffff !important;
+}
+#header .logo span {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* 2. Fix Mobile Horizontal Overflow Layout Bug
+   特定のスクリーン幅でbodyが横にはみ出す問題を抑制 */
+body, #wrapper {
+    overflow-x: hidden !important;
+    width: 100%;
+    max-width: 100vw;
+}
+
+/* 3. Fix Banner Title Overflow (Especially for Japanese Text)
+   日本語のh1が長い場合に折り返しが正しく行われるよう設定 */
+#banner h1 {
+    word-break: auto-phrase;
+    overflow-wrap: break-word;
+}
+
+@media screen and (max-width: 736px) {
+    #banner h1 {
+        font-size: 1.8em !important;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    #banner h1 {
+        font-size: 1.5em !important;
+    }
+}
