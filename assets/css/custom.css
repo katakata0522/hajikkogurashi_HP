@@ -20,6 +20,8 @@
     letter-spacing: .15em;
     padding: 0 !important;
     text-shadow: 0 1px 4px rgba(0, 0, 0, .3);
+    border: none !important;
+    box-shadow: none !important;
 }
 
 #header .logo span {
@@ -135,9 +137,28 @@ body, #wrapper {
     margin-top: 0.5em;
 }
 
+.contact-method--social .social-links .icon {
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+}
+
 .contact-method--social .social-links .icon.alt:before {
     width: 2.4em;
     height: 2.4em;
     line-height: 2.4em;
     font-size: 1.1em;
+}
+
+/* 8. Contact Form — パネル内側のゆとりを持たせる */
+#contact > .inner > .contact-panel--form {
+    padding-left: 2.5em !important;
+}
+
+@media screen and (max-width: 980px) {
+    #contact > .inner > .contact-panel--form,
+    #contact > .inner > .contact-panel--info {
+        padding-left: 2em !important;
+        padding-right: 2em !important;
+    }
 }
