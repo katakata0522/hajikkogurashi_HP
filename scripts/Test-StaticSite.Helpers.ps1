@@ -12,17 +12,12 @@ $script:StaticPages = @(
 
 $script:StaticAssets = @(
     "assets\css\main.css",
+    "assets\css\custom.css",
+    "assets\css\members.css",
     "assets\css\index.css",
     "assets\css\portfolio.css",
-    "assets\css\ie9.css",
-    "assets\css\ie8.css",
     "assets\js\main.js",
-    "assets\js\index.js",
-    "assets\js\jquery.min.js",
-    "assets\js\jquery.scrolly.min.js",
-    "assets\js\jquery.scrollex.min.js",
-    "assets\js\skel.min.js",
-    "assets\js\util.js"
+    "assets\js\index.js"
 )
 
 function Get-RepoRoot {
