@@ -1,6 +1,6 @@
 /* ======================================
    HAJIKKOGURASHI — Custom Overrides
-   custom.css  v20260417-5
+   custom.css  v20260417-7
    ====================================== */
 
 /* 1. Header — ロゴ・ナビ・ハンバーガーの垂直揃え */
@@ -36,11 +36,11 @@
 }
 
 /* ハンバーガーメニューをロゴタイトルの高さに合わせる
-   headerはflex+centerだがロゴが2行分あるため
-   ナビをflex-startにしてtitleと同じ高さに配置 */
+   計測値: ロゴtop=28, ナビtop=46 → 18px低い
+   ロゴ中心=45, ナビ中心=66 → 21px低い */
 #header nav {
     align-self: flex-start !important;
-    margin-top: 1.5em;
+    margin-top: 8px;
 }
 
 /* 2. Fix Mobile Horizontal Overflow Layout Bug */
@@ -63,7 +63,7 @@ body, #wrapper {
 }
 
 #banner .content .button.next {
-    margin-top: -0.5em;
+    margin-top: -12px;
 }
 
 @media screen and (max-width: 736px) {
