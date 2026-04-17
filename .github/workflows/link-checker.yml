@@ -17,71 +17,103 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install lychee link checker
-        run: |
-          LYCHEE_VERSION="v0.18.0"
-          curl -sL "https://github.com/lycheeverse/lychee/releases/download/${LYCHEE_VERSION}/lychee-${LYCHEE_VERSION}-x86_64-unknown-linux-gnu.tar.gz" \
-            | tar xz -C /usr/local/bin
-          lychee --version
+      - name: Restore lychee cache
+        uses: actions/cache@v4
+        with:
+          path: .lycheecache
+          key: cache-lychee-${{ github.sha }}
+          restore-keys: cache-lychee-
 
-      - name: Check all sites for broken links
-        id: linkcheck
-        continue-on-error: true
-        run: |
-          echo "🔍 全サイトのリンク切れチェックを開始..."
-          
-          SITES=(
+      - name: Check hajikkoroom.xsrv.jp
+        id: check_hajikko
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
             "https://hajikkoroom.xsrv.jp"
+            --max-concurrency 4
+            --timeout 15
+            --retry-wait-time 5
+            --max-retries 2
+            --exclude "x.com"
+            --exclude "twitter.com"
+            --exclude "note.com"
+            --exclude "youtube.com"
+            --exclude "fonts.googleapis.com"
+            --exclude "formspree.io"
+            --cache
+          output: ./lychee-report-hajikko.md
+          fail: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check playpoint-sim.com
+        id: check_playpoint
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
             "https://playpoint-sim.com"
+            --max-concurrency 4
+            --timeout 15
+            --retry-wait-time 5
+            --max-retries 2
+            --exclude "x.com"
+            --exclude "twitter.com"
+            --exclude "fonts.googleapis.com"
+            --cache
+          output: ./lychee-report-playpoint.md
+          fail: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check katakatalab.com
+        id: check_katakatalab
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
             "https://katakatalab.com"
-          )
-          
-          RESULT_FILE="link-check-results.md"
-          FAILED=0
-          
-          echo "# 🔗 週次リンクチェック結果" > "$RESULT_FILE"
-          echo "" >> "$RESULT_FILE"
-          echo "実行日時: $(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M JST')" >> "$RESULT_FILE"
-          echo "" >> "$RESULT_FILE"
-          
-          for SITE in "${SITES[@]}"; do
-            echo "---"
-            echo "🌐 チェック中: $SITE"
-            echo "" >> "$RESULT_FILE"
-            echo "## $SITE" >> "$RESULT_FILE"
-            echo "" >> "$RESULT_FILE"
-            
-            # lychee でリンクチェック実行
-            # --max-concurrency: 同時接続数を控えめに（サーバー負荷軽減）
-            # --timeout: 各リンクのタイムアウト
-            # --exclude: SNS等のbot対策があるサイトは除外
-            if lychee "$SITE" \
-              --max-concurrency 4 \
-              --timeout 15 \
-              --retry-wait-time 5 \
-              --max-retries 2 \
-              --exclude "x.com" \
-              --exclude "twitter.com" \
-              --exclude "note.com" \
-              --exclude "youtube.com" \
-              --exclude "fonts.googleapis.com" \
-              --exclude "formspree.io" \
-              --format markdown \
-              2>&1 | tee -a "$RESULT_FILE"; then
-              echo "✅ $SITE: 問題なし" | tee -a "$RESULT_FILE"
+            --max-concurrency 4
+            --timeout 15
+            --retry-wait-time 5
+            --max-retries 2
+            --exclude "x.com"
+            --exclude "twitter.com"
+            --exclude "fonts.googleapis.com"
+            --cache
+          output: ./lychee-report-katakatalab.md
+          fail: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Merge reports
+        run: |
+          echo "# 🔗 週次リンクチェック結果" > link-check-results.md
+          echo "" >> link-check-results.md
+          echo "実行日時: $(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M JST')" >> link-check-results.md
+          echo "" >> link-check-results.md
+
+          for REPORT in lychee-report-hajikko.md lychee-report-playpoint.md lychee-report-katakatalab.md; do
+            SITE=$(echo "$REPORT" | sed 's/lychee-report-//;s/\.md//')
+            echo "## $SITE" >> link-check-results.md
+            echo "" >> link-check-results.md
+            if [ -f "$REPORT" ]; then
+              cat "$REPORT" >> link-check-results.md
             else
-              echo "⚠️ $SITE: リンク切れの可能性あり" | tee -a "$RESULT_FILE"
-              FAILED=1
+              echo "✅ チェック対象なし、またはエラーなし" >> link-check-results.md
             fi
-            echo "" >> "$RESULT_FILE"
+            echo "" >> link-check-results.md
           done
-          
-          echo "has_errors=$FAILED" >> "$GITHUB_OUTPUT"
-          echo "---"
-          echo "📋 チェック完了！"
+
+      - name: Check for errors
+        id: has_errors
+        run: |
+          if grep -qiE "\[error\]|❌|Failed" link-check-results.md 2>/dev/null; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Create Issue if broken links found
-        if: steps.linkcheck.outputs.has_errors == '1'
+        if: steps.has_errors.outputs.found == 'true'
         uses: peter-evans/create-issue-from-file@v5
         with:
           title: "🔗 週次リンクチェック: リンク切れ検出"
@@ -93,7 +125,7 @@ jobs:
 
       - name: Summary
         run: |
-          if [ "${{ steps.linkcheck.outputs.has_errors }}" == "1" ]; then
+          if [ "${{ steps.has_errors.outputs.found }}" == "true" ]; then
             echo "::warning::⚠️ リンク切れが検出されました。GitHub Issues を確認してください。"
           else
             echo "✅ 全サイトのリンクに問題はありませんでした！"
