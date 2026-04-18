@@ -164,40 +164,47 @@ body, #wrapper {
 }
 
 /* 9. パンくずリスト（Breadcrumbs） */
-.breadcrumbs {
+#main nav.breadcrumbs {
     margin-bottom: 2.5em;
     font-size: 0.9em;
 }
 
-.breadcrumbs ol {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-wrap: wrap;
+#main nav.breadcrumbs ol {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
 }
 
-.breadcrumbs li {
+#main nav.breadcrumbs li {
+    list-style: none !important;
+    padding-left: 0 !important;
+    margin-bottom: 0 !important;
     display: inline-flex;
     align-items: center;
     color: rgba(255, 255, 255, 0.5);
 }
 
-.breadcrumbs li:not(:last-child)::after {
+#main nav.breadcrumbs li::before {
+    display: none !important;
+}
+
+#main nav.breadcrumbs li:not(:last-child)::after {
     content: "＞";
     margin: 0 0.8em;
     color: rgba(255, 255, 255, 0.3);
     font-size: 0.8em;
 }
 
-.breadcrumbs li a {
+#main nav.breadcrumbs li a {
     color: rgba(255, 255, 255, 0.8);
     text-decoration: none;
     border-bottom: none;
     transition: color 0.2s ease;
 }
 
-.breadcrumbs li a:hover {
+#main nav.breadcrumbs li a:hover {
     color: #9bf1ff;
 }
 
@@ -215,4 +222,20 @@ body, #wrapper {
     border-color: #4CAF50 !important;
     box-shadow: inset 0 0 0 1px rgba(76, 175, 80, 0.2) !important;
     background: rgba(76, 175, 80, 0.05) !important;
+}
+
+/* 12. 各ページの「デカすぎる写真」をスリム化 */
+span.image.main img {
+    max-height: 40vh;
+    object-fit: cover;
+    width: 100%;
+    object-position: center 20%;
+}
+
+/* 13. ホーム画面のタイルにフワッと感（ホバーエフェクト）を追加 */
+.tiles article .image img {
+    transition: transform 0.4s ease !important;
+}
+.tiles article:hover .image img {
+    transform: scale(1.08) !important;
 }
