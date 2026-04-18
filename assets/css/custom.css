@@ -239,3 +239,10 @@ span.image.main img {
 .tiles article:hover .image img {
     transform: scale(1.08) !important;
 }
+
+/* 14. ヘッダーのサークル説明文の視認性を高める */
+#header .logo span {
+    font-weight: 500;
+    opacity: 0.85;
+    letter-spacing: 0.05em;
+}

@@ -25,12 +25,10 @@
 .portfolio-pillar,
 .portfolio-card,
 .portfolio-cta {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
-    linear-gradient(135deg, rgba(243, 162, 59, 0.18), rgba(71, 183, 201, 0.1));
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 1.25rem;
-  box-shadow: 0 1.25rem 2.5rem rgba(8, 13, 29, 0.18);
+  background: rgba(255, 255, 255, 0.05); /* Theme native solid semi-transparent background */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0; /* Remove rounded corners to match the sharp theme */
+  box-shadow: none; /* Remove drop shadows */
 }
 
 .portfolio-pillar {
@@ -44,7 +42,7 @@
   letter-spacing: 0.2em;
   text-transform: uppercase;
   font-size: 0.78rem;
-  color: #f3a23b;
+  color: #9bf1ff; /* Matching the theme's highlight color */
 }
 
 .portfolio-pillar__value {
@@ -87,10 +85,17 @@
 
 .portfolio-card--featured {
   grid-column: span 2;
-  background:
-    radial-gradient(circle at top right, rgba(243, 162, 59, 0.22), transparent 35%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
-    linear-gradient(140deg, rgba(71, 183, 201, 0.16), rgba(243, 162, 59, 0.1));
+  background: rgba(255, 255, 255, 0.08); /* Slightly highlighted for featured */
+}
+
+.portfolio-card:last-child {
+  grid-column: 1 / -1; /* Make the last card span the entire width */
+  display: flex;
+  flex-direction: column;
+}
+
+.portfolio-card:last-child .portfolio-links {
+  margin-top: auto;
 }
 
 .portfolio-links {
