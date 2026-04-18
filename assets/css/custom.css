@@ -279,25 +279,35 @@ span.image.main img {
     }
 }
 
-/* 18. メニューボタン：テキスト＋ドット（デザインC） */
+/* 18. メニューボタン：≡→× モーフィング（デザインA） */
+#header nav a[href="#menu"] {
+    position: relative;
+    padding-right: 2.4em !important;
+}
+#header nav a[href="#menu"]::before,
 #header nav a[href="#menu"]::after {
-    content: "●●●" !important;
-    font-size: 0.55em;
-    letter-spacing: 0.2em;
-    margin-left: 0.6em;
-    display: inline-block;
-    transition: transform 0.3s ease;
-    vertical-align: middle;
+    content: "" !important;
+    position: absolute;
+    right: 0.7em;
+    width: 1.2em;
+    height: 2px;
+    background: currentColor;
+    transition: transform 0.3s ease, top 0.3s ease, opacity 0.3s ease;
 }
-#header nav a[href="#menu"]:hover::after {
-    animation: dotBounce 0.5s ease;
+#header nav a[href="#menu"]::before {
+    top: calc(50% - 5px);
 }
-@keyframes dotBounce {
-    0%   { transform: translateY(0); }
-    25%  { transform: translateY(-3px); }
-    50%  { transform: translateY(0); }
-    75%  { transform: translateY(-2px); }
-    100% { transform: translateY(0); }
+#header nav a[href="#menu"]::after {
+    top: calc(50% + 5px);
+}
+/* メニュー開いたとき→Xに変形 */
+.is-menu-visible #header nav a[href="#menu"]::before {
+    top: 50%;
+    transform: rotate(45deg);
+}
+.is-menu-visible #header nav a[href="#menu"]::after {
+    top: 50%;
+    transform: rotate(-45deg);
 }
 
 /* 19. 注意書きボックス（ミニゲーム広場用） */
@@ -310,4 +320,45 @@ span.image.main img {
     color: rgba(255, 255, 255, 0.85);
     font-size: 0.95rem;
     line-height: 1.7;
+}
+
+/* 20. モバイル向けレスポンシブ修正 */
+@media screen and (max-width: 736px) {
+    /* 20a. メニューボタンをコンパクトに */
+    #header nav a[href="#menu"] {
+        font-size: 0.85em !important;
+        padding: 0 2em 0 0.6em !important;
+        white-space: nowrap;
+    }
+
+    /* 20b. バナー：テキストとボタンを縦並びに */
+    #banner .content {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+    }
+    #banner .content p {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-bottom: 1em;
+    }
+    #banner .content .actions {
+        width: 100% !important;
+        margin-top: 0.5em;
+    }
+
+    /* 20c. メールアドレスのはみ出し防止 */
+    .contact-method a[href^="mailto:"] {
+        word-break: break-all;
+        overflow-wrap: break-word;
+        font-size: 0.85em;
+    }
+
+    /* 20d. テキストの左右余白を確保 */
+    #main .inner,
+    #contact .inner,
+    #footer .inner {
+        padding-left: 1.2em !important;
+        padding-right: 1.2em !important;
+    }
 }
