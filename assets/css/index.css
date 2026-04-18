@@ -2,20 +2,24 @@ body.is-home{--home-accent: #74f1ff;--home-accent-strong: #9aa7ff;--home-edge: r
 @media screen and (max-width: 980px){body.is-home .home-overview__grid{grid-template-columns:1fr}}
 @media screen and (max-width: 736px){body.is-home .home-overview{padding-top:.75rem}body.is-home .home-overview__intro h2{font-size:1.6rem}}body.is-home .home-hero{padding:7rem 0 4.8rem}body.is-home .home-hero>.inner{display:block}body.is-home .home-hero .home-hero__content{display:block!important;max-width:44rem}body.is-home .home-hero .home-hero__content>*{margin-left:0!important;max-width:38rem}body.is-home .home-hero .home-hero__content--panel{background:linear-gradient(180deg,rgba(7,14,28,.76) 0%,rgba(5,10,21,.88) 100%);border:1px solid rgba(116,241,255,.14);border-radius:.85rem;box-shadow:0 1.8rem 4rem rgba(1,5,14,.38);padding:2rem 2.1rem 1.85rem;backdrop-filter:blur(10px)}body.is-home .home-hero .home-hero__eyebrow{color:var(--home-accent);display:block;font-size:.78rem;letter-spacing:.12em;line-height:1.7;margin:0 0 .85rem;text-transform:none}body.is-home .home-hero .home-hero__title{font-size:3rem;letter-spacing:.04em;line-height:1.12;margin:0 0 .95rem;max-width:34rem}body.is-home .home-hero .home-hero__subtitle{color:rgba(235,242,250,.9);font-size:1.18rem;font-weight:600;letter-spacing:.02em;line-height:1.8;margin:0 0 .8rem;max-width:30rem;text-transform:none}body.is-home .home-hero .home-hero__description{color:var(--home-text-soft);font-size:.98rem;line-height:1.9;margin:0;max-width:36rem;text-transform:none}body.is-home .home-hero .home-hero__actions{display:flex!important;flex-wrap:wrap;gap:.8rem;margin-top:1.35rem}body.is-home .home-hero .home-hero__actions .button{margin:0!important;min-width:12rem;text-align:center}body.is-home .home-feature{padding:1.7rem 0 0;position:relative;z-index:1}body.is-home .home-feature__inner{align-items:center;display:grid;gap:1.2rem;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)}body.is-home .home-feature__visual{background:linear-gradient(135deg,rgba(116,241,255,.16),rgba(154,167,255,.14));border:1px solid rgba(116,241,255,.16);border-radius:.7rem;box-shadow:var(--home-shadow);overflow:hidden;padding:.7rem}body.is-home .home-feature__visual img{border-radius:.45rem;display:block;min-height:100%;object-fit:cover;width:100%}body.is-home .home-feature__body{background:linear-gradient(180deg,rgba(255,255,255,.05) 0%,rgba(255,255,255,.02) 100%),linear-gradient(135deg,rgba(116,241,255,.08),rgba(154,167,255,.08));border:1px solid rgba(116,241,255,.12);border-radius:.7rem;box-shadow:var(--home-shadow);padding:1.6rem 1.45rem;position:relative}body.is-home .home-feature__body:before{background:linear-gradient(90deg,var(--home-accent) 0%,rgba(154,167,255,.18) 100%);content:"";height:2px;left:1.45rem;position:absolute;top:1rem;width:4rem}body.is-home .home-feature__eyebrow{color:var(--home-accent);font-size:.78rem;letter-spacing:.18em;margin:.3rem 0 .75rem;text-transform:none}body.is-home .home-feature__body h2{font-size:2rem;line-height:1.2;margin:0 0 .85rem}body.is-home .home-feature__lead{color:var(--home-text-soft);line-height:1.85;margin:0 0 1rem}body.is-home .home-feature__points{color:var(--home-text-soft);list-style:none;margin:0;padding-left:0}body.is-home .home-feature__points li{line-height:1.7;margin:.55rem 0;padding-left:1.1rem;position:relative}body.is-home .home-feature__points li:before{color:var(--home-accent);content:"•";left:0;position:absolute;top:0}body.is-home .home-feature__actions{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:1.3rem}body.is-home .home-feature__actions .button{margin:0}@media screen and (max-width: 980px){body.is-home .home-hero .home-hero__title{font-size:2.45rem}body.is-home .home-feature__inner{grid-template-columns:1fr}body.is-home .home-feature__body h2{font-size:1.7rem}}/*# sourceMappingURL=index.css.map */
 @media screen and (max-width: 736px) {
-    /* モバイル：バナーのテキストとボタンを縦並び */
-    #banner > .inner > .content {
+    /* モバイル：バナーのテキストとボタンを縦並び（最高詳細度） */
+    body.is-home #wrapper #banner > .inner .content {
         display: block !important;
-        align-items: initial !important;
+        flex-direction: unset !important;
+        align-items: unset !important;
     }
-    #banner > .inner > .content > p {
+    body.is-home #wrapper #banner > .inner .content > p {
         width: 100% !important;
         max-width: 100% !important;
         margin-right: 0 !important;
+        float: none !important;
     }
-    #banner > .inner > .content > .actions {
+    body.is-home #wrapper #banner > .inner .content > .actions {
         margin-top: 1em !important;
+        clear: both !important;
+        float: none !important;
     }
-    #banner > .inner > .content .button.next {
+    body.is-home #wrapper #banner > .inner .content .button.next {
         margin-top: 0 !important;
     }
     /* メールアドレスのはみ出し防止 */
