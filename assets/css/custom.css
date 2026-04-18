@@ -298,7 +298,10 @@ span.image.main img {
 /* 18. メニューボタン：≡→× モーフィング（デザインA） */
 #header nav a[href="#menu"] {
     position: relative;
-    padding-right: 2.4em !important;
+    padding-right: 2.6em !important;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    font-size: 0.85em;
 }
 #header nav a[href="#menu"]::before,
 #header nav a[href="#menu"]::after {
@@ -306,7 +309,7 @@ span.image.main img {
     position: absolute;
     right: 0.7em;
     width: 1.2em;
-    height: 2px;
+    height: 1px;
     background: currentColor;
     transition: transform 0.3s ease, top 0.3s ease, opacity 0.3s ease;
 }
@@ -324,6 +327,13 @@ span.image.main img {
 .is-menu-visible #header nav a[href="#menu"]::after {
     top: 50%;
     transform: rotate(-45deg);
+}
+
+/* メニューパネルのすりガラス（Glassmorphism）効果 */
+#menu {
+    background: rgba(36, 41, 67, 0.75) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
 }
 
 /* 19. 注意書きボックス（ミニゲーム広場用） */

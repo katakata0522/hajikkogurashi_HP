@@ -29,7 +29,7 @@ if (-not $rootIndex.Contains('class="tiles"')) {
     $errors.Add('index.html is missing the tiles section.')
 }
 
-if (-not ($rootIndex.Contains('aria-label="メニューを開く"') -and $rootIndex.Contains('>メニュー</a>'))) {
+if (-not ($rootIndex.Contains('aria-label="メニューを開く"') -and $rootIndex.Contains('>MENU</a>'))) {
     $errors.Add('index.html is missing the menu trigger.')
 }
 
