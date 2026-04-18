@@ -298,18 +298,18 @@ span.image.main img {
 /* 18. メニューボタン：≡→× モーフィング（デザインA） */
 #header nav a[href="#menu"] {
     position: relative;
-    padding-right: 2.6em !important;
+    padding-right: 3em !important;
     font-weight: 600;
     letter-spacing: 0.15em;
-    font-size: 0.85em;
+    font-size: 1.1em;
 }
 #header nav a[href="#menu"]::before,
 #header nav a[href="#menu"]::after {
     content: "" !important;
     position: absolute;
     right: 0.7em;
-    width: 1.2em;
-    height: 1px;
+    width: 1.5em;
+    height: 2px;
     background: currentColor;
     transition: transform 0.3s ease, top 0.3s ease, opacity 0.3s ease;
 }
@@ -352,8 +352,8 @@ span.image.main img {
 @media screen and (max-width: 736px) {
     /* 20a. メニューボタンをコンパクトに */
     #header nav a[href="#menu"] {
-        font-size: 0.85em !important;
-        padding: 0 2em 0 0.6em !important;
+        font-size: 1em !important;
+        padding: 0 2.5em 0 0.6em !important;
         white-space: nowrap;
     }
 
