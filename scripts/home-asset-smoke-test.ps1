@@ -1,9 +1,9 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 
 . (Join-Path $PSScriptRoot 'Test-StaticSite.Helpers.ps1')
 
 $repoRoot = Get-RepoRoot
-$rootIndex = Get-Content (Join-Path $repoRoot 'index.html') -Raw
+$rootIndex = Get-Content (Join-Path $repoRoot 'index.html') -Raw -Encoding UTF8
 $indexCssPath = Join-Path $repoRoot 'assets\css\index.css'
 $indexJsPath = Join-Path $repoRoot 'assets\js\index.js'
 
@@ -21,7 +21,7 @@ if (Test-ContainsLiquidSyntax -Content $rootIndex) {
     $errors.Add('index.html still contains Liquid syntax.')
 }
 
-if (-not ($rootIndex.Contains('assets/css/index.css?v=20260307-4') -and $rootIndex.Contains('assets/js/index.js?v=20260307-4'))) {
+if (-not ($rootIndex.Contains('assets/css/index.css?v=20260418-2') -and $rootIndex.Contains('assets/js/index.js?v=20260307-4'))) {
     $errors.Add('index.html does not reference the current home assets.')
 }
 
@@ -29,7 +29,7 @@ if (-not $rootIndex.Contains('class="tiles"')) {
     $errors.Add('index.html is missing the tiles section.')
 }
 
-if (-not ($rootIndex.Contains('aria-label="メニューを開く"') -and $rootIndex.Contains('>メニュー<'))) {
+if (-not ($rootIndex.Contains('aria-label="メニューを開く"') -and $rootIndex.Contains('>メニュー</a>'))) {
     $errors.Add('index.html is missing the menu trigger.')
 }
 
