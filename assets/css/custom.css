@@ -311,17 +311,22 @@ span.image.main img {
     width: 1.5em;
     height: 2px;
     background: currentColor;
-    transition: transform 0.3s ease, top 0.3s ease, opacity 0.3s ease;
+    transition: transform 0.3s ease, top 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease;
 }
+/* 真ん中の線（::before本体）と、上の線（box-shadow） */
 #header nav a[href="#menu"]::before {
-    top: calc(50% - 5px);
+    top: 50%;
+    margin-top: -1px; /* height 2px の半分 */
+    box-shadow: 0 -7px 0 0 currentColor;
 }
+/* 下の線 */
 #header nav a[href="#menu"]::after {
-    top: calc(50% + 5px);
+    top: calc(50% + 7px);
+    margin-top: -1px;
 }
 /* メニュー開いたとき→Xに変形 */
 .is-menu-visible #header nav a[href="#menu"]::before {
-    top: 50%;
+    box-shadow: 0 0 0 0 transparent; /* 上の線を消す */
     transform: rotate(45deg);
 }
 .is-menu-visible #header nav a[href="#menu"]::after {
