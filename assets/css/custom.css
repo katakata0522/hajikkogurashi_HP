@@ -331,20 +331,19 @@ span.image.main img {
         white-space: nowrap;
     }
 
-    /* 20b. バナー：テキストとボタンを縦並びに */
-    #banner .content {
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: flex-start !important;
+    /* 20b. バナー：テキストとボタンを縦並びに（詳細度をmain.cssに合わせる） */
+    #wrapper #banner > .inner .content {
+        display: block !important;
     }
-    #banner .content p {
+    #wrapper #banner > .inner .content p {
         width: 100% !important;
         max-width: 100% !important;
+        margin-right: 0 !important;
         margin-bottom: 1em;
     }
-    #banner .content .actions {
+    #wrapper #banner > .inner .content .actions {
         width: 100% !important;
-        margin-top: 0.5em;
+        margin-top: 1em;
     }
 
     /* 20c. メールアドレスのはみ出し防止 */
