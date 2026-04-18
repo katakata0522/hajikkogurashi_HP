@@ -119,6 +119,30 @@
 		<!-- Contact -->
 		<section id="contact">
 			<div class="inner">
+				<section class="contact-panel contact-panel--form">
+					<header class="major">
+						<h2>お問い合わせ</h2>
+					</header>
+					<form action="https://formspree.io/hajikkogurashi.official@gmail.com" method="POST" class="contact-form">
+						<div class="field half first">
+							<label for="name">お名前（ニックネーム可）</label>
+							<input type="text" name="name" id="name" autocomplete="name" placeholder="例：山田 太郎" />
+						</div>
+						<div class="field half">
+							<label for="email"><span class="required-mark">※</span>メールアドレス</label>
+							<input type="email" name="_replyto" id="email" autocomplete="email" inputmode="email" placeholder="例：example@mail.com" required />
+						</div>
+						<div class="field">
+							<label for="message"><span class="required-mark">※</span>お問い合わせ内容</label>
+							<textarea name="message" id="message" rows="6" placeholder="お問い合わせ内容をご記入ください" required></textarea>
+						</div>
+						<ul class="actions">
+							<li><input type="submit" value="送信する" class="special" /></li>
+							<li><input type="reset" value="入力をリセット" /></li>
+						</ul>
+					</form>
+				</section>
+
 				<section class="split contact-panel contact-panel--info">
 					<section>
 						<div class="contact-method">
@@ -159,30 +183,6 @@
 							</ul>
 						</div>
 					</section>
-				</section>
-
-				<section class="contact-panel contact-panel--form">
-					<header class="major">
-						<h2>お問い合わせ</h2>
-					</header>
-					<form action="https://formspree.io/hajikkogurashi.official@gmail.com" method="POST" class="contact-form">
-						<div class="field half first">
-							<label for="name">お名前（ニックネーム可）</label>
-							<input type="text" name="name" id="name" autocomplete="name" placeholder="例：山田 太郎" />
-						</div>
-						<div class="field half">
-							<label for="email"><span class="required-mark">※</span>メールアドレス</label>
-							<input type="email" name="_replyto" id="email" autocomplete="email" inputmode="email" placeholder="例：example@mail.com" required />
-						</div>
-						<div class="field">
-							<label for="message"><span class="required-mark">※</span>お問い合わせ内容</label>
-							<textarea name="message" id="message" rows="6" placeholder="お問い合わせ内容をご記入ください" required></textarea>
-						</div>
-						<ul class="actions">
-							<li><input type="submit" value="送信する" class="special" /></li>
-							<li><input type="reset" value="入力をリセット" /></li>
-						</ul>
-					</form>
 				</section>
 			</div>
 		</section>
