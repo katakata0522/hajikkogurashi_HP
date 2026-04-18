@@ -258,16 +258,23 @@ span.image.main img {
     box-shadow: 0 0 12px rgba(155, 241, 255, 0.45), 0 0 28px rgba(155, 241, 255, 0.2) !important;
 }
 
-/* 17. お問い合わせ欄とタイルの中央線の位置揃え */
+/* 16. 必須マーク（赤い※） */
+.required-mark {
+    color: #ff4444;
+    font-weight: bold;
+    margin-right: 0.3em;
+}
+
+/* 17. お問い合わせ欄のレイアウト（info左=狭い、form右=広い） */
 @media screen and (min-width: 981px) {
     #contact > .inner {
         display: flex;
     }
-    #contact > .inner > .contact-panel--form {
-        width: 50% !important;
+    #contact > .inner > .contact-panel--info {
+        width: 35% !important;
         border-right: 1px solid rgba(116,241,255,.1) !important;
     }
-    #contact > .inner > .contact-panel--info {
-        width: 50% !important;
+    #contact > .inner > .contact-panel--form {
+        width: 65% !important;
     }
 }

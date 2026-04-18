@@ -310,7 +310,8 @@
 
 	/* ============================
 	   Contact Form — Submit Button Glow
-	   文字が入力された瞬間に送信ボタンを光らせる
+	   メールアドレスとお問い合わせ内容の両方が入力された時に
+	   送信ボタンを光らせる
 	   ============================ */
 	function initContactFormGlow() {
 		var form = document.querySelector('.contact-form');
@@ -319,26 +320,22 @@
 		var submitBtn = form.querySelector('input[type="submit"]');
 		if (!submitBtn) return;
 
-		var fields = form.querySelectorAll('input[type="text"], input[type="email"], textarea');
+		var emailField = form.querySelector('#email');
+		var messageField = form.querySelector('#message');
+		if (!emailField || !messageField) return;
 
-		function checkFields() {
-			var hasContent = false;
-			for (var i = 0; i < fields.length; i++) {
-				if (fields[i].value.trim() !== '') {
-					hasContent = true;
-					break;
-				}
-			}
-			if (hasContent) {
+		function checkRequired() {
+			var emailFilled = emailField.value.trim() !== '';
+			var messageFilled = messageField.value.trim() !== '';
+			if (emailFilled && messageFilled) {
 				submitBtn.classList.add('is-active');
 			} else {
 				submitBtn.classList.remove('is-active');
 			}
 		}
 
-		for (var i = 0; i < fields.length; i++) {
-			fields[i].addEventListener('input', checkFields);
-		}
+		emailField.addEventListener('input', checkRequired);
+		messageField.addEventListener('input', checkRequired);
 
 		// フォームリセット時にも対応
 		form.addEventListener('reset', function () {
