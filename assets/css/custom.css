@@ -278,3 +278,36 @@ span.image.main img {
         width: 35% !important;
     }
 }
+
+/* 18. メニューボタン：テキスト＋ドット（デザインC） */
+#header nav a[href="#menu"]::after {
+    content: "●●●" !important;
+    font-size: 0.55em;
+    letter-spacing: 0.2em;
+    margin-left: 0.6em;
+    display: inline-block;
+    transition: transform 0.3s ease;
+    vertical-align: middle;
+}
+#header nav a[href="#menu"]:hover::after {
+    animation: dotBounce 0.5s ease;
+}
+@keyframes dotBounce {
+    0%   { transform: translateY(0); }
+    25%  { transform: translateY(-3px); }
+    50%  { transform: translateY(0); }
+    75%  { transform: translateY(-2px); }
+    100% { transform: translateY(0); }
+}
+
+/* 19. 注意書きボックス（ミニゲーム広場用） */
+.notice {
+    background: rgba(255, 200, 50, 0.08);
+    border: 1px solid rgba(255, 200, 50, 0.25);
+    border-left: 3px solid rgba(255, 200, 50, 0.6);
+    border-radius: 0.3rem;
+    padding: 1rem 1.2rem;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.95rem;
+    line-height: 1.7;
+}
