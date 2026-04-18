@@ -310,7 +310,8 @@ span.image.main img {
     right: 0.7em;
     width: 1.5em;
     height: 2px;
-    background: currentColor;
+    background: currentColor !important;
+    opacity: 1 !important;
     transition: transform 0.3s ease, top 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease;
 }
 /* 真ん中の線（::before本体）と、上の線（box-shadow） */
