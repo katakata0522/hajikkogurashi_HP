@@ -309,6 +309,46 @@
 	}
 
 	/* ============================
+	   Contact Form — Submit Button Glow
+	   文字が入力された瞬間に送信ボタンを光らせる
+	   ============================ */
+	function initContactFormGlow() {
+		var form = document.querySelector('.contact-form');
+		if (!form) return;
+
+		var submitBtn = form.querySelector('input[type="submit"]');
+		if (!submitBtn) return;
+
+		var fields = form.querySelectorAll('input[type="text"], input[type="email"], textarea');
+
+		function checkFields() {
+			var hasContent = false;
+			for (var i = 0; i < fields.length; i++) {
+				if (fields[i].value.trim() !== '') {
+					hasContent = true;
+					break;
+				}
+			}
+			if (hasContent) {
+				submitBtn.classList.add('is-active');
+			} else {
+				submitBtn.classList.remove('is-active');
+			}
+		}
+
+		for (var i = 0; i < fields.length; i++) {
+			fields[i].addEventListener('input', checkFields);
+		}
+
+		// フォームリセット時にも対応
+		form.addEventListener('reset', function () {
+			setTimeout(function () {
+				submitBtn.classList.remove('is-active');
+			}, 10);
+		});
+	}
+
+	/* ============================
 	   Init
 	   ============================ */
 	document.addEventListener('DOMContentLoaded', function () {
@@ -318,6 +358,7 @@
 		initMenu();
 		initScrollToTop();
 		initScrolly();
+		initContactFormGlow();
 	});
 
 })();
