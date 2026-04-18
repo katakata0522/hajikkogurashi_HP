@@ -246,3 +246,47 @@ span.image.main img {
     opacity: 0.85;
     letter-spacing: 0.05em;
 }
+
+/* 15. 送信ボタンのホバー・入力完了時の発光エフェクト */
+.contact-form:valid input[type="submit"] {
+    background-color: #9bf1ff !important;
+    color: #050a15 !important;
+    border-color: #9bf1ff !important;
+    box-shadow: 0 0 15px rgba(155, 241, 255, 0.4), 0 0 30px rgba(155, 241, 255, 0.2) !important;
+    transition: all 0.3s ease !important;
+}
+
+/* 16. ハンバーガーメニューのサイズと位置の最適化 */
+body.is-home #header nav a[href="#menu"],
+#header nav a[href="#menu"] {
+    height: auto !important;
+    padding: 0.5em 1.2em !important;
+    margin-right: 1.5em;
+    border-radius: 2em !important;
+    display: inline-flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow: none !important;
+    transition: all 0.3s ease;
+}
+body.is-home #header nav a[href="#menu"]:hover,
+#header nav a[href="#menu"]:hover {
+    background: rgba(155, 241, 255, 0.1) !important;
+    border-color: rgba(155, 241, 255, 0.3) !important;
+    color: #9bf1ff !important;
+}
+
+/* 17. お問い合わせ欄とタイルの中央線の位置揃え */
+@media screen and (min-width: 981px) {
+    #contact > .inner {
+        display: flex;
+    }
+    #contact > .inner > .contact-panel--form {
+        width: 50% !important;
+        border-right: 1px solid rgba(116,241,255,.1) !important;
+    }
+    #contact > .inner > .contact-panel--info {
+        width: 50% !important;
+    }
+}
