@@ -72,6 +72,22 @@ body, #wrapper {
     #banner h1 {
         font-size: 1.8em !important;
     }
+    /* モバイルではテキストとボタンを縦並びに */
+    #banner .content {
+        display: block !important;
+        align-items: initial !important;
+    }
+    #banner .content p {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-right: 0 !important;
+    }
+    #banner .content .actions {
+        margin-top: 1em;
+    }
+    #banner .content .button.next {
+        margin-top: 0;
+    }
     #header .logo strong {
         font-size: 1.5em !important;
     }
@@ -331,20 +347,7 @@ span.image.main img {
         white-space: nowrap;
     }
 
-    /* 20b. バナー：テキストとボタンを縦並びに（詳細度をmain.cssに合わせる） */
-    #wrapper #banner > .inner .content {
-        display: block !important;
-    }
-    #wrapper #banner > .inner .content p {
-        width: 100% !important;
-        max-width: 100% !important;
-        margin-right: 0 !important;
-        margin-bottom: 1em;
-    }
-    #wrapper #banner > .inner .content .actions {
-        width: 100% !important;
-        margin-top: 1em;
-    }
+    /* 20b. (上の736pxメディアクエリに統合済み) */
 
     /* 20c. メールアドレスのはみ出し防止 */
     .contact-method a[href^="mailto:"] {
