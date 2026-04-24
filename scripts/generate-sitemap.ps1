@@ -1,59 +1,54 @@
-#!/usr/bin/env pwsh
-# ============================================================
-# generate-sitemap.ps1
-# リポジトリ内の全 HTML ファイルから sitemap.xml を自動生成する
-# ============================================================
 $ErrorActionPreference = 'Stop'
 
-$repoRoot  = (git -C $PSScriptRoot rev-parse --show-toplevel).Trim()
-$baseUrl   = 'https://hajikkoroom.xsrv.jp'
-$today     = (Get-Date).ToString('yyyy-MM-dd')
-
-# 除外対象（検索エンジンに登録しないページ）
+$repoRoot = (Split-Path -Parent $PSScriptRoot)
+$baseUrl = 'https://hajikkoroom.xsrv.jp'
+$today = (Get-Date).ToString('yyyy-MM-dd')
 $excludes = @('404.html')
 
-# HTML ファイルを収集
-$htmlFiles = Get-ChildItem -Path $repoRoot -Filter '*.html' -File |
-    Where-Object { $excludes -notcontains $_.Name }
+function Get-Priority {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$FileName
+    )
 
-# 優先度の定義（トップページは最重要、他はやや低め）
-function Get-Priority($fileName) {
-    switch ($fileName) {
-        'index.html'          { '1.0' }
-        'portfolio.html'      { '0.8' }
-        'aboutus.html'        { '0.8' }
-        'news.html'           { '0.7' }
-        'members.html'        { '0.6' }
-        'coming-soon.html'    { '0.5' }
-        default               { '0.4' }
+    switch ($FileName) {
+        'index.html'       { return '1.0' }
+        'portfolio.html'   { return '0.8' }
+        'aboutus.html'     { return '0.8' }
+        'news.html'        { return '0.7' }
+        'members.html'     { return '0.6' }
+        'coming-soon.html' { return '0.5' }
+        default            { return '0.4' }
     }
 }
 
-# sitemap.xml を組み立て
+$htmlFiles = Get-ChildItem -Path $repoRoot -Filter '*.html' -File |
+    Where-Object { $excludes -notcontains $_.Name } |
+    Sort-Object Name
+
 $entries = foreach ($file in $htmlFiles) {
     $loc = if ($file.Name -eq 'index.html') {
         "$baseUrl/"
     } else {
         "$baseUrl/$($file.Name)"
     }
-    $priority = Get-Priority $file.Name
 
     @"
   <url>
     <loc>$loc</loc>
     <lastmod>$today</lastmod>
-    <priority>$priority</priority>
+    <priority>$(Get-Priority -FileName $file.Name)</priority>
   </url>
 "@
 }
 
-$sitemap = @"
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-$($entries -join "`n")
-</urlset>
-"@
+$sitemap = @(
+    '<?xml version="1.0" encoding="UTF-8"?>'
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+    ($entries -join "`n")
+    '</urlset>'
+) -join "`n"
 
 $outPath = Join-Path $repoRoot 'sitemap.xml'
-$sitemap | Out-File -FilePath $outPath -Encoding utf8NoBOM -Force
+[System.IO.File]::WriteAllText($outPath, $sitemap, [System.Text.UTF8Encoding]::new($false))
 Write-Output "sitemap.xml generated with $($htmlFiles.Count) URLs -> $outPath"

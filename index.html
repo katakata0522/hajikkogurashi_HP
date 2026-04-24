@@ -11,19 +11,19 @@
 	<link rel="canonical" href="https://hajikkoroom.xsrv.jp/" />
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-	<meta name="description" content="Unreal Engineでゲームを制作するサークル「はじっこぐらし」の公式サイトです！まだ初心者ですが私たちが作ったインディーゲームの作品紹介や活動記録を載せていっます！" />
+	<meta name="description" content="Unreal Engineでゲームを制作するサークル「はじっこぐらし」の公式サイトです！まだ初心者ですが私たちが作ったインディーゲームの作品紹介や活動記録を載せています！" />
 	<meta name="robots" content="index,follow" />
 	<meta property="og:locale" content="ja_JP" />
 	<meta property="og:type" content="website" />
 	<meta property="og:site_name" content="はじっこぐらし公式ホームページ" />
 	<meta property="og:title" content="はじっこぐらし公式ホームページ" />
-	<meta property="og:description" content="Unreal Engineでゲームを制作するサークル「はじっこぐらし」の公式サイトです！まだ初心者ですが私たちが作ったインディーゲームの作品紹介や活動記録を載せていっます！" />
+	<meta property="og:description" content="Unreal Engineでゲームを制作するサークル「はじっこぐらし」の公式サイトです！まだ初心者ですが私たちが作ったインディーゲームの作品紹介や活動記録を載せています！" />
 	<meta property="og:url" content="https://hajikkoroom.xsrv.jp/" />
 	<meta property="og:image" content="https://hajikkoroom.xsrv.jp/assets/images/banner.jpg" />
 	<meta property="og:image:alt" content="はじっこぐらし公式ホームページ" />
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta name="twitter:title" content="はじっこぐらし公式ホームページ" />
-	<meta name="twitter:description" content="Unreal Engineでゲームを制作するサークル「はじっこぐらし」の公式サイトです！まだ初心者ですが私たちが作ったインディーゲームの作品紹介や活動記録を載せていっます！" />
+	<meta name="twitter:description" content="Unreal Engineでゲームを制作するサークル「はじっこぐらし」の公式サイトです！まだ初心者ですが私たちが作ったインディーゲームの作品紹介や活動記録を載せています！" />
 	<meta name="twitter:image" content="https://hajikkoroom.xsrv.jp/assets/images/banner.jpg" />
 	<link rel="stylesheet" href="/assets/css/main.css?v=20260307-4" />
 	<link rel="stylesheet" href="/assets/css/custom.css?v=20260418-9" />
@@ -63,7 +63,7 @@
 					<h1>ようこそ、はじっこぐらしへ！</h1>
 				</header>
 				<div class="content">
-					<p>あなたの帰りを待ってたよ。ゆっくりしていってね。</p>
+					<p>遊びに来てくれてありがとう。ゆっくりしていってね。</p>
 					<ul class="actions">
 						<li><a href="/aboutus.html" class="button next">見に行く</a></li>
 					</ul>
@@ -110,7 +110,7 @@
 					</span>
 					<header class="major">
 						<h3><a href="/news.html" class="link">お知らせ</a></h3>
-						<p>最新情報や活動ー容をお届け！</p>
+						<p>最新情報や活動内容をお届け！</p>
 					</header>
 				</article>
 
@@ -124,7 +124,7 @@
 					<header class="major">
 						<h2>お問い合わせ</h2>
 					</header>
-					<form action="https://formspree.io/hajikkogurashi.official@gmail.com" method="POST" class="contact-form">
+					<form action="/contact.php" method="POST" class="contact-form">
 						<div class="field half first">
 							<label for="name">お名前</label>
 							<input type="text" name="name" id="name" autocomplete="name" required />
@@ -137,11 +137,17 @@
 							<label for="message">お問い合わせ内容</label>
 							<textarea name="message" id="message" rows="6" required></textarea>
 						</div>
+						<input type="hidden" name="return_to" value="/" />
+						<div style="display:none;">
+							<label for="company">会社名</label>
+							<input type="text" name="company" id="company" tabindex="-1" autocomplete="off" />
+						</div>
 						<ul class="actions">
 							<li><input type="submit" value="送信する" class="special" /></li>
 							<li><input type="reset" value="入力をリセット" /></li>
 						</ul>
 					</form>
+					<p>フォームが送信できない場合は、<a href="mailto:hajikkogurashi.official@gmail.com">メール</a>でもご連絡いただけます。</p>
 				</section>
 
 				<section class="split contact-panel contact-panel--info">
@@ -172,7 +178,7 @@
 									</a>
 								</li>
 								<li class="social-links__item">
-									<a href="https://x.com/hajikko_games" class="icon alt fa-twitter" target="_blank" rel="noopener noreferrer" aria-label="X" title="X">
+									<a href="https://x.com/Corner_neighbor" class="icon alt fa-twitter" target="_blank" rel="noopener noreferrer" aria-label="X" title="X">
 										<span class="label">X</span>
 									</a>
 								</li>

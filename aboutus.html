@@ -65,13 +65,13 @@
                     <nav class="breadcrumbs" aria-label="breadcrumbs">
                         <ol>
                             <li><a href="/">ホーム</a></li>
-                            <li aria-current="page">私たちについっ</li>
+                            <li aria-current="page">私たちについて</li>
                         </ol>
                     </nav>
                     <header class="major">
                         <h1>私たちについて</h1>
                     </header>
-                    <span class="image main"><img src="/assets/images/pic01.jpg" alt="縺ｯ縺倥▲縺薙＄繧峨＠繧ｵ繝ｼ繧ｯ繝ｫ縺ｮ繧､繝｡繝ｼ繧ｸ逕ｻ蜒・ /></span>
+                    <span class="image main"><img src="/assets/images/pic01.jpg" alt="はじっこぐらしサークルのイメージ" /></span>
                     <h2 id="サークル紹介"><strong>サークル紹介</strong></h2>
 
 <p class="lead"> <!-- "lead" クラスで少し大っな導入文にする (テーマにあれば) -->
@@ -85,6 +85,10 @@
 <p>
 その過程でゲーム開発の情報を発信し、後世のクリエイターのための知識の積み上げになれれば、こんなに嬉しいことはありません！<br />
 まだまだ右も左もわからない初心者ではありますが、暖かい応援をよろしくお願いします！
+</p>
+
+<p>
+なお、はじっこぐらしは現在 <strong>Corner Neighbor</strong> 名義でも活動しています。
 </p>
 
 <section class="spotlight"> <!-- "spotlight" のようなセクションで夢を強調 (テーマにあれば) -->
@@ -107,7 +111,7 @@
 			<header class="major">
 				<h2>お問い合わせ</h2>
 			</header>
-			<form action="https://formspree.io/hajikkogurashi.official@gmail.com" method="POST" class="contact-form">
+			<form action="/contact.php" method="POST" class="contact-form">
 				<div class="field half first">
 					<label for="name">お名前</label>
 					<input type="text" name="name" id="name" autocomplete="name" required />
@@ -120,11 +124,17 @@
 					<label for="message">お問い合わせ内容</label>
 					<textarea name="message" id="message" rows="6" required></textarea>
 				</div>
+				<input type="hidden" name="return_to" value="/aboutus.html" />
+				<div style="display:none;">
+					<label for="company">会社名</label>
+					<input type="text" name="company" id="company" tabindex="-1" autocomplete="off" />
+				</div>
 				<ul class="actions">
 					<li><input type="submit" value="送信する" class="special" /></li>
 					<li><input type="reset" value="入力をリセット" /></li>
 				</ul>
 			</form>
+			<p>フォームが送信できない場合は、<a href="mailto:hajikkogurashi.official@gmail.com">メール</a>でもご連絡いただけます。</p>
 		</section>
 		<section class="split contact-panel contact-panel--info">
 			<section>
@@ -167,7 +177,7 @@
 						
 							
 								<li class="social-links__item">
-									<a href="https://x.com/hajikko_games" class="icon alt fa-twitter" target="_blank" rel="noopener noreferrer" aria-label="X" title="X">
+									<a href="https://x.com/Corner_neighbor" class="icon alt fa-twitter" target="_blank" rel="noopener noreferrer" aria-label="X" title="X">
 										<span class="label">X</span>
 									</a>
 								</li>

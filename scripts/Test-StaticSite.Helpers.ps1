@@ -4,6 +4,7 @@ $script:StaticPages = @(
     "coming-soon.html",
     "index.html",
     "members.html",
+    "minigames.html",
     "news.html",
     "portfolio.html",
     "privacy-policy.html",
