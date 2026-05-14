@@ -33,10 +33,11 @@
 	var body = document.body;
 	body.classList.add('is-loading');
 
-	window.addEventListener('DOMContentLoaded', function () {
+	window.addEventListener('load', function () {
 		setTimeout(function () {
 			body.classList.remove('is-loading');
-		}, 200);
+			body.classList.add('loaded'); // For custom loader fade out
+		}, 300); // 少しディレイを入れてローダーを見せる
 	});
 
 	// Clear transitioning state on unload
