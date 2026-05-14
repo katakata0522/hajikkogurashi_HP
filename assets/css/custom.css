@@ -442,3 +442,10 @@ span.image.main img {
         padding-right: 1.2em !important;
     }
 }
+
+/* 21. Note Card Hover Effects */
+.note-card:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+}
