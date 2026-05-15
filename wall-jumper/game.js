@@ -18,6 +18,7 @@ let cameraY = 0;
 let highestY = 0;
 let hasReachedGoal = false;
 let isClearSoundPlayed = false;
+let hasShownNewRecordPopup = false;
 
 // Screen Shake
 let screenShake = 0;
@@ -143,6 +144,7 @@ function initGame() {
     highestY = player.y;
     hasReachedGoal = false;
     isClearSoundPlayed = false;
+    hasShownNewRecordPopup = false;
     newRecordDisplay.style.display = 'none';
     
     platforms = [
@@ -348,8 +350,9 @@ function update() {
     player.y += player.vy;
     
     for (let p of platforms) {
-        if (player.x < p.x + p.width && player.x + player.width > p.x &&
-            player.y + player.height >= p.y && player.y + player.height - player.vy <= p.y) {
+        // すり抜け防止の修正: player.vy >= 0（落下中）かつ、前フレームで足場より上にいたか(余裕を持たせて p.y + 0.1 まで許容)
+        if (player.vy >= 0 && player.x < p.x + p.width && player.x + player.width > p.x &&
+            player.y + player.height >= p.y && player.y + player.height - player.vy <= p.y + 0.1) {
             
             player.y = p.y - player.height;
             player.vy = 0;
@@ -391,6 +394,19 @@ function update() {
     currentDistance = Math.max(0, Math.floor((startY - player.y) / 50));
     if (currentDistance > maxDistance) {
         maxDistance = currentDistance;
+        
+        // NEW RECORD 表示のロジック
+        if (maxDistance > bestDistance && bestDistance > 0 && !hasShownNewRecordPopup) {
+            hasShownNewRecordPopup = true;
+            const popup = document.getElementById('in-game-new-record');
+            if (popup) {
+                popup.style.display = 'block';
+                popup.style.animation = 'none';
+                void popup.offsetWidth; // アニメーションを強制リセット
+                popup.style.animation = 'popUp 2s ease-out forwards';
+                setTimeout(() => { popup.style.display = 'none'; }, 2000);
+            }
+        }
     }
     
     const checkAndSaveRecord = () => {
@@ -580,10 +596,31 @@ function draw() {
     }
 }
 
-function gameLoop() {
-    update();
-    draw();
+let lastTimestamp = 0;
+const TIME_STEP = 1000 / 60; // 60 FPS target
+let accumulatedTime = 0;
+
+function gameLoop(timestamp) {
     requestAnimationFrame(gameLoop);
+    
+    if (!lastTimestamp) {
+        lastTimestamp = timestamp;
+        return;
+    }
+    
+    let dt = timestamp - lastTimestamp;
+    lastTimestamp = timestamp;
+    
+    // バックグラウンド等でタブが非アクティブだった際の巨大な時間ジャンプを制限
+    if (dt > 100) dt = 100;
+    
+    accumulatedTime += dt;
+    while (accumulatedTime >= TIME_STEP) {
+        update();
+        accumulatedTime -= TIME_STEP;
+    }
+    
+    draw();
 }
 
 const handleJump = (e) => {
