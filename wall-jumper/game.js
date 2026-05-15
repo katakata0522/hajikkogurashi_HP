@@ -10,8 +10,13 @@ const scoreDisplay = document.getElementById('score-display');
 const clearTimeDisplay = document.getElementById('clear-time');
 const bestTimeDisplay = document.getElementById('best-time-display');
 const newRecordDisplay = document.getElementById('new-record');
+const pauseBtn = document.getElementById('pause-btn');
+const pauseScreen = document.getElementById('pause-screen');
+const resumeBtn = document.getElementById('resume-btn');
+const quitBtn = document.getElementById('quit-btn');
+const milestoneDisplay = document.getElementById('milestone-display');
 
-let gameState = 'start'; // start, playing, dead, clear
+let gameState = 'start'; // start, playing, dead, clear, paused
 let currentDistance = 0;
 let maxDistance = 0;
 let cameraY = 0;
@@ -19,6 +24,7 @@ let highestY = 0;
 let hasReachedGoal = false;
 let isClearSoundPlayed = false;
 let hasShownNewRecordPopup = false;
+let nextMilestone = 50;
 
 // Screen Shake
 let screenShake = 0;
@@ -26,7 +32,7 @@ let screenShake = 0;
 // Best Distance
 let bestDistance = parseInt(localStorage.getItem('wallJumperBestDistance') || '0', 10);
 
-// Audio Context (Initialize on first user interaction)
+// Audio Context
 let audioCtx;
 function initAudio() {
     if (!audioCtx) {
@@ -83,6 +89,35 @@ function playSound(type) {
     }
 }
 
+// Background Colors
+const bgColors = [
+    { m: 0,   c: {r: 92, g: 148, b: 252} },  // 青空
+    { m: 50,  c: {r: 253, g: 127, b: 0} },   // 夕焼け
+    { m: 100, c: {r: 30, g: 44, b: 90} },    // 夜空
+    { m: 150, c: {r: 10, g: 10, b: 25} }     // 宇宙
+];
+
+function lerpColor(c1, c2, t) {
+    t = Math.max(0, Math.min(1, t));
+    return {
+        r: Math.round(c1.r + (c2.r - c1.r) * t),
+        g: Math.round(c1.g + (c2.g - c1.g) * t),
+        b: Math.round(c1.b + (c2.b - c1.b) * t)
+    };
+}
+
+function getBackgroundColor(dist) {
+    for (let i = 0; i < bgColors.length - 1; i++) {
+        if (dist >= bgColors[i].m && dist <= bgColors[i+1].m) {
+            let t = (dist - bgColors[i].m) / (bgColors[i+1].m - bgColors[i].m);
+            let c = lerpColor(bgColors[i].c, bgColors[i+1].c, t);
+            return `rgb(${c.r}, ${c.g}, ${c.b})`;
+        }
+    }
+    let last = bgColors[bgColors.length - 1].c;
+    return `rgb(${last.r}, ${last.g}, ${last.b})`;
+}
+
 // Physics settings
 const GRAVITY = 0.4;
 const TERMINAL_VELOCITY = 12;
@@ -105,7 +140,7 @@ const player = {
     color: '#ff3333',
     trail: [],
     canDoubleJump: true,
-    scaleX: 1.0, // For Squash and Stretch
+    scaleX: 1.0, 
     scaleY: 1.0,
     wasGrounded: false
 };
@@ -114,6 +149,7 @@ let platforms = [];
 let spikes = [];
 let particles = [];
 let jumpRings = [];
+let stars = [];
 let goalBlock = null;
 
 function updateBestDistanceUI() {
@@ -145,16 +181,29 @@ function initGame() {
     hasReachedGoal = false;
     isClearSoundPlayed = false;
     hasShownNewRecordPopup = false;
+    nextMilestone = 50;
     newRecordDisplay.style.display = 'none';
+    milestoneDisplay.style.display = 'none';
     
     platforms = [
-        { x: 0, y: canvas.height - 20, width: canvas.width, height: 20 } // Ground
+        { x: 0, y: canvas.height - 20, width: canvas.width, height: 20 } 
     ];
     spikes = [];
     particles = [];
     jumpRings = [];
     goalBlock = null;
     screenShake = 0;
+    
+    // 星の生成
+    stars = [];
+    for (let i = 0; i < 150; i++) {
+        stars.push({
+            x: Math.random() * canvas.width,
+            y: -Math.random() * 8500, 
+            size: Math.random() * 2 + 1,
+            opacity: Math.random()
+        });
+    }
     
     generateLevel(-1500);
 }
@@ -249,7 +298,6 @@ function jump() {
     if (isGrounded) {
         player.vy = JUMP_FORCE;
         player.canDoubleJump = true;
-        // Squash & Stretch (Jump)
         player.scaleX = 0.6;
         player.scaleY = 1.4;
         playSound('jump');
@@ -284,6 +332,8 @@ function jump() {
 }
 
 function update() {
+    if (gameState === 'paused') return;
+
     updateParticles();
     
     if (screenShake > 0) {
@@ -293,7 +343,6 @@ function update() {
 
     if (gameState !== 'playing') return;
     
-    // Smoothly return scale to 1.0
     player.scaleX += (1.0 - player.scaleX) * 0.2;
     player.scaleY += (1.0 - player.scaleY) * 0.2;
     
@@ -350,7 +399,6 @@ function update() {
     player.y += player.vy;
     
     for (let p of platforms) {
-        // すり抜け防止の修正: player.vy >= 0（落下中）かつ、前フレームで足場より上にいたか(余裕を持たせて p.y + 0.1 まで許容)
         if (player.vy >= 0 && player.x < p.x + p.width && player.x + player.width > p.x &&
             player.y + player.height >= p.y && player.y + player.height - player.vy <= p.y + 0.1) {
             
@@ -369,7 +417,6 @@ function update() {
         }
     }
     
-    // Squash & Stretch on landing
     if (!player.wasGrounded && isGroundedCurrently) {
         player.scaleX = 1.4;
         player.scaleY = 0.6;
@@ -395,17 +442,28 @@ function update() {
     if (currentDistance > maxDistance) {
         maxDistance = currentDistance;
         
-        // NEW RECORD 表示のロジック
+        // NEW RECORD
         if (maxDistance > bestDistance && bestDistance > 0 && !hasShownNewRecordPopup) {
             hasShownNewRecordPopup = true;
             const popup = document.getElementById('in-game-new-record');
             if (popup) {
                 popup.style.display = 'block';
                 popup.style.animation = 'none';
-                void popup.offsetWidth; // アニメーションを強制リセット
+                void popup.offsetWidth; 
                 popup.style.animation = 'popUp 2s ease-out forwards';
                 setTimeout(() => { popup.style.display = 'none'; }, 2000);
             }
+        }
+        
+        // Milestone
+        if (maxDistance >= nextMilestone && nextMilestone <= 150) {
+            milestoneDisplay.innerText = nextMilestone + "m 突破!!";
+            milestoneDisplay.style.display = 'block';
+            milestoneDisplay.style.animation = 'none';
+            void milestoneDisplay.offsetWidth;
+            milestoneDisplay.style.animation = 'popUp 2s ease-out forwards';
+            setTimeout(() => { milestoneDisplay.style.display = 'none'; }, 2000);
+            nextMilestone += 50;
         }
     }
     
@@ -422,11 +480,13 @@ function update() {
         checkAndSaveRecord();
         createDeathParticles();
         playSound('death');
-        screenShake = 15; // Trigger screen shake
+        screenShake = 15;
         gameState = 'dead';
+        pauseBtn.style.display = 'none';
         setTimeout(() => {
             if (gameState === 'dead') {
                 gameState = 'playing';
+                pauseBtn.style.display = 'block';
                 initGame();
             }
         }, 500);
@@ -435,6 +495,7 @@ function update() {
 
     if (hasReachedGoal) {
         gameState = 'clear';
+        pauseBtn.style.display = 'none';
         if (!isClearSoundPlayed) {
             playSound('clear');
             isClearSoundPlayed = true;
@@ -449,7 +510,7 @@ function update() {
     scoreDisplay.innerText = maxDistance + " m";
     
     let targetCameraY = player.y - canvas.height / 2;
-    if (targetCameraY > 0) targetCameraY = 0; // 地面より下は映さない
+    if (targetCameraY > 0) targetCameraY = 0; 
     cameraY += (targetCameraY - cameraY) * 0.1;
     
     if (cameraY < platforms[platforms.length-1].y + 1000 && !goalBlock) {
@@ -461,8 +522,21 @@ function update() {
 }
 
 function draw() {
-    ctx.fillStyle = '#111';
+    // Dynamic Background
+    ctx.fillStyle = getBackgroundColor(currentDistance);
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw Parallax Stars
+    let starAlpha = Math.max(0, Math.min(1, (currentDistance - 80) / 40)); 
+    if (starAlpha > 0) {
+        ctx.save();
+        ctx.translate(0, -cameraY * 0.2); 
+        for (let s of stars) {
+            ctx.fillStyle = `rgba(255, 255, 255, ${s.opacity * starAlpha})`;
+            ctx.fillRect(s.x, s.y, s.size, s.size);
+        }
+        ctx.restore();
+    }
     
     ctx.save();
     
@@ -475,7 +549,7 @@ function draw() {
     
     ctx.translate(0, -cameraY);
     
-    ctx.strokeStyle = '#222';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
     ctx.lineWidth = 1;
     let startY = Math.floor(cameraY / 50) * 50;
     for (let i = startY; i < startY + canvas.height + 100; i += 50) {
@@ -531,7 +605,7 @@ function draw() {
         ctx.stroke();
     }
     
-    if (gameState === 'playing') {
+    if (gameState === 'playing' || gameState === 'paused') {
         ctx.beginPath();
         for (let i = 0; i < player.trail.length; i++) {
             let t = player.trail[i];
@@ -547,10 +621,9 @@ function draw() {
             ctx.shadowColor = '#ffff00';
         }
         
-        // Apply Squash & Stretch matrix
         ctx.save();
         let cx = player.x + player.width / 2;
-        let cy = player.y + player.height; // scale from bottom
+        let cy = player.y + player.height; 
         ctx.translate(cx, cy);
         ctx.scale(player.scaleX, player.scaleY);
         
@@ -572,24 +645,19 @@ function draw() {
         ctx.fillRect(p.x, p.y, 4, 4);
     }
     
-    ctx.restore(); // Restore camera and screen shake
+    ctx.restore(); 
 
-    // Draw UI overlay on canvas (Progress Bar)
-    if (gameState === 'playing') {
+    // Progress Bar
+    if (gameState === 'playing' || gameState === 'paused') {
         const barWidth = 6;
         const barHeight = 200;
         const barX = canvas.width - 15;
-        const barY = 15;
+        const barY = 50; // offset because of pause button
         
-        // Background track
         ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
         ctx.fillRect(barX, barY, barWidth, barHeight);
         
-        // Progress marker
-        // player.y starts near 0 and goes down to GOAL_Y (-8000). 
-        // 0% progress at y=0, 100% at y=GOAL_Y
         let progress = Math.max(0, Math.min(1, player.y / GOAL_Y));
-        
         ctx.fillStyle = '#00ff00';
         let markerY = barY + barHeight - (barHeight * progress);
         ctx.fillRect(barX - 4, markerY - 2, barWidth + 8, 4);
@@ -597,7 +665,7 @@ function draw() {
 }
 
 let lastTimestamp = 0;
-const TIME_STEP = 1000 / 60; // 60 FPS target
+const TIME_STEP = 1000 / 60; 
 let accumulatedTime = 0;
 
 function gameLoop(timestamp) {
@@ -611,7 +679,6 @@ function gameLoop(timestamp) {
     let dt = timestamp - lastTimestamp;
     lastTimestamp = timestamp;
     
-    // バックグラウンド等でタブが非アクティブだった際の巨大な時間ジャンプを制限
     if (dt > 100) dt = 100;
     
     accumulatedTime += dt;
@@ -623,7 +690,37 @@ function gameLoop(timestamp) {
     draw();
 }
 
+function togglePause() {
+    if (gameState === 'playing') {
+        gameState = 'paused';
+        pauseScreen.style.display = 'flex';
+        pauseBtn.style.display = 'none';
+        if (audioCtx && audioCtx.state === 'running') audioCtx.suspend();
+    } else if (gameState === 'paused') {
+        gameState = 'playing';
+        pauseScreen.style.display = 'none';
+        pauseBtn.style.display = 'block';
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    }
+}
+
+pauseBtn.addEventListener('click', togglePause);
+resumeBtn.addEventListener('click', togglePause);
+quitBtn.addEventListener('click', () => {
+    gameState = 'start';
+    pauseScreen.style.display = 'none';
+    uiTitle.style.display = 'block';
+    uiInstruction.style.display = 'block';
+    startBtn.style.display = 'block';
+    scoreDisplay.style.display = 'none';
+    bestTimeDisplay.style.display = 'none';
+    pauseBtn.style.display = 'none';
+    initGame();
+    gameState = 'start'; 
+});
+
 const handleJump = (e) => {
+    if (e.target.id === 'pause-btn' || e.target.id === 'resume-btn' || e.target.id === 'quit-btn') return;
     if(e.type !== 'keydown' || e.code === 'Space') {
         e.preventDefault();
         jump();
@@ -642,12 +739,14 @@ startBtn.addEventListener('click', () => {
     startBtn.style.display = 'none';
     scoreDisplay.style.display = 'block';
     bestTimeDisplay.style.display = 'block';
+    pauseBtn.style.display = 'block';
     initGame();
 });
 
 restartBtn.addEventListener('click', () => {
     gameState = 'playing';
     gameClearScreen.style.display = 'none';
+    pauseBtn.style.display = 'block';
     initGame();
 });
 

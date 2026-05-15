@@ -15,6 +15,17 @@
             <button id="start-btn">ゲームスタート</button>
             <div id="score-display">0 m</div>
             <div id="best-time-display">Best: -- m</div>
+            
+            <button id="pause-btn" style="display: none; position: absolute; top: 15px; right: 15px; padding: 5px 15px; font-size: 16px; background-color: rgba(255,255,255,0.2); color: #fff; box-shadow: none; z-index: 20;">||</button>
+            
+            <div id="pause-screen" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 15; flex-direction: column; justify-content: center; align-items: center; pointer-events: auto;">
+                <h2 style="color: #fff; font-size: 36px; margin-bottom: 30px; text-shadow: 2px 2px 0 #000;">PAUSE</h2>
+                <button id="resume-btn" style="margin-bottom: 20px;">ゲームに戻る</button>
+                <button id="quit-btn" style="background-color: #666; box-shadow: 0 4px 0 #333;">タイトルへ</button>
+            </div>
+            
+            <div id="milestone-display" style="display: none; position: absolute; top: 30%; left: 50%; transform: translateX(-50%); font-size: 40px; color: #ffd700; font-weight: 900; text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000; z-index: 10; width: 100%;">50m 突破!!</div>
+            
             <div id="in-game-new-record" style="display: none; position: absolute; top: 30%; left: 50%; transform: translateX(-50%); font-size: 36px; color: #ff3333; font-weight: 900; text-shadow: 2px 2px 0 #fff, -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff; z-index: 10;">NEW RECORD!</div>
             <div id="game-clear">
                 <h2>GAME CLEAR!!</h2>
