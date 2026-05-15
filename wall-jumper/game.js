@@ -12,8 +12,8 @@ const bestTimeDisplay = document.getElementById('best-time-display');
 const newRecordDisplay = document.getElementById('new-record');
 
 let gameState = 'start'; // start, playing, dead, clear
-let startTime = 0;
-let currentTimeStr = "0.00";
+let currentDistance = 0;
+let maxDistance = 0;
 let cameraY = 0;
 let highestY = 0;
 let hasReachedGoal = false;
@@ -22,8 +22,8 @@ let isClearSoundPlayed = false;
 // Screen Shake
 let screenShake = 0;
 
-// Best Time
-let bestTime = localStorage.getItem('wallJumperBestTime');
+// Best Distance
+let bestDistance = parseInt(localStorage.getItem('wallJumperBestDistance') || '0', 10);
 
 // Audio Context (Initialize on first user interaction)
 let audioCtx;
@@ -115,17 +115,17 @@ let particles = [];
 let jumpRings = [];
 let goalBlock = null;
 
-function updateBestTimeUI() {
-    if (bestTime) {
-        bestTimeDisplay.innerText = "Best: " + parseFloat(bestTime).toFixed(2);
+function updateBestDistanceUI() {
+    if (bestDistance > 0) {
+        bestTimeDisplay.innerText = "Best: " + bestDistance + " m";
     } else {
-        bestTimeDisplay.innerText = "Best: --";
+        bestTimeDisplay.innerText = "Best: -- m";
     }
 }
 
 function initGame() {
     initAudio();
-    updateBestTimeUI();
+    updateBestDistanceUI();
     
     player.x = canvas.width / 2 - player.width / 2;
     player.y = canvas.height - 50;
@@ -137,8 +137,8 @@ function initGame() {
     player.scaleY = 1.0;
     player.wasGrounded = true;
     
-    startTime = Date.now();
-    currentTimeStr = "0.00";
+    currentDistance = 0;
+    maxDistance = 0;
     cameraY = 0;
     highestY = player.y;
     hasReachedGoal = false;
@@ -386,7 +386,24 @@ function update() {
         dead = true;
     }
     
+    // Update distance
+    let startY = canvas.height - 50;
+    currentDistance = Math.max(0, Math.floor((startY - player.y) / 50));
+    if (currentDistance > maxDistance) {
+        maxDistance = currentDistance;
+    }
+    
+    const checkAndSaveRecord = () => {
+        if (maxDistance > bestDistance) {
+            bestDistance = maxDistance;
+            localStorage.setItem('wallJumperBestDistance', bestDistance);
+            updateBestDistanceUI();
+            newRecordDisplay.style.display = 'block';
+        }
+    };
+
     if (dead) {
+        checkAndSaveRecord();
         createDeathParticles();
         playSound('death');
         screenShake = 15; // Trigger screen shake
@@ -405,29 +422,19 @@ function update() {
         if (!isClearSoundPlayed) {
             playSound('clear');
             isClearSoundPlayed = true;
-            
-            let elapsed = (Date.now() - startTime) / 1000;
-            if (!bestTime || elapsed < parseFloat(bestTime)) {
-                bestTime = elapsed.toFixed(2);
-                localStorage.setItem('wallJumperBestTime', bestTime);
-                updateBestTimeUI();
-                newRecordDisplay.style.display = 'block';
-            }
+            checkAndSaveRecord();
         }
         
         gameClearScreen.style.display = 'flex';
-        clearTimeDisplay.innerText = currentTimeStr;
+        clearTimeDisplay.innerText = maxDistance;
         return;
     }
     
-    let elapsed = (Date.now() - startTime) / 1000;
-    currentTimeStr = elapsed.toFixed(2);
-    scoreDisplay.innerText = "Time: " + currentTimeStr;
+    scoreDisplay.innerText = maxDistance + " m";
     
     let targetCameraY = player.y - canvas.height / 2;
-    if (targetCameraY < cameraY) {
-        cameraY += (targetCameraY - cameraY) * 0.1;
-    }
+    if (targetCameraY > 0) targetCameraY = 0; // 地面より下は映さない
+    cameraY += (targetCameraY - cameraY) * 0.1;
     
     if (cameraY < platforms[platforms.length-1].y + 1000 && !goalBlock) {
         generateLevel(cameraY - 2000);
