@@ -721,14 +721,28 @@ quitBtn.addEventListener('click', () => {
 
 const handleJump = (e) => {
     if (e.target.id === 'pause-btn' || e.target.id === 'resume-btn' || e.target.id === 'quit-btn') return;
-    if(e.type !== 'keydown' || e.code === 'Space') {
+    
+    // キーボード操作（スペースキーのみ）
+    if (e.type === 'keydown') {
+        if (e.code === 'Space') {
+            e.preventDefault();
+            jump();
+        }
+    } else {
+        // マウス・タッチ操作
         e.preventDefault();
         jump();
     }
 };
 
-canvas.addEventListener('mousedown', handleJump);
-canvas.addEventListener('touchstart', handleJump, {passive: false});
+// 重複発火を防ぐため、pointerdownを使用（モダンブラウザ対応）
+// pointerdown がサポートされていない環境のフォールバックとして mousedown/touchstart を使い分ける
+if (window.PointerEvent) {
+    canvas.addEventListener('pointerdown', handleJump);
+} else {
+    canvas.addEventListener('mousedown', handleJump);
+    canvas.addEventListener('touchstart', handleJump, {passive: false});
+}
 window.addEventListener('keydown', handleJump);
 
 startBtn.addEventListener('click', () => {
