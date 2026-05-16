@@ -27,7 +27,7 @@ body {
     width: 100%;
     max-width: 400px;
     height: 100vh;
-    max-height: 700px; /* PCでの表示バランス調整 */
+    max-height: 700px;
     background-color: #000;
     overflow: hidden;
     box-shadow: 0 0 50px rgba(0,0,0,0.5);
@@ -54,51 +54,37 @@ canvas {
     width: 100%;
     height: 100%;
     pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
     z-index: 10;
 }
 
-/* Typography & Titles */
+/* Typography & Titles (Original Style) */
 #title {
-    position: absolute;
-    top: 15%;
-    width: 100%;
-    font-family: var(--font-heading);
-    font-size: 64px;
-    line-height: 0.9;
-    color: var(--primary-color);
-    text-shadow: 
-        0 4px 0 #800,
-        0 8px 15px rgba(255, 51, 51, 0.4);
-    text-align: center;
-    margin: 0;
+    font-family: Arial, sans-serif;
+    font-size: 42px;
+    color: #ff3333;
+    text-shadow: 2px 2px 0 #000, 4px 4px 0 #550000;
+    margin-bottom: 10px;
+    letter-spacing: 2px;
     font-weight: 900;
-    letter-spacing: -2px;
 }
 
 #instruction {
-    position: absolute;
-    top: 45%;
-    width: 100%;
-    text-align: center;
+    font-family: Arial, sans-serif;
     font-size: 16px;
-    color: #fff;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    line-height: 1.6;
+    margin-bottom: 40px;
+    text-shadow: 1px 1px 0 #000;
+    background: rgba(0,0,0,0.5);
+    padding: 10px 20px;
+    border-radius: 5px;
 }
 
-.highlight {
-    display: inline-block;
-    margin-top: 10px;
-    color: var(--accent-color);
-    font-size: 20px;
-    animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { transform: scale(1); opacity: 0.8; }
-    50% { transform: scale(1.1); opacity: 1; }
-}
-
-/* HUD (In-game UI) */
+/* HUD (New Visual Style) */
 #hud {
     position: absolute;
     top: 20px;
@@ -125,38 +111,30 @@ canvas {
     color: var(--accent-color);
 }
 
-/* Buttons */
+/* Buttons (Original Style for Main Buttons) */
 button {
     pointer-events: auto;
-    font-family: var(--font-main);
-    padding: 15px 50px;
-    font-size: 24px;
-    background: linear-gradient(to bottom, #ff5555, #ff3333);
+    padding: 15px 40px;
+    font-family: Arial, sans-serif;
+    font-size: 20px;
+    background-color: #ff3333;
     color: white;
     border: none;
-    border-radius: 50px;
+    border-radius: 5px;
     cursor: pointer;
-    box-shadow: 
-        0 6px 0 #900,
-        0 10px 20px rgba(0,0,0,0.3);
-    transition: all 0.1s;
+    font-weight: bold;
+    box-shadow: 0 4px 0 #990000;
+    transition: transform 0.1s, box-shadow 0.1s;
 }
 
 button:active {
     transform: translateY(4px);
-    box-shadow: 0 2px 0 #900;
+    box-shadow: 0 0 0 #990000;
 }
 
 button.secondary {
     background: var(--secondary-color);
     box-shadow: 0 6px 0 #333;
-}
-
-#start-btn {
-    position: absolute;
-    top: 65%;
-    left: 50%;
-    transform: translateX(-50%);
 }
 
 #pause-btn {
@@ -180,6 +158,7 @@ button.secondary {
 #pause-btn span {
     font-size: 18px;
     margin-top: -2px;
+    font-family: Arial, sans-serif;
 }
 
 /* Screens */
