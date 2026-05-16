@@ -4,38 +4,55 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ウォールジャンパー | はじっこぐらし</title>
-    <link rel="stylesheet" href="style.css?v=1.9.1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Mochiyopop+One&family=Noto+Sans+JP:wght@900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=1.9.2">
 </head>
 <body>
     <div id="game-container">
         <canvas id="gameCanvas" width="400" height="600"></canvas>
         <div id="ui-layer">
-            <h1 id="title">WALL JUMPER</h1>
-            <p id="instruction">画面をクリックしてジャンプ！<br>壁を蹴って上に登ろう！<br>トゲに当たると即ゲームオーバー！</p>
-            <button id="start-btn">ゲームスタート</button>
-            <div id="score-display">0 m</div>
-            <div id="best-time-display">Best: -- m</div>
+            <h1 id="title">WALL<br>JUMPER</h1>
+            <p id="instruction">壁を蹴って、宇宙を目指せ！<br><span class="highlight">TAP TO JUMP</span></p>
+            <button id="start-btn">スタート！</button>
             
-            <button id="pause-btn" style="display: none; position: absolute; top: 15px; right: 15px; padding: 5px 15px; font-size: 16px; background-color: rgba(255,255,255,0.2); color: #fff; box-shadow: none; z-index: 20;">||</button>
-            
-            <div id="pause-screen" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 15; flex-direction: column; justify-content: center; align-items: center; pointer-events: auto;">
-                <h2 style="color: #fff; font-size: 36px; margin-bottom: 30px; text-shadow: 2px 2px 0 #000;">PAUSE</h2>
-                <button id="resume-btn" style="margin-bottom: 20px;">ゲームに戻る</button>
-                <button id="quit-btn" style="background-color: #666; box-shadow: 0 4px 0 #333;">タイトルへ</button>
+            <div id="hud">
+                <div id="score-container">
+                    <span class="label">DISTANCE</span>
+                    <div id="score-display">0m</div>
+                </div>
+                <div id="best-container">
+                    <span class="label">BEST</span>
+                    <div id="best-time-display">--m</div>
+                </div>
             </div>
             
-            <div id="milestone-display" style="display: none; position: absolute; top: 30%; left: 50%; transform: translateX(-50%); font-size: 40px; color: #ffd700; font-weight: 900; text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000; z-index: 10; width: 100%;">50m 突破!!</div>
+            <button id="pause-btn" style="display: none;"><span>||</span></button>
             
-            <div id="in-game-new-record" style="display: none; position: absolute; top: 30%; left: 50%; transform: translateX(-50%); font-size: 36px; color: #ff3333; font-weight: 900; text-shadow: 2px 2px 0 #fff, -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff; z-index: 10;">NEW RECORD!</div>
+            <div id="pause-screen" style="display: none;">
+                <h2>PAUSE</h2>
+                <button id="resume-btn">続ける</button>
+                <button id="quit-btn" class="secondary">やめる</button>
+            </div>
+            
+            <div id="milestone-display" style="display: none;">50m 突破!!</div>
+            <div id="in-game-new-record" style="display: none;">NEW RECORD!</div>
+
             <div id="game-clear">
-                <h2>GAME CLEAR!!</h2>
-                <h3 id="new-record" style="color: #ff3333; display: none; text-shadow: 1px 1px 0 #fff; margin: 0 0 10px 0; font-size: 30px;">★ NEW RECORD ★</h3>
-                <p>Record: <span id="clear-time">0</span> m</p>
-                <button id="restart-btn">もう一度遊ぶ</button>
-                <a href="/minigames.html" class="back-link">ミニゲーム一覧に戻る</a>
+                <div class="clear-card">
+                    <h2>GAME CLEAR!!</h2>
+                    <h3 id="new-record" style="display: none;">★ NEW RECORD ★</h3>
+                    <div class="result-score">
+                        <span class="label">RESULT</span>
+                        <div class="value"><span id="clear-time">0</span>m</div>
+                    </div>
+                    <button id="restart-btn">リトライ</button>
+                    <a href="/minigames.html" class="back-link">ミニゲーム広場へ戻る</a>
+                </div>
             </div>
         </div>
     </div>
-    <script src="game.js?v=1.9.1"></script>
+    <script src="game.js?v=1.9.2"></script>
 </body>
 </html>

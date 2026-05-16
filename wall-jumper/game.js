@@ -6,6 +6,7 @@ const uiInstruction = document.getElementById('instruction');
 const startBtn = document.getElementById('start-btn');
 const restartBtn = document.getElementById('restart-btn');
 const gameClearScreen = document.getElementById('game-clear');
+const hud = document.getElementById('hud');
 const scoreDisplay = document.getElementById('score-display');
 const clearTimeDisplay = document.getElementById('clear-time');
 const bestTimeDisplay = document.getElementById('best-time-display');
@@ -154,9 +155,9 @@ let goalBlock = null;
 
 function updateBestDistanceUI() {
     if (bestDistance > 0) {
-        bestTimeDisplay.innerText = "Best: " + bestDistance + " m";
+        bestTimeDisplay.innerText = bestDistance + "m";
     } else {
-        bestTimeDisplay.innerText = "Best: -- m";
+        bestTimeDisplay.innerText = "--m";
     }
 }
 
@@ -276,9 +277,16 @@ function updateParticles() {
     }
 }
 
+let lastJumpTime = 0;
+
 function jump() {
     initAudio();
     if (gameState !== 'playing') return;
+    
+    // 重複発火防止（50ms以内の連続ジャンプを無視）
+    const now = performance.now();
+    if (now - lastJumpTime < 50) return;
+    lastJumpTime = now;
     
     let isGrounded = false;
     let isWallLeft = false;
@@ -298,28 +306,28 @@ function jump() {
     if (isGrounded) {
         player.vy = JUMP_FORCE;
         player.canDoubleJump = true;
-        player.scaleX = 0.6;
-        player.scaleY = 1.4;
+        player.scaleX = 0.5;
+        player.scaleY = 1.5;
         playSound('jump');
     } else if (isWallLeft) {
         player.vy = WALL_JUMP_FORCE_Y;
         player.vx = WALL_JUMP_FORCE_X;
         player.canDoubleJump = true;
-        player.scaleX = 0.6;
-        player.scaleY = 1.4;
+        player.scaleX = 0.5;
+        player.scaleY = 1.5;
         playSound('walljump');
     } else if (isWallRight) {
         player.vy = WALL_JUMP_FORCE_Y;
         player.vx = -WALL_JUMP_FORCE_X;
         player.canDoubleJump = true;
-        player.scaleX = 0.6;
-        player.scaleY = 1.4;
+        player.scaleX = 0.5;
+        player.scaleY = 1.5;
         playSound('walljump');
     } else if (player.canDoubleJump) {
         player.canDoubleJump = false;
         player.vy = JUMP_FORCE;
-        player.scaleX = 0.6;
-        player.scaleY = 1.4;
+        player.scaleX = 0.5;
+        player.scaleY = 1.5;
         playSound('jump');
         
         jumpRings.push({
@@ -343,8 +351,8 @@ function update() {
 
     if (gameState !== 'playing') return;
     
-    player.scaleX += (1.0 - player.scaleX) * 0.2;
-    player.scaleY += (1.0 - player.scaleY) * 0.2;
+    player.scaleX += (1.0 - player.scaleX) * 0.15;
+    player.scaleY += (1.0 - player.scaleY) * 0.15;
     
     if (player.vx > 0) player.vx = MOVE_SPEED;
     if (player.vx < 0) player.vx = -MOVE_SPEED;
@@ -402,6 +410,11 @@ function update() {
         if (player.vy >= 0 && player.x < p.x + p.width && player.x + player.width > p.x &&
             player.y + player.height >= p.y && player.y + player.height - player.vy <= p.y + 0.1) {
             
+            if (!player.wasGrounded && player.vy > 2) {
+                player.scaleX = 1.5;
+                player.scaleY = 0.5;
+            }
+
             player.y = p.y - player.height;
             player.vy = 0;
             player.canDoubleJump = true;
@@ -486,7 +499,7 @@ function update() {
         setTimeout(() => {
             if (gameState === 'dead') {
                 gameState = 'playing';
-                pauseBtn.style.display = 'block';
+                pauseBtn.style.display = 'flex';
                 initGame();
             }
         }, 500);
@@ -496,6 +509,7 @@ function update() {
     if (hasReachedGoal) {
         gameState = 'clear';
         pauseBtn.style.display = 'none';
+        hud.style.display = 'none';
         if (!isClearSoundPlayed) {
             playSound('clear');
             isClearSoundPlayed = true;
@@ -507,7 +521,7 @@ function update() {
         return;
     }
     
-    scoreDisplay.innerText = maxDistance + " m";
+    scoreDisplay.innerText = maxDistance + "m";
     
     let targetCameraY = player.y - canvas.height / 2;
     if (targetCameraY > 0) targetCameraY = 0; 
@@ -579,22 +593,34 @@ function draw() {
         }
     }
     
-    ctx.fillStyle = '#ff0044';
     for (let s of spikes) {
-        ctx.beginPath();
-        let numSpikes = Math.max(1, Math.floor((s.width > s.height ? s.width : s.height) / 15));
-        
-        if (s.width < s.height) {
-            let isLeft = s.x === 0;
-            for (let i = 0; i < numSpikes; i++) {
-                let sy = s.y + (i * s.height / numSpikes);
-                let nextSy = s.y + ((i+1) * s.height / numSpikes);
-                ctx.moveTo(isLeft ? 0 : canvas.width, sy);
-                ctx.lineTo(isLeft ? s.width : canvas.width - s.width, (sy + nextSy)/2);
-                ctx.lineTo(isLeft ? 0 : canvas.width, nextSy);
-            }
+        let isLeft = s.x === 0;
+        let numSpikes = Math.floor(s.height / 20);
+        let spikeW = s.width;
+        let spikeH = s.height / numSpikes;
+
+        for (let i = 0; i < numSpikes; i++) {
+            let sy = s.y + (i * spikeH);
+            
+            let grad = ctx.createLinearGradient(isLeft ? 0 : canvas.width, sy, isLeft ? spikeW : canvas.width - spikeW, sy);
+            grad.addColorStop(0, '#ff0044');
+            grad.addColorStop(0.5, '#aa0022');
+            grad.addColorStop(1, '#660011');
+            
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.moveTo(isLeft ? 0 : canvas.width, sy);
+            ctx.lineTo(isLeft ? spikeW : canvas.width - spikeW, sy + spikeH/2);
+            ctx.lineTo(isLeft ? 0 : canvas.width, sy + spikeH);
+            ctx.fill();
+
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(isLeft ? 0 : canvas.width, sy + 2);
+            ctx.lineTo(isLeft ? spikeW - 2 : canvas.width - spikeW + 2, sy + spikeH/2);
+            ctx.stroke();
         }
-        ctx.fill();
     }
 
     for (let r of jumpRings) {
@@ -652,7 +678,7 @@ function draw() {
         const barWidth = 6;
         const barHeight = 200;
         const barX = canvas.width - 15;
-        const barY = 50; // offset because of pause button
+        const barY = 80; // adjusted for new pause button
         
         ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
         ctx.fillRect(barX, barY, barWidth, barHeight);
@@ -699,7 +725,7 @@ function togglePause() {
     } else if (gameState === 'paused') {
         gameState = 'playing';
         pauseScreen.style.display = 'none';
-        pauseBtn.style.display = 'block';
+        pauseBtn.style.display = 'flex';
         if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
     }
 }
@@ -712,15 +738,14 @@ quitBtn.addEventListener('click', () => {
     uiTitle.style.display = 'block';
     uiInstruction.style.display = 'block';
     startBtn.style.display = 'block';
-    scoreDisplay.style.display = 'none';
-    bestTimeDisplay.style.display = 'none';
+    hud.style.display = 'none';
     pauseBtn.style.display = 'none';
     initGame();
     gameState = 'start'; 
 });
 
 const handleJump = (e) => {
-    if (e.target.id === 'pause-btn' || e.target.id === 'resume-btn' || e.target.id === 'quit-btn') return;
+    if (e.target.id === 'pause-btn' || e.target.closest('#pause-btn') || e.target.id === 'resume-btn' || e.target.id === 'quit-btn') return;
     
     // キーボード操作（スペースキーのみ）
     if (e.type === 'keydown') {
@@ -751,16 +776,16 @@ startBtn.addEventListener('click', () => {
     uiTitle.style.display = 'none';
     uiInstruction.style.display = 'none';
     startBtn.style.display = 'none';
-    scoreDisplay.style.display = 'block';
-    bestTimeDisplay.style.display = 'block';
-    pauseBtn.style.display = 'block';
+    hud.style.display = 'flex';
+    pauseBtn.style.display = 'flex';
     initGame();
 });
 
 restartBtn.addEventListener('click', () => {
     gameState = 'playing';
     gameClearScreen.style.display = 'none';
-    pauseBtn.style.display = 'block';
+    hud.style.display = 'flex';
+    pauseBtn.style.display = 'flex';
     initGame();
 });
 
