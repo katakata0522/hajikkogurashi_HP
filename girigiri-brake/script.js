@@ -14,7 +14,7 @@ const startBtn = document.getElementById('start-btn');
 const retryBtn = document.getElementById('retry-btn');
 const shareBtn = document.getElementById('share-btn');
 
-// --- 内部解像度の固定（環境依存バグの解消） ---
+// --- 内部解像度の固定 ---
 const LOGICAL_WIDTH = 1000;
 const LOGICAL_HEIGHT = 600;
 canvas.width = LOGICAL_WIDTH;
@@ -31,6 +31,7 @@ function resizeCanvas() {
         canvas.style.width = gameContainer.clientWidth + 'px';
         canvas.style.height = (gameContainer.clientWidth / aspect) + 'px';
     }
+    // 中央配置
     canvas.style.position = 'absolute';
     canvas.style.left = '50%';
     canvas.style.top = '50%';
@@ -39,7 +40,7 @@ function resizeCanvas() {
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
-// --- サウンド（Web Audio API）実装 ---
+// --- サウンド（Web Audio API） ---
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 let audioCtx;
 
@@ -93,11 +94,11 @@ function playSound(type) {
     }
 }
 
-// ゲームのステート
+// ゲームステート
 const STATE = { START: 0, READY: 1, RUNNING: 2, BRAKING: 3, RESULT: 4 };
 let currentState = STATE.START;
 
-// ゲーム内変数
+// 設定
 const gameConfig = {
     groundY: LOGICAL_HEIGHT * 0.75,
     cliffX: LOGICAL_WIDTH * 0.85,
@@ -121,19 +122,16 @@ let animationId;
 let lastTime = 0;
 let resultDistance = 0;
 
-// --- 描画 ---
+// --- 描画処理 ---
 function drawBackground() {
     ctx.clearRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
     
-    // 地面
     ctx.fillStyle = '#0a0a14';
     ctx.fillRect(0, gameConfig.groundY, gameConfig.cliffX, LOGICAL_HEIGHT - gameConfig.groundY);
     
-    // 崖
     ctx.fillStyle = '#050508';
     ctx.fillRect(gameConfig.cliffX, gameConfig.groundY, LOGICAL_WIDTH - gameConfig.cliffX, LOGICAL_HEIGHT - gameConfig.groundY);
 
-    // 警戒線
     ctx.save();
     ctx.translate(gameConfig.cliffX - 30, gameConfig.groundY);
     const stripeCount = 10;
@@ -144,7 +142,6 @@ function drawBackground() {
     }
     ctx.restore();
 
-    // ネオンライン
     ctx.shadowBlur = 15;
     ctx.shadowColor = '#ff416c';
     ctx.strokeStyle = '#ff416c';
@@ -192,13 +189,13 @@ class Particle {
         this.speedX = (Math.random() - 0.5) * -200;
         this.speedY = (Math.random() - 1) * 100;
         this.life = 1.0;
-        this.decay = Math.random() * 1.5 + 1.0; // 1秒あたりの減衰
+        this.decay = Math.random() * 1.5 + 1.0;
     }
     update(dt) {
         this.x += this.speedX * dt;
         this.y += this.speedY * dt;
         this.life -= this.decay * dt;
-        this.size *= (1 - dt*2);
+        this.size *= Math.max(0, 1 - dt * 2);
     }
     draw(ctx) {
         if(this.life <= 0) return;
@@ -250,7 +247,7 @@ function update(dt) {
 function gameLoop(timestamp) {
     if(!lastTime) lastTime = timestamp;
     let dt = (timestamp - lastTime) / 1000;
-    if(dt > 0.1) dt = 0.1; // フレーム落ち対策
+    if(dt > 0.1) dt = 0.1;
     lastTime = timestamp;
 
     if(currentState !== STATE.RESULT) {
@@ -267,7 +264,11 @@ function gameLoop(timestamp) {
 }
 
 // --- アクション ---
-function startGame() {
+function startGame(e) {
+    if (e) {
+        e.stopPropagation();
+        e.preventDefault();
+    }
     initAudio();
     currentState = STATE.READY;
     player.x = 20;
@@ -319,7 +320,7 @@ function gameOverFall() {
 
         player.x += fallSpeedX * dt;
         player.y += fallSpeedY * dt;
-        fallSpeedY += 1500 * dt; // 重力
+        fallSpeedY += 1500 * dt;
 
         drawBackground();
         drawPlayer();
@@ -339,8 +340,6 @@ function checkResult() {
     const playerFrontX = player.x + player.width;
     const distancePixel = gameConfig.cliffX - playerFrontX;
     
-    // 論理座標の割合からリアルな数値へ
-    // 崖までの道のりを 100m とした場合の換算
     const roadLength = gameConfig.cliffX - 20 - player.width;
     const ratio = distancePixel / roadLength;
     resultDistance = (ratio * 100).toFixed(2);
@@ -371,10 +370,9 @@ function showResult(type) {
         rankTextEl.innerText = '大クラッシュ...';
         rankTextEl.classList.add('rank-fall');
     } else {
-        // ミリ秒単位でのカウントアップ演出（ヒリヒリ感）
         let target = parseFloat(resultDistance);
         let current = 100.0;
-        let step = (100.0 - target) / 30; // 30フレームでアニメーション
+        let step = (100.0 - target) / 30;
         
         document.querySelector('.score-unit').style.display = 'inline-block';
         scoreValueEl.style.color = '#00f2fe';
@@ -408,18 +406,21 @@ function showResult(type) {
 gameContainer.addEventListener('mousedown', handleInput);
 gameContainer.addEventListener('touchstart', (e) => {
     e.preventDefault();
-    handleInput();
+    handleInput(e);
 }, { passive: false });
 
-function handleInput() {
+function handleInput(e) {
     if (currentState === STATE.START || currentState === STATE.RESULT) return;
     if (currentState === STATE.READY) triggerRun();
     else if (currentState === STATE.RUNNING) triggerBrake();
 }
 
-startBtn.addEventListener('click', () => { initAudio(); startGame(); });
+startBtn.addEventListener('click', startGame);
+startBtn.addEventListener('touchstart', startGame);
 retryBtn.addEventListener('click', startGame);
-shareBtn.addEventListener('click', () => {
+retryBtn.addEventListener('touchstart', startGame);
+shareBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
     let text = "";
     if (rankTextEl.classList.contains('rank-fall')) {
         text = `あああああ！崖から落ちた…（チキン度 100%）`;
@@ -429,6 +430,10 @@ shareBtn.addEventListener('click', () => {
     const url = "https://hajikkoroom.xsrv.jp/girigiri-brake/";
     const hashtags = "はじっこぐらし,ギリギリブレーキ";
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtags)}`);
+});
+shareBtn.addEventListener('touchstart', (e) => {
+    e.stopPropagation();
+    shareBtn.click();
 });
 
 // 初期描画

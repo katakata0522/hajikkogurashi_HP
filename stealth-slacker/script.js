@@ -138,7 +138,11 @@ let floatingTexts = [];
 
 // --- ゲームループ ---
 
-function startGame() {
+function startGame(e) {
+    if (e) {
+        e.stopPropagation();
+        e.preventDefault();
+    }
     initAudio();
     gameState = STATE.PLAYING;
     bossState = BOSS.AWAY;
