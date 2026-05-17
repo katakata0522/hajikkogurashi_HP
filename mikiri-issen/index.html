@@ -1096,6 +1096,11 @@
       transition: opacity 200ms ease, transform 200ms ease;
     }
 
+    .toast.is-visible {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
     @keyframes breathe { 0%, 100% { translate: 0 0; } 50% { translate: 0 5px; } }
     @keyframes slowPulse { 0%, 100% { transform: translate(-50%, -50%) scale(0.96); opacity: 0.46; } 50% { transform: translate(-50%, -50%) scale(1.08); opacity: 0.84; } }
     @keyframes signalPop { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.48) rotate(-10deg); } 18% { opacity: 1; transform: translate(-50%, -50%) scale(1.14) rotate(2deg); } 100% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0); } }
@@ -1334,69 +1339,56 @@
         { name: '刹那の鬼', title: '六人目', rank: '★★★★★', reactionMs: 200, cssClass: 'enemy-demon', minWaitMs: 2600, maxWaitMs: 9200, flavor: '人間離れした速さ。勝てたら誇っていい相手です。' },
       ];
 
-      const enemyClassNames = enemies.map(e => e.cssClass);
+      const enemyClassNames = enemies.map((enemy) => enemy.cssClass);
 
-      // --- DOM Elements Organization ---
-      const elements = {
-        screens: {
-          title: document.getElementById('titleScreen'),
-          play: document.getElementById('playScreen'),
-          result: document.getElementById('resultScreen'),
-        },
-        buttons: {
-          start: document.getElementById('startButton'),
-          retry: document.getElementById('retryButton'),
-          restart: document.getElementById('restartButton'),
-          backTitle: document.getElementById('backTitleButton'),
-          share: document.getElementById('shareButton'),
-          resetRecord: document.getElementById('resetRecordButton'),
-          sound: document.getElementById('soundButton'),
-          howto: document.getElementById('howtoButton'),
-        },
-        ui: {
-          howtoPanel: document.getElementById('howtoPanel'),
-          arena: document.getElementById('arena'),
-          stateLabel: document.getElementById('stateLabel'),
-          instructionText: document.getElementById('instructionText'),
-          toast: document.getElementById('toast'),
-          impactText: document.getElementById('impactText'),
-        },
-        enemy: {
-          title: document.getElementById('enemyTitleLabel'),
-          rank: document.getElementById('enemyRankLabel'),
-          name: document.getElementById('enemyNameLabel'),
-          nameplate: document.getElementById('enemyNameplate'),
-          wrap: document.getElementById('enemyFighterWrap'),
-          slash: document.getElementById('enemySlash'),
-        },
-        player: {
-          wrap: document.getElementById('playerFighterWrap'),
-          slash: document.getElementById('playerSlash'),
-        },
-        result: {
-          card: document.getElementById('resultCard'),
-          judge: document.getElementById('judgeLabel'),
-          time: document.getElementById('resultTime'),
-          diff: document.getElementById('differenceLabel'),
-          enemyName: document.getElementById('enemyResultLabel'),
-          enemyRank: document.getElementById('enemyRankResultLabel'),
-          enemySpeed: document.getElementById('enemySpeedLabel'),
-          waitTime: document.getElementById('waitTimeLabel'),
-          comment: document.getElementById('resultComment'),
-          best: document.getElementById('resultBest'),
-          streak: document.getElementById('resultStreak'),
-          maxStreak: document.getElementById('resultMaxStreak'),
-          totalWins: document.getElementById('resultTotalWins'),
-          nextEnemy: document.getElementById('nextEnemyLabel'),
-        },
-        titleRecord: {
-          best: document.getElementById('titleBestLabel'),
-          maxStreak: document.getElementById('titleMaxStreakLabel'),
-          totalWins: document.getElementById('titleTotalWinsLabel'),
-        }
+      const screens = {
+        title: document.getElementById('titleScreen'),
+        play: document.getElementById('playScreen'),
+        result: document.getElementById('resultScreen'),
       };
 
-      // --- Game State ---
+      const elements = {
+        startButton: document.getElementById('startButton'),
+        retryButton: document.getElementById('retryButton'),
+        restartButton: document.getElementById('restartButton'),
+        backTitleButton: document.getElementById('backTitleButton'),
+        shareButton: document.getElementById('shareButton'),
+        resetRecordButton: document.getElementById('resetRecordButton'),
+        soundButton: document.getElementById('soundButton'),
+        howtoButton: document.getElementById('howtoButton'),
+        howtoPanel: document.getElementById('howtoPanel'),
+        arena: document.getElementById('arena'),
+        stateLabel: document.getElementById('stateLabel'),
+        instructionText: document.getElementById('instructionText'),
+        enemyTitleLabel: document.getElementById('enemyTitleLabel'),
+        enemyRankLabel: document.getElementById('enemyRankLabel'),
+        enemyNameLabel: document.getElementById('enemyNameLabel'),
+        enemyNameplate: document.getElementById('enemyNameplate'),
+        playerFighterWrap: document.getElementById('playerFighterWrap'),
+        enemyFighterWrap: document.getElementById('enemyFighterWrap'),
+        playerSlash: document.getElementById('playerSlash'),
+        enemySlash: document.getElementById('enemySlash'),
+        impactText: document.getElementById('impactText'),
+        resultCard: document.getElementById('resultCard'),
+        judgeLabel: document.getElementById('judgeLabel'),
+        resultTime: document.getElementById('resultTime'),
+        differenceLabel: document.getElementById('differenceLabel'),
+        enemyResultLabel: document.getElementById('enemyResultLabel'),
+        enemyRankResultLabel: document.getElementById('enemyRankResultLabel'),
+        enemySpeedLabel: document.getElementById('enemySpeedLabel'),
+        resultComment: document.getElementById('resultComment'),
+        resultBest: document.getElementById('resultBest'),
+        resultStreak: document.getElementById('resultStreak'),
+        resultMaxStreak: document.getElementById('resultMaxStreak'),
+        resultTotalWins: document.getElementById('resultTotalWins'),
+        waitTimeLabel: document.getElementById('waitTimeLabel'),
+        nextEnemyLabel: document.getElementById('nextEnemyLabel'),
+        titleBestLabel: document.getElementById('titleBestLabel'),
+        titleMaxStreakLabel: document.getElementById('titleMaxStreakLabel'),
+        titleTotalWinsLabel: document.getElementById('titleTotalWinsLabel'),
+        toast: document.getElementById('toast'),
+      };
+
       const game = {
         state: 'title',
         waitTimer: null,
@@ -1407,273 +1399,486 @@
         lastResult: null,
         soundEnabled: true,
         audioContext: null,
-        record: { bestMs: null, maxStreak: 0, totalWins: 0 },
+        record: {
+          bestMs: null,
+          maxStreak: 0,
+          totalWins: 0,
+        },
       };
 
-      // --- Utilities & Formatters ---
-      const getCurrentEnemy = () => enemies[Math.min(game.currentEnemyIndex, enemies.length - 1)];
-      const isFinalEnemy = () => game.currentEnemyIndex >= enemies.length - 1;
-      const formatReaction = (ms) => ms === null ? '--' : Math.floor(Math.max(0, ms) / 10).toString().padStart(2, '0');
-      const formatDiff = (ms) => ms === null ? '--' : Math.ceil(Math.max(0, ms) / 10).toString().padStart(2, '0');
-      const randomWait = (enemy) => Math.floor(enemy.minWaitMs + Math.random() * (enemy.maxWaitMs - enemy.minWaitMs + 1));
-
-      // --- Storage ---
       function loadRecord() {
         try {
-          const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-          if (parsed.bestMs !== undefined) game.record.bestMs = parsed.bestMs;
-          if (parsed.maxStreak !== undefined) game.record.maxStreak = parsed.maxStreak;
-          if (parsed.totalWins !== undefined) game.record.totalWins = parsed.totalWins;
-          if (parsed.soundEnabled !== undefined) game.soundEnabled = parsed.soundEnabled;
-        } catch (e) { /* fallback gracefully */ }
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return;
+          const parsed = JSON.parse(raw);
+          if (typeof parsed.bestMs === 'number' || parsed.bestMs === null) game.record.bestMs = parsed.bestMs;
+          if (Number.isInteger(parsed.maxStreak) && parsed.maxStreak >= 0) game.record.maxStreak = parsed.maxStreak;
+          if (Number.isInteger(parsed.totalWins) && parsed.totalWins >= 0) game.record.totalWins = parsed.totalWins;
+          if (typeof parsed.soundEnabled === 'boolean') game.soundEnabled = parsed.soundEnabled;
+        } catch (error) {
+          console.warn('記録の読み込みに失敗しました。', error);
+        }
       }
 
       function saveRecord() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ 
-          ...game.record, 
-          soundEnabled: game.soundEnabled, 
-          version: VERSION 
-        }));
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            bestMs: game.record.bestMs,
+            maxStreak: game.record.maxStreak,
+            totalWins: game.record.totalWins,
+            soundEnabled: game.soundEnabled,
+            version: VERSION,
+          }));
+        } catch (error) {
+          console.warn('記録の保存に失敗しました。', error);
+        }
       }
 
-      // --- Audio Engine (Refactored DRY) ---
+      function showScreen(name) {
+        Object.values(screens).forEach((screen) => screen.classList.remove('is-active'));
+        screens[name].classList.add('is-active');
+      }
+
+      function getCurrentEnemy() {
+        return enemies[Math.min(game.currentEnemyIndex, enemies.length - 1)];
+      }
+
+      function isFinalEnemy() {
+        return game.currentEnemyIndex >= enemies.length - 1;
+      }
+
+      function getNextEnemyName() {
+        if (isFinalEnemy()) return '限界突破';
+        const nextIndex = game.currentEnemyIndex + 1;
+        return enemies[nextIndex].name;
+      }
+
+      function toReactionValue(ms) {
+        if (typeof ms !== 'number' || Number.isNaN(ms)) return null;
+        return Math.floor(Math.max(0, ms) / 10);
+      }
+
+      function formatReaction(ms) {
+        const value = toReactionValue(ms);
+        if (value === null) return '--';
+        if (value > 99) return '99+';
+        return String(value).padStart(2, '0');
+      }
+
+      function formatReactionDiff(ms) {
+        if (typeof ms !== 'number' || Number.isNaN(ms)) return '--';
+        const value = Math.ceil(Math.max(0, ms) / 10);
+        if (value <= 0) return '00';
+        if (value > 99) return '99+';
+        return String(value).padStart(2, '0');
+      }
+
+      function formatSeconds(ms) {
+        if (typeof ms !== 'number' || Number.isNaN(ms)) return '-- 秒';
+        return `${(ms / 1000).toFixed(2)} 秒`;
+      }
+
+      function randomWait(enemy) {
+        return Math.floor(enemy.minWaitMs + Math.random() * (enemy.maxWaitMs - enemy.minWaitMs + 1));
+      }
+
+      function updateRecordView() {
+        elements.titleBestLabel.textContent = formatReaction(game.record.bestMs);
+        elements.titleMaxStreakLabel.textContent = `${game.record.maxStreak} 人`;
+        elements.titleTotalWinsLabel.textContent = `${game.record.totalWins} 勝`;
+        elements.soundButton.textContent = game.soundEnabled ? '音 ON' : '音 OFF';
+        elements.soundButton.setAttribute('aria-pressed', String(game.soundEnabled));
+      }
+
+      function updateDuelView() {
+        const enemy = getCurrentEnemy();
+        elements.enemyTitleLabel.textContent = enemy.title;
+        elements.enemyRankLabel.textContent = enemy.rank;
+        elements.enemyNameLabel.textContent = enemy.name;
+        elements.enemyNameplate.textContent = enemy.name;
+        elements.enemyFighterWrap.classList.remove(...enemyClassNames);
+        elements.enemyFighterWrap.classList.add(enemy.cssClass);
+      }
+
+      function resetArenaClasses() {
+        elements.arena.classList.remove('is-waiting', 'is-tension', 'is-signal', 'is-resolved', 'is-failed');
+        elements.playerFighterWrap.classList.remove('winner', 'loser');
+        elements.enemyFighterWrap.classList.remove('winner', 'loser');
+        elements.playerSlash.classList.remove('player-hit');
+        elements.enemySlash.classList.remove('enemy-hit');
+      }
+
+      function setWaitingText() {
+        elements.stateLabel.innerHTML = '待て<span class="wait-dots"><i></i><i></i><i></i></span>';
+        elements.instructionText.textContent = '合図が出るまで、押さない。';
+      }
+
+      function clearTimers() {
+        window.clearTimeout(game.waitTimer);
+      }
+
       function prepareAudio() {
         if (!game.soundEnabled) return null;
-        if (!game.audioContext) game.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        if (game.audioContext.state === 'suspended') game.audioContext.resume().catch(() => {});
+        if (!game.audioContext) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (!AudioContext) return null;
+          game.audioContext = new AudioContext();
+        }
+        if (game.audioContext.state === 'suspended') {
+          game.audioContext.resume().catch(() => {});
+        }
         return game.audioContext;
       }
 
       function playTone(type) {
-        const ctx = prepareAudio();
-        if (!ctx) return;
-        const now = ctx.currentTime;
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
+        const context = prepareAudio();
+        if (!context) return;
 
-        const config = {
-          signal:  { type: 'triangle', f0: 760, f1: 1260, fT: 0.08,  g: 0.18, gT: 0.012, dur: 0.19 },
-          success: { type: 'sawtooth', f0: 170, f1: 1040, fT: 0.075, g: 0.16, gT: 0.012, dur: 0.28 },
-          fail:    { type: 'square',   f0: 120, f1: 78,   fT: 0.16,  g: 0.13, gT: 0.012, dur: 0.25 }
-        }[type] || config.fail;
+        const now = context.currentTime;
+        const oscillator = context.createOscillator();
+        const gain = context.createGain();
+        oscillator.connect(gain);
+        gain.connect(context.destination);
 
-        osc.type = config.type;
-        osc.frequency.setValueAtTime(config.f0, now);
-        osc.frequency.exponentialRampToValueAtTime(config.f1, now + config.fT);
-        
-        gain.gain.setValueAtTime(0.0001, now);
-        gain.gain.exponentialRampToValueAtTime(config.g, now + config.gT);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + config.dur - 0.02);
-        
-        osc.start(now);
-        osc.stop(now + config.dur);
-      }
-
-      // --- UI Rendering ---
-      function showScreen(name) {
-        Object.values(elements.screens).forEach(s => s.classList.remove('is-active'));
-        elements.screens[name].classList.add('is-active');
-      }
-
-      function updateDashboardViews() {
-        elements.titleRecord.best.textContent = formatReaction(game.record.bestMs);
-        elements.titleRecord.maxStreak.textContent = `${game.record.maxStreak} 人`;
-        elements.titleRecord.totalWins.textContent = `${game.record.totalWins} 勝`;
-        elements.buttons.sound.textContent = game.soundEnabled ? '音 ON' : '音 OFF';
-        elements.buttons.sound.setAttribute('aria-pressed', game.soundEnabled);
-
-        const enemy = getCurrentEnemy();
-        elements.enemy.title.textContent = enemy.title;
-        elements.enemy.rank.textContent = enemy.rank;
-        elements.enemy.name.textContent = enemy.name;
-        elements.enemy.nameplate.textContent = enemy.name;
-        elements.enemy.wrap.classList.remove(...enemyClassNames);
-        elements.enemy.wrap.classList.add(enemy.cssClass);
-      }
-
-      function showToast(msg) {
-        elements.ui.toast.textContent = msg;
-        elements.ui.toast.classList.add('is-visible');
-        clearTimeout(showToast.timer);
-        showToast.timer = setTimeout(() => elements.ui.toast.classList.remove('is-visible'), 1800);
-      }
-
-      function renderImpactUI(win) {
-        elements.ui.arena.classList.replace('is-signal', 'is-resolved');
-        elements.ui.impactText.textContent = win ? '一閃' : '遅れ';
-        elements.ui.stateLabel.textContent = win ? '勝負あり' : '斬られた';
-        
-        if (win) {
-          elements.player.wrap.classList.add('winner');
-          elements.enemy.wrap.classList.add('loser');
-          elements.player.slash.classList.add('player-hit');
-          playTone('success');
-        } else {
-          elements.enemy.wrap.classList.add('winner');
-          elements.player.wrap.classList.add('loser');
-          elements.enemy.slash.classList.add('enemy-hit');
-          playTone('fail');
+        if (type === 'signal') {
+          oscillator.type = 'triangle';
+          oscillator.frequency.setValueAtTime(760, now);
+          oscillator.frequency.exponentialRampToValueAtTime(1260, now + 0.08);
+          gain.gain.setValueAtTime(0.0001, now);
+          gain.gain.exponentialRampToValueAtTime(0.18, now + 0.012);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.17);
+          oscillator.start(now);
+          oscillator.stop(now + 0.19);
+          return;
         }
+
+        if (type === 'success') {
+          oscillator.type = 'sawtooth';
+          oscillator.frequency.setValueAtTime(170, now);
+          oscillator.frequency.exponentialRampToValueAtTime(1040, now + 0.075);
+          gain.gain.setValueAtTime(0.0001, now);
+          gain.gain.exponentialRampToValueAtTime(0.16, now + 0.012);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.26);
+          oscillator.start(now);
+          oscillator.stop(now + 0.28);
+          return;
+        }
+
+        oscillator.type = 'square';
+        oscillator.frequency.setValueAtTime(120, now);
+        oscillator.frequency.exponentialRampToValueAtTime(78, now + 0.16);
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(0.13, now + 0.012);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.23);
+        oscillator.start(now);
+        oscillator.stop(now + 0.25);
       }
 
-      function renderResultScreen(r) {
-        const cr = elements.result;
-        cr.card.className = `result-card ${r.early ? 'is-early' : (!r.win ? 'is-lose' : '')}`;
-        cr.judge.textContent = r.judgeLabel;
-        cr.time.innerHTML = r.early ? '合図前<small></small>' : (r.reactionMs !== null ? `${formatReaction(r.reactionMs)}<small>反応値</small>` : 'MISS<small></small>');
-        
-        cr.enemyName.textContent = `敵：${r.enemyName}`;
-        cr.enemyRank.textContent = r.enemyRank;
-        cr.enemySpeed.textContent = `敵の反応値：${formatReaction(r.enemyReactionMs)}`;
-        cr.waitTime.textContent = `待機：${(r.waitMs / 1000).toFixed(2)} 秒`;
-        
-        cr.diff.textContent = r.diffMs === null 
-          ? (r.early ? 'もう一回いける' : '合図前に動いた') 
-          : (r.diffMs >= 0 ? `敵より ${formatDiff(r.diffMs)} 早い` : `あと ${formatDiff(Math.abs(r.diffMs))} 足りない`);
-        
-        cr.comment.textContent = r.comment;
-        cr.best.textContent = formatReaction(game.record.bestMs);
-        cr.streak.textContent = `${r.streak} 人`;
-        cr.maxStreak.textContent = `${game.record.maxStreak} 人`;
-        cr.totalWins.textContent = `${game.record.totalWins} 勝`;
-        cr.nextEnemy.textContent = r.win ? (isFinalEnemy() ? '限界突破' : enemies[game.currentEnemyIndex + 1].name) : enemies[0].name;
-        
-        elements.buttons.retry.textContent = r.win ? (isFinalEnemy() ? '限界突破へ' : '次の相手へ') : 'もう一回';
-        showScreen('result');
+      function startRun() {
+        game.streak = 0;
+        game.currentEnemyIndex = 0;
+        startRound();
       }
 
-      // --- Game Logic ---
-      function createResultObject(win, early, reactionMs, diffMs, judge, comment) {
-        const enemy = getCurrentEnemy();
-        return {
-          win, early, reactionMs, diffMs,
-          enemyName: enemy.name, enemyTitle: enemy.title, enemyRank: enemy.rank, enemyReactionMs: enemy.reactionMs,
-          judgeLabel: judge, comment,
-          waitMs: game.waitMs, streak: game.streak
-        };
+      function startNextRound() {
+        if (!game.lastResult || !game.lastResult.win) {
+          startRun();
+          return;
+        }
+        game.currentEnemyIndex = Math.min(game.currentEnemyIndex + 1, enemies.length - 1);
+        startRound();
       }
 
       function startRound() {
-        clearTimeout(game.waitTimer);
+        clearTimers();
         prepareAudio();
+        const enemy = getCurrentEnemy();
         game.state = 'waiting';
-        game.waitMs = randomWait(getCurrentEnemy());
-        
-        elements.ui.arena.className = 'arena is-waiting is-tension';
-        elements.player.wrap.className = 'fighter-wrap player';
-        elements.enemy.wrap.className = `fighter-wrap enemy ${getCurrentEnemy().cssClass}`;
-        elements.player.slash.className = 'slash';
-        elements.enemy.slash.className = 'enemy-slash';
-        
-        elements.ui.stateLabel.innerHTML = '待て<span class="wait-dots"><i></i><i></i><i></i></span>';
-        elements.ui.instructionText.textContent = '合図が出るまで、押さない。';
-        
-        updateDashboardViews();
+        game.signalAt = 0;
+        game.waitMs = randomWait(enemy);
+
+        resetArenaClasses();
+        elements.arena.classList.add('is-waiting', 'is-tension');
+        setWaitingText();
+        updateDuelView();
         showScreen('play');
-        setTimeout(() => elements.ui.arena.focus({ preventScroll: true }), 60);
-        game.waitTimer = setTimeout(showSignal, game.waitMs);
+
+        window.setTimeout(() => {
+          elements.arena.focus({ preventScroll: true });
+        }, 60);
+
+        game.waitTimer = window.setTimeout(showSignal, game.waitMs);
       }
 
       function showSignal() {
         if (game.state !== 'waiting') return;
         game.state = 'signal';
         game.signalAt = performance.now();
-        elements.ui.arena.classList.replace('is-waiting', 'is-signal');
-        elements.ui.arena.classList.remove('is-tension');
-        elements.ui.stateLabel.textContent = '今！';
-        elements.ui.instructionText.textContent = '斬れ！';
+        elements.arena.classList.remove('is-waiting', 'is-tension');
+        elements.arena.classList.add('is-signal');
+        elements.stateLabel.textContent = '今！';
+        elements.instructionText.textContent = '斬れ！';
         playTone('signal');
+      }
+
+      function judgeReaction(ms, enemy) {
+        const diff = enemy.reactionMs - ms;
+        if (diff >= 0) {
+          if (ms < 155) return { label: '神速勝利', comment: `${enemy.name}を光と同時に斬りました。これはかなり強い記録です。` };
+          if (ms < 220) return { label: '一閃勝利', comment: `${enemy.name}より先に動きました。迷いの少ない一撃です。` };
+          return { label: '見切り勝利', comment: `${enemy.name}の動きを見切りました。次の相手はさらに速くなります。` };
+        }
+
+        const behind = Math.abs(diff);
+        if (behind <= 35) return { label: '惜敗', comment: `あと反応値${formatReactionDiff(behind)}でした。勝負は見えていました。もう一回で届きます。` };
+        return { label: '敗北', comment: `${enemy.name}の方が早く動きました。深い「ため」に飲まれず、合図だけを狙いましょう。` };
       }
 
       function resolveReaction() {
         if (game.state !== 'signal') return;
         game.state = 'resolved';
-        
         const enemy = getCurrentEnemy();
         const reactionMs = Math.max(0, Math.round(performance.now() - game.signalAt));
         const diffMs = enemy.reactionMs - reactionMs;
         const win = diffMs >= 0;
-        
-        if (game.record.bestMs === null || reactionMs < game.record.bestMs) game.record.bestMs = reactionMs;
-        
+        const isNewBest = game.record.bestMs === null || reactionMs < game.record.bestMs;
+        const judge = judgeReaction(reactionMs, enemy);
+
+        if (isNewBest) game.record.bestMs = reactionMs;
+
         if (win) {
-          game.streak++;
-          game.record.totalWins++;
+          game.streak += 1;
+          game.record.totalWins += 1;
           game.record.maxStreak = Math.max(game.record.maxStreak, game.streak);
         } else {
           game.streak = 0;
         }
 
-        let judge, comment;
+        game.lastResult = {
+          win,
+          early: false,
+          reactionMs,
+          enemyName: enemy.name,
+          enemyTitle: enemy.title,
+          enemyRank: enemy.rank,
+          enemyReactionMs: enemy.reactionMs,
+          diffMs,
+          judgeLabel: win && isFinalEnemy() ? '完全勝利' : judge.label,
+          comment: win && isFinalEnemy() ? '最後の相手を斬りました。ここから先は限界突破の一戦です。' : judge.comment,
+          isNewBest,
+          waitMs: game.waitMs,
+          streak: game.streak,
+        };
+
+        saveRecord();
+        updateRecordView();
+        updateDuelView();
+
+        elements.arena.classList.remove('is-signal');
+        elements.arena.classList.add('is-resolved');
+        elements.impactText.textContent = win ? '一閃' : '遅れ';
+        elements.stateLabel.textContent = win ? '勝負あり' : '斬られた';
+        elements.instructionText.textContent = `反応値 ${formatReaction(reactionMs)}`;
+
         if (win) {
-          if (reactionMs < 155) { judge = '神速勝利'; comment = `${enemy.name}を光と同時に斬りました。これはかなり強い記録です。`; }
-          else if (reactionMs < 220) { judge = '一閃勝利'; comment = `${enemy.name}より先に動きました。迷いの少ない一撃です。`; }
-          else { judge = '見切り勝利'; comment = `${enemy.name}の動きを見切りました。次の相手はさらに速くなります。`; }
-          if (isFinalEnemy()) { judge = '完全勝利'; comment = '最後の相手を斬りました。ここから先は限界突破の一戦です。'; }
+          elements.playerFighterWrap.classList.add('winner');
+          elements.enemyFighterWrap.classList.add('loser');
+          elements.playerSlash.classList.add('player-hit');
+          playTone('success');
         } else {
-          if (Math.abs(diffMs) <= 35) { judge = '惜敗'; comment = `あと反応値${formatDiff(Math.abs(diffMs))}でした。勝負は見えていました。もう一回で届きます。`; }
-          else { judge = '敗北'; comment = `${enemy.name}の方が早く動きました。深い「ため」に飲まれず、合図だけを狙いましょう。`; }
+          elements.enemyFighterWrap.classList.add('winner');
+          elements.playerFighterWrap.classList.add('loser');
+          elements.enemySlash.classList.add('enemy-hit');
+          playTone('fail');
         }
 
-        game.lastResult = createResultObject(win, false, reactionMs, diffMs, judge, comment);
-        saveRecord();
-        updateDashboardViews();
-        
-        elements.ui.instructionText.textContent = `反応値 ${formatReaction(reactionMs)}`;
-        renderImpactUI(win);
-        setTimeout(() => renderResultScreen(game.lastResult), RESULT_DELAY_MS);
+        window.setTimeout(() => showResult(game.lastResult), RESULT_DELAY_MS);
       }
 
       function resolveEarlyFail(reason) {
         if (game.state === 'resolved' || game.state === 'failed') return;
-        clearTimeout(game.waitTimer);
+        const enemy = getCurrentEnemy();
+        clearTimers();
         game.state = 'failed';
         game.streak = 0;
-        
-        elements.ui.arena.className = 'arena is-failed';
-        elements.ui.stateLabel.textContent = reason === 'hidden' ? '中断' : '早すぎ';
-        elements.ui.instructionText.textContent = 'まだ「！」は出ていません。';
+        resetArenaClasses();
+        elements.arena.classList.add('is-failed');
+        elements.stateLabel.textContent = reason === 'hidden' ? '中断' : '早すぎ';
+        elements.instructionText.textContent = 'まだ「！」は出ていません。';
         playTone('fail');
 
-        game.lastResult = createResultObject(
-          false, true, null, null,
-          reason === 'hidden' ? '中断' : '早すぎ！',
-          reason === 'hidden' ? '勝負中に画面を離れたため中断しました。' : '合図の前に動いてしまいました。すぐにもう一回いきましょう。'
-        );
+        game.lastResult = {
+          win: false,
+          early: true,
+          reactionMs: null,
+          enemyName: enemy.name,
+          enemyTitle: enemy.title,
+          enemyRank: enemy.rank,
+          enemyReactionMs: enemy.reactionMs,
+          diffMs: null,
+          judgeLabel: reason === 'hidden' ? '中断' : '早すぎ！',
+          comment: reason === 'hidden'
+            ? '勝負中に画面を離れたため中断しました。'
+            : '合図の前に動いてしまいました。すぐにもう一回いきましょう。',
+          isNewBest: false,
+          waitMs: game.waitMs,
+          streak: 0,
+        };
 
         saveRecord();
-        updateDashboardViews();
-        setTimeout(() => renderResultScreen(game.lastResult), 420);
+        updateRecordView();
+        updateDuelView();
+        window.setTimeout(() => showResult(game.lastResult), 420);
       }
 
-      // --- Event Listeners ---
-      elements.buttons.start.onclick = elements.buttons.restart.onclick = () => { game.streak = game.currentEnemyIndex = 0; startRound(); };
-      elements.buttons.retry.onclick = () => { if (game.lastResult?.win) game.currentEnemyIndex = Math.min(game.currentEnemyIndex + 1, enemies.length - 1); startRound(); };
-      elements.buttons.backTitle.onclick = () => { clearTimeout(game.waitTimer); game.state = 'title'; updateDashboardViews(); showScreen('title'); };
-      elements.buttons.resetRecord.onclick = () => { game.record = { bestMs: null, maxStreak: 0, totalWins: 0 }; game.streak = game.currentEnemyIndex = 0; saveRecord(); updateDashboardViews(); showToast('記録をリセットしました'); };
-      elements.buttons.sound.onclick = () => { game.soundEnabled = !game.soundEnabled; saveRecord(); updateDashboardViews(); if (game.soundEnabled) playTone('signal'); };
-      elements.buttons.howto.onclick = () => { const isOpen = elements.ui.howtoPanel.classList.toggle('is-open'); elements.buttons.howto.setAttribute('aria-expanded', isOpen); };
-      
-      elements.buttons.share.onclick = async () => {
-        const r = game.lastResult;
-        if (!r) return showToast('共有する結果がありません');
-        const score = r.reactionMs !== null ? `反応値${formatReaction(r.reactionMs)}` : 'MISS';
-        const diff = r.diffMs === null ? '合図前に動いた' : (r.diffMs >= 0 ? `敵より${formatDiff(r.diffMs)}早い` : `あと${formatDiff(Math.abs(r.diffMs))}`);
-        const text = `みきり一閃で${r.enemyName}に${r.win ? '勝利！' : '敗北…'} ${score}（${diff}）/ 現在${r.streak}人抜き / 最高${game.record.maxStreak}人抜き #かたかたミニゲーム`;
-        try { if (navigator.share) await navigator.share({ title: 'みきり一閃', text }); else { await navigator.clipboard.writeText(text); showToast('コピーしました'); } } 
-        catch (e) { showToast('キャンセルしました'); }
-      };
+      function showResult(result) {
+        game.state = 'result';
+        elements.resultCard.classList.toggle('is-lose', !result.win && !result.early);
+        elements.resultCard.classList.toggle('is-early', result.early);
+        elements.judgeLabel.textContent = result.judgeLabel;
 
-      const handleAction = () => { if (game.state === 'waiting') resolveEarlyFail('early'); else if (game.state === 'signal') resolveReaction(); };
-      elements.ui.arena.onpointerdown = (e) => { e.preventDefault(); handleAction(); };
-      elements.ui.arena.onkeydown = (e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); handleAction(); } };
-      document.onvisibilitychange = () => { if (document.hidden && ['waiting', 'signal'].includes(game.state)) resolveEarlyFail('hidden'); };
+        if (result.early) {
+          elements.resultTime.innerHTML = '合図前<small></small>';
+        } else {
+          elements.resultTime.innerHTML = result.reactionMs !== null
+            ? `${formatReaction(result.reactionMs)}<small>反応値</small>`
+            : 'MISS<small></small>';
+        }
 
-      // --- Initialization ---
+        elements.enemyResultLabel.textContent = `敵：${result.enemyName}`;
+        elements.enemyRankResultLabel.textContent = result.enemyRank;
+        elements.enemySpeedLabel.textContent = `敵の反応値：${formatReaction(result.enemyReactionMs)}`;
+        elements.waitTimeLabel.textContent = `待機：${formatSeconds(result.waitMs)}`;
+
+        if (result.diffMs === null) {
+          elements.differenceLabel.textContent = result.early ? 'もう一回いける' : '合図前に動いた';
+        } else if (result.diffMs >= 0) {
+          elements.differenceLabel.textContent = `敵より ${formatReactionDiff(result.diffMs)} 早い`;
+        } else {
+          elements.differenceLabel.textContent = `あと ${formatReactionDiff(Math.abs(result.diffMs))} 足りない`;
+        }
+
+        elements.resultComment.textContent = result.comment;
+        elements.resultBest.textContent = formatReaction(game.record.bestMs);
+        elements.resultStreak.textContent = `${result.streak} 人`;
+        elements.resultMaxStreak.textContent = `${game.record.maxStreak} 人`;
+        elements.resultTotalWins.textContent = `${game.record.totalWins} 勝`;
+        elements.nextEnemyLabel.textContent = result.win ? getNextEnemyName() : enemies[0].name;
+        elements.retryButton.textContent = result.win ? (isFinalEnemy() ? '限界突破へ' : '次の相手へ') : 'もう一回';
+        showScreen('result');
+      }
+
+      function handleAction() {
+        if (game.state === 'waiting') {
+          resolveEarlyFail('early');
+          return;
+        }
+        if (game.state === 'signal') {
+          resolveReaction();
+        }
+      }
+
+      async function shareResult() {
+        const result = game.lastResult;
+        if (!result) {
+          showToast('まだ共有できる結果がありません');
+          return;
+        }
+
+        const score = result.reactionMs !== null ? `反応値${formatReaction(result.reactionMs)}` : 'MISS';
+        const diff = result.diffMs === null
+          ? '合図前に動いた'
+          : result.diffMs >= 0
+            ? `敵より${formatReactionDiff(result.diffMs)}早い`
+            : `あと${formatReactionDiff(Math.abs(result.diffMs))}`;
+        const text = result.win
+          ? `みきり一閃で${result.enemyName}に勝利！ ${score}（${diff}）/ 現在${result.streak}人抜き / 最高${game.record.maxStreak}人抜き #かたかたミニゲーム`
+          : `みきり一閃で${result.enemyName}に敗北… ${score}（${diff}）/ 最高${game.record.maxStreak}人抜き #かたかたミニゲーム`;
+
+        try {
+          if (navigator.share) {
+            await navigator.share({ title: 'みきり一閃', text });
+            return;
+          }
+          await navigator.clipboard.writeText(text);
+          showToast('結果をコピーしました');
+        } catch (error) {
+          console.warn('共有に失敗しました。', error);
+          showToast('共有をキャンセルしました');
+        }
+      }
+
+      function showToast(message) {
+        elements.toast.textContent = message;
+        elements.toast.classList.add('is-visible');
+        window.clearTimeout(showToast.timer);
+        showToast.timer = window.setTimeout(() => {
+          elements.toast.classList.remove('is-visible');
+        }, 1800);
+      }
+
+      function backToTitle() {
+        clearTimers();
+        game.state = 'title';
+        resetArenaClasses();
+        updateRecordView();
+        showScreen('title');
+      }
+
+      function resetRecord() {
+        game.record.bestMs = null;
+        game.record.maxStreak = 0;
+        game.record.totalWins = 0;
+        game.streak = 0;
+        game.currentEnemyIndex = 0;
+        game.lastResult = null;
+        saveRecord();
+        updateRecordView();
+        showToast('記録をリセットしました');
+      }
+
+      function toggleSound() {
+        game.soundEnabled = !game.soundEnabled;
+        saveRecord();
+        updateRecordView();
+        if (game.soundEnabled) playTone('signal');
+      }
+
+      function toggleHowto() {
+        const isOpen = elements.howtoPanel.classList.toggle('is-open');
+        elements.howtoButton.setAttribute('aria-expanded', String(isOpen));
+      }
+
+      elements.startButton.addEventListener('click', startRun);
+      elements.retryButton.addEventListener('click', startNextRound);
+      elements.restartButton.addEventListener('click', startRun);
+      elements.backTitleButton.addEventListener('click', backToTitle);
+      elements.shareButton.addEventListener('click', shareResult);
+      elements.resetRecordButton.addEventListener('click', resetRecord);
+      elements.soundButton.addEventListener('click', toggleSound);
+      elements.howtoButton.addEventListener('click', toggleHowto);
+
+      elements.arena.addEventListener('pointerdown', (event) => {
+        event.preventDefault();
+        handleAction();
+      });
+
+      elements.arena.addEventListener('keydown', (event) => {
+        if (event.key === ' ' || event.key === 'Enter') {
+          event.preventDefault();
+          handleAction();
+        }
+      });
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden && (game.state === 'waiting' || game.state === 'signal')) {
+          resolveEarlyFail('hidden');
+        }
+      });
+
       loadRecord();
-      updateDashboardViews();
+      updateRecordView();
+      updateDuelView();
     })();
   </script>
 </body>
