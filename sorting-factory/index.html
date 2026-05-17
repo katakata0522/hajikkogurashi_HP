@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>超絶！仕分け工場 | はじっこぐらし</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;900&family=Teko:wght@600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="game-container">
+        <!-- 背景エフェクトレイヤー -->
+        <div id="bg-effect" class="bg-effect"></div>
+
+        <!-- Canvas -->
+        <canvas id="game-canvas"></canvas>
+
+        <!-- UIレイヤー -->
+        <div id="ui-layer">
+            
+            <!-- ルール表示部（プレイ中） -->
+            <div id="rule-display" class="rule-display hidden">
+                <span class="rule-label">現在のルール</span>
+                <span id="current-rule-text" class="rule-text">色で仕分けろ！</span>
+            </div>
+
+            <!-- スコア表示（プレイ中） -->
+            <div id="score-hud" class="score-hud hidden">
+                <div class="score-box">
+                    <span class="score-label">SCORE</span>
+                    <span id="score-value" class="score-value">0</span>
+                </div>
+                <div class="combo-box">
+                    <span id="combo-value" class="combo-value">0 COMBO!</span>
+                </div>
+            </div>
+
+            <!-- スタート画面 -->
+            <div id="start-screen" class="screen active">
+                <div class="title-container">
+                    <h1 class="main-title">SORTING<br>FACTORY</h1>
+                    <p class="subtitle">超絶！仕分け工場</p>
+                </div>
+                <div class="instruction-card">
+                    <h3>【遊び方】</h3>
+                    <p>落ちてくるアイテムを左右に仕分けろ！</p>
+                    <div class="how-to-flex">
+                        <div class="how-to-box left-box">左タップ<br>(←キー)</div>
+                        <div class="how-to-box right-box">右タップ<br>(→キー)</div>
+                    </div>
+                    <p class="warning-text">途中で「ルール」が変わるぞ！瞬時に判断しろ！</p>
+                </div>
+                <button id="start-btn" class="action-btn">業務開始</button>
+            </div>
+
+            <!-- リザルト画面 -->
+            <div id="result-screen" class="screen glass-panel">
+                <h2 class="result-title">業務終了</h2>
+                
+                <div class="result-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">仕分け数</span>
+                        <span id="final-score" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">最大コンボ</span>
+                        <span id="max-combo" class="stat-value">0</span>
+                    </div>
+                </div>
+
+                <div class="rank-container">
+                    <p class="rank-label">今回の称号</p>
+                    <p id="rank-text" class="rank-text">新人バイト</p>
+                </div>
+
+                <div class="action-buttons">
+                    <button id="retry-btn" class="action-btn primary">再挑戦</button>
+                    <button id="share-btn" class="action-btn secondary">結果をポスト</button>
+                </div>
+            </div>
+            
+            <!-- タップ領域オーバーレイ（スマホ用・不可視） -->
+            <div id="touch-left" class="touch-zone hidden"></div>
+            <div id="touch-right" class="touch-zone hidden"></div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

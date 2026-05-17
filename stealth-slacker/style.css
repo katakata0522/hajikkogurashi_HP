@@ -1,0 +1,307 @@
+:root {
+    --bg-color: #fce38a; /* ポップな黄色 */
+    --primary-color: #ff3366; /* アメコミレッド */
+    --secondary-color: #33ccff; /* ポップブルー */
+    --text-main: #333333;
+    --border-color: #111111;
+    
+    --font-comic: 'Yusei Magic', sans-serif;
+    --font-pop: 'M PLUS Rounded 1c', sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background-color: #333;
+    color: var(--text-main);
+    font-family: var(--font-pop);
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#game-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    max-width: 600px;
+    background-color: var(--bg-color);
+    /* 漫画風のドットパターン背景 */
+    background-image: radial-gradient(#f3c623 15%, transparent 16%), radial-gradient(#f3c623 15%, transparent 16%);
+    background-size: 20px 20px;
+    background-position: 0 0, 10px 10px;
+    border: 4px solid var(--border-color);
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    overflow: hidden;
+}
+
+/* サボり中の集中線エフェクト */
+.bg-fever {
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: repeating-conic-gradient(
+        from 0deg,
+        transparent 0deg 10deg,
+        rgba(255, 255, 255, 0.4) 10deg 20deg
+    );
+    z-index: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.1s;
+    animation: spin 10s linear infinite;
+}
+
+.bg-fever.active {
+    opacity: 1;
+}
+
+@keyframes spin {
+    100% { transform: rotate(360deg); }
+}
+
+canvas {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 1;
+}
+
+#ui-layer {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* --- スコア表示 --- */
+.score-hud {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #fff;
+    border: 4px solid var(--border-color);
+    padding: 10px 30px;
+    border-radius: 30px;
+    text-align: center;
+    box-shadow: 4px 4px 0 var(--border-color);
+}
+
+.score-label {
+    display: block;
+    font-family: var(--font-comic);
+    font-size: 1.2rem;
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.score-value {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--border-color);
+}
+
+/* --- ヒントテキスト --- */
+.hint-text {
+    position: absolute;
+    bottom: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-comic);
+    font-size: 1.5rem;
+    color: #fff;
+    background: rgba(0,0,0,0.7);
+    padding: 10px 20px;
+    border-radius: 10px;
+    white-space: nowrap;
+    animation: bounce 1s infinite alternate;
+}
+
+@keyframes bounce {
+    from { transform: translate(-50%, 0); }
+    to { transform: translate(-50%, -10px); }
+}
+
+/* --- 画面共通 --- */
+.screen {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s;
+    background: rgba(255, 255, 255, 0.9);
+    pointer-events: auto;
+}
+
+.screen.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* --- スタート画面（コミック風パネル） --- */
+.comic-panel {
+    background: repeating-linear-gradient(
+        45deg,
+        #fce38a,
+        #fce38a 10px,
+        #f8d247 10px,
+        #f8d247 20px
+    );
+}
+
+.title-container {
+    background: #fff;
+    border: 5px solid var(--border-color);
+    padding: 20px;
+    transform: rotate(-3deg);
+    box-shadow: 8px 8px 0 var(--border-color);
+    margin-bottom: 30px;
+}
+
+.main-title {
+    font-family: var(--font-comic);
+    font-size: 3.5rem;
+    line-height: 1.1;
+    color: var(--border-color);
+    text-align: center;
+}
+
+.main-title .highlight {
+    color: var(--primary-color);
+    font-size: 4rem;
+}
+
+.instruction {
+    background: #fff;
+    border: 4px solid var(--border-color);
+    padding: 20px;
+    border-radius: 15px;
+    text-align: center;
+    margin-bottom: 30px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    box-shadow: 4px 4px 0 var(--border-color);
+    width: 85%;
+}
+
+.text-red { color: var(--primary-color); font-size: 1.2em; }
+.text-blue { color: var(--secondary-color); font-size: 1.2em;}
+.warning { color: #ff0000; font-size: 1.3em; margin-top: 10px; animation: shake 0.5s infinite; }
+
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    50% { transform: translateX(2px); }
+    75% { transform: translateX(-2px); }
+    100% { transform: translateX(0); }
+}
+
+/* コミック風ボタン */
+.comic-btn {
+    font-family: var(--font-comic);
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding: 15px 40px;
+    border: 4px solid var(--border-color);
+    background: var(--primary-color);
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 4px 4px 0 var(--border-color);
+    transition: all 0.1s;
+    border-radius: 10px;
+}
+
+.comic-btn:active {
+    transform: translate(4px, 4px);
+    box-shadow: 0 0 0 var(--border-color);
+}
+
+/* --- リザルト画面 --- */
+.result-panel {
+    background: rgba(0, 0, 0, 0.85);
+}
+
+.result-box {
+    background: #fff;
+    border: 6px solid var(--primary-color);
+    padding: 30px 20px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    border-radius: 20px;
+    box-shadow: 10px 10px 0 var(--primary-color);
+    transform: rotate(2deg);
+}
+
+.result-title {
+    font-family: var(--font-comic);
+    font-size: 3rem;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+    line-height: 1;
+}
+
+.sub-title {
+    font-size: 1.2rem;
+    color: var(--border-color);
+}
+
+.score-container, .rank-container {
+    margin-bottom: 20px;
+    background: #f4f4f4;
+    padding: 15px;
+    border: 3px solid var(--border-color);
+    border-radius: 10px;
+}
+
+.score-label, .rank-label {
+    font-weight: bold;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.final-score {
+    font-size: 3rem;
+    font-weight: 900;
+    color: var(--border-color);
+    line-height: 1;
+}
+
+.rank-text {
+    font-family: var(--font-comic);
+    font-size: 2rem;
+    color: var(--secondary-color);
+    font-weight: bold;
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.comic-btn.secondary {
+    background: #fff;
+    color: var(--border-color);
+}

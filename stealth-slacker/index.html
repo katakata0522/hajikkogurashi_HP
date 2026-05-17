@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>限界！ステルスサボタージュ | はじっこぐらし</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Yusei+Magic&family=M+PLUS+Rounded+1c:wght@800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="game-container">
+        <!-- 背景（集中線などのエフェクト用） -->
+        <div id="bg-fever" class="bg-fever"></div>
+
+        <canvas id="game-canvas"></canvas>
+
+        <!-- UIレイヤー -->
+        <div id="ui-layer">
+            
+            <!-- スコア表示（プレイ中） -->
+            <div id="score-hud" class="score-hud hidden">
+                <span class="score-label">サボり度</span>
+                <span id="score-value" class="score-value">0</span>
+            </div>
+
+            <!-- 操作ヒント -->
+            <div id="hint-text" class="hint-text hidden">画面を長押しでサボる！</div>
+
+            <!-- スタート画面 -->
+            <div id="start-screen" class="screen active comic-panel">
+                <div class="title-container">
+                    <h1 class="main-title">限界！<br><span class="highlight">ステルス</span><br>サボタージュ</h1>
+                </div>
+                <div class="instruction">
+                    <p><strong>【ルール】</strong></p>
+                    <p>画面を<span class="text-red">長押し</span>して全力でサボれ！<br>スコアが爆速で貯まるぞ！</p>
+                    <p>上司が振り向いたら<br>指を離して<span class="text-blue">仕事してるフリ</span>をしろ！</p>
+                    <p class="warning">見つかったら即クビだ！！</p>
+                </div>
+                <button id="start-btn" class="comic-btn">出社する (START)</button>
+            </div>
+
+            <!-- リザルト画面 -->
+            <div id="result-screen" class="screen result-panel">
+                <div class="result-box">
+                    <h2 class="result-title">YOU'RE FIRED!!<br><span class="sub-title">（見つかった！）</span></h2>
+                    
+                    <div class="score-container">
+                        <p class="score-label">今回のサボりスコア</p>
+                        <p id="final-score" class="final-score">0</p>
+                    </div>
+
+                    <div class="rank-container">
+                        <p class="rank-label">上司からの評価</p>
+                        <p id="rank-text" class="rank-text">給料泥棒</p>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button id="retry-btn" class="comic-btn primary">再就職する (RETRY)</button>
+                        <button id="share-btn" class="comic-btn secondary">Xで言い訳する</button>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

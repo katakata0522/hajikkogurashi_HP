@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ギリギリ・ブレーキ！ | はじっこぐらし</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;900&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="game-container">
+        <!-- 背景の装飾要素 -->
+        <div class="background-grid"></div>
+        
+        <canvas id="game-canvas"></canvas>
+
+        <!-- UIレイヤー -->
+        <div id="ui-layer">
+            <!-- スタート画面 -->
+            <div id="start-screen" class="screen active">
+                <div class="logo-container">
+                    <h1 class="glow-text main-title">GIRIGIRI<br>BRAKE!</h1>
+                    <p class="subtitle">ギリギリ・ブレーキ！</p>
+                </div>
+                <div class="instruction">
+                    <div class="step">
+                        <span class="step-num">1</span>
+                        <p>タップで猛ダッシュ！</p>
+                    </div>
+                    <div class="step">
+                        <span class="step-num">2</span>
+                        <p>もう一度タップで急ブレーキ！</p>
+                    </div>
+                    <div class="step warning">
+                        <p>崖から落ちないように<br>極限まで攻めろ！</p>
+                    </div>
+                </div>
+                <button id="start-btn" class="cyber-btn">TAP TO START</button>
+            </div>
+
+            <!-- プレイ中のHUD（ヘッドアップディスプレイ） -->
+            <div id="hud" class="screen">
+                <div class="hud-top">
+                    <div class="speedometer">
+                        <span class="speed-label">SPEED</span>
+                        <span id="speed-value" class="speed-value">0</span>
+                        <span class="speed-unit">km/h</span>
+                    </div>
+                    <div class="status-indicator">
+                        <span id="status-text" class="status-text blink">READY...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- リザルト画面 -->
+            <div id="result-screen" class="screen glass-panel">
+                <h2 id="result-title" class="result-title glow-text">RESULT</h2>
+                
+                <div class="score-container">
+                    <p class="score-label">崖までの残り距離</p>
+                    <div class="score-value-wrapper">
+                        <span id="score-value" class="score-value">0.00</span>
+                        <span class="score-unit">m</span>
+                    </div>
+                </div>
+
+                <div class="rank-container">
+                    <p class="rank-label">評価</p>
+                    <p id="rank-text" class="rank-text">チキン野郎</p>
+                </div>
+
+                <div class="action-buttons">
+                    <button id="retry-btn" class="cyber-btn primary">もう一度挑戦</button>
+                    <button id="share-btn" class="cyber-btn secondary">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                        </svg>
+                        ポストする
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,370 @@
+:root {
+    --bg-color: #0b0c10;
+    --grid-color: rgba(255, 65, 108, 0.1);
+    --primary-color: #ff416c;
+    --secondary-color: #ff4b2b;
+    --accent-color: #00f2fe;
+    --text-main: #ffffff;
+    --text-sub: #b3b3b3;
+    --glass-bg: rgba(11, 12, 16, 0.7);
+    --glass-border: rgba(255, 65, 108, 0.3);
+    
+    --font-main: 'M PLUS Rounded 1c', sans-serif;
+    --font-number: 'Orbitron', sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    font-family: var(--font-main);
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#game-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    max-width: 800px; /* PCでの表示上限 */
+    max-height: 1000px;
+    background: linear-gradient(180deg, #141e30 0%, #243b55 100%);
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+    overflow: hidden;
+}
+
+/* レトロフューチャーなグリッド背景 */
+.background-grid {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    background-image: 
+        linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
+        linear-gradient(to top, var(--grid-color) 1px, transparent 1px);
+    background-size: 40px 40px;
+    transform: perspective(500px) rotateX(60deg);
+    transform-origin: bottom center;
+    opacity: 0.5;
+    z-index: 0;
+}
+
+canvas {
+    z-index: 1;
+}
+
+/* UI全体 */
+#ui-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    pointer-events: none; /* UIの裏のキャンバスもタップできるように */
+}
+
+.screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease;
+}
+
+.screen.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto; /* アクティブな画面はタップ受付 */
+}
+
+/* テキストの発光エフェクト */
+.glow-text {
+    text-transform: uppercase;
+    color: #fff;
+    text-shadow: 
+        0 0 5px #fff,
+        0 0 10px #fff,
+        0 0 20px var(--primary-color),
+        0 0 40px var(--primary-color),
+        0 0 80px var(--primary-color);
+}
+
+/* --- スタート画面 --- */
+#start-screen {
+    background: radial-gradient(circle at center, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.8) 100%);
+    backdrop-filter: blur(3px);
+}
+
+.logo-container {
+    text-align: center;
+    margin-bottom: 2rem;
+    animation: float 3s ease-in-out infinite;
+}
+
+.main-title {
+    font-family: var(--font-number);
+    font-size: 3.5rem;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    letter-spacing: 2px;
+}
+
+.subtitle {
+    font-size: 1.2rem;
+    color: var(--accent-color);
+    letter-spacing: 4px;
+    font-weight: 900;
+}
+
+.instruction {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 3rem;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 1.1rem;
+}
+
+.step-num {
+    background: var(--primary-color);
+    color: white;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    font-family: var(--font-number);
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.warning p {
+    color: #ffd700;
+    font-weight: bold;
+    text-align: center;
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+/* サイバーパンク風ボタン */
+.cyber-btn {
+    font-family: var(--font-number);
+    font-size: 1.5rem;
+    padding: 1rem 2.5rem;
+    border: none;
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    font-weight: bold;
+    letter-spacing: 2px;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(255, 65, 108, 0.4);
+    transition: transform 0.1s, box-shadow 0.1s;
+    text-transform: uppercase;
+}
+
+.cyber-btn:active {
+    transform: scale(0.95);
+    box-shadow: 0 2px 5px rgba(255, 65, 108, 0.4);
+}
+
+/* --- HUD（プレイ中） --- */
+.hud-top {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.speedometer {
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid var(--accent-color);
+    padding: 10px 15px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+}
+
+.speed-label {
+    font-family: var(--font-number);
+    font-size: 0.7rem;
+    color: var(--accent-color);
+    letter-spacing: 2px;
+}
+
+.speed-value {
+    font-family: var(--font-number);
+    font-size: 2.5rem;
+    font-weight: 900;
+    line-height: 1;
+    color: white;
+    text-shadow: 0 0 10px var(--accent-color);
+}
+
+.speed-unit {
+    font-size: 0.8rem;
+    color: var(--text-sub);
+}
+
+.status-text {
+    font-family: var(--font-number);
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #ffd700;
+    text-shadow: 0 0 10px #ffd700;
+}
+
+.blink {
+    animation: blinker 1s linear infinite;
+}
+
+/* --- リザルト画面 --- */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    padding: 3rem 2rem;
+    width: 90%;
+    max-width: 400px;
+    border-radius: 20px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    height: auto;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* 中央配置 */
+}
+
+#result-screen:not(.active) {
+    transform: translate(-50%, -40%);
+}
+
+.result-title {
+    font-family: var(--font-number);
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.score-container, .rank-container {
+    text-align: center;
+    margin-bottom: 2rem;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.score-label, .rank-label {
+    font-size: 0.9rem;
+    color: var(--text-sub);
+    margin-bottom: 0.5rem;
+    letter-spacing: 1px;
+}
+
+.score-value-wrapper {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.2rem;
+}
+
+.score-value {
+    font-family: var(--font-number);
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: var(--accent-color);
+    text-shadow: 0 0 15px rgba(0, 242, 254, 0.5);
+}
+
+.score-unit {
+    font-family: var(--font-number);
+    font-size: 1.5rem;
+    color: var(--accent-color);
+}
+
+.rank-text {
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: #fff;
+}
+
+.rank-success { color: #00f2fe; text-shadow: 0 0 10px #00f2fe; }
+.rank-perfect { color: #ffd700; text-shadow: 0 0 15px #ffd700; }
+.rank-chicken { color: #ff9a9e; }
+.rank-fall { color: #ff416c; text-shadow: 0 0 10px #ff416c; }
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.cyber-btn.primary {
+    font-size: 1.2rem;
+    padding: 1rem;
+}
+
+.cyber-btn.secondary {
+    background: transparent;
+    border: 2px solid var(--text-sub);
+    color: white;
+    font-size: 1.1rem;
+    padding: 0.8rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: none;
+}
+
+.cyber-btn.secondary:active {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* アニメーション群 */
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+@keyframes blinker {
+    50% { opacity: 0; }
+}
