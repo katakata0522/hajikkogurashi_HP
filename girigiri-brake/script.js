@@ -316,7 +316,7 @@ class GameController {
 
         this.player = {
             x: 100,
-            y: 0,
+            y: CONFIG.GROUND_Y - CONFIG.PLAYER_SIZE,
             speed: 0,
             width: CONFIG.PLAYER_SIZE * 2,
             height: CONFIG.PLAYER_SIZE,
@@ -625,7 +625,6 @@ class GameController {
             this.ctx.translate((Math.random() - 0.5) * this.screenShake, (Math.random() - 0.5) * this.screenShake);
         }
         const screenX = this.player.x - this.cameraX;
-        this.player.y = CONFIG.GROUND_Y - this.player.height;
         
         this.ctx.fillStyle = this.player.color;
         this.ctx.shadowBlur = 15;
