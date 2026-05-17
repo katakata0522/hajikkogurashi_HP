@@ -78,6 +78,8 @@ canvas {
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease;
+    overflow-y: auto; /* 内容がはみ出る場合はスクロール可能に */
+    padding: 20px;
 }
 
 .screen.active {

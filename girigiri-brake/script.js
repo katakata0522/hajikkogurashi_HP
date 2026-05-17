@@ -339,17 +339,27 @@ class GameController {
         const aspect = CONFIG.LOGICAL_WIDTH / CONFIG.LOGICAL_HEIGHT;
         const windowAspect = this.container.clientWidth / this.container.clientHeight;
         
+        let cssWidth, cssHeight;
         if (windowAspect > aspect) {
-            this.canvas.style.width = (this.container.clientHeight * aspect) + 'px';
-            this.canvas.style.height = this.container.clientHeight + 'px';
+            cssWidth = (this.container.clientHeight * aspect);
+            cssHeight = this.container.clientHeight;
         } else {
-            this.canvas.style.width = this.container.clientWidth + 'px';
-            this.canvas.style.height = (this.container.clientWidth / aspect) + 'px';
+            cssWidth = this.container.clientWidth;
+            cssHeight = (this.container.clientWidth / aspect);
         }
-        this.canvas.style.position = 'absolute';
-        this.canvas.style.left = '50%';
-        this.canvas.style.top = '50%';
-        this.canvas.style.transform = 'translate(-50%, -50%)';
+
+        const styles = {
+            width: cssWidth + 'px',
+            height: cssHeight + 'px',
+            position: 'absolute',
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%)'
+        };
+
+        Object.assign(this.canvas.style, styles);
+        const uiLayer = document.getElementById('ui-layer');
+        Object.assign(uiLayer.style, styles);
     }
 
     bindEvents() {
