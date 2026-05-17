@@ -1,85 +1,71 @@
-const canvas = document.getElementById('game-canvas');
-const ctx = canvas.getContext('2d');
-const container = document.getElementById('game-container');
+/**
+ * 超絶！仕分け工場 - Refactored Main Script
+ */
 
-// UI Elements
-const uiLayer = document.getElementById('ui-layer');
-const startScreen = document.getElementById('start-screen');
-const resultScreen = document.getElementById('result-screen');
-const scoreHud = document.getElementById('score-hud');
-const ruleDisplay = document.getElementById('rule-display');
-const currentRuleText = document.getElementById('current-rule-text');
+const CONFIG = {
+    LOGICAL_WIDTH: 600,
+    LOGICAL_HEIGHT: 1000,
+    COLORS: { RED: '#ff3366', BLUE: '#00c3ff' },
+    SHAPES: { CIRCLE: 0, SQUARE: 1 },
+    RULES: { COLOR: '色', SHAPE: '形' }
+};
 
-const scoreValueEl = document.getElementById('score-value');
-const comboValueEl = document.getElementById('combo-value');
-const finalScoreEl = document.getElementById('final-score');
-const maxComboEl = document.getElementById('max-combo');
-const rankTextEl = document.getElementById('rank-text');
+const STATE = { START: 0, PLAYING: 1, GAMEOVER: 2 };
 
-const touchLeft = document.getElementById('touch-left');
-const touchRight = document.getElementById('touch-right');
-const bgEffect = document.getElementById('bg-effect');
-
-// --- 内部解像度の固定（環境依存バグの解消） ---
-const LOGICAL_WIDTH = 600;
-const LOGICAL_HEIGHT = 1000;
-canvas.width = LOGICAL_WIDTH;
-canvas.height = LOGICAL_HEIGHT;
-
-function resizeCanvas() {
-    const aspect = LOGICAL_WIDTH / LOGICAL_HEIGHT;
-    const windowAspect = container.clientWidth / container.clientHeight;
-    
-    if (windowAspect > aspect) {
-        canvas.style.width = (container.clientHeight * aspect) + 'px';
-        canvas.style.height = container.clientHeight + 'px';
-    } else {
-        canvas.style.width = container.clientWidth + 'px';
-        canvas.style.height = (container.clientWidth / aspect) + 'px';
+// ==========================================
+// AudioManager
+// ==========================================
+class AudioManager {
+    constructor() {
+        this.audioCtx = null;
     }
-    canvas.style.position = 'absolute';
-    canvas.style.left = '50%';
-    canvas.style.top = '50%';
-    canvas.style.transform = 'translate(-50%, -50%)';
-}
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
 
-// --- サウンド（Web Audio API）実装 ---
-const AudioContext = window.AudioContext || window.webkitAudioContext;
-let audioCtx;
+    init() {
+        if (!this.audioCtx) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            this.audioCtx = new AudioContext();
+        }
+        if (this.audioCtx.state === 'suspended') {
+            this.audioCtx.resume();
+        }
+    }
 
-function initAudio() {
-    if (!audioCtx) audioCtx = new AudioContext();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-}
+    _createOscillator(type, freq) {
+        if (!this.audioCtx) return null;
+        const osc = this.audioCtx.createOscillator();
+        const gain = this.audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(this.audioCtx.destination);
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, this.audioCtx.currentTime);
+        return { osc, gain };
+    }
 
-function playSound(type) {
-    if (!audioCtx) return;
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    
-    const now = audioCtx.currentTime;
-    if (type === 'sort') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(800 + (Math.min(combo, 20) * 20), now); // コンボで音程が上がる
+    playSort(combo) {
+        if (!this.audioCtx) return;
+        const now = this.audioCtx.currentTime;
+        const { osc, gain } = this._createOscillator('sine', 800 + (Math.min(combo, 20) * 20));
         gain.gain.setValueAtTime(0.1, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
         osc.start(now);
         osc.stop(now + 0.1);
-    } else if (type === 'error') {
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(150, now);
+    }
+
+    playError() {
+        if (!this.audioCtx) return;
+        const now = this.audioCtx.currentTime;
+        const { osc, gain } = this._createOscillator('sawtooth', 150);
         osc.frequency.linearRampToValueAtTime(100, now + 0.3);
         gain.gain.setValueAtTime(0.2, now);
         gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
         osc.start(now);
         osc.stop(now + 0.3);
-    } else if (type === 'rule_change') {
-        osc.type = 'square';
-        osc.frequency.setValueAtTime(400, now);
+    }
+
+    playRuleChange() {
+        if (!this.audioCtx) return;
+        const now = this.audioCtx.currentTime;
+        const { osc, gain } = this._createOscillator('square', 400);
         osc.frequency.setValueAtTime(600, now + 0.1);
         gain.gain.setValueAtTime(0.1, now);
         gain.gain.linearRampToValueAtTime(0, now + 0.3);
@@ -88,41 +74,106 @@ function playSound(type) {
     }
 }
 
-// Constants
-const COLORS = { RED: '#ff3366', BLUE: '#00c3ff' };
-const SHAPES = { CIRCLE: 0, SQUARE: 1 };
-const RULES = { COLOR: '色', SHAPE: '形' };
+// ==========================================
+// UIManager
+// ==========================================
+class UIManager {
+    constructor() {
+        this.startScreen = document.getElementById('start-screen');
+        this.resultScreen = document.getElementById('result-screen');
+        this.scoreHud = document.getElementById('score-hud');
+        this.ruleDisplay = document.getElementById('rule-display');
+        this.currentRuleText = document.getElementById('current-rule-text');
+        this.bgEffect = document.getElementById('bg-effect');
+        
+        this.touchLeft = document.getElementById('touch-left');
+        this.touchRight = document.getElementById('touch-right');
 
-// Game State
-let state = 'START'; 
-let score = 0;
-let combo = 0;
-let maxCombo = 0;
-let currentRule = RULES.COLOR;
-let items = [];
-let particles = [];
+        this.scoreValueEl = document.getElementById('score-value');
+        this.comboValueEl = document.getElementById('combo-value');
+        this.finalScoreEl = document.getElementById('final-score');
+        this.maxComboEl = document.getElementById('max-combo');
+        this.rankTextEl = document.getElementById('rank-text');
+        
+        this.bestScoreValueEl = document.getElementById('best-score-value');
+        this.bestComboValueEl = document.getElementById('best-combo-value');
+        this.newRecordBadge = document.getElementById('new-record-badge');
+    }
 
-// Physics / Timing variables
-let fallSpeed = 300; // px/sec
-let spawnIntervalTime = 2.0; // seconds
-let timeSinceLastSpawn = 0;
-let lastTime = 0;
-let animationId;
+    startGameUI() {
+        this.startScreen.classList.remove('active');
+        this.resultScreen.classList.remove('active');
+        this.scoreHud.classList.remove('hidden');
+        this.ruleDisplay.classList.remove('hidden');
+        this.touchLeft.classList.remove('hidden');
+        this.touchRight.classList.remove('hidden');
+        this.bgEffect.classList.add('moving');
+        this.updateScore(0, 0);
+    }
 
-// Item Class
+    setRule(ruleName) {
+        this.currentRuleText.innerText = `${ruleName}で仕分けろ！`;
+        this.ruleDisplay.classList.add('changed');
+        setTimeout(() => this.ruleDisplay.classList.remove('changed'), 300);
+    }
+
+    updateScore(score, combo) {
+        this.scoreValueEl.innerText = score;
+        if (combo > 1) {
+            this.comboValueEl.innerText = `${combo} COMBO!`;
+            this.comboValueEl.style.opacity = 1;
+            if (combo > 10) this.comboValueEl.classList.add('high');
+            else this.comboValueEl.classList.remove('high');
+        } else {
+            this.comboValueEl.style.opacity = 0;
+        }
+    }
+
+    showGameOver(score, maxCombo, bestScore, bestCombo, isNewRecord) {
+        this.bgEffect.classList.remove('moving');
+        this.scoreHud.classList.add('hidden');
+        this.ruleDisplay.classList.add('hidden');
+        this.touchLeft.classList.add('hidden');
+        this.touchRight.classList.add('hidden');
+
+        this.finalScoreEl.innerText = score;
+        this.maxComboEl.innerText = maxCombo;
+        
+        this.bestScoreValueEl.innerText = bestScore !== null ? bestScore : '--';
+        this.bestComboValueEl.innerText = bestCombo !== null ? bestCombo : '--';
+
+        if (isNewRecord) {
+            this.newRecordBadge.classList.remove('hidden');
+        } else {
+            this.newRecordBadge.classList.add('hidden');
+        }
+
+        if (score < 10) this.rankTextEl.innerText = 'クビ寸前';
+        else if (score < 30) this.rankTextEl.innerText = '新人バイト';
+        else if (score < 60) this.rankTextEl.innerText = '優秀なパート';
+        else if (score < 100) this.rankTextEl.innerText = '熟練ライン長';
+        else this.rankTextEl.innerText = 'スーパーAI頭脳';
+
+        this.resultScreen.classList.add('active');
+    }
+}
+
+// ==========================================
+// Entities (Item & Particles)
+// ==========================================
 class Item {
     constructor() {
-        this.color = Math.random() < 0.5 ? COLORS.RED : COLORS.BLUE;
-        this.shape = Math.random() < 0.5 ? SHAPES.CIRCLE : SHAPES.SQUARE;
-        this.size = 80; // 論理解像度に合わせて大きく
-        this.x = LOGICAL_WIDTH / 2;
+        this.color = Math.random() < 0.5 ? CONFIG.COLORS.RED : CONFIG.COLORS.BLUE;
+        this.shape = Math.random() < 0.5 ? CONFIG.SHAPES.CIRCLE : CONFIG.SHAPES.SQUARE;
+        this.size = 80;
+        this.x = CONFIG.LOGICAL_WIDTH / 2;
         this.y = -this.size;
         this.isSorted = false;
         this.sortDir = 0;
         this.alpha = 1;
     }
 
-    update(dt) {
+    update(dt, fallSpeed) {
         if (!this.isSorted) {
             this.y += fallSpeed * dt;
         } else {
@@ -141,7 +192,7 @@ class Item {
         ctx.shadowColor = this.color;
 
         ctx.beginPath();
-        if (this.shape === SHAPES.CIRCLE) {
+        if (this.shape === CONFIG.SHAPES.CIRCLE) {
             ctx.arc(this.x, this.y, this.size / 2, 0, Math.PI * 2);
             ctx.fill();
         } else {
@@ -149,11 +200,10 @@ class Item {
             ctx.fill();
         }
 
-        // Inner highlight
         ctx.fillStyle = 'rgba(255,255,255,0.6)';
         ctx.shadowBlur = 0;
         ctx.beginPath();
-        if (this.shape === SHAPES.CIRCLE) {
+        if (this.shape === CONFIG.SHAPES.CIRCLE) {
             ctx.arc(this.x - 15, this.y - 15, 12, 0, Math.PI * 2);
         } else {
             ctx.roundRect(this.x - this.size/2 + 10, this.y - this.size/2 + 10, 20, 20, 4);
@@ -164,7 +214,6 @@ class Item {
     }
 }
 
-// Particle System
 class Particle {
     constructor(x, y, color) {
         this.x = x;
@@ -178,8 +227,8 @@ class Particle {
     update(dt) {
         this.x += this.vx * dt;
         this.y += this.vy * dt;
-        this.life -= 2.0 * dt; // 0.5秒で消える
-        this.size *= (1 - dt * 2);
+        this.life -= 2.0 * dt;
+        this.size *= Math.max(0, 1 - dt * 2);
     }
     draw(ctx) {
         if(this.life <= 0) return;
@@ -192,224 +241,318 @@ class Particle {
     }
 }
 
-function spawnParticles(x, y, color) {
-    for(let i=0; i<20; i++) particles.push(new Particle(x, y, color));
-}
-
-// Game Logic
-function startGame() {
-    initAudio();
-    state = 'PLAYING';
-    score = 0;
-    combo = 0;
-    maxCombo = 0;
-    fallSpeed = 300;
-    spawnIntervalTime = 1.5;
-    timeSinceLastSpawn = spawnIntervalTime; // すぐに最初の1個が出るように
-    lastTime = 0;
-    items = [];
-    particles = [];
-    
-    updateScoreUI();
-    setRule(RULES.COLOR);
-
-    startScreen.classList.remove('active');
-    resultScreen.classList.remove('active');
-    scoreHud.classList.remove('hidden');
-    ruleDisplay.classList.remove('hidden');
-    touchLeft.classList.remove('hidden');
-    touchRight.classList.remove('hidden');
-    bgEffect.classList.add('moving');
-
-    animationId = requestAnimationFrame(gameLoop);
-}
-
-function setRule(newRule) {
-    if(currentRule !== newRule && state === 'PLAYING') playSound('rule_change');
-    currentRule = newRule;
-    currentRuleText.innerText = `${currentRule}で仕分けろ！`;
-    
-    ruleDisplay.classList.add('changed');
-    setTimeout(() => {
-        ruleDisplay.classList.remove('changed');
-    }, 300);
-}
-
-function gameOver() {
-    playSound('error');
-    state = 'GAMEOVER';
-    cancelAnimationFrame(animationId);
-    
-    container.style.backgroundColor = '#ff0000';
-    setTimeout(() => { container.style.backgroundColor = '#111118'; }, 100);
-
-    bgEffect.classList.remove('moving');
-    scoreHud.classList.add('hidden');
-    ruleDisplay.classList.add('hidden');
-    touchLeft.classList.add('hidden');
-    touchRight.classList.add('hidden');
-
-    finalScoreEl.innerText = score;
-    maxComboEl.innerText = maxCombo;
-    
-    if (score < 10) rankTextEl.innerText = 'クビ寸前';
-    else if (score < 30) rankTextEl.innerText = '新人バイト';
-    else if (score < 60) rankTextEl.innerText = '優秀なパート';
-    else if (score < 100) rankTextEl.innerText = '熟練ライン長';
-    else rankTextEl.innerText = 'スーパーAI頭脳';
-
-    resultScreen.classList.add('active');
-}
-
-function updateScoreUI() {
-    scoreValueEl.innerText = score;
-    if (combo > 1) {
-        comboValueEl.innerText = `${combo} COMBO!`;
-        comboValueEl.style.opacity = 1;
-        if (combo > 10) comboValueEl.classList.add('high');
-        else comboValueEl.classList.remove('high');
-    } else {
-        comboValueEl.style.opacity = 0;
+class ParticleSystem {
+    constructor() { this.particles = []; }
+    spawn(x, y, color) {
+        for(let i=0; i<20; i++) this.particles.push(new Particle(x, y, color));
     }
-}
-
-// Input
-function handleInput(direction) {
-    if (state !== 'PLAYING') return;
-
-    let targetItem = null;
-    for (let i = 0; i < items.length; i++) {
-        if (!items[i].isSorted) {
-            targetItem = items[i];
-            break;
+    updateAndDraw(ctx, dt) {
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            this.particles[i].update(dt);
+            this.particles[i].draw(ctx);
+            if (this.particles[i].life <= 0) this.particles.splice(i, 1);
         }
     }
+    clear() { this.particles = []; }
+}
 
-    if (!targetItem) return;
-
-    let expectedDir = 0;
-    if (currentRule === RULES.COLOR) {
-        expectedDir = targetItem.color === COLORS.RED ? -1 : 1;
-    } else {
-        expectedDir = targetItem.shape === SHAPES.CIRCLE ? -1 : 1;
-    }
-
-    if (direction === expectedDir) {
-        playSound('sort');
-        targetItem.isSorted = true;
-        targetItem.sortDir = direction;
-        spawnParticles(targetItem.x, targetItem.y, targetItem.color);
+// ==========================================
+// GameController
+// ==========================================
+class GameController {
+    constructor() {
+        this.canvas = document.getElementById('game-canvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.container = document.getElementById('game-container');
         
-        score++;
-        combo++;
-        if (combo > maxCombo) maxCombo = combo;
+        this.audio = new AudioManager();
+        this.ui = new UIManager();
+        this.particles = new ParticleSystem();
+
+        this.state = STATE.START;
+        this.lastTime = 0;
+        this.animationId = null;
+
+        this.score = 0;
+        this.combo = 0;
+        this.maxCombo = 0;
+        this.currentRule = CONFIG.RULES.COLOR;
         
-        // 難易度上昇（dtベースの速度増加）
-        fallSpeed = Math.min(fallSpeed + 10, 1500);
-        spawnIntervalTime = Math.max(spawnIntervalTime - 0.05, 0.4);
+        this.items = [];
+        this.fallSpeed = 300;
+        this.spawnIntervalTime = 1.5;
+        this.timeSinceLastSpawn = 0;
 
-        // ルール変更ガチャ
-        if (score > 10 && Math.random() < 0.15) {
-            setRule(currentRule === RULES.COLOR ? RULES.SHAPE : RULES.COLOR);
+        this.screenShake = 0;
+
+        this.initCanvas();
+        this.bindEvents();
+        this.drawBoxes();
+    }
+
+    initCanvas() {
+        this.canvas.width = CONFIG.LOGICAL_WIDTH;
+        this.canvas.height = CONFIG.LOGICAL_HEIGHT;
+        window.addEventListener('resize', () => this.resizeCanvas());
+        this.resizeCanvas();
+    }
+
+    resizeCanvas() {
+        const aspect = CONFIG.LOGICAL_WIDTH / CONFIG.LOGICAL_HEIGHT;
+        const windowAspect = this.container.clientWidth / this.container.clientHeight;
+        
+        if (windowAspect > aspect) {
+            this.canvas.style.width = (this.container.clientHeight * aspect) + 'px';
+            this.canvas.style.height = this.container.clientHeight + 'px';
+        } else {
+            this.canvas.style.width = this.container.clientWidth + 'px';
+            this.canvas.style.height = (this.container.clientWidth / aspect) + 'px';
+        }
+        this.canvas.style.position = 'absolute';
+        this.canvas.style.left = '50%';
+        this.canvas.style.top = '50%';
+        this.canvas.style.transform = 'translate(-50%, -50%)';
+    }
+
+    bindEvents() {
+        const handleInput = (dir, e) => {
+            if (e) { e.stopPropagation(); e.preventDefault(); }
+            this.processInput(dir);
+        };
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') handleInput(-1);
+            if (e.key === 'ArrowRight') handleInput(1);
+        });
+        
+        this.ui.touchLeft.addEventListener('touchstart', (e) => handleInput(-1, e), {passive: false});
+        this.ui.touchRight.addEventListener('touchstart', (e) => handleInput(1, e), {passive: false});
+        this.ui.touchLeft.addEventListener('mousedown', (e) => handleInput(-1, e));
+        this.ui.touchRight.addEventListener('mousedown', (e) => handleInput(1, e));
+
+        const startBtn = document.getElementById('start-btn');
+        const retryBtn = document.getElementById('retry-btn');
+        const shareBtn = document.getElementById('share-btn');
+        const menuBtn = document.getElementById('menu-btn');
+
+        const startWrapper = (e) => { e.stopPropagation(); e.preventDefault(); this.startGame(); };
+        startBtn.addEventListener('click', startWrapper);
+        startBtn.addEventListener('touchstart', startWrapper);
+        retryBtn.addEventListener('click', startWrapper);
+        retryBtn.addEventListener('touchstart', startWrapper);
+
+        shareBtn.addEventListener('click', (e) => this.shareResult(e));
+        shareBtn.addEventListener('touchstart', (e) => this.shareResult(e));
+
+        const goMenu = (e) => { e.stopPropagation(); window.location.href = '../minigames.html'; };
+        menuBtn.addEventListener('click', goMenu);
+        menuBtn.addEventListener('touchstart', goMenu);
+    }
+
+    startGame() {
+        this.audio.init();
+        this.state = STATE.PLAYING;
+        this.score = 0;
+        this.combo = 0;
+        this.maxCombo = 0;
+        this.fallSpeed = 300;
+        this.spawnIntervalTime = 1.5;
+        this.timeSinceLastSpawn = this.spawnIntervalTime;
+        this.lastTime = 0;
+        this.screenShake = 0;
+        this.items = [];
+        this.particles.clear();
+        
+        this.currentRule = CONFIG.RULES.COLOR;
+        this.ui.startGameUI();
+        this.ui.setRule(this.currentRule);
+
+        if(this.animationId) cancelAnimationFrame(this.animationId);
+        this.animationId = requestAnimationFrame((t) => this.loop(t));
+    }
+
+    setRule(newRule) {
+        if(this.currentRule !== newRule && this.state === STATE.PLAYING) {
+            this.audio.playRuleChange();
+        }
+        this.currentRule = newRule;
+        this.ui.setRule(this.currentRule);
+    }
+
+    processInput(direction) {
+        if (this.state !== STATE.PLAYING) return;
+
+        let targetItem = null;
+        for (let i = 0; i < this.items.length; i++) {
+            if (!this.items[i].isSorted) {
+                targetItem = this.items[i];
+                break;
+            }
         }
 
-        updateScoreUI();
-    } else {
-        gameOver();
-    }
-}
+        if (!targetItem) return;
 
-window.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowLeft') handleInput(-1);
-    if (e.key === 'ArrowRight') handleInput(1);
-});
-touchLeft.addEventListener('touchstart', (e) => { e.preventDefault(); handleInput(-1); });
-touchRight.addEventListener('touchstart', (e) => { e.preventDefault(); handleInput(1); });
-touchLeft.addEventListener('mousedown', () => handleInput(-1));
-touchRight.addEventListener('mousedown', () => handleInput(1));
+        let expectedDir = 0;
+        if (this.currentRule === CONFIG.RULES.COLOR) {
+            expectedDir = targetItem.color === CONFIG.COLORS.RED ? -1 : 1;
+        } else {
+            expectedDir = targetItem.shape === CONFIG.SHAPES.CIRCLE ? -1 : 1;
+        }
 
-document.getElementById('start-btn').addEventListener('click', startGame);
-document.getElementById('retry-btn').addEventListener('click', startGame);
-document.getElementById('share-btn').addEventListener('click', () => {
-    const text = `脳の処理限界に到達…！ 【${score}個】のアイテムを仕分けました！（最大${maxCombo}コンボ） 称号：[${rankTextEl.innerText}]`;
-    const url = "https://hajikkoroom.xsrv.jp/sorting-factory/";
-    const hashtags = "はじっこぐらし,超絶仕分け工場";
-    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtags)}`);
-});
+        if (direction === expectedDir) {
+            this.audio.playSort(this.combo);
+            targetItem.isSorted = true;
+            targetItem.sortDir = direction;
+            this.particles.spawn(targetItem.x, targetItem.y, targetItem.color);
+            
+            this.score++;
+            this.combo++;
+            if (this.combo > this.maxCombo) this.maxCombo = this.combo;
+            
+            this.fallSpeed = Math.min(this.fallSpeed + 10, 1500);
+            this.spawnIntervalTime = Math.max(this.spawnIntervalTime - 0.05, 0.4);
 
-// Render
-function drawBoxes() {
-    const boxY = LOGICAL_HEIGHT - 150;
-    const boxWidth = LOGICAL_WIDTH / 2;
-    
-    // Left Box
-    ctx.fillStyle = 'rgba(255, 51, 102, 0.1)';
-    ctx.fillRect(0, boxY, boxWidth, 150);
-    ctx.strokeStyle = COLORS.RED;
-    ctx.lineWidth = 4;
-    ctx.beginPath(); ctx.moveTo(0, boxY); ctx.lineTo(boxWidth, boxY); ctx.stroke();
+            if (this.score > 10 && Math.random() < 0.15) {
+                this.setRule(this.currentRule === CONFIG.RULES.COLOR ? CONFIG.RULES.SHAPE : CONFIG.RULES.COLOR);
+            }
 
-    // Right Box
-    ctx.fillStyle = 'rgba(0, 195, 255, 0.1)';
-    ctx.fillRect(boxWidth, boxY, boxWidth, 150);
-    ctx.strokeStyle = COLORS.BLUE;
-    ctx.beginPath(); ctx.moveTo(boxWidth, boxY); ctx.lineTo(LOGICAL_WIDTH, boxY); ctx.stroke();
-
-    // Line
-    ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-    ctx.beginPath(); ctx.moveTo(boxWidth, 0); ctx.lineTo(boxWidth, LOGICAL_HEIGHT); ctx.stroke();
-    
-    // Labels
-    ctx.fillStyle = 'rgba(255,255,255,0.7)';
-    ctx.font = 'bold 30px "M PLUS Rounded 1c"';
-    ctx.textAlign = 'center';
-    if(currentRule === RULES.COLOR) {
-        ctx.fillText('赤', boxWidth/2, boxY + 80);
-        ctx.fillText('青', boxWidth + boxWidth/2, boxY + 80);
-    } else {
-        ctx.fillText('● (丸)', boxWidth/2, boxY + 80);
-        ctx.fillText('■ (四角)', boxWidth + boxWidth/2, boxY + 80);
-    }
-}
-
-function gameLoop(timestamp) {
-    if(!lastTime) lastTime = timestamp;
-    let dt = (timestamp - lastTime) / 1000;
-    if(dt > 0.1) dt = 0.1; // フレーム落ち対策
-    lastTime = timestamp;
-
-    if (state !== 'PLAYING') return;
-
-    ctx.clearRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
-    drawBoxes();
-
-    // Spawn (Time-based)
-    timeSinceLastSpawn += dt;
-    if (timeSinceLastSpawn >= spawnIntervalTime) {
-        items.push(new Item());
-        timeSinceLastSpawn = 0;
-    }
-
-    // Update & Draw Items
-    for (let i = 0; i < items.length; i++) {
-        items[i].update(dt);
-        items[i].draw(ctx);
-
-        if (!items[i].isSorted && items[i].y > LOGICAL_HEIGHT - 150) {
-            gameOver();
-            return;
+            this.ui.updateScore(this.score, this.combo);
+        } else {
+            this.triggerGameOver();
         }
     }
 
-    items = items.filter(item => item.alpha > 0);
+    triggerGameOver() {
+        this.audio.playError();
+        this.state = STATE.GAMEOVER;
+        cancelAnimationFrame(this.animationId);
+        
+        this.container.style.backgroundColor = '#ff0000';
+        this.screenShake = 15;
+        setTimeout(() => { this.container.style.backgroundColor = '#111118'; }, 100);
 
-    for (let i = particles.length - 1; i >= 0; i--) {
-        particles[i].update(dt);
-        particles[i].draw(ctx);
-        if (particles[i].life <= 0) particles.splice(i, 1);
+        let isNewRecord = false;
+        let bestScore = localStorage.getItem('sorting_best_score');
+        let bestCombo = localStorage.getItem('sorting_best_combo');
+        
+        bestScore = bestScore ? parseInt(bestScore) : null;
+        bestCombo = bestCombo ? parseInt(bestCombo) : null;
+
+        if (!bestScore || this.score > bestScore) {
+            localStorage.setItem('sorting_best_score', this.score.toString());
+            bestScore = this.score;
+            isNewRecord = true;
+        }
+        if (!bestCombo || this.maxCombo > bestCombo) {
+            localStorage.setItem('sorting_best_combo', this.maxCombo.toString());
+            bestCombo = this.maxCombo;
+        }
+
+        this.ui.showGameOver(this.score, this.maxCombo, bestScore, bestCombo, isNewRecord);
+        this.draw(); // Final render with shake
     }
 
-    animationId = requestAnimationFrame(gameLoop);
+    update(dt) {
+        if (this.screenShake > 0) {
+            this.screenShake -= 30 * dt;
+            if (this.screenShake < 0) this.screenShake = 0;
+        }
+
+        this.timeSinceLastSpawn += dt;
+        if (this.timeSinceLastSpawn >= this.spawnIntervalTime) {
+            this.items.push(new Item());
+            this.timeSinceLastSpawn = 0;
+        }
+
+        for (let i = 0; i < this.items.length; i++) {
+            this.items[i].update(dt, this.fallSpeed);
+
+            if (!this.items[i].isSorted && this.items[i].y > CONFIG.LOGICAL_HEIGHT - 150) {
+                this.triggerGameOver();
+                return;
+            }
+        }
+
+        this.items = this.items.filter(item => item.alpha > 0);
+    }
+
+    drawBoxes() {
+        const boxY = CONFIG.LOGICAL_HEIGHT - 150;
+        const boxWidth = CONFIG.LOGICAL_WIDTH / 2;
+        
+        // Left Box
+        this.ctx.fillStyle = 'rgba(255, 51, 102, 0.1)';
+        this.ctx.fillRect(0, boxY, boxWidth, 150);
+        this.ctx.strokeStyle = CONFIG.COLORS.RED;
+        this.ctx.lineWidth = 4;
+        this.ctx.beginPath(); this.ctx.moveTo(0, boxY); this.ctx.lineTo(boxWidth, boxY); this.ctx.stroke();
+
+        // Right Box
+        this.ctx.fillStyle = 'rgba(0, 195, 255, 0.1)';
+        this.ctx.fillRect(boxWidth, boxY, boxWidth, 150);
+        this.ctx.strokeStyle = CONFIG.COLORS.BLUE;
+        this.ctx.beginPath(); this.ctx.moveTo(boxWidth, boxY); this.ctx.lineTo(CONFIG.LOGICAL_WIDTH, boxY); this.ctx.stroke();
+
+        // Line
+        this.ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+        this.ctx.beginPath(); this.ctx.moveTo(boxWidth, 0); this.ctx.lineTo(boxWidth, CONFIG.LOGICAL_HEIGHT); this.ctx.stroke();
+        
+        // Labels
+        this.ctx.fillStyle = 'rgba(255,255,255,0.7)';
+        this.ctx.font = 'bold 30px "M PLUS Rounded 1c"';
+        this.ctx.textAlign = 'center';
+        if(this.currentRule === CONFIG.RULES.COLOR) {
+            this.ctx.fillText('赤', boxWidth/2, boxY + 80);
+            this.ctx.fillText('青', boxWidth + boxWidth/2, boxY + 80);
+        } else {
+            this.ctx.fillText('● (丸)', boxWidth/2, boxY + 80);
+            this.ctx.fillText('■ (四角)', boxWidth + boxWidth/2, boxY + 80);
+        }
+    }
+
+    draw() {
+        this.ctx.clearRect(0, 0, CONFIG.LOGICAL_WIDTH, CONFIG.LOGICAL_HEIGHT);
+        
+        this.ctx.save();
+        if (this.screenShake > 0) {
+            this.ctx.translate((Math.random() - 0.5) * this.screenShake, (Math.random() - 0.5) * this.screenShake);
+        }
+
+        this.drawBoxes();
+
+        for (let item of this.items) {
+            item.draw(this.ctx);
+        }
+
+        this.ctx.restore();
+    }
+
+    loop(timestamp) {
+        if(!this.lastTime) this.lastTime = timestamp;
+        let dt = (timestamp - this.lastTime) / 1000;
+        if(dt > 0.1) dt = 0.1;
+        this.lastTime = timestamp;
+
+        if (this.state === STATE.PLAYING) {
+            this.update(dt);
+            this.draw();
+            this.particles.updateAndDraw(this.ctx, dt);
+            this.animationId = requestAnimationFrame((t) => this.loop(t));
+        }
+    }
+
+    shareResult(e) {
+        e.stopPropagation();
+        const text = `脳の処理限界に到達…！ 【${this.score}個】のアイテムを仕分けました！（最大${this.maxCombo}コンボ） 称号：[${this.ui.rankTextEl.innerText}]`;
+        const url = "https://hajikkoroom.xsrv.jp/sorting-factory/";
+        const hashtags = "はじっこぐらし,超絶仕分け工場";
+        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtags)}`);
+    }
 }
 
-drawBoxes();
+// ==========================================
+// Initialization
+// ==========================================
+window.addEventListener('DOMContentLoaded', () => {
+    new GameController();
+});
