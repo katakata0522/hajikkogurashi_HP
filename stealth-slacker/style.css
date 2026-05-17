@@ -35,7 +35,6 @@ body {
     height: 100%;
     max-width: 600px;
     background-color: var(--bg-color);
-    /* 漫画風のドットパターン背景 */
     background-image: radial-gradient(#f3c623 15%, transparent 16%), radial-gradient(#f3c623 15%, transparent 16%);
     background-size: 20px 20px;
     background-position: 0 0, 10px 10px;
@@ -96,6 +95,7 @@ canvas {
     border-radius: 30px;
     text-align: center;
     box-shadow: 4px 4px 0 var(--border-color);
+    transition: transform 0.1s;
 }
 
 .score-label {
@@ -112,6 +112,7 @@ canvas {
     font-weight: 900;
     line-height: 1;
     color: var(--border-color);
+    transition: all 0.1s;
 }
 
 /* --- ヒントテキスト --- */
@@ -270,6 +271,7 @@ canvas {
     padding: 15px;
     border: 3px solid var(--border-color);
     border-radius: 10px;
+    position: relative;
 }
 
 .score-label, .rank-label {
@@ -283,6 +285,26 @@ canvas {
     font-weight: 900;
     color: var(--border-color);
     line-height: 1;
+}
+
+.best-score-label {
+    font-family: var(--font-comic);
+    font-size: 1.2rem;
+    color: var(--primary-color);
+    margin-top: 10px;
+}
+
+.new-record {
+    position: absolute;
+    top: -15px; right: -10px;
+    background: var(--secondary-color);
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    transform: rotate(10deg);
+    box-shadow: 0 0 10px var(--secondary-color);
 }
 
 .rank-text {
@@ -302,4 +324,10 @@ canvas {
 .comic-btn.secondary {
     background: #fff;
     color: var(--border-color);
+}
+.comic-btn.tertiary {
+    background: #ccc;
+    color: var(--border-color);
+    font-size: 1.2rem;
+    padding: 10px 20px;
 }
