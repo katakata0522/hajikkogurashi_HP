@@ -32,23 +32,27 @@
                         <p>もう一度タップで急ブレーキ！</p>
                     </div>
                     <div class="step warning">
-                        <p>崖から落ちないように<br>極限まで攻めろ！</p>
+                        <p>天気によって滑りやすさが変わるぞ！<br>看板を目安に限界まで攻めろ！</p>
                     </div>
                 </div>
                 <button id="start-btn" class="cyber-btn">TAP TO START</button>
             </div>
 
-            <!-- プレイ中のHUD（ヘッドアップディスプレイ） -->
+            <!-- プレイ中のHUD -->
             <div id="hud" class="screen">
                 <div class="hud-top">
+                    <div class="weather-box">
+                        <span class="weather-label">CONDITION</span>
+                        <span id="weather-value" class="weather-value">☀️ NORMAL</span>
+                    </div>
                     <div class="speedometer">
                         <span class="speed-label">SPEED</span>
                         <span id="speed-value" class="speed-value">0</span>
                         <span class="speed-unit">km/h</span>
                     </div>
-                    <div class="status-indicator">
-                        <span id="status-text" class="status-text blink">READY...</span>
-                    </div>
+                </div>
+                <div class="status-indicator">
+                    <span id="status-text" class="status-text blink">READY...</span>
                 </div>
             </div>
 
@@ -62,6 +66,9 @@
                         <span id="score-value" class="score-value">0.00</span>
                         <span class="score-unit">m</span>
                     </div>
+                    <!-- 自己ベスト表示 -->
+                    <p class="best-score-label">BEST: <span id="best-score-value">--</span> m</p>
+                    <p id="new-record-badge" class="new-record blink hidden">NEW RECORD!!</p>
                 </div>
 
                 <div class="rank-container">
@@ -77,6 +84,7 @@
                         </svg>
                         ポストする
                     </button>
+                    <button id="menu-btn" class="cyber-btn tertiary">広場に戻る</button>
                 </div>
             </div>
         </div>
