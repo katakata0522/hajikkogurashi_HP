@@ -126,7 +126,7 @@ class UIManager {
     }
 
     setRule(ruleName) {
-        this.currentRuleText.innerText = `${ruleName}で仕分けろ！`;
+        this.currentRuleText.innerText = ruleName;
         this.ruleDisplay.classList.add('changed');
         setTimeout(() => this.ruleDisplay.classList.remove('changed'), 300);
     }
@@ -544,7 +544,7 @@ class GameController {
     }
 
     drawBoxes() {
-        const boxHeight = 40;
+        const boxHeight = 60;
         const boxY = CONFIG.LOGICAL_HEIGHT - boxHeight;
         const boxWidth = CONFIG.LOGICAL_WIDTH / 2;
         const isColor = this.currentRule === CONFIG.RULES.COLOR;
@@ -569,25 +569,25 @@ class GameController {
             this.ctx.shadowBlur = 10;
             this.ctx.shadowColor = '#fff';
             // Circle left
-            this.ctx.beginPath(); this.ctx.arc(boxWidth/2, boxY + 20, 12, 0, Math.PI*2); this.ctx.stroke();
+            this.ctx.beginPath(); this.ctx.arc(boxWidth/2, boxY + 30, 16, 0, Math.PI*2); this.ctx.stroke();
             // Square right
-            this.ctx.beginPath(); this.ctx.roundRect(boxWidth + boxWidth/2 - 12, boxY + 8, 24, 24, 4); this.ctx.stroke();
+            this.ctx.beginPath(); this.ctx.roundRect(boxWidth + boxWidth/2 - 16, boxY + 14, 32, 32, 6); this.ctx.stroke();
             this.ctx.shadowBlur = 0;
         } else if (this.currentRule === CONFIG.RULES.SIZE) {
             this.ctx.fillStyle = 'rgba(255,255,255,0.8)';
             this.ctx.textAlign = 'center';
             this.ctx.textBaseline = 'middle';
-            this.ctx.font = 'bold 20px "M PLUS Rounded 1c"';
-            this.ctx.fillText('小 (SMALL)', boxWidth/2, boxY + 20);
             this.ctx.font = 'bold 24px "M PLUS Rounded 1c"';
-            this.ctx.fillText('大 (LARGE)', boxWidth + boxWidth/2, boxY + 20);
+            this.ctx.fillText('小 (SMALL)', boxWidth/2, boxY + 30);
+            this.ctx.font = 'bold 28px "M PLUS Rounded 1c"';
+            this.ctx.fillText('大 (LARGE)', boxWidth + boxWidth/2, boxY + 30);
         } else if (this.currentRule === CONFIG.RULES.NUMBER) {
             this.ctx.fillStyle = 'rgba(255,255,255,0.8)';
             this.ctx.textAlign = 'center';
             this.ctx.textBaseline = 'middle';
-            this.ctx.font = 'bold 18px "M PLUS Rounded 1c"';
-            this.ctx.fillText('奇数(1,3,5...)', boxWidth/2, boxY + 20);
-            this.ctx.fillText('偶数(2,4,6...)', boxWidth + boxWidth/2, boxY + 20);
+            this.ctx.font = 'bold 24px "M PLUS Rounded 1c"';
+            this.ctx.fillText('奇数', boxWidth/2, boxY + 30);
+            this.ctx.fillText('偶数', boxWidth + boxWidth/2, boxY + 30);
         }
 
         // 境界線
