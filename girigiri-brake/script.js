@@ -14,8 +14,9 @@ const CONFIG = {
     LOGICAL_HEIGHT: 600,
     GROUND_Y: 450, // 600 * 0.75
     CLIFF_X: 12000,
-    BASE_ACC: 1200,
-    BASE_FRIC: 1500,
+    BASE_ACC: 950,
+    BASE_FRIC: 1900,
+    DANGER_DISTANCE_PX: 5000,
     PLAYER_SIZE: 30
 };
 
@@ -25,7 +26,7 @@ const WEATHERS = [
     { name: '☀️ NORMAL', acc: 1.0, fric: 1.0, color: '#fff' },
     { name: '💨 TAILWIND (追い風)', acc: 1.3, fric: 0.8, color: '#00f2fe' },
     { name: '🌪️ HEADWIND (向かい風)', acc: 0.8, fric: 1.2, color: '#ffb347' },
-    { name: '🌧️ RAIN (滑る)', acc: 0.9, fric: 0.4, color: '#5555ff' }
+    { name: '🌧️ RAIN (滑る)', acc: 0.9, fric: 0.55, color: '#5555ff' }
 ];
 
 // ==========================================
@@ -453,7 +454,7 @@ class GameController {
             { x: Math.max(0, CONFIG.CLIFF_X - 6000), text: 'あと 60m' },
             { x: Math.max(0, CONFIG.CLIFF_X - 3000), text: 'あと 30m' },
             { x: Math.max(0, CONFIG.CLIFF_X - 1000), text: 'あと 10m' },
-            { x: Math.max(0, CONFIG.CLIFF_X - 500),  text: '⚠️ DANGER!' }
+            { x: Math.max(0, CONFIG.CLIFF_X - 1500), text: '⚠️ DANGER!' }
         ];
 
         this.weather = WEATHERS[Math.floor(Math.random() * WEATHERS.length)];
@@ -772,9 +773,9 @@ class GameController {
             this.ctx.strokeStyle = 'rgba(0, 242, 254, 0.4)';
             this.ctx.lineWidth = 2;
             
-            // 警告ゾーン判定（崖まで残り30m = 3000px 未満）
+            // 警告ゾーン判定（崖まで残り50m = 5000px 未満）
             const playerDistToCliff = CONFIG.CLIFF_X - (this.player.x + this.player.width);
-            const isDangerZone = playerDistToCliff < 3000;
+            const isDangerZone = playerDistToCliff < CONFIG.DANGER_DISTANCE_PX;
             
             if (isDangerZone && this.state !== STATE.RESULT) {
                 const flash = Math.sin(Date.now() / 60) > 0;

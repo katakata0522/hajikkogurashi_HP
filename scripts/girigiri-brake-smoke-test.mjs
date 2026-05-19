@@ -16,6 +16,11 @@ assert.match(
   'fall detection should use the same player front edge as result scoring'
 );
 
+assert.match(script, /BASE_ACC:\s*950,/, 'base acceleration should be toned down for a less punishing speed curve');
+assert.match(script, /BASE_FRIC:\s*1900,/, 'base braking friction should be stronger');
+assert.match(script, /DANGER_DISTANCE_PX:\s*5000/, 'danger warning should start earlier than the old 30m zone');
+assert.match(script, /fric:\s*0\.55/, 'rain should remain slippery but not overwhelmingly punishing');
+
 assert.match(
   script,
   /if \(this\.state !== STATE\.START && this\.state !== STATE\.RESULT\) \{/,
