@@ -313,6 +313,21 @@ class GameController {
         // コンテキストメニュー（右クリック・長押しメニュー）を無効化
         window.addEventListener('contextmenu', (e) => { e.preventDefault(); });
 
+        // スペースキー対応
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                if (e.target.tagName !== 'BUTTON') e.preventDefault();
+                if (this.gameState === STATE.START || this.gameState === STATE.RESULT) return;
+                if (!e.repeat) this.startSlacking();
+            }
+        });
+        window.addEventListener('keyup', (e) => {
+            if (e.code === 'Space') {
+                if (e.target.tagName !== 'BUTTON') e.preventDefault();
+                this.stopSlacking();
+            }
+        });
+
         const startBtn = document.getElementById('start-btn');
         const retryBtn = document.getElementById('retry-btn');
         const shareBtn = document.getElementById('share-btn');
@@ -575,9 +590,9 @@ class GameController {
             
             // ! マーク
             const warningScale = 1 + Math.min(this.score / 20000, 1);
-            this.ctx.fillStyle = '#ffd700';
+            this.ctx.fillStyle = '#ff3366'; // 背景の黄色と被らないように赤に変更
             this.ctx.shadowBlur = 20;
-            this.ctx.shadowColor = '#ffd700';
+            this.ctx.shadowColor = '#ff3366';
             this.ctx.font = `bold ${80 * warningScale}px "M PLUS Rounded 1c"`;
             this.ctx.textAlign = 'center';
             this.ctx.textBaseline = 'middle';
