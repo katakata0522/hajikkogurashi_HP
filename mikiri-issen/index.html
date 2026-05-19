@@ -210,7 +210,7 @@
     h1 {
       margin: 0;
       font-family: var(--font-serif);
-      font-size: clamp(4.2rem, 9vw, 7.8rem);
+      font-size: clamp(3.8rem, 7.2vw, 6.6rem);
       line-height: 1.02;
       letter-spacing: 0.035em;
       color: #fff2c6;
@@ -300,6 +300,10 @@
       gap: 10px;
       margin: clamp(10px, 1.8vh, 18px) auto 0;
       max-width: 620px;
+    }
+
+    .result-grid {
+      max-width: 430px;
     }
 
     .record-chip,
@@ -917,20 +921,20 @@
     .result-screen {
       place-items: center;
       text-align: center;
-      padding: clamp(18px, 3vh, 34px) 18px 18px;
+      padding: clamp(16px, 2.6vh, 28px) 18px 18px;
     }
 
     .result-card {
-      width: min(830px, 100%);
+      width: min(720px, 100%);
       height: auto;
-      max-height: calc(100% - 4px);
+      max-height: calc(100% - 18px);
       overflow: hidden;
       display: flex;
       flex-direction: column;
       justify-content: center;
       border: 3px solid rgba(255, 211, 106, 0.24);
       border-radius: 28px;
-      padding: clamp(16px, 2.8vw, 30px);
+      padding: clamp(16px, 2.4vw, 26px);
       background:
         radial-gradient(circle at 50% 0%, rgba(245, 182, 65, 0.2), transparent 36%),
         linear-gradient(180deg, rgba(0, 0, 0, 0.52), rgba(0, 0, 0, 0.28));
@@ -983,7 +987,7 @@
       margin: 0;
       color: var(--gold);
       font-family: var(--font-serif);
-      font-size: clamp(2.2rem, 5.4vw, 4.8rem);
+      font-size: clamp(2.1rem, 4.2vw, 4rem);
       line-height: 1;
       letter-spacing: 0.05em;
       text-shadow: 0 5px 0 var(--red-dark), 0 16px 34px rgba(0, 0, 0, 0.45);
@@ -992,9 +996,9 @@
     .result-card.is-lose .judge { color: #ff8a70; }
 
     .time-result {
-      margin-top: clamp(8px, 1.4vh, 14px);
+      margin-top: clamp(6px, 1.1vh, 10px);
       color: var(--paper);
-      font-size: clamp(2.6rem, 6.4vw, 5.2rem);
+      font-size: clamp(2.5rem, 5vw, 4.4rem);
       font-weight: 1000;
       line-height: 1;
       letter-spacing: -0.04em;
@@ -1008,7 +1012,7 @@
     }
 
     .reaction-help {
-      margin-top: 6px;
+      margin-top: 4px;
       color: rgba(255, 244, 214, 0.56);
       font-size: 0.82rem;
       font-weight: 800;
@@ -1019,7 +1023,7 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      margin-top: clamp(8px, 1.4vh, 12px);
+      margin-top: clamp(8px, 1.2vh, 10px);
       min-height: 40px;
       border-radius: 999px;
       padding: 8px 16px;
@@ -1043,6 +1047,10 @@
       margin-top: clamp(8px, 1.3vh, 12px);
     }
 
+    .result-optional {
+      display: none;
+    }
+
     .versus-pill {
       padding: 8px 12px;
       color: rgba(255, 244, 214, 0.78);
@@ -1051,7 +1059,7 @@
 
     .result-comment {
       max-width: 42em;
-      margin: clamp(8px, 1.4vh, 12px) auto 0;
+      margin: clamp(8px, 1.2vh, 10px) auto 0;
       color: rgba(255, 244, 214, 0.78);
       line-height: 1.65;
       font-size: 0.94rem;
@@ -1062,7 +1070,7 @@
       flex-wrap: wrap;
       justify-content: center;
       gap: 10px;
-      margin-top: clamp(10px, 2vh, 18px);
+      margin-top: clamp(10px, 1.6vh, 14px);
       flex: 0 0 auto;
     }
 
@@ -1292,9 +1300,9 @@
           <div class="difference-label" id="differenceLabel">敵より 00 早い</div>
           <div class="versus-detail" aria-label="対決詳細">
             <span class="versus-pill" id="enemyResultLabel">敵：町の剣士</span>
-            <span class="versus-pill" id="enemyRankResultLabel">★☆☆☆☆</span>
-            <span class="versus-pill" id="enemySpeedLabel">敵の反応値：36</span>
-            <span class="versus-pill" id="waitTimeLabel">待機：-- 秒</span>
+            <span class="versus-pill result-optional" id="enemyRankResultLabel">★☆☆☆☆</span>
+            <span class="versus-pill result-optional" id="enemySpeedLabel">敵の反応値：36</span>
+            <span class="versus-pill result-optional" id="waitTimeLabel">待機：-- 秒</span>
           </div>
           <p class="result-comment" id="resultComment">見事な一閃。</p>
 
@@ -1302,9 +1310,9 @@
             <div class="result-box"><span>BEST</span><strong id="resultBest">--</strong></div>
             <div class="result-box"><span>STREAK</span><strong id="resultStreak">0 人</strong></div>
             <div class="result-box"><span>MAX</span><strong id="resultMaxStreak">0 人</strong></div>
-            <div class="result-box"><span>TOTAL WINS</span><strong id="resultTotalWins">0 勝</strong></div>
-            <div class="result-box"><span>NEXT</span><strong id="nextEnemyLabel">道場破り</strong></div>
-            <div class="result-box"><span>VERSION</span><strong>v0.6.5</strong></div>
+            <div class="result-box result-optional"><span>TOTAL WINS</span><strong id="resultTotalWins">0 勝</strong></div>
+            <div class="result-box result-optional"><span>NEXT</span><strong id="nextEnemyLabel">道場破り</strong></div>
+            <div class="result-box result-optional"><span>VERSION</span><strong>v0.6.5</strong></div>
           </div>
 
           <div class="result-actions">

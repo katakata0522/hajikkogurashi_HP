@@ -41,3 +41,27 @@ assert.match(
   /confirm\('記録をリセットしますか？'\)/,
   'record reset should require confirmation'
 );
+
+assert.match(
+  html,
+  /class="versus-pill result-optional" id="enemyRankResultLabel"/,
+  'secondary enemy details should stay out of the compact result card'
+);
+
+assert.match(
+  html,
+  /class="result-box result-optional"><span>TOTAL WINS<\/span>/,
+  'secondary record details should stay out of the compact result card'
+);
+
+assert.match(
+  html,
+  /\.result-optional\s*\{\s*display:\s*none;\s*\}/,
+  'optional result details should be visually hidden by default'
+);
+
+assert.match(
+  html,
+  /\.result-card\s*\{[\s\S]*?width:\s*min\(720px,\s*100%\);/,
+  'desktop result card should use a compact width'
+);
