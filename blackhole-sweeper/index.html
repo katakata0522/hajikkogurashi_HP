@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ブラックホール・スイーパー</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="game-container">
+        <!-- キャンバス -->
+        <canvas id="game-canvas"></canvas>
+
+        <!-- UIレイヤー -->
+        <div id="ui-layer">
+            <!-- HUD -->
+            <div id="hud" class="hidden">
+                <div class="hud-left">
+                    <span class="hud-label">SCORE</span>
+                    <span id="score-value">0</span>
+                </div>
+                <div class="hud-right">
+                    <span class="hud-label">LIFE</span>
+                    <div id="life-container">
+                        <span class="heart active">❤️</span>
+                        <span class="heart active">❤️</span>
+                        <span class="heart active">❤️</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 操作ヒント -->
+            <div id="hint-text" class="hint-text hidden">画面をなぞって敵を囲め！</div>
+
+            <!-- スタート画面 -->
+            <div id="start-screen" class="screen active cyber-panel">
+                <div class="title-container">
+                    <h1 class="main-title">炎上タスク<br><span class="highlight">火消し</span><br>スイーパー</h1>
+                </div>
+                <div class="instruction">
+                    <p><strong>【ルール】</strong></p>
+                    <p>画面をスワイプして<span class="text-cyan">線</span>を引き、<br>敵をぐるっと<span class="text-cyan">囲んで</span>消滅させろ！</p>
+                    <p>一気に囲むと<span class="text-yellow">コンボボーナス！</span></p>
+                    <p class="warning">引いている途中の線に敵がぶつかるとダメージ！</p>
+                </div>
+                <button id="start-btn" class="cyber-btn">鎮火開始 (START)</button>
+            </div>
+
+            <!-- リザルト画面 -->
+            <div id="result-screen" class="screen result-panel">
+                <div class="result-box">
+                    <h2 class="result-title">SYSTEM DOWN<br><span class="sub-title">（タスクに押し潰された…）</span></h2>
+                    
+                    <div class="score-container">
+                        <p class="score-label">消火スコア</p>
+                        <p id="final-score" class="final-score">0</p>
+                        <p class="best-score-label">BEST: <span id="best-score-value">--</span></p>
+                        <p id="new-record-badge" class="new-record blink hidden">NEW RECORD!!</p>
+                    </div>
+
+                    <div class="rank-container">
+                        <p class="rank-label">今回の評価</p>
+                        <p id="rank-text" class="rank-text">新人火消し</p>
+                    </div>
+
+                    <div class="btn-group">
+                        <button id="retry-btn" class="cyber-btn primary">再挑戦 (RETRY)</button>
+                        <button id="share-btn" class="cyber-btn x-share">𝕏 結果をシェア</button>
+                        <button id="menu-btn" class="cyber-btn secondary">メニューへ戻る</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
