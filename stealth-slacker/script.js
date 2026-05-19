@@ -587,23 +587,12 @@ class GameController {
             this.ctx.fillStyle = '#555';
             this.ctx.beginPath(); this.ctx.arc(bossX, bossY, 40, 0, Math.PI*2); this.ctx.fill();
             this.ctx.beginPath(); this.ctx.roundRect(bossX - 55, bossY + 40, 110, 80, 10); this.ctx.fill();
-            // 居眠りZzz...
-            if (Date.now() % 2000 < 1000) {
-                this.ctx.fillStyle = '#fff';
-                this.ctx.font = 'bold 20px "M PLUS Rounded 1c"';
-                this.ctx.fillText('Zzz...', bossX + 40, bossY - 30);
-            }
         } else if (this.bossState === BOSS.WARNING) {
             // 警戒（少し振り向く気配）
             this.ctx.fillStyle = '#555';
             this.ctx.beginPath(); this.ctx.arc(bossX, bossY, 40, 0, Math.PI*2); this.ctx.fill();
             this.ctx.beginPath(); this.ctx.roundRect(bossX - 55, bossY + 40, 110, 80, 10); this.ctx.fill();
             
-            // ? マーク (気配を感じている)
-            this.ctx.fillStyle = '#fff';
-            this.ctx.font = 'bold 30px "M PLUS Rounded 1c"';
-            this.ctx.fillText('?', bossX + 45, bossY - 20);
-
             // ! マーク
             const warningScale = 1 + Math.min(this.score / 20000, 1);
             this.ctx.fillStyle = '#ff3366'; // 背景の黄色と被らないように赤に変更
@@ -627,26 +616,6 @@ class GameController {
             this.ctx.beginPath(); this.ctx.ellipse(bossX - 15, bossY - 5, 12, 6, 0.2, 0, Math.PI*2); this.ctx.fill();
             this.ctx.beginPath(); this.ctx.ellipse(bossX + 15, bossY - 5, 12, 6, -0.2, 0, Math.PI*2); this.ctx.fill();
             this.ctx.shadowBlur = 0;
-
-            // 怒りマーク（💢）
-            this.ctx.strokeStyle = '#ff3366';
-            this.ctx.lineWidth = 3;
-            this.ctx.beginPath();
-            this.ctx.moveTo(bossX + 20, bossY - 35); this.ctx.lineTo(bossX + 30, bossY - 35);
-            this.ctx.moveTo(bossX + 20, bossY - 30); this.ctx.lineTo(bossX + 30, bossY - 30);
-            this.ctx.moveTo(bossX + 23, bossY - 38); this.ctx.lineTo(bossX + 23, bossY - 27);
-            this.ctx.moveTo(bossX + 27, bossY - 38); this.ctx.lineTo(bossX + 27, bossY - 27);
-            this.ctx.stroke();
-
-            // ギザギザの口（牙）
-            this.ctx.fillStyle = '#fff';
-            this.ctx.beginPath();
-            this.ctx.moveTo(bossX - 15, bossY + 15);
-            this.ctx.lineTo(bossX - 5, bossY + 25);
-            this.ctx.lineTo(bossX + 5, bossY + 15);
-            this.ctx.lineTo(bossX + 15, bossY + 25);
-            this.ctx.lineTo(bossX + 25, bossY + 15);
-            this.ctx.fill();
 
             // 視線のレーザー（スポットライト）
             const alpha = this.gameState === STATE.GAMEOVER ? 0.6 : 0.2;
@@ -712,12 +681,6 @@ class GameController {
             this.ctx.beginPath(); this.ctx.arc(playerX, playerY + 10, 35, 0, Math.PI*2); this.ctx.fill(); // 頭が下がっている
             this.ctx.beginPath(); this.ctx.roundRect(playerX - 45, playerY + 30, 90, 80, 15); this.ctx.fill(); // 体
             
-            // 死んだ目 (- -)
-            this.ctx.strokeStyle = '#222';
-            this.ctx.lineWidth = 4;
-            this.ctx.beginPath(); this.ctx.moveTo(playerX - 15, playerY + 5); this.ctx.lineTo(playerX - 5, playerY + 5); this.ctx.stroke();
-            this.ctx.beginPath(); this.ctx.moveTo(playerX + 5, playerY + 5); this.ctx.lineTo(playerX + 15, playerY + 5); this.ctx.stroke();
-            
             // ノートPC
             this.ctx.fillStyle = '#ddd';
             this.ctx.beginPath();
@@ -726,13 +689,6 @@ class GameController {
             this.ctx.lineTo(playerX + 70, playerY + 80);
             this.ctx.lineTo(playerX - 70, playerY + 80);
             this.ctx.fill();
-            
-            // タイピングのエフェクト
-            if (Date.now() % 400 < 200) {
-                this.ctx.fillStyle = '#fff';
-                this.ctx.fillRect(playerX - 30, playerY + 40, 10, 5);
-                this.ctx.fillRect(playerX + 20, playerY + 45, 10, 5);
-            }
             
             // 画面の光
             this.ctx.fillStyle = 'rgba(51, 204, 255, 0.15)';
