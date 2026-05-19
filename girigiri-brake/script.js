@@ -256,14 +256,34 @@ class UIManager {
     }
 
     _setRankText(type) {
-        if (type === 'perfect') {
-            this.rankText.innerText = '神回避！！';
+        if (type === 'fall') return; // 落下時はshowResultで処理済み
+
+        const dist = type; // processResultから距離(m)を直接受け取る
+        const totalDist = (CONFIG.CLIFF_X - 20) / 100; // 全体距離(m)
+        const percent = (dist / totalDist) * 100; // 残り距離の割合(%)
+
+        this.rankText.className = 'rank-text'; // クラスリセット
+
+        if (dist < 1.0) {
+            this.rankText.innerText = '神回避！！🔥';
             this.rankText.classList.add('rank-perfect');
-        } else if (type === 'success') {
-            this.rankText.innerText = 'ナイス・ブレーキ！';
+        } else if (dist < 3.0) {
+            this.rankText.innerText = '凄腕ドライバー🚗💨';
             this.rankText.classList.add('rank-success');
-        } else {
+        } else if (percent < 5) {
+            this.rankText.innerText = 'ナイス・ブレーキ👍';
+            this.rankText.classList.add('rank-success');
+        } else if (percent < 15) {
+            this.rankText.innerText = 'ビビリ運転手🔰';
+            this.rankText.classList.add('rank-chicken');
+        } else if (percent < 30) {
             this.rankText.innerText = 'チキン野郎🐔';
+            this.rankText.classList.add('rank-chicken');
+        } else if (percent < 60) {
+            this.rankText.innerText = '超絶チキン野郎🐣';
+            this.rankText.classList.add('rank-chicken');
+        } else {
+            this.rankText.innerText = '歩いた方がマシ🐌';
             this.rankText.classList.add('rank-chicken');
         }
     }
@@ -421,6 +441,10 @@ class GameController {
         if (e) { e.stopPropagation(); e.preventDefault(); }
         this.audio.init();
         
+        // --- ランダム要素の追加 ---
+        // 崖までの距離を毎回ランダムに設定（10000px 〜 15000px）し、タイミングの暗記を防止
+        CONFIG.CLIFF_X = Math.floor(Math.random() * 5000) + 10000;
+        
         this.weather = WEATHERS[Math.floor(Math.random() * WEATHERS.length)];
         this.state = STATE.READY;
         this.player.x = 20;
@@ -498,14 +522,12 @@ class GameController {
         const distanceMeter = parseFloat((distancePixel / 100).toFixed(2));
         this.resultDistance = distanceMeter;
 
-        let rankType = 'chicken';
-        if (distanceMeter < 0 || distanceMeter < 1.0) {
+        if (distanceMeter < 0 || distanceMeter < 5.0) {
             this.audio.playSuccess();
-            rankType = 'perfect';
-        } else if (distanceMeter < 5.0) {
-            this.audio.playSuccess();
-            rankType = 'success';
         }
+
+        // _setRankTextに直接距離(m)を渡して詳細な評価判定を行わせる
+        let rankType = distanceMeter;
 
         if (!bestDist || distanceMeter < bestDist) {
             localStorage.setItem('girigiri_best_distance', distanceMeter.toString());

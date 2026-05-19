@@ -372,3 +372,38 @@ canvas {
 }
 @keyframes blinker { 50% { opacity: 0; } }
 .blink { animation: blinker 1s linear infinite; }
+
+/* Sub-actions for Result Screen */
+.sub-actions {
+    display: flex;
+    gap: 0.8rem;
+    width: 100%;
+}
+.sub-actions .cyber-btn {
+    flex: 1;
+    font-size: 0.9rem;
+    padding: 0.6rem;
+}
+
+/* Responsive adjustments for short screens (e.g. height < 700px) */
+@media (max-height: 700px) {
+    .main-title { font-size: 2.8rem; }
+    .subtitle { font-size: 1rem; }
+    .instruction { margin-bottom: 1.5rem; padding: 1rem; gap: 0.5rem; font-size: 0.9rem; }
+    .glass-panel { padding: 1.5rem 1rem; width: 95%; max-width: 400px; }
+    .result-title { font-size: 2rem; margin-bottom: 1rem; }
+    .score-container, .rank-container { margin-bottom: 1rem; padding: 0.8rem; }
+    .score-value { font-size: 2.5rem; }
+    .score-unit { font-size: 1.2rem; }
+    .rank-text { font-size: 1.5rem; }
+    .cyber-btn.primary { font-size: 1rem; padding: 0.6rem; }
+    .action-buttons { gap: 0.5rem; }
+}
+
+@media (max-height: 550px) {
+    .glass-panel { padding: 1rem; }
+    .result-title { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    .score-container, .rank-container { margin-bottom: 0.5rem; padding: 0.5rem; }
+    .score-value { font-size: 2rem; }
+    .rank-text { font-size: 1.2rem; }
+}
