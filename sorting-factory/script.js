@@ -64,16 +64,6 @@ class AudioManager {
         return { osc, gain };
     }
 
-    playSort(combo) {
-        if (!this.audioCtx) return;
-        const now = this.audioCtx.currentTime;
-        const { osc, gain } = this._createOscillator('sine', 800 + (Math.min(combo, 20) * 20));
-        gain.gain.setValueAtTime(0.1, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-        osc.start(now);
-        osc.stop(now + 0.1);
-    }
-
     playError() {
         if (!this.audioCtx) return;
         const now = this.audioCtx.currentTime;
@@ -403,8 +393,6 @@ class GameController {
         this.audio.init();
         this.state = STATE.PLAYING;
         this.score = 0;
-        this.combo = 0;
-        this.maxCombo = 0;
         this.fallSpeed = 300;
         this.spawnIntervalTime = 1.5;
         this.timeSinceLastSpawn = this.spawnIntervalTime;

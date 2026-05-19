@@ -9,6 +9,7 @@ const htmlPath = resolve(root, 'sorting-factory', 'index.html');
 const scriptPath = resolve(root, 'sorting-factory', 'script.js');
 const html = readFileSync(htmlPath, 'utf8');
 const script = readFileSync(scriptPath, 'utf8');
+const style = readFileSync(resolve(root, 'sorting-factory', 'style.css'), 'utf8');
 
 assert.match(html, /<canvas id="game-canvas"><\/canvas>/, 'game canvas should be present');
 assert.doesNotThrow(() => new vm.Script(script), 'sorting-factory script must be valid JavaScript');
@@ -47,4 +48,16 @@ assert.match(
   script,
   /window\.open\([^)]*'_blank',\s*'noopener,noreferrer'\)/,
   'external share fallback should open with noopener and noreferrer'
+);
+
+assert.match(
+  style,
+  /\.touch-zone\s*\{[\s\S]*?pointer-events:\s*auto;/,
+  'touch zones should receive pointer events above the canvas'
+);
+
+assert.doesNotMatch(
+  script,
+  /\bcombo\b|\bmaxCombo\b|playSort/,
+  'one-miss game should not keep unused combo-era code'
 );
