@@ -307,25 +307,21 @@ class GameController {
     }
 
     resizeCanvas() {
-        const aspect = CONFIG.LOGICAL_WIDTH / CONFIG.LOGICAL_HEIGHT;
-        const windowAspect = this.container.clientWidth / this.container.clientHeight;
-        
-        let cssWidth, cssHeight;
-        if (windowAspect > aspect) {
-            cssWidth = (this.container.clientHeight * aspect);
-            cssHeight = this.container.clientHeight;
-        } else {
-            cssWidth = this.container.clientWidth;
-            cssHeight = (this.container.clientWidth / aspect);
-        }
+        const width = this.container.clientWidth;
+        const height = this.container.clientHeight;
+
+        CONFIG.LOGICAL_HEIGHT = CONFIG.LOGICAL_WIDTH * (height / width);
+
+        this.canvas.width = CONFIG.LOGICAL_WIDTH;
+        this.canvas.height = CONFIG.LOGICAL_HEIGHT;
 
         const styles = {
-            width: cssWidth + 'px',
-            height: cssHeight + 'px',
+            width: width + 'px',
+            height: height + 'px',
             position: 'absolute',
-            left: '50%',
-            top: '50%',
-            transform: 'translate(-50%, -50%)'
+            left: '0',
+            top: '0',
+            transform: 'none'
         };
 
         Object.assign(this.canvas.style, styles);
@@ -604,14 +600,14 @@ class GameController {
         this.ctx.save();
         this.ctx.translate(boxWidth, boxY);
         this.ctx.rotate(Math.PI - this.flipperAngleLeft);
-        this.ctx.beginPath(); this.ctx.moveTo(0, 0); this.ctx.lineTo(boxWidth - 20, 0); this.ctx.stroke();
+        this.ctx.beginPath(); this.ctx.moveTo(0, 0); this.ctx.lineTo(boxWidth, 0); this.ctx.stroke();
         this.ctx.restore();
 
         // Right Flipper
         this.ctx.save();
         this.ctx.translate(boxWidth, boxY);
         this.ctx.rotate(this.flipperAngleRight);
-        this.ctx.beginPath(); this.ctx.moveTo(0, 0); this.ctx.lineTo(boxWidth - 20, 0); this.ctx.stroke();
+        this.ctx.beginPath(); this.ctx.moveTo(0, 0); this.ctx.lineTo(boxWidth, 0); this.ctx.stroke();
         this.ctx.restore();
     }
 
