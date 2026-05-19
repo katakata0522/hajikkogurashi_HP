@@ -331,8 +331,21 @@ class GameController {
         };
 
         window.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft') handleInput(-1);
-            if (e.key === 'ArrowRight') handleInput(1);
+            if (this.state === STATE.PLAYING) {
+                if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+                    e.preventDefault();
+                    this.processInput(-1);
+                } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+                    e.preventDefault();
+                    this.processInput(1);
+                }
+            } else if (this.state === STATE.START || this.state === STATE.GAMEOVER) {
+                if (e.key === ' ' || e.key === 'Enter') {
+                    if (document.activeElement && document.activeElement.tagName === 'BUTTON') return;
+                    e.preventDefault();
+                    this.startGame();
+                }
+            }
         });
         
         this.ui.touchLeft.addEventListener('touchstart', (e) => handleInput(-1, e), {passive: false});
@@ -420,7 +433,7 @@ class GameController {
             if (this.combo > this.maxCombo) this.maxCombo = this.combo;
             
             this.fallSpeed = Math.min(this.fallSpeed + 10, 1500);
-            this.spawnIntervalTime = Math.max(this.spawnIntervalTime - 0.05, 0.4);
+            this.spawnIntervalTime = Math.max(this.spawnIntervalTime - 0.02, 0.4);
 
             if (this.score > 10 && Math.random() < 0.15) {
                 this.setRule(this.currentRule === CONFIG.RULES.COLOR ? CONFIG.RULES.SHAPE : CONFIG.RULES.COLOR);
