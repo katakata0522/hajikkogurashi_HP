@@ -4,10 +4,10 @@
 
 const CONFIG = {
     LOGICAL_WIDTH: 600,
-    LOGICAL_HEIGHT: 1500,
+    LOGICAL_HEIGHT: 1000,
     COLORS: { RED: '#ff3366', BLUE: '#00c3ff' },
     SHAPES: { CIRCLE: 0, SQUARE: 1 },
-    SIZES: { SMALL: 80, LARGE: 150 },
+    SIZES: { SMALL: 80, LARGE: 140 },
     RULES: { COLOR: '色', SHAPE: '形', SIZE: '大きさ', NUMBER: '数字' }
 };
 
@@ -304,8 +304,8 @@ class GameController {
         this.currentRule = CONFIG.RULES.COLOR;
         
         this.items = [];
-        this.fallSpeed = 300;
-        this.spawnIntervalTime = 1.5;
+        this.fallSpeed = 200; // 初期スピードを遅くして思考時間を確保
+        this.spawnIntervalTime = 1.8;
         this.timeSinceLastSpawn = 0;
 
         this.screenShake = 0;
@@ -485,8 +485,8 @@ class GameController {
             this.combo++;
             if (this.combo > this.maxCombo) this.maxCombo = this.combo;
             
-            this.fallSpeed = Math.min(this.fallSpeed + 10, 1500);
-            this.spawnIntervalTime = Math.max(this.spawnIntervalTime - 0.02, 0.4);
+            this.fallSpeed = Math.min(this.fallSpeed + 8, 1200); // 最大スピードも抑えめに
+            this.spawnIntervalTime = Math.max(this.spawnIntervalTime - 0.02, 0.5);
 
             this.sortsUntilChange--;
             if (this.sortsUntilChange <= 0) {
