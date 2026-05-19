@@ -14,10 +14,6 @@
 
         <!-- UIレイヤー -->
         <div id="ui-layer">
-            <div class="dark-mode-container">
-                <input type="checkbox" id="dark-mode-toggle" class="dark-mode-checkbox">
-                <label for="dark-mode-toggle" class="dark-mode-label">残業モード🌙</label>
-            </div>
             <!-- HUD -->
             <div id="hud" class="hidden">
                 <div class="hud-left">
@@ -35,29 +31,29 @@
             </div>
 
             <!-- 操作ヒント -->
-            <div id="hint-text" class="hint-text hidden">画面をなぞって敵を囲め！</div>
+            <div id="hint-text" class="hint-text hidden">画面をなぞってターゲットを囲め！</div>
 
             <!-- スタート画面 -->
             <div id="start-screen" class="screen active cyber-panel">
                 <div class="title-container">
-                    <h1 class="main-title">炎上タスク<br><span class="highlight">火消し</span><br>スイーパー</h1>
+                    <h1 class="main-title">BLACKHOLE<br><span class="highlight">SWEEPER</span></h1>
                 </div>
                 <div class="instruction">
                     <p><strong>【ルール】</strong></p>
-                    <p>画面をスワイプして<span class="text-cyan">線</span>を引き、<br>敵をぐるっと<span class="text-cyan">囲んで</span>消滅させろ！</p>
+                    <p>画面をスワイプして<span class="text-cyan">線</span>を引き、<br>ターゲットをぐるっと<span class="text-cyan">囲んで</span>吸い込め！</p>
                     <p>一気に囲むと<span class="text-yellow">コンボボーナス！</span></p>
-                    <p class="warning">引いている途中の線に敵がぶつかるとダメージ！</p>
+                    <p class="warning">引いている途中の線にターゲットがぶつかるとダメージ！</p>
                 </div>
-                <button id="start-btn" class="cyber-btn">鎮火開始 (START)</button>
+                <button id="start-btn" class="cyber-btn">SWEEP START</button>
             </div>
 
             <!-- リザルト画面 -->
             <div id="result-screen" class="screen result-panel">
                 <div class="result-box">
-                    <h2 class="result-title">SYSTEM DOWN<br><span class="sub-title">（タスクに押し潰された…）</span></h2>
+                    <h2 class="result-title">GAME OVER<br><span class="sub-title">（シールド大破）</span></h2>
                     
                     <div class="score-container">
-                        <p class="score-label">消火スコア</p>
+                        <p class="score-label">スコア</p>
                         <p id="final-score" class="final-score">0</p>
                         <p class="best-score-label">BEST: <span id="best-score-value">--</span></p>
                         <p id="new-record-badge" class="new-record blink hidden">NEW RECORD!!</p>
