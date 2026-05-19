@@ -173,6 +173,7 @@ canvas {
     pointer-events: auto;
     overflow-y: auto; /* 内容がはみ出る場合はスクロール可能に */
     padding: 20px;
+    box-sizing: border-box;
 }
 
 .screen.active {

@@ -7,7 +7,7 @@ const CONFIG = {
     LOGICAL_HEIGHT: 1500,
     COLORS: { RED: '#ff3366', BLUE: '#00c3ff' },
     SHAPES: { CIRCLE: 0, SQUARE: 1 },
-    SIZES: { SMALL: 60, LARGE: 110 },
+    SIZES: { SMALL: 80, LARGE: 150 },
     RULES: { COLOR: '色', SHAPE: '形', SIZE: '大きさ', NUMBER: '数字' }
 };
 
@@ -558,7 +558,7 @@ class GameController {
         for (let i = 0; i < this.items.length; i++) {
             this.items[i].update(dt, this.fallSpeed);
 
-            if (!this.items[i].isSorted && this.items[i].y > CONFIG.LOGICAL_HEIGHT - 150) {
+            if (!this.items[i].isSorted && this.items[i].y > CONFIG.LOGICAL_HEIGHT - 100) {
                 this.triggerGameOver();
                 return;
             }
@@ -568,47 +568,48 @@ class GameController {
     }
 
     drawBoxes() {
-        const boxY = CONFIG.LOGICAL_HEIGHT - 150;
+        const boxHeight = 100;
+        const boxY = CONFIG.LOGICAL_HEIGHT - boxHeight;
         const boxWidth = CONFIG.LOGICAL_WIDTH / 2;
         const isColor = this.currentRule === CONFIG.RULES.COLOR;
         
         // Left Box
         this.ctx.fillStyle = isColor ? 'rgba(255, 51, 102, 0.5)' : 'rgba(30, 30, 40, 0.8)';
-        this.ctx.fillRect(0, boxY, boxWidth, 150);
+        this.ctx.fillRect(0, boxY, boxWidth, boxHeight);
         this.ctx.strokeStyle = isColor ? CONFIG.COLORS.RED : '#555';
         this.ctx.lineWidth = 4;
         this.ctx.beginPath(); this.ctx.moveTo(0, boxY); this.ctx.lineTo(boxWidth, boxY); this.ctx.stroke();
 
         // Right Box
         this.ctx.fillStyle = isColor ? 'rgba(0, 195, 255, 0.5)' : 'rgba(30, 30, 40, 0.8)';
-        this.ctx.fillRect(boxWidth, boxY, boxWidth, 150);
+        this.ctx.fillRect(boxWidth, boxY, boxWidth, boxHeight);
         this.ctx.strokeStyle = isColor ? CONFIG.COLORS.BLUE : '#555';
         this.ctx.beginPath(); this.ctx.moveTo(boxWidth, boxY); this.ctx.lineTo(CONFIG.LOGICAL_WIDTH, boxY); this.ctx.stroke();
 
         // Shape Icons / Size Labels / Number Labels
         if (this.currentRule === CONFIG.RULES.SHAPE) {
             this.ctx.strokeStyle = 'rgba(255,255,255,0.8)';
-            this.ctx.lineWidth = 10;
-            this.ctx.shadowBlur = 20;
+            this.ctx.lineWidth = 8;
+            this.ctx.shadowBlur = 15;
             this.ctx.shadowColor = '#fff';
             // Circle left
-            this.ctx.beginPath(); this.ctx.arc(boxWidth/2, boxY + 75, 40, 0, Math.PI*2); this.ctx.stroke();
+            this.ctx.beginPath(); this.ctx.arc(boxWidth/2, boxY + 50, 30, 0, Math.PI*2); this.ctx.stroke();
             // Square right
-            this.ctx.beginPath(); this.ctx.roundRect(boxWidth + boxWidth/2 - 40, boxY + 35, 80, 80, 10); this.ctx.stroke();
+            this.ctx.beginPath(); this.ctx.roundRect(boxWidth + boxWidth/2 - 30, boxY + 20, 60, 60, 8); this.ctx.stroke();
             this.ctx.shadowBlur = 0;
         } else if (this.currentRule === CONFIG.RULES.SIZE) {
             this.ctx.fillStyle = 'rgba(255,255,255,0.8)';
             this.ctx.textAlign = 'center';
+            this.ctx.font = 'bold 30px "M PLUS Rounded 1c"';
+            this.ctx.fillText('小 (SMALL)', boxWidth/2, boxY + 60);
             this.ctx.font = 'bold 40px "M PLUS Rounded 1c"';
-            this.ctx.fillText('小 (SMALL)', boxWidth/2, boxY + 85);
-            this.ctx.font = 'bold 50px "M PLUS Rounded 1c"';
-            this.ctx.fillText('大 (LARGE)', boxWidth + boxWidth/2, boxY + 85);
+            this.ctx.fillText('大 (LARGE)', boxWidth + boxWidth/2, boxY + 60);
         } else if (this.currentRule === CONFIG.RULES.NUMBER) {
             this.ctx.fillStyle = 'rgba(255,255,255,0.8)';
             this.ctx.textAlign = 'center';
-            this.ctx.font = 'bold 30px "M PLUS Rounded 1c"';
-            this.ctx.fillText('奇数 (1,3,5...)', boxWidth/2, boxY + 85);
-            this.ctx.fillText('偶数 (2,4,6...)', boxWidth + boxWidth/2, boxY + 85);
+            this.ctx.font = 'bold 24px "M PLUS Rounded 1c"';
+            this.ctx.fillText('奇数 (1,3,5...)', boxWidth/2, boxY + 60);
+            this.ctx.fillText('偶数 (2,4,6...)', boxWidth + boxWidth/2, boxY + 60);
         }
 
         // 境界線
