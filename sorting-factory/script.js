@@ -62,15 +62,18 @@ class AudioManager {
         osc.stop(now + 0.3);
     }
 
-    playRuleChange() {
+    playSiren() {
         if (!this.audioCtx) return;
         const now = this.audioCtx.currentTime;
-        const { osc, gain } = this._createOscillator('square', 400);
-        osc.frequency.setValueAtTime(600, now + 0.1);
-        gain.gain.setValueAtTime(0.1, now);
-        gain.gain.linearRampToValueAtTime(0, now + 0.3);
+        const { osc, gain } = this._createOscillator('square', 600);
+        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.setValueAtTime(800, now + 0.2);
+        osc.frequency.setValueAtTime(600, now + 0.4);
+        osc.frequency.setValueAtTime(800, now + 0.6);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.linearRampToValueAtTime(0, now + 1.0);
         osc.start(now);
-        osc.stop(now + 0.3);
+        osc.stop(now + 1.0);
     }
 }
 
@@ -84,6 +87,8 @@ class UIManager {
         this.scoreHud = document.getElementById('score-hud');
         this.ruleDisplay = document.getElementById('rule-display');
         this.currentRuleText = document.getElementById('current-rule-text');
+        this.ruleAlert = document.getElementById('rule-alert');
+        this.alertText = document.getElementById('alert-text');
         this.bgEffect = document.getElementById('bg-effect');
         
         this.touchLeft = document.getElementById('touch-left');
@@ -115,6 +120,15 @@ class UIManager {
         this.currentRuleText.innerText = `${ruleName}で仕分けろ！`;
         this.ruleDisplay.classList.add('changed');
         setTimeout(() => this.ruleDisplay.classList.remove('changed'), 300);
+    }
+
+    showRuleAlert(ruleName) {
+        this.alertText.innerText = ruleName;
+        this.ruleAlert.classList.remove('hidden');
+    }
+
+    hideRuleAlert() {
+        this.ruleAlert.classList.add('hidden');
     }
 
     updateScore(score, combo) {
@@ -383,8 +397,10 @@ class GameController {
         this.timeSinceLastSpawn = this.spawnIntervalTime;
         this.lastTime = 0;
         this.screenShake = 0;
+        this.freezeTimer = 0;
         this.items = [];
         this.particles.clear();
+        this.ui.hideRuleAlert();
         
         this.currentRule = CONFIG.RULES.COLOR;
         this.ui.startGameUI();
@@ -396,7 +412,9 @@ class GameController {
 
     setRule(newRule) {
         if(this.currentRule !== newRule && this.state === STATE.PLAYING) {
-            this.audio.playRuleChange();
+            this.audio.playSiren();
+            this.freezeTimer = 1.0; // 1秒間タイムフリーズして思考時間を確保
+            this.ui.showRuleAlert(newRule);
         }
         this.currentRule = newRule;
         this.ui.setRule(this.currentRule);
@@ -404,6 +422,7 @@ class GameController {
 
     processInput(direction) {
         if (this.state !== STATE.PLAYING) return;
+        if (this.freezeTimer > 0) return; // フリーズ中は入力を無視
 
         let targetItem = null;
         for (let i = 0; i < this.items.length; i++) {
@@ -479,6 +498,16 @@ class GameController {
         if (this.screenShake > 0) {
             this.screenShake -= 30 * dt;
             if (this.screenShake < 0) this.screenShake = 0;
+        }
+
+        // タイムフリーズ中の処理
+        if (this.freezeTimer > 0) {
+            this.freezeTimer -= dt;
+            if (this.freezeTimer <= 0) {
+                this.freezeTimer = 0;
+                this.ui.hideRuleAlert();
+            }
+            return; // タイムフリーズ中はアイテムの移動と出現をストップ
         }
 
         this.timeSinceLastSpawn += dt;
