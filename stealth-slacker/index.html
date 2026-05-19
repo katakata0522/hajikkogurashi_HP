@@ -16,11 +16,18 @@
 
         <!-- UIレイヤー -->
         <div id="ui-layer">
-            
             <!-- スコア表示（プレイ中） -->
             <div id="score-hud" class="score-hud hidden">
                 <span class="score-label">サボり度</span>
                 <span id="score-value" class="score-value">0</span>
+            </div>
+
+            <!-- ストレスゲージ（プレイ中） -->
+            <div id="stress-hud" class="stress-hud hidden">
+                <span class="stress-label">ストレス</span>
+                <div class="stress-bar-container">
+                    <div id="stress-bar-fill" class="stress-bar-fill"></div>
+                </div>
             </div>
 
             <!-- 操作ヒント -->
@@ -33,9 +40,9 @@
                 </div>
                 <div class="instruction">
                     <p><strong>【ルール】</strong></p>
-                    <p>画面を<span class="text-red">長押し</span>して全力でサボれ！<br>スコアが爆速で貯まるぞ！</p>
+                    <p>画面を<span class="text-red">長押し</span>してサボれ！<br>『！』中は<span class="text-red">スコア爆増ボーナス！</span></p>
                     <p>上司が振り向いたら<br>指を離して<span class="text-blue">仕事してるフリ</span>をしろ！</p>
-                    <p class="warning">見つかったら即クビだ！！</p>
+                    <p class="warning">働きすぎるとストレスで死ぬぞ！！</p>
                 </div>
                 <button id="start-btn" class="comic-btn">出社する (START)</button>
             </div>

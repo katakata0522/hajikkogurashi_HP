@@ -121,7 +121,7 @@ canvas {
 /* --- ヒントテキスト --- */
 .hint-text {
     position: absolute;
-    bottom: 20%;
+    bottom: 25%;
     left: 50%;
     transform: translateX(-50%);
     font-family: var(--font-comic);
@@ -137,6 +137,58 @@ canvas {
 @keyframes bounce {
     from { transform: translate(-50%, 0); }
     to { transform: translate(-50%, -10px); }
+}
+
+/* --- ストレスゲージ --- */
+.stress-hud {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 85%;
+    max-width: 400px;
+    background: #fff;
+    border: 4px solid var(--border-color);
+    padding: 8px 15px;
+    border-radius: 20px;
+    box-shadow: 4px 4px 0 var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.stress-label {
+    font-family: var(--font-comic);
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--border-color);
+}
+
+.stress-bar-container {
+    flex-grow: 1;
+    height: 15px;
+    background: #eee;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.stress-bar-fill {
+    width: 0%;
+    height: 100%;
+    background: #00cc66;
+    transition: width 0.1s, background-color 0.3s;
+}
+
+.stress-bar-fill.danger {
+    background: #ff3366;
+    animation: blink-stress 0.5s infinite;
+}
+
+@keyframes blink-stress {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
 }
 
 /* --- 画面共通 --- */

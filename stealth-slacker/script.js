@@ -129,6 +129,9 @@ class UIManager {
         this.scoreHud = document.getElementById('score-hud');
         this.hintText = document.getElementById('hint-text');
         this.bgFever = document.getElementById('bg-fever');
+        
+        this.stressHud = document.getElementById('stress-hud');
+        this.stressBarFill = document.getElementById('stress-bar-fill');
 
         this.scoreValueEl = document.getElementById('score-value');
         this.finalScoreEl = document.getElementById('final-score');
@@ -141,11 +144,13 @@ class UIManager {
         this.startScreen.classList.remove('active');
         this.resultScreen.classList.remove('active');
         this.scoreHud.classList.remove('hidden');
+        this.stressHud.classList.remove('hidden');
         this.hintText.classList.remove('hidden');
         this.scoreValueEl.innerText = '0';
         this.scoreValueEl.style.transform = 'scale(1)';
         this.scoreValueEl.style.color = 'var(--border-color)';
         this.bgFever.style.animationDuration = '10s';
+        this.updateStress(0);
     }
 
     setSlacking(isSlacking) {
@@ -160,24 +165,33 @@ class UIManager {
     updateScore(score) {
         this.scoreValueEl.innerText = Math.floor(score);
         
-        // カオス演出（スコアが高いほど赤くなり、揺れる）
+        // カオス演出
         if (score > 10000) {
-            const chaosLevel = Math.min((score - 10000) / 100000, 1); // 0 to 1
+            const chaosLevel = Math.min((score - 10000) / 100000, 1);
             const scale = 1 + (chaosLevel * 0.5);
             const red = Math.floor(chaosLevel * 255);
             this.scoreValueEl.style.transform = `scale(${scale}) rotate(${(Math.random()-0.5)*10*chaosLevel}deg)`;
             this.scoreValueEl.style.color = `rgb(${red}, 0, 0)`;
             
-            // 背景の回転速度UP
             const duration = Math.max(1, 10 - (chaosLevel * 9));
             this.bgFever.style.animationDuration = `${duration}s`;
         }
     }
 
-    showGameOver(score, bestScore, isNewRecord) {
+    updateStress(stress) {
+        this.stressBarFill.style.width = `${Math.min(100, Math.max(0, stress))}%`;
+        if (stress >= 80) {
+            this.stressBarFill.classList.add('danger');
+        } else {
+            this.stressBarFill.classList.remove('danger');
+        }
+    }
+
+    showGameOver(score, bestScore, isNewRecord, reason) {
         this.bgFever.classList.remove('active');
         this.hintText.classList.add('hidden');
         this.scoreHud.classList.add('hidden');
+        this.stressHud.classList.add('hidden');
         
         let rank = "";
         if (score < 5000) rank = "真面目か！";
@@ -185,6 +199,13 @@ class UIManager {
         else if (score < 50000) rank = "プロニート";
         else if (score < 100000) rank = "伝説のサボり魔";
         else rank = "会社を裏で牛耳る者";
+
+        const titleEl = this.resultScreen.querySelector('.result-title');
+        if (reason === 'karoushi') {
+            titleEl.innerHTML = "GAME OVER<br><span class=\"sub-title\">（過労で倒れた！）</span>";
+        } else {
+            titleEl.innerHTML = "YOU'RE FIRED!!<br><span class=\"sub-title\">（見つかった！）</span>";
+        }
 
         this.finalScoreEl.innerText = Math.floor(score);
         this.rankTextEl.innerText = rank;
@@ -217,8 +238,16 @@ class GameController {
         this.bossTimer = 0;
         this.isFeint = false;
         
+        this.currentWarningTime = 1000;
+        this.doubleTurnPending = false;
+        this.doubleTurnSetup = false;
+        
         this.isSlacking = false;
         this.score = 0;
+        this.stress = 0; // 0 to 100
+        this.stressRate = 18; // Increase per second when working
+        this.reliefRate = 40; // Decrease per second when slacking
+
         this.animationId = null;
         this.lastTime = 0;
         this.floatingTexts = [];
@@ -323,6 +352,9 @@ class GameController {
         this.gameState = STATE.PLAYING;
         this.bossState = BOSS.AWAY;
         this.score = 0;
+        this.stress = 0;
+        this.doubleTurnPending = false;
+        this.doubleTurnSetup = false;
         this.bossTimer = this.getRandomInt(2000, 4000); 
         this.isSlacking = false;
         this.floatingTexts = [];
@@ -337,7 +369,7 @@ class GameController {
         this.animationId = requestAnimationFrame((t) => this.loop(t));
     }
 
-    triggerGameOver() {
+    triggerGameOver(reason = 'found') {
         this.gameState = STATE.GAMEOVER;
         this.audio.stopEnvironmentSounds();
         this.audio.playEffect('gameover');
@@ -357,7 +389,7 @@ class GameController {
             isNewRecord = true;
         }
 
-        this.ui.showGameOver(this.score, bestScore, isNewRecord);
+        this.ui.showGameOver(this.score, bestScore, isNewRecord, reason);
         this.draw(); 
     }
 
@@ -369,10 +401,41 @@ class GameController {
             if (this.screenShake < 0) this.screenShake = 0;
         }
 
-        // --- Score & Chaos ---
+        // --- Stress Update ---
         if (this.isSlacking) {
+            this.stress -= this.reliefRate * dt;
+            if (this.stress < 0) this.stress = 0;
+        } else {
+            this.stress += this.stressRate * dt;
+            if (this.stress >= 100) {
+                this.triggerGameOver('karoushi');
+                return;
+            }
+        }
+        this.ui.updateStress(this.stress);
+
+        // --- Score & Chaos & Risk/Reward ---
+        if (this.isSlacking) {
+            let multiplier = 1;
+            
+            // 見切りボーナス：上司が『！』を出している間はスコア爆増
+            if (this.bossState === BOSS.WARNING) {
+                const factor = 1 - (this.bossTimer / this.currentWarningTime); // 0 to 1
+                multiplier = 2 + (factor * 8); // 2倍〜10倍！
+                
+                if (Math.random() < 0.1) {
+                    this.floatingTexts.push({
+                        x: CONFIG.LOGICAL_WIDTH / 2 + (Math.random() * 200 - 100),
+                        y: CONFIG.LOGICAL_HEIGHT * 0.7 - 50,
+                        life: 1.0,
+                        text: `x${Math.floor(multiplier)}!`,
+                        scale: 1.5
+                    });
+                }
+            }
+
             const scorePerSec = (Math.floor(this.score / 1000) + 10) * 60;
-            this.score += scorePerSec * dt;
+            this.score += scorePerSec * multiplier * dt;
             this.ui.updateScore(this.score);
             
             // Chaos texts
@@ -396,15 +459,43 @@ class GameController {
         
         if (this.bossState === BOSS.AWAY) {
             if (this.bossTimer <= 0) {
-                // スコアが高いほどフェイント率上昇、最大50%
-                const feintRate = Math.min(0.1 + (this.score / 50000), 0.5);
-                this.isFeint = Math.random() < feintRate;
-                
-                this.bossState = BOSS.WARNING;
-                // 警戒時間。スコアが高いほど短くなる
-                const warningTime = Math.max(200, 1000 - (this.score / 100));
-                this.bossTimer = warningTime;
-                this.audio.playEffect('warning');
+                const difficulty = Math.min(this.score / 50000, 1); // 0 to 1
+
+                if (this.doubleTurnPending) {
+                    // 二段振り向き発動（超速）
+                    this.isFeint = false;
+                    this.bossState = BOSS.WARNING;
+                    this.currentWarningTime = 200; // 超短い猶予
+                    this.bossTimer = this.currentWarningTime;
+                    this.audio.playEffect('warning');
+                    this.doubleTurnPending = false;
+                } else {
+                    const rand = Math.random();
+                    if (rand < 0.15 + (difficulty * 0.15)) {
+                        // フェイント
+                        this.isFeint = true;
+                        this.bossState = BOSS.WARNING;
+                        this.currentWarningTime = 800 - (difficulty * 300);
+                        this.bossTimer = this.currentWarningTime;
+                        this.audio.playEffect('warning');
+                    } else if (rand < 0.3 + (difficulty * 0.15) && difficulty > 0.1) {
+                        // 二段振り向きの布石（最初は普通に振り向く）
+                        this.isFeint = false;
+                        this.doubleTurnSetup = true;
+                        this.bossState = BOSS.WARNING;
+                        this.currentWarningTime = Math.max(300, 1000 - (difficulty * 500));
+                        this.bossTimer = this.currentWarningTime;
+                        this.audio.playEffect('warning');
+                    } else {
+                        // 通常振り向き（緩急あり）
+                        this.isFeint = false;
+                        const isFast = Math.random() < difficulty; 
+                        this.bossState = BOSS.WARNING;
+                        this.currentWarningTime = isFast ? Math.max(250, 600 - (difficulty * 200)) : 1000 + Math.random() * 500;
+                        this.bossTimer = this.currentWarningTime;
+                        this.audio.playEffect('warning');
+                    }
+                }
             }
         } else if (this.bossState === BOSS.WARNING) {
             if (this.bossTimer <= 0) {
@@ -420,13 +511,19 @@ class GameController {
             }
         } else if (this.bossState === BOSS.LOOKING) {
             if (this.isSlacking) {
-                this.triggerGameOver();
+                this.triggerGameOver('found');
                 return;
             }
             if (this.bossTimer <= 0) {
                 this.bossState = BOSS.AWAY;
-                const nextAwayTime = Math.max(500, 3000 - (this.score / 50));
-                this.bossTimer = this.getRandomInt(nextAwayTime, nextAwayTime + 1500);
+                if (this.doubleTurnSetup) {
+                    this.bossTimer = 150; // 振り向いてすぐにもう一度！
+                    this.doubleTurnPending = true;
+                    this.doubleTurnSetup = false;
+                } else {
+                    const nextAwayTime = Math.max(500, 3000 - (this.score / 50));
+                    this.bossTimer = this.getRandomInt(nextAwayTime, nextAwayTime + 1500);
+                }
             }
         }
 
