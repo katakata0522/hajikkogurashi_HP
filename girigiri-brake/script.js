@@ -106,17 +106,42 @@ class AudioManager {
     playSkidStart() {
         if (!this.audioCtx || this.skidOscillator) return;
         const now = this.audioCtx.currentTime;
-        const { osc, gain } = this._createOscillator('sawtooth', 600);
-        gain.gain.setValueAtTime(0.1, now);
+        
+        // 高音の摩擦悲鳴（キキキーッ）をリアルに表現するため、2つの波形オシレーターをミックス
+        const { osc, gain } = this._createOscillator('sawtooth', 850);
+        const osc2 = this.audioCtx.createOscillator();
+        const gain2 = this.audioCtx.createGain();
+        osc2.type = 'triangle';
+        osc2.frequency.setValueAtTime(1700, now);
+        
+        osc2.connect(gain2);
+        gain2.connect(this.audioCtx.destination);
+        
+        gain.gain.setValueAtTime(0.06, now);
+        gain2.gain.setValueAtTime(0.03, now);
+        
         osc.start(now);
+        osc2.start(now);
+        
         this.skidOscillator = osc;
+        this.skidOscillator2 = osc2;
         this.skidGain = gain;
+        this.skidGain2 = gain2;
     }
 
     updateSkid(speed) {
         if (this.skidOscillator && speed > 0 && this.audioCtx) {
-            const freq = Math.max(100, (speed / 2000) * 600 + 100);
-            this.skidOscillator.frequency.setValueAtTime(freq, this.audioCtx.currentTime);
+            const now = this.audioCtx.currentTime;
+            // 速度低下に合わせて摩擦ピッチがキキーと変化するよう動的に制御
+            const baseFreq = Math.max(250, (speed / 2000) * 600 + 250);
+            
+            // ビブラート（高速揺れ）を加えてタイヤがアスファルトを削る粗い摩擦感を再現
+            const vibrato = Math.sin(now * 60) * 20;
+            this.skidOscillator.frequency.setValueAtTime(baseFreq + vibrato, now);
+            
+            if (this.skidOscillator2) {
+                this.skidOscillator2.frequency.setValueAtTime((baseFreq * 2) + vibrato, now);
+            }
         }
     }
 
@@ -127,6 +152,13 @@ class AudioManager {
             this.skidOscillator.stop(now + 0.1);
             this.skidOscillator = null;
             this.skidGain = null;
+            
+            if (this.skidOscillator2) {
+                this.skidGain2.gain.linearRampToValueAtTime(0, now + 0.1);
+                this.skidOscillator2.stop(now + 0.1);
+                this.skidOscillator2 = null;
+                this.skidGain2 = null;
+            }
         }
     }
 }
@@ -370,24 +402,19 @@ class GameController {
             else if (this.state === STATE.RUNNING) this.triggerBrake();
         };
 
-        this.container.addEventListener('mousedown', handleInput);
-        this.container.addEventListener('touchstart', handleInput, { passive: false });
+        // PointerEventsを利用して、タッチとクリックの重複発火（ゴーストタップ）を完全に防止
+        this.container.addEventListener('pointerdown', handleInput);
 
         const startBtn = document.getElementById('start-btn');
         const retryBtn = document.getElementById('retry-btn');
         const shareBtn = document.getElementById('share-btn');
         const menuBtn = document.getElementById('menu-btn');
 
+        // ボタンのクリックイベントは click イベントのみで制御（モバイル・PC共に高レスポンスで動く）
         startBtn.addEventListener('click', (e) => this.startGame(e));
-        startBtn.addEventListener('touchstart', (e) => this.startGame(e));
         retryBtn.addEventListener('click', (e) => this.startGame(e));
-        retryBtn.addEventListener('touchstart', (e) => this.startGame(e));
-        
         shareBtn.addEventListener('click', (e) => this.shareResult(e));
-        shareBtn.addEventListener('touchstart', (e) => this.shareResult(e));
-        
         menuBtn.addEventListener('click', (e) => { e.stopPropagation(); window.location.href = '../minigames.html'; });
-        menuBtn.addEventListener('touchstart', (e) => { e.stopPropagation(); window.location.href = '../minigames.html'; });
     }
 
     startGame(e) {
@@ -627,35 +654,143 @@ class GameController {
             }
         }
 
+        // --- 天候エフェクト描画（背景・雰囲気の可視化） ---
+        if (this.weather.name.includes('RAIN')) {
+            this.ctx.strokeStyle = 'rgba(174, 207, 238, 0.4)';
+            this.ctx.lineWidth = 1.5;
+            const rainSeed = (Date.now() / 12) % 300;
+            for (let i = 0; i < 40; i++) {
+                const x = ((i * 37) + rainSeed * 2.5) % CONFIG.LOGICAL_WIDTH;
+                const y = ((i * 19) + rainSeed * 5) % CONFIG.LOGICAL_HEIGHT;
+                this.ctx.beginPath();
+                this.ctx.moveTo(x, y);
+                this.ctx.lineTo(x - 6, y + 18);
+                this.ctx.stroke();
+            }
+        } else if (this.weather.name.includes('TAILWIND')) {
+            this.ctx.strokeStyle = 'rgba(0, 242, 254, 0.15)';
+            this.ctx.lineWidth = 1.2;
+            const windSeed = (Date.now() / 10) % 500;
+            for (let i = 0; i < 8; i++) {
+                const x = ((i * 123) + windSeed * 4.5) % (CONFIG.LOGICAL_WIDTH + 100) - 50;
+                const y = (i * 73) % (CONFIG.LOGICAL_HEIGHT - 200) + 50;
+                this.ctx.beginPath();
+                this.ctx.moveTo(x, y);
+                this.ctx.lineTo(x + 70, y);
+                this.ctx.stroke();
+            }
+        } else if (this.weather.name.includes('HEADWIND')) {
+            this.ctx.strokeStyle = 'rgba(255, 179, 71, 0.15)';
+            this.ctx.lineWidth = 1.2;
+            const windSeed = (Date.now() / 10) % 500;
+            for (let i = 0; i < 8; i++) {
+                const x = CONFIG.LOGICAL_WIDTH - (((i * 123) + windSeed * 4.5) % (CONFIG.LOGICAL_WIDTH + 100)) + 50;
+                const y = (i * 73) % (CONFIG.LOGICAL_HEIGHT - 200) + 50;
+                this.ctx.beginPath();
+                this.ctx.moveTo(x, y);
+                this.ctx.lineTo(x - 70, y);
+                this.ctx.stroke();
+            }
+        }
+
         this.ctx.restore(); // 画面揺れ解除
 
-        // --- プレイヤー描画 ---
+        // --- プレイヤー描画（長方形から流線型のネオンスポーツカーへ） ---
         this.ctx.save();
         if (this.screenShake > 0) {
             this.ctx.translate((Math.random() - 0.5) * this.screenShake, (Math.random() - 0.5) * this.screenShake);
         }
         const screenX = this.player.x - this.cameraX;
         
-        this.ctx.fillStyle = this.player.color;
-        this.ctx.shadowBlur = 15;
+        // 1. アンダーグロー（サイバーパンクな底面発光）
+        this.ctx.fillStyle = 'rgba(0, 242, 254, 0.18)';
+        this.ctx.shadowBlur = 20;
         this.ctx.shadowColor = this.player.color;
+        this.ctx.beginPath();
+        this.ctx.ellipse(screenX + this.player.width / 2, this.player.y + this.player.height, this.player.width / 1.4, 5, 0, 0, Math.PI * 2);
+        this.ctx.fill();
+
+        // 2. 流線型スポーツカーのボディライン
+        this.ctx.fillStyle = this.player.color;
+        this.ctx.beginPath();
+        this.ctx.moveTo(screenX + 4, this.player.y + this.player.height - 4); // 左下
+        this.ctx.lineTo(screenX + 2, this.player.y + 13); // リア後端
+        this.ctx.quadraticCurveTo(screenX + 15, this.player.y + 5, screenX + 32, this.player.y + 5); // ルーフ
+        this.ctx.lineTo(screenX + 44, this.player.y + 17); // フロントガラス斜面
+        this.ctx.lineTo(screenX + this.player.width - 3, this.player.y + 19); // ボンネット
+        this.ctx.lineTo(screenX + this.player.width, this.player.y + this.player.height - 4); // フロントバンパー
+        this.ctx.closePath();
+        this.ctx.fill();
+
+        // 3. フロント・サイドウィンドウの描画
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+        this.ctx.shadowBlur = 0; // グローを窓には適用しない
+        this.ctx.beginPath();
+        this.ctx.moveTo(screenX + 25, this.player.y + 8);
+        this.ctx.lineTo(screenX + 33, this.player.y + 8);
+        this.ctx.lineTo(screenX + 39, this.player.y + 16);
+        this.ctx.lineTo(screenX + 28, this.player.y + 16);
+        this.ctx.closePath();
+        this.ctx.fill();
+
+        // 4. ホイールとタイヤ（サイバーブルーのリム付き）
+        this.ctx.fillStyle = '#0f172a';
+        this.ctx.strokeStyle = '#00f2fe';
+        this.ctx.lineWidth = 1.8;
         
+        // 後輪
         this.ctx.beginPath();
-        this.ctx.roundRect(screenX, this.player.y, this.player.width, this.player.height, 6);
+        this.ctx.arc(screenX + 16, this.player.y + this.player.height - 4, 7, 0, Math.PI * 2);
+        this.ctx.fill();
+        this.ctx.stroke();
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.beginPath();
+        this.ctx.arc(screenX + 16, this.player.y + this.player.height - 4, 2, 0, Math.PI * 2);
+        this.ctx.fill();
+        
+        // 前輪
+        this.ctx.fillStyle = '#0f172a';
+        this.ctx.beginPath();
+        this.ctx.arc(screenX + this.player.width - 16, this.player.y + this.player.height - 4, 7, 0, Math.PI * 2);
+        this.ctx.fill();
+        this.ctx.stroke();
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.beginPath();
+        this.ctx.arc(screenX + this.player.width - 16, this.player.y + this.player.height - 4, 2, 0, Math.PI * 2);
         this.ctx.fill();
 
-        this.ctx.fillStyle = 'rgba(255,255,255,0.8)';
-        this.ctx.shadowBlur = 0;
+        // 5. リアスポイラー（ウイング）
+        this.ctx.strokeStyle = this.player.color;
+        this.ctx.lineWidth = 3;
         this.ctx.beginPath();
-        this.ctx.roundRect(screenX + this.player.width - 15, this.player.y + 5, 10, this.player.height - 10, 2);
-        this.ctx.fill();
+        this.ctx.moveTo(screenX + 2, this.player.y + 9);
+        this.ctx.lineTo(screenX + 8, this.player.y + 3);
+        this.ctx.stroke();
 
-        if (this.state === STATE.BRAKING) {
-            this.ctx.fillStyle = '#ff0000';
-            this.ctx.shadowBlur = 15;
-            this.ctx.shadowColor = '#ff0000';
+        // 6. 前方ヘッドライト光線（走行中のみ投光）
+        if (this.state === STATE.RUNNING) {
+            this.ctx.save();
+            const grad = this.ctx.createLinearGradient(screenX + this.player.width, this.player.y + 19, screenX + this.player.width + 120, this.player.y + 24);
+            grad.addColorStop(0, 'rgba(255, 255, 200, 0.45)');
+            grad.addColorStop(1, 'rgba(255, 255, 200, 0.0)');
+            this.ctx.fillStyle = grad;
             this.ctx.beginPath();
-            this.ctx.roundRect(screenX - 5, this.player.y + 5, 8, this.player.height - 10, 2);
+            this.ctx.moveTo(screenX + this.player.width, this.player.y + 17);
+            this.ctx.lineTo(screenX + this.player.width + 120, this.player.y + 8);
+            this.ctx.lineTo(screenX + this.player.width + 120, this.player.y + 38);
+            this.ctx.lineTo(screenX + this.player.width, this.player.y + 23);
+            this.ctx.closePath();
+            this.ctx.fill();
+            this.ctx.restore();
+        }
+
+        // 7. テールランプ発光（ブレーキ時のみ赤色で発光）
+        if (this.state === STATE.BRAKING) {
+            this.ctx.fillStyle = '#ff3333';
+            this.ctx.shadowBlur = 25;
+            this.ctx.shadowColor = '#ff3333';
+            this.ctx.beginPath();
+            this.ctx.roundRect(screenX - 1, this.player.y + 10, 4, 6, 1);
             this.ctx.fill();
             this.ctx.shadowBlur = 0;
         }
