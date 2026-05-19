@@ -231,6 +231,9 @@ canvas {
     max-width: 400px;
     border-radius: 15px;
     height: auto;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .result-title {
