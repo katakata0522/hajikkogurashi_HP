@@ -408,8 +408,8 @@ class GameController {
 
     bindEvents() {
         const handleInput = (e) => {
+            if (this.state === STATE.START || this.state === STATE.RESULT) return; // 画面操作を受け付ける状態なら早期リターンしてボタンのclickを妨害しない
             if (e) { e.stopPropagation(); e.preventDefault(); }
-            if (this.state === STATE.START || this.state === STATE.RESULT) return;
             if (this.state === STATE.READY) this.triggerRun();
             else if (this.state === STATE.RUNNING) this.triggerBrake();
         };
