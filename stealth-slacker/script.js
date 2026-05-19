@@ -237,25 +237,21 @@ class GameController {
     }
 
     resizeCanvas() {
-        const aspect = CONFIG.LOGICAL_WIDTH / CONFIG.LOGICAL_HEIGHT;
-        const windowAspect = this.container.clientWidth / this.container.clientHeight;
-        
-        let cssWidth, cssHeight;
-        if (windowAspect > aspect) {
-            cssWidth = (this.container.clientHeight * aspect);
-            cssHeight = this.container.clientHeight;
-        } else {
-            cssWidth = this.container.clientWidth;
-            cssHeight = (this.container.clientWidth / aspect);
-        }
+        const width = this.container.clientWidth;
+        const height = this.container.clientHeight;
+
+        CONFIG.LOGICAL_HEIGHT = CONFIG.LOGICAL_WIDTH * (height / width);
+
+        this.canvas.width = CONFIG.LOGICAL_WIDTH;
+        this.canvas.height = CONFIG.LOGICAL_HEIGHT;
 
         const styles = {
-            width: cssWidth + 'px',
-            height: cssHeight + 'px',
+            width: width + 'px',
+            height: height + 'px',
             position: 'absolute',
-            left: '50%',
-            top: '50%',
-            transform: 'translate(-50%, -50%)'
+            left: '0',
+            top: '0',
+            transform: 'none'
         };
 
         Object.assign(this.canvas.style, styles);
@@ -282,8 +278,11 @@ class GameController {
         this.container.addEventListener('mousedown', handleDown);
         window.addEventListener('mouseup', handleUp);
         this.container.addEventListener('touchstart', handleDown, {passive: false});
-        window.addEventListener('touchend', handleUp);
-        window.addEventListener('touchcancel', handleUp);
+        window.addEventListener('touchend', handleUp, {passive: false});
+        window.addEventListener('touchcancel', handleUp, {passive: false});
+        
+        // コンテキストメニュー（右クリック・長押しメニュー）を無効化
+        window.addEventListener('contextmenu', (e) => { e.preventDefault(); });
 
         const startBtn = document.getElementById('start-btn');
         const retryBtn = document.getElementById('retry-btn');
@@ -453,43 +452,67 @@ class GameController {
         const horizon = CONFIG.LOGICAL_HEIGHT * 0.4;
         
         // Floor
-        this.ctx.fillStyle = 'rgba(0,0,0,0.05)';
+        this.ctx.fillStyle = 'rgba(0,0,0,0.2)';
         this.ctx.fillRect(0, horizon, CONFIG.LOGICAL_WIDTH, CONFIG.LOGICAL_HEIGHT - horizon);
 
-        // --- Boss ---
-        this.ctx.textAlign = 'center';
-        this.ctx.textBaseline = 'middle';
-        
+        // --- Boss (図形描画でスタイリッシュに) ---
         const bossX = CONFIG.LOGICAL_WIDTH / 2;
-        const bossY = horizon - 20;
+        const bossY = horizon - 50;
 
         // Boss Desk
-        this.ctx.fillStyle = '#8B4513';
-        this.ctx.fillRect(bossX - 80, bossY + 20, 160, 50);
+        this.ctx.fillStyle = '#222';
+        this.ctx.fillRect(bossX - 120, bossY + 40, 240, 60);
+        this.ctx.fillStyle = '#333';
+        this.ctx.fillRect(bossX - 110, bossY + 45, 220, 10);
 
-        // Boss Head
-        this.ctx.font = '100px Arial';
         if (this.bossState === BOSS.AWAY) {
-            this.ctx.fillText(EMOJIS.BOSS_AWAY, bossX, bossY);
+            // 後ろ姿
+            this.ctx.fillStyle = '#555';
+            this.ctx.beginPath(); this.ctx.arc(bossX, bossY, 40, 0, Math.PI*2); this.ctx.fill();
+            this.ctx.beginPath(); this.ctx.roundRect(bossX - 55, bossY + 40, 110, 80, 10); this.ctx.fill();
         } else if (this.bossState === BOSS.WARNING) {
-            this.ctx.fillText(EMOJIS.BOSS_AWAY, bossX, bossY);
-            // Warning Mark
-            let warningSize = 80 + Math.min(this.score / 500, 100); // Scale up warning mark
-            this.ctx.font = `${warningSize}px Arial`;
-            this.ctx.fillText(EMOJIS.WARNING, bossX + 50 + (warningSize*0.2), bossY - 60);
-        } else if (this.bossState === BOSS.LOOKING) {
-            this.ctx.font = this.gameState === STATE.GAMEOVER ? '250px Arial' : '100px Arial';
-            this.ctx.fillText(EMOJIS.BOSS_LOOK, bossX, bossY - (this.gameState === STATE.GAMEOVER ? 50 : 0));
+            // 警戒（少し振り向く気配）
+            this.ctx.fillStyle = '#555';
+            this.ctx.beginPath(); this.ctx.arc(bossX, bossY, 40, 0, Math.PI*2); this.ctx.fill();
+            this.ctx.beginPath(); this.ctx.roundRect(bossX - 55, bossY + 40, 110, 80, 10); this.ctx.fill();
             
+            // ! マーク
+            const warningScale = 1 + Math.min(this.score / 20000, 1);
+            this.ctx.fillStyle = '#ffd700';
+            this.ctx.shadowBlur = 20;
+            this.ctx.shadowColor = '#ffd700';
+            this.ctx.font = `bold ${80 * warningScale}px "M PLUS Rounded 1c"`;
+            this.ctx.textAlign = 'center';
+            this.ctx.textBaseline = 'middle';
+            this.ctx.fillText('!', bossX + 60, bossY - 40);
+            this.ctx.shadowBlur = 0;
+        } else if (this.bossState === BOSS.LOOKING) {
+            // 振り向いた！
+            this.ctx.fillStyle = '#111'; // シルエット化
+            this.ctx.beginPath(); this.ctx.arc(bossX, bossY, 40, 0, Math.PI*2); this.ctx.fill();
+            this.ctx.beginPath(); this.ctx.roundRect(bossX - 55, bossY + 40, 110, 80, 10); this.ctx.fill();
+
+            // 鋭い赤い目
+            this.ctx.fillStyle = '#ff3366';
+            this.ctx.shadowBlur = 20;
+            this.ctx.shadowColor = '#ff3366';
+            this.ctx.beginPath(); this.ctx.ellipse(bossX - 15, bossY - 5, 12, 6, 0.2, 0, Math.PI*2); this.ctx.fill();
+            this.ctx.beginPath(); this.ctx.ellipse(bossX + 15, bossY - 5, 12, 6, -0.2, 0, Math.PI*2); this.ctx.fill();
+            this.ctx.shadowBlur = 0;
+
+            // 視線のレーザー（スポットライト）
+            const alpha = this.gameState === STATE.GAMEOVER ? 0.6 : 0.2;
+            this.ctx.fillStyle = `rgba(255, 51, 102, ${alpha})`;
+            this.ctx.beginPath();
+            this.ctx.moveTo(bossX, bossY);
+            this.ctx.lineTo(bossX - 400, CONFIG.LOGICAL_HEIGHT);
+            this.ctx.lineTo(bossX + 400, CONFIG.LOGICAL_HEIGHT);
+            this.ctx.fill();
+
+            // ゲームオーバー時の画面全体フラッシュ
             if (this.gameState === STATE.GAMEOVER) {
-                this.ctx.strokeStyle = 'red';
-                this.ctx.lineWidth = 10;
-                this.ctx.beginPath();
-                for(let i=0; i<8; i++){
-                    this.ctx.moveTo(bossX, bossY);
-                    this.ctx.lineTo(bossX + Math.cos(i*Math.PI/4)*400, bossY + Math.sin(i*Math.PI/4)*400);
-                }
-                this.ctx.stroke();
+                this.ctx.fillStyle = 'rgba(255, 51, 102, 0.3)';
+                this.ctx.fillRect(0, 0, CONFIG.LOGICAL_WIDTH, CONFIG.LOGICAL_HEIGHT);
             }
         }
 
@@ -498,22 +521,64 @@ class GameController {
         const playerY = CONFIG.LOGICAL_HEIGHT * 0.75;
 
         // Player Desk
-        this.ctx.fillStyle = '#A0522D';
-        this.ctx.fillRect(playerX - 150, playerY + 30, 300, 120);
+        this.ctx.fillStyle = '#1a1a1a';
+        this.ctx.beginPath(); this.ctx.roundRect(playerX - 180, playerY + 50, 360, 150, 10); this.ctx.fill();
+        this.ctx.fillStyle = '#33ccff';
+        this.ctx.fillRect(playerX - 180, playerY + 50, 360, 5); // デスクのフチ
 
-        this.ctx.font = '160px Arial';
         if (this.isSlacking) {
-            this.ctx.fillText(EMOJIS.PLAYER_PLAY, playerX, playerY);
+            // サボり中（のけぞってスマホ/ゲーム機）
+            this.ctx.fillStyle = '#ff3366'; // アクティブな色
+            this.ctx.beginPath(); this.ctx.arc(playerX, playerY, 35, 0, Math.PI*2); this.ctx.fill(); // 頭
+            this.ctx.beginPath(); this.ctx.roundRect(playerX - 45, playerY + 30, 90, 80, 15); this.ctx.fill(); // 体
+            
+            // ゲーム機
+            this.ctx.fillStyle = '#fff';
+            this.ctx.beginPath(); this.ctx.roundRect(playerX - 35, playerY + 15, 70, 35, 10); this.ctx.fill();
+            this.ctx.fillStyle = '#111';
+            this.ctx.fillRect(playerX - 25, playerY + 20, 50, 25);
+            
+            // オーラ
+            this.ctx.strokeStyle = 'rgba(255, 51, 102, 0.5)';
+            this.ctx.lineWidth = 4;
+            this.ctx.beginPath(); this.ctx.arc(playerX, playerY + 20, 80 + Math.random()*10, 0, Math.PI*2); this.ctx.stroke();
+
         } else {
-            this.ctx.fillText(EMOJIS.PLAYER_WORK, playerX, playerY);
-            if (this.bossState === BOSS.LOOKING) {
-                this.ctx.font = '60px Arial';
-                this.ctx.fillText(EMOJIS.SWEAT, playerX + 80, playerY - 50);
+            // 仕事中（PCに向かっている前傾姿勢）
+            this.ctx.fillStyle = '#777'; 
+            this.ctx.beginPath(); this.ctx.arc(playerX, playerY + 10, 35, 0, Math.PI*2); this.ctx.fill(); // 頭が下がっている
+            this.ctx.beginPath(); this.ctx.roundRect(playerX - 45, playerY + 30, 90, 80, 15); this.ctx.fill(); // 体
+            
+            // ノートPC
+            this.ctx.fillStyle = '#ddd';
+            this.ctx.beginPath();
+            this.ctx.moveTo(playerX - 50, playerY + 30);
+            this.ctx.lineTo(playerX + 50, playerY + 30);
+            this.ctx.lineTo(playerX + 70, playerY + 80);
+            this.ctx.lineTo(playerX - 70, playerY + 80);
+            this.ctx.fill();
+            
+            // 画面の光
+            this.ctx.fillStyle = 'rgba(51, 204, 255, 0.15)';
+            this.ctx.beginPath();
+            this.ctx.moveTo(playerX - 40, playerY + 30);
+            this.ctx.lineTo(playerX, playerY - 30);
+            this.ctx.lineTo(playerX + 40, playerY + 30);
+            this.ctx.fill();
+
+            // 汗
+            if (this.bossState === BOSS.LOOKING && this.gameState !== STATE.GAMEOVER) {
+                this.ctx.fillStyle = '#33ccff';
+                this.ctx.beginPath();
+                this.ctx.ellipse(playerX + 45, playerY - 10, 6, 10, Math.PI/4, 0, Math.PI*2);
+                this.ctx.fill();
             }
         }
 
-        // Floating texts
-        this.ctx.fillStyle = '#ff3366';
+        // Floating texts (サボり中の「ﾌヒﾋw」等)
+        this.ctx.fillStyle = '#fff';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
         for (let ft of this.floatingTexts) {
             this.ctx.globalAlpha = Math.max(0, ft.life);
             this.ctx.font = `bold ${24 * ft.scale}px "M PLUS Rounded 1c"`;
