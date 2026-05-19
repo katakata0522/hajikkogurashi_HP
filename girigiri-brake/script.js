@@ -529,7 +529,12 @@ class GameController {
             
             this.ui.updateSpeed(this.player.speed);
 
-            this.cameraX = Math.max(0, this.player.x - (CONFIG.LOGICAL_WIDTH * 0.3));
+            // 速度に応じてカメラの先読み量を動的に変更（スピードが速いほど自車が画面左寄りに配置され、前方視野が大きく広がる）
+            const lookAheadFactor = Math.min(0.18, (this.player.speed / 5000) * 0.15); // スピードに応じて最大15%視野を広げる
+            const cameraPercent = 0.3 - lookAheadFactor; 
+            const targetCameraX = Math.max(0, this.player.x - (CONFIG.LOGICAL_WIDTH * cameraPercent));
+            // 急激なカメラジャンプを防ぎ、ダイナミックで滑らかな追従を実現
+            this.cameraX += (targetCameraX - this.cameraX) * 8 * dt;
 
             if (this.player.x + this.player.width / 2 > CONFIG.CLIFF_X) {
                 this.triggerGameOverFall();
@@ -550,8 +555,11 @@ class GameController {
 
             this.audio.updateSkid(this.player.speed);
 
-            const targetCameraX = this.player.x - (CONFIG.LOGICAL_WIDTH * 0.3);
-            this.cameraX += (targetCameraX - this.cameraX) * 5 * dt;
+            // ブレーキ中も減速に合わせて滑らかにカメラの先読み量を調整
+            const lookAheadFactor = Math.min(0.18, (this.player.speed / 5000) * 0.15);
+            const cameraPercent = 0.3 - lookAheadFactor;
+            const targetCameraX = this.player.x - (CONFIG.LOGICAL_WIDTH * cameraPercent);
+            this.cameraX += (targetCameraX - this.cameraX) * 8 * dt;
 
             if (this.player.x + this.player.width / 2 > CONFIG.CLIFF_X) {
                 this.triggerGameOverFall();
@@ -691,6 +699,132 @@ class GameController {
                 this.ctx.lineTo(x - 70, y);
                 this.ctx.stroke();
             }
+        }
+
+        // --- 天候エフェクト描画（背景・雰囲気の可視化） ---
+        if (this.weather.name.includes('RAIN')) {
+            this.ctx.strokeStyle = 'rgba(174, 207, 238, 0.4)';
+            this.ctx.lineWidth = 1.5;
+            const rainSeed = (Date.now() / 12) % 300;
+            for (let i = 0; i < 40; i++) {
+                const x = ((i * 37) + rainSeed * 2.5) % CONFIG.LOGICAL_WIDTH;
+                const y = ((i * 19) + rainSeed * 5) % CONFIG.LOGICAL_HEIGHT;
+                this.ctx.beginPath();
+                this.ctx.moveTo(x, y);
+                this.ctx.lineTo(x - 6, y + 18);
+                this.ctx.stroke();
+            }
+        } else if (this.weather.name.includes('TAILWIND')) {
+            this.ctx.strokeStyle = 'rgba(0, 242, 254, 0.15)';
+            this.ctx.lineWidth = 1.2;
+            const windSeed = (Date.now() / 10) % 500;
+            for (let i = 0; i < 8; i++) {
+                const x = ((i * 123) + windSeed * 4.5) % (CONFIG.LOGICAL_WIDTH + 100) - 50;
+                const y = (i * 73) % (CONFIG.LOGICAL_HEIGHT - 200) + 50;
+                this.ctx.beginPath();
+                this.ctx.moveTo(x, y);
+                this.ctx.lineTo(x + 70, y);
+                this.ctx.stroke();
+            }
+        } else if (this.weather.name.includes('HEADWIND')) {
+            this.ctx.strokeStyle = 'rgba(255, 179, 71, 0.15)';
+            this.ctx.lineWidth = 1.2;
+            const windSeed = (Date.now() / 10) % 500;
+            for (let i = 0; i < 8; i++) {
+                const x = CONFIG.LOGICAL_WIDTH - (((i * 123) + windSeed * 4.5) % (CONFIG.LOGICAL_WIDTH + 100)) + 50;
+                const y = (i * 73) % (CONFIG.LOGICAL_HEIGHT - 200) + 50;
+                this.ctx.beginPath();
+                this.ctx.moveTo(x, y);
+                this.ctx.lineTo(x - 70, y);
+                this.ctx.stroke();
+            }
+        }
+
+        // --- 崖距離インジケーター（プログレスバー） ---
+        if (this.state === STATE.RUNNING || this.state === STATE.BRAKING) {
+            const barX = 300;
+            const barY = 40;
+            const barW = 400;
+            const barH = 12;
+
+            this.ctx.save();
+            
+            // バーの背景
+            this.ctx.fillStyle = 'rgba(10, 10, 20, 0.8)';
+            this.ctx.strokeStyle = 'rgba(0, 242, 254, 0.4)';
+            this.ctx.lineWidth = 2;
+            
+            // 警告ゾーン判定（崖まで残り30m = 3000px 未満）
+            const playerDistToCliff = CONFIG.CLIFF_X - (this.player.x + this.player.width);
+            const isDangerZone = playerDistToCliff < 3000;
+            
+            if (isDangerZone && this.state !== STATE.RESULT) {
+                const flash = Math.sin(Date.now() / 60) > 0;
+                this.ctx.strokeStyle = flash ? '#ff3333' : 'rgba(255, 51, 51, 0.3)';
+                this.ctx.shadowColor = '#ff3333';
+                this.ctx.shadowBlur = flash ? 12 : 0;
+            }
+
+            this.ctx.beginPath();
+            this.ctx.roundRect(barX, barY, barW, barH, 4);
+            this.ctx.fill();
+            this.ctx.stroke();
+            this.ctx.shadowBlur = 0;
+
+            // 進行割合（20pxからCLIFF_Xまでの進捗）
+            const totalTrack = CONFIG.CLIFF_X - 20;
+            const currentProgress = Math.min(1.0, (this.player.x - 20) / totalTrack);
+            const fillW = barW * currentProgress;
+
+            // プログレスバーのグラデーション塗りつぶし
+            const progressGrad = this.ctx.createLinearGradient(barX, barY, barX + barW, barY);
+            progressGrad.addColorStop(0, '#00f2fe');
+            progressGrad.addColorStop(0.7, '#ffd700');
+            progressGrad.addColorStop(1.0, '#ff3333');
+            this.ctx.fillStyle = progressGrad;
+            
+            this.ctx.beginPath();
+            this.ctx.roundRect(barX, barY, fillW, barH, 4);
+            this.ctx.fill();
+
+            // 自車位置インジケーター（ネオンサークル）
+            const indicatorX = barX + fillW;
+            this.ctx.fillStyle = '#ffffff';
+            this.ctx.shadowBlur = 10;
+            this.ctx.shadowColor = '#ffffff';
+            this.ctx.beginPath();
+            this.ctx.arc(indicatorX, barY + barH / 2, 7, 0, Math.PI * 2);
+            this.ctx.fill();
+            this.ctx.shadowBlur = 0;
+
+            // ゴール（崖・🏁）マークを描画
+            this.ctx.fillStyle = '#ff3333';
+            this.ctx.font = '14px sans-serif';
+            this.ctx.textAlign = 'left';
+            this.ctx.fillText('🏁', barX + barW + 10, barY + barH + 1);
+
+            // 残り距離（m）のリアルタイムテキスト表示
+            const distMeter = Math.max(0, parseFloat((playerDistToCliff / 100).toFixed(1)));
+            this.ctx.fillStyle = isDangerZone ? '#ff3333' : '#ffffff';
+            this.ctx.font = isDangerZone ? 'bold 12px Orbitron, sans-serif' : '12px Orbitron, sans-serif';
+            this.ctx.textAlign = 'right';
+            this.ctx.fillText(`LIMIT: ${distMeter.toFixed(1)}m`, barX - 15, barY + barH + 1);
+
+            // 危険領域に入った時の大きな中央警告表示（ビジュアル演出）
+            if (isDangerZone && this.state === STATE.RUNNING) {
+                const dangerFlash = Math.sin(Date.now() / 60) > 0;
+                if (dangerFlash) {
+                    this.ctx.fillStyle = 'rgba(255, 51, 51, 0.95)';
+                    this.ctx.font = 'bold 24px Orbitron, sans-serif';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.shadowColor = '#ff3333';
+                    this.ctx.shadowBlur = 15;
+                    this.ctx.fillText('⚠️ DANGER ZONE ⚠️', CONFIG.LOGICAL_WIDTH / 2, CONFIG.LOGICAL_HEIGHT / 2 - 80);
+                    this.ctx.shadowBlur = 0;
+                }
+            }
+
+            this.ctx.restore();
         }
 
         this.ctx.restore(); // 画面揺れ解除
