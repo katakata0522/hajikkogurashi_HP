@@ -1331,12 +1331,12 @@
       const RESULT_DELAY_MS = 940;
 
       const enemies = [
-        { name: '町の剣士', title: '一人目', rank: '★☆☆☆☆', reactionMs: 430, cssClass: 'enemy-town', minWaitMs: 1600, maxWaitMs: 3800, flavor: 'まずは落ち着いて合図を見る相手です。' },
-        { name: '道場破り', title: '二人目', rank: '★★☆☆☆', reactionMs: 340, cssClass: 'enemy-dojo', minWaitMs: 1900, maxWaitMs: 5200, flavor: '油断すると斬られます。合図だけを見ましょう。' },
-        { name: '早耳の忍び', title: '三人目', rank: '★★★☆☆', reactionMs: 300, cssClass: 'enemy-ninja', minWaitMs: 2000, maxWaitMs: 6200, flavor: '速い相手です。長い待ちに飲まれないように。' },
-        { name: '無口な達人', title: '四人目', rank: '★★★★☆', reactionMs: 260, cssClass: 'enemy-master', minWaitMs: 2200, maxWaitMs: 7200, flavor: '一瞬の迷いが負けにつながります。' },
-        { name: '影の剣豪', title: '五人目', rank: '★★★★★', reactionMs: 225, cssClass: 'enemy-shadow', minWaitMs: 2400, maxWaitMs: 8500, flavor: 'ここからは本気の領域。かなり厳しい勝負です。' },
-        { name: '刹那の鬼', title: '六人目', rank: '★★★★★', reactionMs: 200, cssClass: 'enemy-demon', minWaitMs: 2600, maxWaitMs: 9200, flavor: '人間離れした速さ。勝てたら誇っていい相手です。' },
+        { name: '町の剣士', title: '一人目', rank: '★☆☆☆☆', reactionMs: 440, cssClass: 'enemy-town', minWaitMs: 1600, maxWaitMs: 3800, flavor: 'まずは落ち着いて合図を見る相手です。' },
+        { name: '道場破り', title: '二人目', rank: '★★☆☆☆', reactionMs: 350, cssClass: 'enemy-dojo', minWaitMs: 1900, maxWaitMs: 5200, flavor: '油断すると斬られます。合図だけを見ましょう。' },
+        { name: '早耳の忍び', title: '三人目', rank: '★★★☆☆', reactionMs: 310, cssClass: 'enemy-ninja', minWaitMs: 2000, maxWaitMs: 6200, flavor: '速い相手です。長い待ちに飲まれないように。' },
+        { name: '無口な達人', title: '四人目', rank: '★★★★☆', reactionMs: 275, cssClass: 'enemy-master', minWaitMs: 2200, maxWaitMs: 7200, flavor: '一瞬の迷いが負けにつながります。' },
+        { name: '影の剣豪', title: '五人目', rank: '★★★★★', reactionMs: 250, cssClass: 'enemy-shadow', minWaitMs: 2400, maxWaitMs: 8500, flavor: 'ここからは本気の領域。かなり厳しい勝負です。' },
+        { name: '刹那の鬼', title: '六人目', rank: '★★★★★', reactionMs: 235, cssClass: 'enemy-demon', minWaitMs: 2600, maxWaitMs: 9200, flavor: '人間離れした速さ。勝てたら誇っていい相手です。' },
       ];
 
       const enemyClassNames = enemies.map((enemy) => enemy.cssClass);
@@ -1702,7 +1702,8 @@
         game.state = 'failed';
         game.streak = 0;
         resetArenaClasses();
-        elements.arena.classList.add('is-failed');
+        elements.arena.classList.add('is-failed', 'is-resolved');
+        elements.impactText.textContent = reason === 'hidden' ? '中断' : 'お手付き';
         elements.stateLabel.textContent = reason === 'hidden' ? '中断' : '早すぎ';
         elements.instructionText.textContent = 'まだ「！」は出ていません。';
         playTone('fail');
@@ -1858,15 +1859,31 @@
       elements.soundButton.addEventListener('click', toggleSound);
       elements.howtoButton.addEventListener('click', toggleHowto);
 
-      elements.arena.addEventListener('pointerdown', (event) => {
+      // スマホのゴーストタップと、画面外タッチ時の無反応を防ぐため window 全体で監視
+      window.addEventListener('pointerdown', (event) => {
+        if (game.state !== 'waiting' && game.state !== 'signal') return;
+        if (event.target.tagName === 'BUTTON' || event.target.closest('button')) return; // ボタン操作は妨害しない
         event.preventDefault();
         handleAction();
-      });
+      }, { passive: false });
 
-      elements.arena.addEventListener('keydown', (event) => {
+      // スペースキー/Enterキーでタイトル画面やリザルト画面からもシームレスに進行可能に
+      window.addEventListener('keydown', (event) => {
         if (event.key === ' ' || event.key === 'Enter') {
-          event.preventDefault();
-          handleAction();
+          if (document.activeElement && document.activeElement.tagName === 'BUTTON') return; // ボタンフォーカス時は標準動作優先
+          event.preventDefault(); // 画面スクロール防止
+          
+          if (game.state === 'title') {
+            startRun();
+          } else if (game.state === 'result') {
+            if (game.lastResult && game.lastResult.win && !isFinalEnemy()) {
+              startNextRound();
+            } else {
+              startRun(); // 敗北時、または最終敵討伐後は最初から
+            }
+          } else if (game.state === 'waiting' || game.state === 'signal') {
+            handleAction();
+          }
         }
       });
 
