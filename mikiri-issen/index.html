@@ -1197,7 +1197,7 @@
 </head>
 <body>
   <div class="app">
-    <main class="shell" aria-live="polite">
+    <main class="shell">
       <button class="sound-button" type="button" id="soundButton" aria-pressed="true">音 ON</button>
 
       <section class="screen title-screen is-active" id="titleScreen" aria-label="タイトル画面">
@@ -1261,7 +1261,7 @@
           </div>
 
           <div class="state-center">
-            <div class="state-label" id="stateLabel">構え</div>
+            <div class="state-label" id="stateLabel" aria-live="polite">構え</div>
             <p class="instruction" id="instructionText">合図が出るまで、押さない。</p>
           </div>
 
@@ -1786,6 +1786,7 @@
           return;
         }
 
+        const url = 'https://hajikkoroom.xsrv.jp/mikiri-issen/';
         const score = result.reactionMs !== null ? `反応値${formatReaction(result.reactionMs)}` : 'MISS';
         const diff = result.diffMs === null
           ? '合図前に動いた'
@@ -1793,12 +1794,12 @@
             ? `敵より${formatReactionDiff(result.diffMs)}早い`
             : `あと${formatReactionDiff(Math.abs(result.diffMs))}`;
         const text = result.win
-          ? `みきり一閃で${result.enemyName}に勝利！ ${score}（${diff}）/ 現在${result.streak}人抜き / 最高${game.record.maxStreak}人抜き #かたかたミニゲーム`
-          : `みきり一閃で${result.enemyName}に敗北… ${score}（${diff}）/ 最高${game.record.maxStreak}人抜き #かたかたミニゲーム`;
+          ? `みきり一閃で${result.enemyName}に勝利！ ${score}（${diff}）/ 現在${result.streak}人抜き / 最高${game.record.maxStreak}人抜き ${url} #かたかたミニゲーム`
+          : `みきり一閃で${result.enemyName}に敗北… ${score}（${diff}）/ 最高${game.record.maxStreak}人抜き ${url} #かたかたミニゲーム`;
 
         try {
           if (navigator.share) {
-            await navigator.share({ title: 'みきり一閃', text });
+            await navigator.share({ title: 'みきり一閃', text, url });
             return;
           }
           await navigator.clipboard.writeText(text);
@@ -1827,6 +1828,7 @@
       }
 
       function resetRecord() {
+        if (!window.confirm('記録をリセットしますか？')) return;
         game.record.bestMs = null;
         game.record.maxStreak = 0;
         game.record.totalWins = 0;
@@ -1870,6 +1872,7 @@
       // スペースキー/Enterキーでタイトル画面やリザルト画面からもシームレスに進行可能に
       window.addEventListener('keydown', (event) => {
         if (event.key === ' ' || event.key === 'Enter') {
+          if (event.repeat) return;
           if (document.activeElement && document.activeElement.tagName === 'BUTTON') return; // ボタンフォーカス時は標準動作優先
           event.preventDefault(); // 画面スクロール防止
           

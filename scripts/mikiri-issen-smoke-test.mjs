@@ -1,0 +1,43 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import vm from 'node:vm';
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const htmlPath = resolve(root, 'mikiri-issen', 'index.html');
+const html = readFileSync(htmlPath, 'utf8');
+const script = html.match(/<script>\s*([\s\S]*?)\s*<\/script>/)?.[1] ?? '';
+
+assert.ok(script, 'inline script should be present');
+assert.doesNotThrow(() => new vm.Script(script), 'mikiri-issen inline script must be valid JavaScript');
+
+assert.doesNotMatch(
+  html,
+  /<main class="shell" aria-live="polite">/,
+  'the entire game shell should not be a live region'
+);
+
+assert.match(
+  html,
+  /id="stateLabel"[^>]*aria-live="polite"/,
+  'only the state label should announce duel state changes'
+);
+
+assert.match(
+  script,
+  /if \(event\.repeat\) return;/,
+  'keyboard repeat should not cause accidental early failures'
+);
+
+assert.match(
+  script,
+  /https:\/\/hajikkoroom\.xsrv\.jp\/mikiri-issen\//,
+  'shared result text should include the public game URL'
+);
+
+assert.match(
+  script,
+  /confirm\('記録をリセットしますか？'\)/,
+  'record reset should require confirmation'
+);
