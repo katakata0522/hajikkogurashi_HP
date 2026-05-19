@@ -204,13 +204,13 @@
       position: relative;
       z-index: 5;
       width: min(780px, 100%);
-      padding-top: 34px;
+      padding-top: clamp(12px, 3vh, 34px);
     }
 
     h1 {
       margin: 0;
       font-family: var(--font-serif);
-      font-size: clamp(4.2rem, 13vw, 9.6rem);
+      font-size: clamp(4.2rem, 9vw, 7.8rem);
       line-height: 1.02;
       letter-spacing: 0.035em;
       color: #fff2c6;
@@ -222,7 +222,7 @@
 
     .lead {
       max-width: 38em;
-      margin: 22px auto 0;
+      margin: clamp(12px, 2vh, 22px) auto 0;
       color: rgba(255, 244, 214, 0.86);
       font-size: clamp(0.98rem, 1.8vw, 1.16rem);
       font-weight: 700;
@@ -234,7 +234,7 @@
       display: grid;
       gap: 6px;
       width: min(480px, 100%);
-      margin: 18px auto 0;
+      margin: clamp(10px, 1.8vh, 18px) auto 0;
       color: rgba(255, 244, 214, 0.88);
       font-weight: 900;
       line-height: 1.55;
@@ -246,7 +246,7 @@
       flex-wrap: wrap;
       justify-content: center;
       gap: 12px;
-      margin-top: 26px;
+      margin-top: clamp(14px, 2.4vh, 26px);
     }
 
     .main-button,
@@ -298,7 +298,7 @@
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 10px;
-      margin: 18px auto 0;
+      margin: clamp(10px, 1.8vh, 18px) auto 0;
       max-width: 620px;
     }
 
@@ -334,7 +334,7 @@
 
     .howto-panel {
       display: none;
-      margin: 20px auto 0;
+      margin: clamp(10px, 1.8vh, 20px) auto 0;
       width: min(660px, 100%);
       border: 2px solid rgba(255, 211, 106, 0.14);
       border-radius: 18px;
@@ -362,7 +362,7 @@
     .press-start {
       position: absolute;
       left: 50%;
-      bottom: 28px;
+      bottom: clamp(14px, 2.6vh, 28px);
       transform: translateX(-50%);
       color: rgba(255, 211, 106, 0.92);
       font-size: clamp(0.9rem, 1.8vw, 1.24rem);
@@ -917,20 +917,20 @@
     .result-screen {
       place-items: center;
       text-align: center;
-      padding: 58px 18px 18px;
+      padding: clamp(18px, 3vh, 34px) 18px 18px;
     }
 
     .result-card {
       width: min(830px, 100%);
-      height: 100%;
-      max-height: 100%;
+      height: auto;
+      max-height: calc(100% - 4px);
       overflow: hidden;
       display: flex;
       flex-direction: column;
       justify-content: center;
       border: 3px solid rgba(255, 211, 106, 0.24);
       border-radius: 28px;
-      padding: clamp(18px, 3.4vw, 38px);
+      padding: clamp(16px, 2.8vw, 30px);
       background:
         radial-gradient(circle at 50% 0%, rgba(245, 182, 65, 0.2), transparent 36%),
         linear-gradient(180deg, rgba(0, 0, 0, 0.52), rgba(0, 0, 0, 0.28));
@@ -983,7 +983,7 @@
       margin: 0;
       color: var(--gold);
       font-family: var(--font-serif);
-      font-size: clamp(2.4rem, 7vw, 6rem);
+      font-size: clamp(2.2rem, 5.4vw, 4.8rem);
       line-height: 1;
       letter-spacing: 0.05em;
       text-shadow: 0 5px 0 var(--red-dark), 0 16px 34px rgba(0, 0, 0, 0.45);
@@ -992,9 +992,9 @@
     .result-card.is-lose .judge { color: #ff8a70; }
 
     .time-result {
-      margin-top: 14px;
+      margin-top: clamp(8px, 1.4vh, 14px);
       color: var(--paper);
-      font-size: clamp(2.6rem, 8vw, 6rem);
+      font-size: clamp(2.6rem, 6.4vw, 5.2rem);
       font-weight: 1000;
       line-height: 1;
       letter-spacing: -0.04em;
@@ -1019,7 +1019,7 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      margin-top: 12px;
+      margin-top: clamp(8px, 1.4vh, 12px);
       min-height: 40px;
       border-radius: 999px;
       padding: 8px 16px;
@@ -1040,7 +1040,7 @@
       flex-wrap: wrap;
       justify-content: center;
       gap: 8px;
-      margin-top: 12px;
+      margin-top: clamp(8px, 1.3vh, 12px);
     }
 
     .versus-pill {
@@ -1051,7 +1051,7 @@
 
     .result-comment {
       max-width: 42em;
-      margin: 12px auto 0;
+      margin: clamp(8px, 1.4vh, 12px) auto 0;
       color: rgba(255, 244, 214, 0.78);
       line-height: 1.65;
       font-size: 0.94rem;
@@ -1062,7 +1062,7 @@
       flex-wrap: wrap;
       justify-content: center;
       gap: 10px;
-      margin-top: 18px;
+      margin-top: clamp(10px, 2vh, 18px);
       flex: 0 0 auto;
     }
 
