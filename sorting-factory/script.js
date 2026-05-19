@@ -7,7 +7,8 @@ const CONFIG = {
     LOGICAL_HEIGHT: 1500,
     COLORS: { RED: '#ff3366', BLUE: '#00c3ff' },
     SHAPES: { CIRCLE: 0, SQUARE: 1 },
-    RULES: { COLOR: '色', SHAPE: '形' }
+    SIZES: { SMALL: 60, LARGE: 110 },
+    RULES: { COLOR: '色', SHAPE: '形', SIZE: '大きさ', NUMBER: '数字' }
 };
 
 const STATE = { START: 0, PLAYING: 1, GAMEOVER: 2 };
@@ -190,7 +191,9 @@ class Item {
     constructor() {
         this.color = Math.random() < 0.5 ? CONFIG.COLORS.RED : CONFIG.COLORS.BLUE;
         this.shape = Math.random() < 0.5 ? CONFIG.SHAPES.CIRCLE : CONFIG.SHAPES.SQUARE;
-        this.size = 80;
+        this.size = Math.random() < 0.5 ? CONFIG.SIZES.SMALL : CONFIG.SIZES.LARGE;
+        this.number = Math.floor(Math.random() * 9) + 1; // 1-9
+        
         this.x = CONFIG.LOGICAL_WIDTH / 2;
         this.y = -this.size;
         this.isSorted = false;
@@ -225,15 +228,12 @@ class Item {
             ctx.fill();
         }
 
-        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.fillStyle = 'rgba(255,255,255,0.95)';
+        ctx.font = `bold ${this.size * 0.6}px "Teko", sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
         ctx.shadowBlur = 0;
-        ctx.beginPath();
-        if (this.shape === CONFIG.SHAPES.CIRCLE) {
-            ctx.arc(this.x - 15, this.y - 15, 12, 0, Math.PI * 2);
-        } else {
-            ctx.roundRect(this.x - this.size/2 + 10, this.y - this.size/2 + 10, 20, 20, 4);
-        }
-        ctx.fill();
+        ctx.fillText(this.number, this.x, this.y + (this.size * 0.05));
 
         ctx.globalAlpha = 1.0;
     }
@@ -428,6 +428,15 @@ class GameController {
         return Math.floor(Math.random() * 11) + 5; // 5回〜15回
     }
 
+    getRandomRule() {
+        const rules = Object.values(CONFIG.RULES);
+        let newRule;
+        do {
+            newRule = rules[Math.floor(Math.random() * rules.length)];
+        } while (newRule === this.currentRule);
+        return newRule;
+    }
+
     setRule(newRule) {
         if(this.currentRule !== newRule && this.state === STATE.PLAYING) {
             this.audio.playSiren();
@@ -455,8 +464,12 @@ class GameController {
         let expectedDir = 0;
         if (this.currentRule === CONFIG.RULES.COLOR) {
             expectedDir = targetItem.color === CONFIG.COLORS.RED ? -1 : 1;
-        } else {
+        } else if (this.currentRule === CONFIG.RULES.SHAPE) {
             expectedDir = targetItem.shape === CONFIG.SHAPES.CIRCLE ? -1 : 1;
+        } else if (this.currentRule === CONFIG.RULES.SIZE) {
+            expectedDir = targetItem.size === CONFIG.SIZES.SMALL ? -1 : 1;
+        } else if (this.currentRule === CONFIG.RULES.NUMBER) {
+            expectedDir = targetItem.number % 2 !== 0 ? -1 : 1; // 奇数は左(-1)、偶数は右(1)
         }
 
         if (direction === expectedDir) {
@@ -477,7 +490,7 @@ class GameController {
 
             this.sortsUntilChange--;
             if (this.sortsUntilChange <= 0) {
-                this.setRule(this.currentRule === CONFIG.RULES.COLOR ? CONFIG.RULES.SHAPE : CONFIG.RULES.COLOR);
+                this.setRule(this.getRandomRule());
                 this.sortsUntilChange = this.getRandomRuleChangeCount();
             }
 
@@ -572,8 +585,8 @@ class GameController {
         this.ctx.strokeStyle = isColor ? CONFIG.COLORS.BLUE : '#555';
         this.ctx.beginPath(); this.ctx.moveTo(boxWidth, boxY); this.ctx.lineTo(CONFIG.LOGICAL_WIDTH, boxY); this.ctx.stroke();
 
-        // Shape Icons
-        if (!isColor) {
+        // Shape Icons / Size Labels / Number Labels
+        if (this.currentRule === CONFIG.RULES.SHAPE) {
             this.ctx.strokeStyle = 'rgba(255,255,255,0.8)';
             this.ctx.lineWidth = 10;
             this.ctx.shadowBlur = 20;
@@ -583,6 +596,19 @@ class GameController {
             // Square right
             this.ctx.beginPath(); this.ctx.roundRect(boxWidth + boxWidth/2 - 40, boxY + 35, 80, 80, 10); this.ctx.stroke();
             this.ctx.shadowBlur = 0;
+        } else if (this.currentRule === CONFIG.RULES.SIZE) {
+            this.ctx.fillStyle = 'rgba(255,255,255,0.8)';
+            this.ctx.textAlign = 'center';
+            this.ctx.font = 'bold 40px "M PLUS Rounded 1c"';
+            this.ctx.fillText('小 (SMALL)', boxWidth/2, boxY + 85);
+            this.ctx.font = 'bold 50px "M PLUS Rounded 1c"';
+            this.ctx.fillText('大 (LARGE)', boxWidth + boxWidth/2, boxY + 85);
+        } else if (this.currentRule === CONFIG.RULES.NUMBER) {
+            this.ctx.fillStyle = 'rgba(255,255,255,0.8)';
+            this.ctx.textAlign = 'center';
+            this.ctx.font = 'bold 30px "M PLUS Rounded 1c"';
+            this.ctx.fillText('奇数 (1,3,5...)', boxWidth/2, boxY + 85);
+            this.ctx.fillText('偶数 (2,4,6...)', boxWidth + boxWidth/2, boxY + 85);
         }
 
         // 境界線
