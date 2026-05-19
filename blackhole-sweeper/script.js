@@ -230,6 +230,7 @@ class Enemy {
         this.suckProgress = 0;
         this.suckTarget = null;
         this.isDead = false; // 完全消滅フラグ
+        this.isSlowed = false; // 重力スロー状態
     }
 
     update(dt, targetX, targetY, isDrawing) {
@@ -266,6 +267,9 @@ class Enemy {
             return;
         }
 
+        // 重力スロー状態の速度補正（一時的に速度を半分にする）
+        const currentDtSpeed = this.isSlowed ? 0.4 : 1.0;
+
         // 追跡バグは「線を引いている時だけ」かつ「少し遅い速度」で指を追う
         if (this.type === 2) {
             if (isDrawing && targetX !== null && targetY !== null) {
@@ -273,19 +277,28 @@ class Enemy {
                 const dy = targetY - this.y;
                 const dist = Math.hypot(dx, dy);
                 if (dist > 0) {
-                    // 最大追跡速度を80に制限（マイルドに）
-                    const targetVx = (dx / dist) * 75;
-                    const targetVy = (dy / dist) * 75;
+                    // 最大追跡速度を75に制限（マイルドに）
+                    const targetVx = (dx / dist) * 75 * currentDtSpeed;
+                    const targetVy = (dy / dist) * 75 * currentDtSpeed;
                     // イージングで滑らかに旋回
                     this.vx += (targetVx - this.vx) * 3 * dt;
                     this.vy += (targetVy - this.vy) * 3 * dt;
                 }
             } else {
                 // 描いていない時はランダムにゆったり漂う
-                const speed = 40;
+                const speed = 40 * currentDtSpeed;
                 const angle = Math.atan2(this.vy, this.vx) + (Math.random() - 0.5) * dt * 2;
                 this.vx = Math.cos(angle) * speed;
                 this.vy = Math.sin(angle) * speed;
+            }
+        } else {
+            // 通常・高速バグのスロー補正
+            // 元々の角度をキープしつつ速度を調整
+            const currentSpeed = Math.hypot(this.vx, this.vy);
+            const targetSpeed = (this.type === 1 ? 200 : 75) * currentDtSpeed;
+            if (currentSpeed > 0) {
+                this.vx = (this.vx / currentSpeed) * targetSpeed;
+                this.vy = (this.vy / currentSpeed) * targetSpeed;
             }
         }
 
@@ -310,7 +323,17 @@ class Enemy {
         }
 
         ctx.save();
-        ctx.fillStyle = this.color;
+
+        // 重力スロー状態のビジュアルエフェクト（ゴースト残像）
+        if (this.isSlowed && !this.isSucked) {
+            ctx.fillStyle = 'rgba(0, 229, 255, 0.15)';
+            ctx.beginPath();
+            ctx.arc(this.x - this.vx * 0.05, this.y - this.vy * 0.05, this.radius * 1.2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // スロー時はカラーをシアン寄りに変更して重力の歪みを表現
+        ctx.fillStyle = this.isSlowed && !this.isSucked ? '#00e5ff' : this.color;
         
         // 吸引中の縮小
         let currentRadius = this.radius;
@@ -325,7 +348,7 @@ class Enemy {
             ctx.shadowColor = '#ffffff';
         } else {
             ctx.shadowBlur = 10;
-            ctx.shadowColor = this.color;
+            ctx.shadowColor = this.isSlowed ? '#00e5ff' : this.color;
         }
 
         ctx.beginPath();
@@ -400,16 +423,22 @@ class GameController {
         const getLogicalPos = (e) => {
             const rect = this.canvas.getBoundingClientRect();
             let clientX, clientY;
-            if (e.touches && e.touches.length > 0) {
+            const isTouch = !!(e.touches && e.touches.length > 0);
+            
+            if (isTouch) {
                 clientX = e.touches[0].clientX;
                 clientY = e.touches[0].clientY;
             } else {
                 clientX = e.clientX;
                 clientY = e.clientY;
             }
+
+            // 新機能：スマホのタッチ操作の時だけ、指で画面が隠れないように描画先端を45px上にオフセットする
+            const offsetY = isTouch ? -45 : 0;
+            
             return {
                 x: (clientX - rect.left) / rect.width * CONFIG.LOGICAL_WIDTH,
-                y: (clientY - rect.top) / rect.height * CONFIG.LOGICAL_HEIGHT
+                y: ((clientY - rect.top) / rect.height * CONFIG.LOGICAL_HEIGHT) + offsetY
             };
         };
 
@@ -595,47 +624,56 @@ class GameController {
         loopPoints.forEach(p => { cx += p.x; cy += p.y; });
         cx /= loopPoints.length;
 
+        // 判定：ブラックホールの中にターゲットがいるかどうかを事前カウント
         let caught = 0;
-        for (let i = this.enemies.length - 1; i >= 0; i--) {
+        const targetsToSuck = [];
+        for (let i = 0; i < this.enemies.length; i++) {
             const e = this.enemies[i];
             if (!e.isSucked && this.ctx.isPointInPath(path, e.x, e.y)) {
                 caught++;
-                // 吸引アニメーション開始（即消去しない）
-                e.isSucked = true;
-                e.suckTarget = { x: cx, y: cy };
-                this.spawnParticles(e.x, e.y, e.color);
+                targetsToSuck.push(e);
             }
         }
 
-        if (caught > 0) {
-            this.audio.playEffect('blackhole');
-            
-            // コンボ倍率
-            let multiplier = 1;
-            if (caught === 2) multiplier = 2;
-            else if (caught === 3) multiplier = 3;
-            else if (caught >= 4) multiplier = 5;
-
-            // 新機能：面積ボーナスの計算
-            const area = getPolygonArea(loopPoints);
-            const areaBonus = Math.floor(area / 150); // 大きく囲むほど大量スコア
-
-            const pts = (caught * 100 * multiplier) + areaBonus;
-            this.score += pts;
-            this.ui.updateScore(this.score);
-
-            if (caught >= 4 || areaBonus > 200) this.screenShake = 15;
-
-            // ブラックホールエフェクトの追加
-            this.blackholes.push({ 
-                x: cx, 
-                y: cy, 
-                life: 1.0, 
-                caught: caught, 
-                pts: pts,
-                areaBonus: areaBonus 
-            });
+        // 新機能：ターゲットを1匹も囲んでいない（空振り）の場合は、ブラックホールを発動せず無効（フラフープ稼ぎの完全排除）
+        if (caught === 0) {
+            return;
         }
+
+        // ターゲットを吸引
+        targetsToSuck.forEach(e => {
+            e.isSucked = true;
+            e.suckTarget = { x: cx, y: cy };
+            this.spawnParticles(e.x, e.y, e.color);
+        });
+
+        this.audio.playEffect('blackhole');
+        
+        // コンボ倍率
+        let multiplier = 1;
+        if (caught === 2) multiplier = 2;
+        else if (caught === 3) multiplier = 3;
+        else if (caught >= 4) multiplier = 5;
+
+        // 新機能：面積ボーナスの計算（ターゲットを巻き込んだ数に応じて面積スコアも増大）
+        const area = getPolygonArea(loopPoints);
+        const areaBonus = Math.floor((area / 150) * (1 + (caught - 1) * 0.5)); 
+
+        const pts = (caught * 100 * multiplier) + areaBonus;
+        this.score += pts;
+        this.ui.updateScore(this.score);
+
+        if (caught >= 4 || areaBonus > 200) this.screenShake = 15;
+
+        // ブラックホールエフェクトの追加
+        this.blackholes.push({ 
+            x: cx, 
+            y: cy, 
+            life: 1.0, 
+            caught: caught, 
+            pts: pts,
+            areaBonus: areaBonus 
+        });
     }
 
     checkDamage() {
@@ -754,6 +792,26 @@ class GameController {
         let tx = null, ty = null;
         if (this.isDrawing) { tx = this.mouseX; ty = this.mouseY; }
 
+        // 新機能：線の周囲の「重力スロー（空間歪み）」判定
+        // 描画中で、かつ線が2点以上引かれている場合のみ有効
+        const slowThreshold = 45; // 45ピクセル以内でスロー発動
+        const slowThresholdSq = slowThreshold * slowThreshold;
+
+        this.enemies.forEach(e => {
+            e.isSlowed = false; // デフォルトでリセット
+            if (e.isSucked) return;
+
+            if (this.isDrawing && this.points.length >= 2) {
+                for (let j = 0; j < this.points.length - 1; j++) {
+                    const distSq = distToSegmentSquared(e, this.points[j], this.points[j+1]);
+                    if (distSq < slowThresholdSq) {
+                        e.isSlowed = true;
+                        break;
+                    }
+                }
+            }
+        });
+
         // 敵の更新（死んだ敵や自然消滅した敵を配列から除外）
         for (let i = this.enemies.length - 1; i >= 0; i--) {
             const e = this.enemies[i];
@@ -833,6 +891,42 @@ class GameController {
 
         // Enemies
         this.enemies.forEach(e => e.draw(this.ctx));
+
+        // 新機能：無敵時間（Invincible Frame）中の指先「ネオンシールドバリア」
+        if (this.invincibleTimer > 0 && this.isDrawing && this.mouseX !== null && this.mouseY !== null) {
+            this.ctx.save();
+            // 無敵シールドのパルス効果
+            const pulse = 1 + Math.sin(Date.now() * 0.02) * 0.1;
+            const shieldRadius = 45 * pulse;
+            const alpha = Math.max(0.2, this.invincibleTimer / 1.5) * 0.5;
+
+            // ネオンシールドのグラデーション
+            const grad = this.ctx.createRadialGradient(this.mouseX, this.mouseY, 5, this.mouseX, this.mouseY, shieldRadius);
+            grad.addColorStop(0, 'rgba(0, 229, 255, 0.05)');
+            grad.addColorStop(0.8, `rgba(0, 229, 255, ${alpha * 0.3})`);
+            grad.addColorStop(1, `rgba(0, 229, 255, ${alpha})`);
+
+            this.ctx.fillStyle = grad;
+            this.ctx.strokeStyle = `rgba(0, 229, 255, ${alpha * 1.5})`;
+            this.ctx.lineWidth = 3;
+            this.ctx.shadowBlur = 15;
+            this.ctx.shadowColor = '#00ffff';
+
+            // バリア描画
+            this.ctx.beginPath();
+            this.ctx.arc(this.mouseX, this.mouseY, shieldRadius, 0, Math.PI * 2);
+            this.ctx.fill();
+            this.ctx.stroke();
+
+            // 内側の幾何学的なサブシールド
+            this.ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+            this.ctx.lineWidth = 1;
+            this.ctx.beginPath();
+            this.ctx.arc(this.mouseX, this.mouseY, shieldRadius * 0.6, 0, Math.PI * 2);
+            this.ctx.stroke();
+
+            this.ctx.restore();
+        }
 
         // Particles
         for (const p of this.particles) {
