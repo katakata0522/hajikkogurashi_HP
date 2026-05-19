@@ -175,15 +175,15 @@ canvas {
 .title-container {
     background: #fff;
     border: 5px solid var(--border-color);
-    padding: 20px;
+    padding: 10px;
     transform: rotate(-3deg);
     box-shadow: 8px 8px 0 var(--border-color);
-    margin-bottom: 30px;
+    margin-bottom: 15px;
 }
 
 .main-title {
     font-family: var(--font-comic);
-    font-size: 3.5rem;
+    font-size: 2.5rem;
     line-height: 1.1;
     color: var(--border-color);
     text-align: center;
@@ -191,18 +191,18 @@ canvas {
 
 .main-title .highlight {
     color: var(--primary-color);
-    font-size: 4rem;
+    font-size: 3rem;
 }
 
 .instruction {
     background: #fff;
     border: 4px solid var(--border-color);
-    padding: 20px;
+    padding: 15px;
     border-radius: 15px;
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 15px;
     font-weight: bold;
-    font-size: 1.1rem;
+    font-size: 1rem;
     line-height: 1.6;
     box-shadow: 4px 4px 0 var(--border-color);
     width: 85%;
@@ -223,9 +223,9 @@ canvas {
 /* コミック風ボタン */
 .comic-btn {
     font-family: var(--font-comic);
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     font-weight: bold;
-    padding: 15px 40px;
+    padding: 10px 30px;
     border: 4px solid var(--border-color);
     background: var(--primary-color);
     color: #fff;
@@ -248,7 +248,7 @@ canvas {
 .result-box {
     background: #fff;
     border: 6px solid var(--primary-color);
-    padding: 30px 20px;
+    padding: 15px 15px;
     width: 90%;
     max-width: 400px;
     text-align: center;
@@ -259,21 +259,21 @@ canvas {
 
 .result-title {
     font-family: var(--font-comic);
-    font-size: 3rem;
+    font-size: 2rem;
     color: var(--primary-color);
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     line-height: 1;
 }
 
 .sub-title {
-    font-size: 1.2rem;
+    font-size: 1rem;
     color: var(--border-color);
 }
 
 .score-container, .rank-container {
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     background: #f4f4f4;
-    padding: 15px;
+    padding: 10px;
     border: 3px solid var(--border-color);
     border-radius: 10px;
     position: relative;
@@ -283,10 +283,11 @@ canvas {
     font-weight: bold;
     color: #666;
     margin-bottom: 5px;
+    font-size: 0.9rem;
 }
 
 .final-score {
-    font-size: 3rem;
+    font-size: 2.5rem;
     font-weight: 900;
     color: var(--border-color);
     line-height: 1;
@@ -314,7 +315,7 @@ canvas {
 
 .rank-text {
     font-family: var(--font-comic);
-    font-size: 2rem;
+    font-size: 1.6rem;
     color: var(--secondary-color);
     font-weight: bold;
 }
@@ -322,8 +323,8 @@ canvas {
 .action-buttons {
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    margin-top: 20px;
+    gap: 10px;
+    margin-top: 10px;
 }
 
 .comic-btn.secondary {
