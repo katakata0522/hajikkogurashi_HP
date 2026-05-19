@@ -266,14 +266,20 @@ class UIManager {
         } else if (percent < 5) {
             this.rankText.innerText = 'ナイス・ブレーキ👍';
             this.rankText.classList.add('rank-success');
-        } else if (percent < 15) {
+        } else if (percent < 10) {
+            this.rankText.innerText = '攻めたブレーキ⚡';
+            this.rankText.classList.add('rank-success');
+        } else if (percent < 18) {
+            this.rankText.innerText = 'セーフティドライバー🔰';
+            this.rankText.classList.add('rank-success');
+        } else if (percent < 30) {
+            this.rankText.innerText = 'まだまだ攻められる💪';
+            this.rankText.classList.add('rank-chicken');
+        } else if (percent < 45) {
             this.rankText.innerText = 'ビビリ運転手🔰';
             this.rankText.classList.add('rank-chicken');
-        } else if (percent < 30) {
+        } else if (percent < 65) {
             this.rankText.innerText = 'チキン野郎🐔';
-            this.rankText.classList.add('rank-chicken');
-        } else if (percent < 60) {
-            this.rankText.innerText = '超絶チキン野郎🐣';
             this.rankText.classList.add('rank-chicken');
         } else {
             this.rankText.innerText = '歩いた方がマシ🐌';
