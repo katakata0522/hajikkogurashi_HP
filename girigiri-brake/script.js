@@ -425,6 +425,18 @@ class GameController {
         // PointerEventsを利用して、タッチとクリックの重複発火（ゴーストタップ）を完全に防止
         this.container.addEventListener('pointerdown', handleInput);
 
+        // PC向け：スペースキーでの直感的なプレイ操作を追加
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault(); // 画面スクロールを防止
+                if (this.state === STATE.START || this.state === STATE.RESULT) {
+                    this.startGame();
+                } else {
+                    handleInput(e);
+                }
+            }
+        });
+
         const startBtn = document.getElementById('start-btn');
         const retryBtn = document.getElementById('retry-btn');
         const shareBtn = document.getElementById('share-btn');
@@ -448,6 +460,7 @@ class GameController {
         this.weather = WEATHERS[Math.floor(Math.random() * WEATHERS.length)];
         this.state = STATE.READY;
         this.player.x = 20;
+        this.player.y = CONFIG.GROUND_Y - CONFIG.PLAYER_SIZE; // 落下後の再スタート時に車が画面外に取り残されるバグを修正
         this.player.speed = 0;
         this.cameraX = 0;
         this.screenShake = 0;
