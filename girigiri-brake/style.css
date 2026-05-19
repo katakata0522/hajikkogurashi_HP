@@ -130,6 +130,7 @@ canvas {
     flex-direction: column;
     gap: 1rem;
     margin-bottom: 3rem;
+    width: min(100%, 520px);
     background: rgba(0, 0, 0, 0.6);
     padding: 1.5rem;
     border-radius: 12px;
@@ -177,6 +178,10 @@ canvas {
     box-shadow: 0 4px 15px rgba(255, 65, 108, 0.4);
     transition: transform 0.1s, box-shadow 0.1s;
     text-transform: uppercase;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: center;
 }
 
 .cyber-btn:active {
@@ -406,4 +411,20 @@ canvas {
     .score-container, .rank-container { margin-bottom: 0.5rem; padding: 0.5rem; }
     .score-value { font-size: 2rem; }
     .rank-text { font-size: 1.2rem; }
+}
+
+@media (max-width: 480px) {
+    .screen { padding: 14px; }
+    .main-title { font-size: 2.6rem; }
+    .subtitle { font-size: 1rem; letter-spacing: 2px; }
+    .instruction { padding: 1rem; margin-bottom: 1.5rem; }
+    .step { align-items: flex-start; font-size: 0.95rem; }
+    .cyber-btn { font-size: 1.05rem; padding: 0.85rem 1rem; letter-spacing: 1px; }
+    .hud-top { top: 12px; left: 12px; right: 12px; gap: 10px; }
+    .weather-box, .speedometer { padding: 8px 10px; min-width: 0; }
+    .weather-value { font-size: 0.9rem; }
+    .speed-value { font-size: 1.8rem; }
+    .status-indicator { top: 110px; }
+    .status-text { font-size: 1.35rem; }
+    .sub-actions { flex-direction: column; }
 }

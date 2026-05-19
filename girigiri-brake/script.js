@@ -402,8 +402,6 @@ class GameController {
         };
 
         Object.assign(this.canvas.style, styles);
-        const uiLayer = document.getElementById('ui-layer');
-        Object.assign(uiLayer.style, styles);
     }
 
     bindEvents() {
@@ -518,14 +516,32 @@ class GameController {
         requestAnimationFrame(fallAnim);
     }
 
+    safeLoadBestDistance() {
+        try {
+            const stored = window.localStorage?.getItem('girigiri_best_distance');
+            const parsed = stored ? parseFloat(stored) : null;
+            return Number.isFinite(parsed) ? parsed : null;
+        } catch (_) {
+            return null;
+        }
+    }
+
+    safeSaveBestDistance(distanceMeter) {
+        try {
+            window.localStorage?.setItem('girigiri_best_distance', distanceMeter.toString());
+            return true;
+        } catch (_) {
+            return false;
+        }
+    }
+
     processResult(type) {
         this.audio.stopSkid();
         this.state = STATE.RESULT;
         this.screenShake = 0;
         
         let isNewRecord = false;
-        let bestDist = localStorage.getItem('girigiri_best_distance');
-        bestDist = bestDist ? parseFloat(bestDist) : null;
+        let bestDist = this.safeLoadBestDistance();
 
         if (type === 'fall') {
             this.ui.showResult(0, 'fall', bestDist, false);
@@ -537,15 +553,15 @@ class GameController {
         const distanceMeter = parseFloat((distancePixel / 100).toFixed(2));
         this.resultDistance = distanceMeter;
 
-        if (distanceMeter < 0 || distanceMeter < 5.0) {
+        if (distanceMeter < 5.0) {
             this.audio.playSuccess();
         }
 
         // _setRankTextに直接距離(m)を渡して詳細な評価判定を行わせる
         let rankType = distanceMeter;
 
-        if (!bestDist || distanceMeter < bestDist) {
-            localStorage.setItem('girigiri_best_distance', distanceMeter.toString());
+        if (bestDist === null || distanceMeter < bestDist) {
+            this.safeSaveBestDistance(distanceMeter);
             bestDist = distanceMeter;
             isNewRecord = true;
         }
@@ -573,7 +589,8 @@ class GameController {
             // 急激なカメラジャンプを防ぎ、ダイナミックで滑らかな追従を実現
             this.cameraX += (targetCameraX - this.cameraX) * 8 * dt;
 
-            if (this.player.x + this.player.width / 2 > CONFIG.CLIFF_X) {
+            const playerFrontX = this.player.x + this.player.width;
+            if (playerFrontX > CONFIG.CLIFF_X) {
                 this.triggerGameOverFall();
             }
 
@@ -598,7 +615,8 @@ class GameController {
             const targetCameraX = this.player.x - (CONFIG.LOGICAL_WIDTH * cameraPercent);
             this.cameraX += (targetCameraX - this.cameraX) * 8 * dt;
 
-            if (this.player.x + this.player.width / 2 > CONFIG.CLIFF_X) {
+            const playerFrontX = this.player.x + this.player.width;
+            if (playerFrontX > CONFIG.CLIFF_X) {
                 this.triggerGameOverFall();
             } else if (this.player.speed <= 0) {
                 this.processResult('success');
@@ -683,60 +701,21 @@ class GameController {
         // --- 看板 ---
         if (this.signboards) {
             for (let sign of this.signboards) {
-            const signScreenX = sign.x - this.cameraX;
-            if (signScreenX > -100 && signScreenX < CONFIG.LOGICAL_WIDTH + 100) {
-                this.ctx.fillStyle = '#555';
-                this.ctx.fillRect(signScreenX - 5, CONFIG.GROUND_Y - 80, 10, 80);
-                this.ctx.fillStyle = '#222';
-                this.ctx.strokeStyle = '#fff';
-                this.ctx.lineWidth = 2;
-                this.ctx.fillRect(signScreenX - 60, CONFIG.GROUND_Y - 120, 120, 40);
-                this.ctx.strokeRect(signScreenX - 60, CONFIG.GROUND_Y - 120, 120, 40);
-                this.ctx.fillStyle = sign.text.includes('DANGER') ? '#ff416c' : '#fff';
-                this.ctx.font = 'bold 16px sans-serif';
-                this.ctx.textAlign = 'center';
-                this.ctx.textBaseline = 'middle';
-                this.ctx.fillText(sign.text, signScreenX, CONFIG.GROUND_Y - 100);
-            }
-        }
-
-
-        // --- 天候エフェクト描画（背景・雰囲気の可視化） ---
-        if (this.weather.name.includes('RAIN')) {
-            this.ctx.strokeStyle = 'rgba(174, 207, 238, 0.4)';
-            this.ctx.lineWidth = 1.5;
-            const rainSeed = (Date.now() / 12) % 300;
-            for (let i = 0; i < 40; i++) {
-                const x = ((i * 37) + rainSeed * 2.5) % CONFIG.LOGICAL_WIDTH;
-                const y = ((i * 19) + rainSeed * 5) % CONFIG.LOGICAL_HEIGHT;
-                this.ctx.beginPath();
-                this.ctx.moveTo(x, y);
-                this.ctx.lineTo(x - 6, y + 18);
-                this.ctx.stroke();
-            }
-        } else if (this.weather.name.includes('TAILWIND')) {
-            this.ctx.strokeStyle = 'rgba(0, 242, 254, 0.15)';
-            this.ctx.lineWidth = 1.2;
-            const windSeed = (Date.now() / 10) % 500;
-            for (let i = 0; i < 8; i++) {
-                const x = ((i * 123) + windSeed * 4.5) % (CONFIG.LOGICAL_WIDTH + 100) - 50;
-                const y = (i * 73) % (CONFIG.LOGICAL_HEIGHT - 200) + 50;
-                this.ctx.beginPath();
-                this.ctx.moveTo(x, y);
-                this.ctx.lineTo(x + 70, y);
-                this.ctx.stroke();
-            }
-        } else if (this.weather.name.includes('HEADWIND')) {
-            this.ctx.strokeStyle = 'rgba(255, 179, 71, 0.15)';
-            this.ctx.lineWidth = 1.2;
-            const windSeed = (Date.now() / 10) % 500;
-            for (let i = 0; i < 8; i++) {
-                const x = CONFIG.LOGICAL_WIDTH - (((i * 123) + windSeed * 4.5) % (CONFIG.LOGICAL_WIDTH + 100)) + 50;
-                const y = (i * 73) % (CONFIG.LOGICAL_HEIGHT - 200) + 50;
-                this.ctx.beginPath();
-                this.ctx.moveTo(x, y);
-                this.ctx.lineTo(x - 70, y);
-                this.ctx.stroke();
+                const signScreenX = sign.x - this.cameraX;
+                if (signScreenX > -100 && signScreenX < CONFIG.LOGICAL_WIDTH + 100) {
+                    this.ctx.fillStyle = '#555';
+                    this.ctx.fillRect(signScreenX - 5, CONFIG.GROUND_Y - 80, 10, 80);
+                    this.ctx.fillStyle = '#222';
+                    this.ctx.strokeStyle = '#fff';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.fillRect(signScreenX - 60, CONFIG.GROUND_Y - 120, 120, 40);
+                    this.ctx.strokeRect(signScreenX - 60, CONFIG.GROUND_Y - 120, 120, 40);
+                    this.ctx.fillStyle = sign.text.includes('DANGER') ? '#ff416c' : '#fff';
+                    this.ctx.font = 'bold 16px sans-serif';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.textBaseline = 'middle';
+                    this.ctx.fillText(sign.text, signScreenX, CONFIG.GROUND_Y - 100);
+                }
             }
         }
 
@@ -984,7 +963,7 @@ class GameController {
         // dtを渡してパーティクルを更新＆描画
         this.particles.updateAndDraw(this.ctx, dt, this.cameraX, this.screenShake);
 
-        if (this.state !== STATE.START) {
+        if (this.state !== STATE.START && this.state !== STATE.RESULT) {
             this.animationId = requestAnimationFrame((t) => this.loop(t));
         }
     }
