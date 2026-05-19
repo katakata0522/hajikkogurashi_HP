@@ -107,13 +107,10 @@ class UIManager {
         this.touchRight = document.getElementById('touch-right');
 
         this.scoreValueEl = document.getElementById('score-value');
-        this.comboValueEl = document.getElementById('combo-value');
         this.finalScoreEl = document.getElementById('final-score');
-        this.maxComboEl = document.getElementById('max-combo');
         this.rankTextEl = document.getElementById('rank-text');
         
         this.bestScoreValueEl = document.getElementById('best-score-value');
-        this.bestComboValueEl = document.getElementById('best-combo-value');
         this.newRecordBadge = document.getElementById('new-record-badge');
     }
 
@@ -125,7 +122,7 @@ class UIManager {
         this.touchLeft.classList.remove('hidden');
         this.touchRight.classList.remove('hidden');
         this.bgEffect.classList.add('moving');
-        this.updateScore(0, 0);
+        this.updateScore(0);
     }
 
     setRule(ruleName) {
@@ -143,19 +140,11 @@ class UIManager {
         this.ruleAlert.classList.add('hidden');
     }
 
-    updateScore(score, combo) {
+    updateScore(score) {
         this.scoreValueEl.innerText = score;
-        if (combo > 1) {
-            this.comboValueEl.innerText = `${combo} COMBO!`;
-            this.comboValueEl.style.opacity = 1;
-            if (combo > 10) this.comboValueEl.classList.add('high');
-            else this.comboValueEl.classList.remove('high');
-        } else {
-            this.comboValueEl.style.opacity = 0;
-        }
     }
 
-    showGameOver(score, maxCombo, bestScore, bestCombo, isNewRecord) {
+    showGameOver(score, bestScore, isNewRecord) {
         this.bgEffect.classList.remove('moving');
         this.scoreHud.classList.add('hidden');
         this.ruleDisplay.classList.add('hidden');
@@ -163,10 +152,7 @@ class UIManager {
         this.touchRight.classList.add('hidden');
 
         this.finalScoreEl.innerText = score;
-        this.maxComboEl.innerText = maxCombo;
-        
         this.bestScoreValueEl.innerText = bestScore !== null ? bestScore : '--';
-        this.bestComboValueEl.innerText = bestCombo !== null ? bestCombo : '--';
 
         if (isNewRecord) {
             this.newRecordBadge.classList.remove('hidden');
@@ -299,8 +285,6 @@ class GameController {
         this.animationId = null;
 
         this.score = 0;
-        this.combo = 0;
-        this.maxCombo = 0;
         this.currentRule = CONFIG.RULES.COLOR;
         
         this.items = [];
@@ -482,8 +466,6 @@ class GameController {
             this.particles.spawn(targetItem.x, targetItem.y, targetItem.color);
             
             this.score++;
-            this.combo++;
-            if (this.combo > this.maxCombo) this.maxCombo = this.combo;
             
             this.fallSpeed = Math.min(this.fallSpeed + 8, 1200); // 最大スピードも抑えめに
             this.spawnIntervalTime = Math.max(this.spawnIntervalTime - 0.02, 0.5);
@@ -494,7 +476,7 @@ class GameController {
                 this.sortsUntilChange = this.getRandomRuleChangeCount();
             }
 
-            this.ui.updateScore(this.score, this.combo);
+            this.ui.updateScore(this.score);
         } else {
             this.triggerGameOver();
         }
@@ -511,22 +493,16 @@ class GameController {
 
         let isNewRecord = false;
         let bestScore = localStorage.getItem('sorting_best_score');
-        let bestCombo = localStorage.getItem('sorting_best_combo');
         
         bestScore = bestScore ? parseInt(bestScore) : null;
-        bestCombo = bestCombo ? parseInt(bestCombo) : null;
 
         if (!bestScore || this.score > bestScore) {
             localStorage.setItem('sorting_best_score', this.score.toString());
             bestScore = this.score;
             isNewRecord = true;
         }
-        if (!bestCombo || this.maxCombo > bestCombo) {
-            localStorage.setItem('sorting_best_combo', this.maxCombo.toString());
-            bestCombo = this.maxCombo;
-        }
 
-        this.ui.showGameOver(this.score, this.maxCombo, bestScore, bestCombo, isNewRecord);
+        this.ui.showGameOver(this.score, bestScore, isNewRecord);
         this.draw(); // Final render with shake
     }
 
@@ -568,7 +544,7 @@ class GameController {
     }
 
     drawBoxes() {
-        const boxHeight = 100;
+        const boxHeight = 40;
         const boxY = CONFIG.LOGICAL_HEIGHT - boxHeight;
         const boxWidth = CONFIG.LOGICAL_WIDTH / 2;
         const isColor = this.currentRule === CONFIG.RULES.COLOR;
@@ -589,27 +565,29 @@ class GameController {
         // Shape Icons / Size Labels / Number Labels
         if (this.currentRule === CONFIG.RULES.SHAPE) {
             this.ctx.strokeStyle = 'rgba(255,255,255,0.8)';
-            this.ctx.lineWidth = 8;
-            this.ctx.shadowBlur = 15;
+            this.ctx.lineWidth = 4;
+            this.ctx.shadowBlur = 10;
             this.ctx.shadowColor = '#fff';
             // Circle left
-            this.ctx.beginPath(); this.ctx.arc(boxWidth/2, boxY + 50, 30, 0, Math.PI*2); this.ctx.stroke();
+            this.ctx.beginPath(); this.ctx.arc(boxWidth/2, boxY + 20, 12, 0, Math.PI*2); this.ctx.stroke();
             // Square right
-            this.ctx.beginPath(); this.ctx.roundRect(boxWidth + boxWidth/2 - 30, boxY + 20, 60, 60, 8); this.ctx.stroke();
+            this.ctx.beginPath(); this.ctx.roundRect(boxWidth + boxWidth/2 - 12, boxY + 8, 24, 24, 4); this.ctx.stroke();
             this.ctx.shadowBlur = 0;
         } else if (this.currentRule === CONFIG.RULES.SIZE) {
             this.ctx.fillStyle = 'rgba(255,255,255,0.8)';
             this.ctx.textAlign = 'center';
-            this.ctx.font = 'bold 30px "M PLUS Rounded 1c"';
-            this.ctx.fillText('小 (SMALL)', boxWidth/2, boxY + 60);
-            this.ctx.font = 'bold 40px "M PLUS Rounded 1c"';
-            this.ctx.fillText('大 (LARGE)', boxWidth + boxWidth/2, boxY + 60);
+            this.ctx.textBaseline = 'middle';
+            this.ctx.font = 'bold 20px "M PLUS Rounded 1c"';
+            this.ctx.fillText('小 (SMALL)', boxWidth/2, boxY + 20);
+            this.ctx.font = 'bold 24px "M PLUS Rounded 1c"';
+            this.ctx.fillText('大 (LARGE)', boxWidth + boxWidth/2, boxY + 20);
         } else if (this.currentRule === CONFIG.RULES.NUMBER) {
             this.ctx.fillStyle = 'rgba(255,255,255,0.8)';
             this.ctx.textAlign = 'center';
-            this.ctx.font = 'bold 24px "M PLUS Rounded 1c"';
-            this.ctx.fillText('奇数 (1,3,5...)', boxWidth/2, boxY + 60);
-            this.ctx.fillText('偶数 (2,4,6...)', boxWidth + boxWidth/2, boxY + 60);
+            this.ctx.textBaseline = 'middle';
+            this.ctx.font = 'bold 18px "M PLUS Rounded 1c"';
+            this.ctx.fillText('奇数(1,3,5...)', boxWidth/2, boxY + 20);
+            this.ctx.fillText('偶数(2,4,6...)', boxWidth + boxWidth/2, boxY + 20);
         }
 
         // 境界線
@@ -635,12 +613,6 @@ class GameController {
         this.ctx.rotate(this.flipperAngleRight);
         this.ctx.beginPath(); this.ctx.moveTo(0, 0); this.ctx.lineTo(boxWidth - 20, 0); this.ctx.stroke();
         this.ctx.restore();
-
-        // 次のルール変更までのカウントダウン
-        this.ctx.fillStyle = '#ffd700';
-        this.ctx.font = 'bold 24px "Teko"';
-        this.ctx.textAlign = 'center';
-        this.ctx.fillText(`NEXT OVERRIDE IN : ${this.sortsUntilChange}`, CONFIG.LOGICAL_WIDTH / 2, boxY - 30);
     }
 
     draw() {
@@ -676,7 +648,7 @@ class GameController {
 
     shareResult(e) {
         e.stopPropagation();
-        const text = `脳の処理限界に到達…！ 【${this.score}個】のアイテムを仕分けました！（最大${this.maxCombo}コンボ） 称号：[${this.ui.rankTextEl.innerText}]`;
+        const text = `脳の処理限界に到達…！ 【${this.score}個】のアイテムを仕分けました！ 称号：[${this.ui.rankTextEl.innerText}]`;
         const url = "https://hajikkoroom.xsrv.jp/sorting-factory/";
         const hashtags = "はじっこぐらし,超絶仕分け工場";
         window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtags)}`);
