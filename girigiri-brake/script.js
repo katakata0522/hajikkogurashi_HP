@@ -28,14 +28,6 @@ const WEATHERS = [
     { name: '🌧️ RAIN (滑る)', acc: 0.9, fric: 0.4, color: '#5555ff' }
 ];
 
-const SIGNBOARDS = [
-    { x: 3000, text: 'あと 90m' },
-    { x: 6000, text: 'あと 60m' },
-    { x: 9000, text: 'あと 30m' },
-    { x: 11000, text: 'あと 10m' },
-    { x: 11500, text: '⚠️ DANGER!' }
-];
-
 // ==========================================
 // AudioManager
 // ==========================================
@@ -457,6 +449,15 @@ class GameController {
         // 崖までの距離を毎回ランダムに設定（10000px 〜 15000px）し、タイミングの暗記を防止
         CONFIG.CLIFF_X = Math.floor(Math.random() * 5000) + 10000;
         
+        // 崖からの相対距離で看板を動的生成（ランダム距離対応）
+        this.signboards = [
+            { x: Math.max(0, CONFIG.CLIFF_X - 9000), text: 'あと 90m' },
+            { x: Math.max(0, CONFIG.CLIFF_X - 6000), text: 'あと 60m' },
+            { x: Math.max(0, CONFIG.CLIFF_X - 3000), text: 'あと 30m' },
+            { x: Math.max(0, CONFIG.CLIFF_X - 1000), text: 'あと 10m' },
+            { x: Math.max(0, CONFIG.CLIFF_X - 500),  text: '⚠️ DANGER!' }
+        ];
+
         this.weather = WEATHERS[Math.floor(Math.random() * WEATHERS.length)];
         this.state = STATE.READY;
         this.player.x = 20;
@@ -497,6 +498,7 @@ class GameController {
         const fallAnim = (timestamp) => {
             if(!this.lastTime) this.lastTime = timestamp;
             let dt = (timestamp - this.lastTime) / 1000;
+            if (dt > 0.1) dt = 0.1; // タブ切り替え時のワープ落下を防止
             this.lastTime = timestamp;
 
             if (this.screenShake > 0) this.screenShake -= 15 * dt;
@@ -679,7 +681,8 @@ class GameController {
         this.ctx.stroke();
 
         // --- 看板 ---
-        for (let sign of SIGNBOARDS) {
+        if (this.signboards) {
+            for (let sign of this.signboards) {
             const signScreenX = sign.x - this.cameraX;
             if (signScreenX > -100 && signScreenX < CONFIG.LOGICAL_WIDTH + 100) {
                 this.ctx.fillStyle = '#555';
@@ -696,6 +699,7 @@ class GameController {
                 this.ctx.fillText(sign.text, signScreenX, CONFIG.GROUND_Y - 100);
             }
         }
+
 
         // --- 天候エフェクト描画（背景・雰囲気の可視化） ---
         if (this.weather.name.includes('RAIN')) {
