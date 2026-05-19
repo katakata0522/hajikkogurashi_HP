@@ -4,7 +4,7 @@
 
 const CONFIG = {
     LOGICAL_WIDTH: 600,
-    LOGICAL_HEIGHT: 1000,
+    LOGICAL_HEIGHT: 1500,
     COLORS: { RED: '#ff3366', BLUE: '#00c3ff' },
     SHAPES: { CIRCLE: 0, SQUARE: 1 },
     RULES: { COLOR: '色', SHAPE: '形' }
@@ -212,10 +212,8 @@ class Item {
         if (this.alpha <= 0) return;
         ctx.globalAlpha = Math.max(0, this.alpha);
         
-        const isShapeRule = currentRule === CONFIG.RULES.SHAPE;
-        
-        ctx.fillStyle = isShapeRule ? '#333' : this.color;
-        ctx.shadowBlur = isShapeRule ? 0 : 20;
+        ctx.fillStyle = this.color;
+        ctx.shadowBlur = 20;
         ctx.shadowColor = this.color;
 
         ctx.beginPath();
@@ -227,25 +225,15 @@ class Item {
             ctx.fill();
         }
 
-        if (isShapeRule) {
-            // 形ルールの時は白くクッキリ発光させる
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 6;
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = '#fff';
-            ctx.stroke();
-            ctx.shadowBlur = 0;
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.shadowBlur = 0;
+        ctx.beginPath();
+        if (this.shape === CONFIG.SHAPES.CIRCLE) {
+            ctx.arc(this.x - 15, this.y - 15, 12, 0, Math.PI * 2);
         } else {
-            ctx.fillStyle = 'rgba(255,255,255,0.6)';
-            ctx.shadowBlur = 0;
-            ctx.beginPath();
-            if (this.shape === CONFIG.SHAPES.CIRCLE) {
-                ctx.arc(this.x - 15, this.y - 15, 12, 0, Math.PI * 2);
-            } else {
-                ctx.roundRect(this.x - this.size/2 + 10, this.y - this.size/2 + 10, 20, 20, 4);
-            }
-            ctx.fill();
+            ctx.roundRect(this.x - this.size/2 + 10, this.y - this.size/2 + 10, 20, 20, 4);
         }
+        ctx.fill();
 
         ctx.globalAlpha = 1.0;
     }
