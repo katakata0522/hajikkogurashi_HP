@@ -49,6 +49,19 @@ function distToSegmentSquared(p, v, w) {
     return dist2(p, { x: v.x + t * (w.x - v.x), y: v.y + t * (w.y - v.y) });
 }
 
+// 面積を計算する（Shoelace formula）
+function getPolygonArea(points) {
+    let area = 0;
+    const len = points.length;
+    if (len < 3) return 0;
+    for (let i = 0; i < len; i++) {
+        const p1 = points[i];
+        const p2 = points[(i + 1) % len];
+        area += (p1.x * p2.y) - (p2.x * p1.y);
+    }
+    return Math.abs(area / 2);
+}
+
 // ==========================================
 // AudioManager
 // ==========================================
@@ -209,23 +222,80 @@ class Enemy {
         this.vy = Math.sin(angle) * speed;
         
         this.color = type === 0 ? '#33ff33' : (type === 1 ? '#ffff33' : '#ff3366');
+
+        // 新機能用パラメータ
+        this.age = 0; // 寿命管理
+        this.stunTimer = 0; // スタン
+        this.isSucked = false; // 吸引中か
+        this.suckProgress = 0;
+        this.suckTarget = null;
+        this.isDead = false; // 完全消滅フラグ
     }
 
-    update(dt, targetX, targetY) {
-        if (this.type === 2 && targetX !== null && targetY !== null) {
-            // Tracker moves towards target (finger)
-            const dx = targetX - this.x;
-            const dy = targetY - this.y;
-            const dist = Math.hypot(dx, dy);
-            if (dist > 0) {
-                this.vx = (dx / dist) * 80;
-                this.vy = (dy / dist) * 80;
+    update(dt, targetX, targetY, isDrawing) {
+        // 吸引中アニメーション
+        if (this.isSucked && this.suckTarget) {
+            this.suckProgress += 4 * dt; // 0.25秒で完了
+            if (this.suckProgress >= 1) {
+                this.suckProgress = 1;
+                this.isDead = true;
+            }
+            // 重心へ引き寄せ
+            this.x += (this.suckTarget.x - this.x) * 10 * dt;
+            this.y += (this.suckTarget.y - this.y) * 10 * dt;
+            return;
+        }
+
+        // 寿命システム（15秒で自然消滅）
+        this.age += dt;
+        if (this.age > 15) {
+            this.isDead = true;
+            return;
+        }
+
+        // スタン状態の処理
+        if (this.stunTimer > 0) {
+            this.stunTimer -= dt;
+            // スタン中は摩擦で減速
+            this.vx *= Math.exp(-2 * dt);
+            this.vy *= Math.exp(-2 * dt);
+            this.x += this.vx * dt;
+            this.y += this.vy * dt;
+            // 境界チェック
+            this.bounceCheck();
+            return;
+        }
+
+        // 追跡バグは「線を引いている時だけ」かつ「少し遅い速度」で指を追う
+        if (this.type === 2) {
+            if (isDrawing && targetX !== null && targetY !== null) {
+                const dx = targetX - this.x;
+                const dy = targetY - this.y;
+                const dist = Math.hypot(dx, dy);
+                if (dist > 0) {
+                    // 最大追跡速度を80に制限（マイルドに）
+                    const targetVx = (dx / dist) * 75;
+                    const targetVy = (dy / dist) * 75;
+                    // イージングで滑らかに旋回
+                    this.vx += (targetVx - this.vx) * 3 * dt;
+                    this.vy += (targetVy - this.vy) * 3 * dt;
+                }
+            } else {
+                // 描いていない時はランダムにゆったり漂う
+                const speed = 40;
+                const angle = Math.atan2(this.vy, this.vx) + (Math.random() - 0.5) * dt * 2;
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed;
             }
         }
 
         this.x += this.vx * dt;
         this.y += this.vy * dt;
 
+        this.bounceCheck();
+    }
+
+    bounceCheck() {
         // Bounce off walls
         if (this.x < this.radius) { this.x = this.radius; this.vx *= -1; }
         if (this.x > CONFIG.LOGICAL_WIDTH - this.radius) { this.x = CONFIG.LOGICAL_WIDTH - this.radius; this.vx *= -1; }
@@ -234,19 +304,41 @@ class Enemy {
     }
 
     draw(ctx) {
+        // 寿命間近（12秒以上）の点滅処理
+        if (!this.isSucked && this.age > 12) {
+            if (Math.floor(this.age * 8) % 2 === 0) return; // 点滅で描画スキップ
+        }
+
+        ctx.save();
         ctx.fillStyle = this.color;
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = this.color;
+        
+        // 吸引中の縮小
+        let currentRadius = this.radius;
+        if (this.isSucked) {
+            currentRadius = this.radius * (1 - this.suckProgress);
+        }
+
+        // スタン中のエフェクト（震えと光彩カット）
+        if (this.stunTimer > 0) {
+            ctx.translate((Math.random() - 0.5) * 4, (Math.random() - 0.5) * 4);
+            ctx.shadowBlur = 4;
+            ctx.shadowColor = '#ffffff';
+        } else {
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = this.color;
+        }
+
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.arc(this.x, this.y, currentRadius, 0, Math.PI * 2);
         ctx.fill();
         ctx.shadowBlur = 0;
         
         // Inner detail
         ctx.fillStyle = '#000';
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius * 0.4, 0, Math.PI * 2);
+        ctx.arc(this.x, this.y, currentRadius * 0.4, 0, Math.PI * 2);
         ctx.fill();
+        ctx.restore();
     }
 }
 
@@ -272,6 +364,8 @@ class GameController {
         this.blackholes = []; // Visual effects for loops
         this.particles = [];
         this.screenShake = 0;
+        this.empWave = null; // EMP波エフェクト
+        this.invincibleTimer = 0; // 無敵時間
         
         this.spawnTimer = 0;
         this.difficultyTimer = 0;
@@ -401,6 +495,8 @@ class GameController {
         this.difficultyTimer = 0;
         this.lastTime = 0;
         this.screenShake = 0;
+        this.empWave = null;
+        this.invincibleTimer = 0;
 
         // Initial enemies
         for(let i=0; i<3; i++) this.spawnEnemy();
@@ -412,6 +508,9 @@ class GameController {
     }
 
     spawnEnemy() {
+        // ハードリミット：画面上の敵が12匹以上の場合はスポーンをスキップして「詰み」を防止
+        if (this.enemies.filter(e => !e.isSucked).length >= 12) return;
+
         const edge = Math.floor(Math.random() * 4);
         let x, y;
         if (edge === 0) { x = Math.random() * CONFIG.LOGICAL_WIDTH; y = -20; }
@@ -457,8 +556,12 @@ class GameController {
         const p3 = this.points[len-2];
         const p4 = this.points[len-1];
 
+        // 誤爆防止の遊び：直近10フレーム分（約0.15秒分）の線は交差判定の対象から除外する
+        const safetyMargin = 10;
+        if (len - safetyMargin <= 0) return;
+
         // Check against older segments
-        for (let i = 0; i < len - 3; i++) {
+        for (let i = 0; i < len - safetyMargin; i++) {
             const p1 = this.points[i];
             const p2 = this.points[i+1];
             
@@ -487,55 +590,81 @@ class GameController {
         }
         path.closePath();
 
+        // ループの中心（重心）を計算
+        let cx = 0, cy = 0;
+        loopPoints.forEach(p => { cx += p.x; cy += p.y; });
+        cx /= loopPoints.length;
+
         let caught = 0;
         for (let i = this.enemies.length - 1; i >= 0; i--) {
             const e = this.enemies[i];
-            // Since path2D requires current context transformation, it's easier to check on a clean context.
-            // But we can just use this.ctx.isPointInPath
-            if (this.ctx.isPointInPath(path, e.x, e.y)) {
+            if (!e.isSucked && this.ctx.isPointInPath(path, e.x, e.y)) {
                 caught++;
-                this.enemies.splice(i, 1);
+                // 吸引アニメーション開始（即消去しない）
+                e.isSucked = true;
+                e.suckTarget = { x: cx, y: cy };
                 this.spawnParticles(e.x, e.y, e.color);
             }
         }
 
         if (caught > 0) {
             this.audio.playEffect('blackhole');
+            
+            // コンボ倍率
             let multiplier = 1;
             if (caught === 2) multiplier = 2;
             else if (caught === 3) multiplier = 3;
             else if (caught >= 4) multiplier = 5;
 
-            const pts = caught * 100 * multiplier;
+            // 新機能：面積ボーナスの計算
+            const area = getPolygonArea(loopPoints);
+            const areaBonus = Math.floor(area / 150); // 大きく囲むほど大量スコア
+
+            const pts = (caught * 100 * multiplier) + areaBonus;
             this.score += pts;
             this.ui.updateScore(this.score);
 
-            if (caught >= 4) this.screenShake = 15;
+            if (caught >= 4 || areaBonus > 200) this.screenShake = 15;
 
-            // Find center of loop for visual effect
-            let cx = 0, cy = 0;
-            loopPoints.forEach(p => { cx += p.x; cy += p.y; });
-            cx /= loopPoints.length;
-
-            this.blackholes.push({ x: cx, y: cy, life: 1.0, caught: caught, pts: pts });
+            // ブラックホールエフェクトの追加
+            this.blackholes.push({ 
+                x: cx, 
+                y: cy, 
+                life: 1.0, 
+                caught: caught, 
+                pts: pts,
+                areaBonus: areaBonus 
+            });
         }
     }
 
     checkDamage() {
         if (!this.isDrawing || this.points.length < 2) return;
+        if (this.invincibleTimer > 0) return; // 無敵時間中は被弾しない
 
         for (let i = 0; i < this.enemies.length; i++) {
             const e = this.enemies[i];
+            if (e.isSucked) continue; // 吸引中の敵からは被弾しない
+
             for (let j = 0; j < this.points.length - 1; j++) {
                 const distSq = distToSegmentSquared(e, this.points[j], this.points[j+1]);
                 const threshold = e.radius + 5; // Line width is ~5
                 if (distSq < threshold * threshold) {
-                    // Damage!
+                    // ダメージ・被弾処理
                     this.life--;
                     this.ui.updateLife(this.life);
                     this.audio.playEffect('damage');
-                    this.screenShake = 10;
-                    if (navigator.vibrate) navigator.vibrate(100);
+                    this.screenShake = 15;
+                    if (navigator.vibrate) navigator.vibrate(200);
+
+                    // 詰み防止：無敵時間の設定
+                    this.invincibleTimer = 1.5;
+
+                    // 詰み防止：被弾時EMPバーストの発生
+                    // 線と敵の衝突点をバーストの中心にする
+                    const hitX = this.points[j].x;
+                    const hitY = this.points[j].y;
+                    this.triggerEmpBurst(hitX, hitY);
                     
                     // Clear line to prevent multiple hits
                     this.points = [];
@@ -548,6 +677,33 @@ class GameController {
                 }
             }
         }
+    }
+
+    triggerEmpBurst(hitX, hitY) {
+        // EMP衝撃波の描画用パラメータ
+        this.empWave = {
+            x: hitX,
+            y: hitY,
+            radius: 0,
+            maxRadius: 500,
+            life: 1.0
+        };
+
+        // すべての敵にスタンと強いノックバック（吹き飛ばし）を適用
+        this.enemies.forEach(e => {
+            if (e.isSucked) return;
+
+            const dx = e.x - hitX;
+            const dy = e.y - hitY;
+            const dist = Math.hypot(dx, dy) || 1;
+
+            // 衝突点から外側に向かうベクトルを計算し、強く吹き飛ばす
+            e.vx = (dx / dist) * 450;
+            e.vy = (dy / dist) * 450;
+            
+            // 詰み防止：1.5秒スタンさせて一時停止させる
+            e.stunTimer = 1.5;
+        });
     }
 
     spawnParticles(x, y, color) {
@@ -570,6 +726,20 @@ class GameController {
             if (this.screenShake < 0) this.screenShake = 0;
         }
 
+        // 無敵タイマーの更新
+        if (this.invincibleTimer > 0) {
+            this.invincibleTimer -= dt;
+        }
+
+        // EMP波エフェクトの更新
+        if (this.empWave) {
+            this.empWave.radius += 800 * dt; // 高速で拡大
+            this.empWave.life -= 1.8 * dt;  // 徐々に薄くなる
+            if (this.empWave.life <= 0) {
+                this.empWave = null;
+            }
+        }
+
         this.difficultyTimer += dt * 1000;
         
         // Spawning
@@ -584,7 +754,14 @@ class GameController {
         let tx = null, ty = null;
         if (this.isDrawing) { tx = this.mouseX; ty = this.mouseY; }
 
-        this.enemies.forEach(e => e.update(dt, tx, ty));
+        // 敵の更新（死んだ敵や自然消滅した敵を配列から除外）
+        for (let i = this.enemies.length - 1; i >= 0; i--) {
+            const e = this.enemies[i];
+            e.update(dt, tx, ty, this.isDrawing);
+            if (e.isDead) {
+                this.enemies.splice(i, 1);
+            }
+        }
 
         this.checkDamage();
 
@@ -622,16 +799,37 @@ class GameController {
             
             // Text
             this.ctx.fillStyle = '#fff';
-            this.ctx.font = 'bold 30px "M PLUS Rounded 1c"';
+            this.ctx.font = 'bold 24px "M PLUS Rounded 1c"';
             this.ctx.textAlign = 'center';
             this.ctx.textBaseline = 'middle';
-            this.ctx.fillText(`+${bh.pts}`, bh.x, bh.y - 30);
+            
+            // コンボと面積ボーナスを綺麗に表示
+            if (bh.areaBonus > 50) {
+                this.ctx.fillText(`+${bh.pts} (AREA:+${bh.areaBonus})`, bh.x, bh.y - 30);
+            } else {
+                this.ctx.fillText(`+${bh.pts}`, bh.x, bh.y - 30);
+            }
+
             if (bh.caught > 1) {
                 this.ctx.fillStyle = '#ff3366';
                 this.ctx.fillText(`${bh.caught} COMBO!`, bh.x, bh.y + 10);
             }
         }
         this.ctx.globalAlpha = 1.0;
+
+        // EMP衝撃波の描画
+        if (this.empWave) {
+            this.ctx.save();
+            this.ctx.globalAlpha = Math.max(0, this.empWave.life);
+            this.ctx.strokeStyle = '#ffffff';
+            this.ctx.lineWidth = 6;
+            this.ctx.shadowBlur = 20;
+            this.ctx.shadowColor = '#ffffff';
+            this.ctx.beginPath();
+            this.ctx.arc(this.empWave.x, this.empWave.y, this.empWave.radius, 0, Math.PI * 2);
+            this.ctx.stroke();
+            this.ctx.restore();
+        }
 
         // Enemies
         this.enemies.forEach(e => e.draw(this.ctx));
@@ -648,7 +846,13 @@ class GameController {
 
         // Drawn Line
         if (this.isDrawing && this.points.length > 0) {
-            this.ctx.strokeStyle = '#00ffff';
+            // 無敵時間中は線が少し半透明で点滅
+            if (this.invincibleTimer > 0 && Math.floor(Date.now() / 100) % 2 === 0) {
+                this.ctx.strokeStyle = 'rgba(0, 229, 255, 0.4)';
+            } else {
+                this.ctx.strokeStyle = '#00ffff';
+            }
+
             this.ctx.lineWidth = 4;
             this.ctx.lineCap = 'round';
             this.ctx.lineJoin = 'round';
