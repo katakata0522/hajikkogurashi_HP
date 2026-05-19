@@ -137,6 +137,18 @@ class UIManager {
         this.newRecordBadge = document.getElementById('new-record-badge');
         this.rankTextEl = document.getElementById('rank-text');
         this.hearts = document.querySelectorAll('.heart');
+
+        this.darkModeToggle = document.getElementById('dark-mode-toggle');
+        if (this.darkModeToggle) {
+            // 初期状態は「残業モード（ON）」＝ダークモードにする
+            this.darkModeToggle.checked = true;
+            document.body.classList.add('dark-mode');
+            
+            this.darkModeToggle.addEventListener('change', (e) => {
+                if (e.target.checked) document.body.classList.add('dark-mode');
+                else document.body.classList.remove('dark-mode');
+            });
+        }
     }
 
     startGameUI() {
@@ -235,15 +247,18 @@ class Enemy {
 
     draw(ctx) {
         ctx.fillStyle = this.color;
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = this.color;
+        const isDark = document.body.classList.contains('dark-mode');
+        if (isDark) {
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = this.color;
+        }
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         ctx.fill();
         ctx.shadowBlur = 0;
         
         // Inner detail
-        ctx.fillStyle = '#000';
+        ctx.fillStyle = isDark ? '#000' : '#fff';
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius * 0.4, 0, Math.PI * 2);
         ctx.fill();
@@ -361,9 +376,12 @@ class GameController {
         // Double tap retry
         let lastTap = 0;
         const checkDoubleTap = () => {
-            if (this.gameState === STATE.RESULT) {
+            if (this.gameState === STATE.GAMEOVER || this.gameState === STATE.START) {
+                // スタートまたはゲームオーバー画面でのみ機能
                 const now = Date.now();
-                if (now - lastTap < 300) this.startGame();
+                if (now - lastTap < 300) {
+                    this.startGame();
+                }
                 lastTap = now;
             }
         };
@@ -612,19 +630,20 @@ class GameController {
         // Blackholes (Effect)
         for (const bh of this.blackholes) {
             this.ctx.globalAlpha = bh.life;
-            this.ctx.fillStyle = '#00ffff';
+            const isDark = document.body.classList.contains('dark-mode');
+            this.ctx.fillStyle = isDark ? '#00ffff' : '#007bff';
             this.ctx.beginPath();
             this.ctx.arc(bh.x, bh.y, (1 - bh.life) * 100, 0, Math.PI*2);
             this.ctx.fill();
             
             // Text
-            this.ctx.fillStyle = '#fff';
+            this.ctx.fillStyle = isDark ? '#fff' : '#333';
             this.ctx.font = 'bold 30px "M PLUS Rounded 1c"';
             this.ctx.textAlign = 'center';
             this.ctx.textBaseline = 'middle';
             this.ctx.fillText(`+${bh.pts}`, bh.x, bh.y - 30);
             if (bh.caught > 1) {
-                this.ctx.fillStyle = '#f3e500';
+                this.ctx.fillStyle = '#ff3366';
                 this.ctx.fillText(`${bh.caught} COMBO!`, bh.x, bh.y + 10);
             }
         }
@@ -645,12 +664,15 @@ class GameController {
 
         // Drawn Line
         if (this.isDrawing && this.points.length > 0) {
-            this.ctx.strokeStyle = '#00ffff';
+            const isDark = document.body.classList.contains('dark-mode');
+            this.ctx.strokeStyle = isDark ? '#00ffff' : '#007bff';
             this.ctx.lineWidth = 4;
             this.ctx.lineCap = 'round';
             this.ctx.lineJoin = 'round';
-            this.ctx.shadowBlur = 10;
-            this.ctx.shadowColor = '#00ffff';
+            if (isDark) {
+                this.ctx.shadowBlur = 10;
+                this.ctx.shadowColor = '#00ffff';
+            }
             
             this.ctx.beginPath();
             this.ctx.moveTo(this.points[0].x, this.points[0].y);
@@ -665,7 +687,7 @@ class GameController {
             
             // Draw head
             if (this.mouseX !== null && this.mouseY !== null) {
-                this.ctx.fillStyle = '#fff';
+                this.ctx.fillStyle = isDark ? '#fff' : '#007bff';
                 this.ctx.beginPath();
                 this.ctx.arc(this.mouseX, this.mouseY, 6, 0, Math.PI*2);
                 this.ctx.fill();
@@ -690,9 +712,24 @@ class GameController {
 
     shareResult(e) {
         if (e) e.stopPropagation();
-        const text = `ブラックホールでバグを【${Math.floor(this.score)}】点分吸い込みました！ 評価：[${this.ui.rankTextEl.innerText}]`;
+        
+        let reasonText = "";
+        if (this.score < 1000) {
+            reasonText = "【結果：瞬殺（バグに秒で囲まれた）】";
+        } else {
+            const excuses = [
+                "「これは一時的な仕様バグで、次のスプリントで直します！」",
+                "「ローカル環境では動いていたんですが…」",
+                "「進捗はきわめて順調です（冷や汗）」",
+                "「GitHub Actionsのデプロイエラーのせいです！」",
+                "「仕様変更が急に入りまして…」"
+            ];
+            reasonText = "言い訳：" + excuses[Math.floor(Math.random() * excuses.length)];
+        }
+
+        const text = `ブラックホールでバグを【${Math.floor(this.score)}】点分吸い込みました！ 評価：[${this.ui.rankTextEl.innerText}]\n${reasonText}`;
         const url = "https://hajikkoroom.xsrv.jp/blackhole-sweeper/";
-        const hashtags = "ブラックホールスイーパー,はじっこぐらし";
+        const hashtags = "ブラックホールスイーパー,炎上タスク火消し,はじっこぐらし";
         window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtags)}`);
     }
 }

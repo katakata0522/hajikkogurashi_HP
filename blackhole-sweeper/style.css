@@ -1,12 +1,21 @@
 :root {
+    --bg-color: #f4f6f9; /* 明るいオフィスグレー */
+    --primary-color: #007bff; /* ビジネスブルー */
+    --danger-color: #ff3366; /* 警告レッド */
+    --accent-color: #ffc107; /* 警告イエロー */
+    --text-main: #333333;
+    --border-color: #cccccc;
+    
+    --font-pop: 'M PLUS Rounded 1c', sans-serif;
+}
+
+body.dark-mode {
     --bg-color: #0b0c10; /* ダークブルーブラック */
     --primary-color: #00e5ff; /* ネオンシアン */
     --danger-color: #ff3366; /* ネオンレッド */
     --accent-color: #f3e500; /* ネオンイエロー */
     --text-main: #c5c6c7;
     --border-color: #1f2833;
-    
-    --font-pop: 'M PLUS Rounded 1c', sans-serif;
 }
 
 * {
@@ -36,11 +45,17 @@ body {
     max-width: 600px;
     background-color: var(--bg-color);
     background-image: 
-        linear-gradient(rgba(0, 229, 255, 0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 229, 255, 0.05) 1px, transparent 1px);
+        linear-gradient(rgba(0, 123, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 123, 255, 0.05) 1px, transparent 1px);
     background-size: 20px 20px;
     overflow: hidden;
     touch-action: none; /* スマホでのスクロール無効化 */
+}
+
+body.dark-mode #game-container {
+    background-image: 
+        linear-gradient(rgba(0, 229, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 229, 255, 0.05) 1px, transparent 1px);
 }
 
 #game-canvas {
@@ -334,4 +349,80 @@ body {
 }
 @keyframes blinker {
     50% { opacity: 0; }
+}
+
+/* --- 残業モード（ダークモード）トグル --- */
+.dark-mode-container {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 100;
+    pointer-events: auto; /* UIレイヤーの中でこれだけタッチを有効化 */
+}
+.dark-mode-checkbox { display: none; }
+.dark-mode-label {
+    background: #333;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: var(--font-pop);
+    border: 2px solid #555;
+    font-size: 0.9rem;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    transition: all 0.2s;
+}
+.dark-mode-checkbox:checked + .dark-mode-label {
+    background: var(--primary-color);
+    color: #000;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 10px var(--primary-color);
+}
+
+/* 明るいテーマ（定時モード）の微調整 */
+body:not(.dark-mode) .title-container,
+body:not(.dark-mode) .instruction,
+body:not(.dark-mode) .result-box {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    color: #333;
+}
+body:not(.dark-mode) .main-title {
+    color: #333;
+    text-shadow: none;
+}
+body:not(.dark-mode) .score-container,
+body:not(.dark-mode) .rank-container {
+    background: #e9ecef;
+    border-color: #dee2e6;
+}
+body:not(.dark-mode) .final-score {
+    color: var(--primary-color);
+    text-shadow: none;
+}
+body:not(.dark-mode) .hud-left,
+body:not(.dark-mode) .hud-right {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: #dee2e6;
+}
+body:not(.dark-mode) #score-value {
+    color: var(--primary-color);
+    text-shadow: none;
+}
+body:not(.dark-mode) .screen {
+    background: rgba(255, 255, 255, 0.85);
+}
+body:not(.dark-mode) .cyber-btn {
+    box-shadow: none;
+}
+body:not(.dark-mode) .cyber-btn.primary {
+    background: var(--primary-color);
+    color: #fff;
+    border-color: var(--primary-color);
+}
+body:not(.dark-mode) .cyber-btn.x-share {
+    background: #000;
+    color: #fff;
 }
