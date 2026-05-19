@@ -138,6 +138,14 @@ class UIManager {
         this.bestScoreValueEl = document.getElementById('best-score-value');
         this.newRecordBadge = document.getElementById('new-record-badge');
         this.rankTextEl = document.getElementById('rank-text');
+
+        this.darkModeToggle = document.getElementById('dark-mode-toggle');
+        if (this.darkModeToggle) {
+            this.darkModeToggle.addEventListener('change', (e) => {
+                if (e.target.checked) document.body.classList.add('dark-mode');
+                else document.body.classList.remove('dark-mode');
+            });
+        }
     }
 
     startGameUI() {
@@ -309,10 +317,21 @@ class GameController {
             this.stopSlacking();
         };
 
+        let lastTapTime = 0;
+        const handleDoubleTap = () => {
+            if (this.gameState === STATE.RESULT) {
+                const now = Date.now();
+                if (now - lastTapTime < 300) {
+                    this.startGame();
+                }
+                lastTapTime = now;
+            }
+        };
+
         this.container.addEventListener('mousedown', handleDown);
-        window.addEventListener('mouseup', handleUp);
+        window.addEventListener('mouseup', (e) => { handleUp(e); handleDoubleTap(); });
         this.container.addEventListener('touchstart', handleDown, {passive: false});
-        window.addEventListener('touchend', handleUp, {passive: false});
+        window.addEventListener('touchend', (e) => { handleUp(e); handleDoubleTap(); }, {passive: false});
         window.addEventListener('touchcancel', handleUp, {passive: false});
         
         // コンテキストメニュー（右クリック・長押しメニュー）を無効化
@@ -394,6 +413,12 @@ class GameController {
         this.audio.stopEnvironmentSounds();
         this.audio.playEffect('gameover');
         this.screenShake = 30;
+        this.deathReason = reason;
+        
+        // Vibrate if supported
+        if (navigator.vibrate) {
+            navigator.vibrate([200, 100, 200]);
+        }
         
         // Flash Red
         this.ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
@@ -735,8 +760,26 @@ class GameController {
     }
 
     shareResult(e) {
-        e.stopPropagation();
-        const text = `上司の目を盗んで【${Math.floor(this.score)}】サボりました。バレてクビになりました。 称号：[${this.ui.rankTextEl.innerText}]`;
+        if (e) e.stopPropagation();
+        
+        let reasonText = "";
+        if (this.deathReason === 'karoushi') {
+            reasonText = "【死因：過労死】";
+        } else if (this.score < 1000) {
+            reasonText = "【死因：秒殺（即バレ）】";
+        } else {
+            const excuses = [
+                "「これはですね、仕様のコンパイル待ちでして…」",
+                "「いや、猫がキーボードに乗ってきまして…」",
+                "「瞑想による生産性向上のアプローチです！」",
+                "「画面のバグをデバッグしていただけです！」",
+                "「気絶していました。」",
+                "「息を止めて気配を消したつもりでした…」"
+            ];
+            reasonText = "言い訳：" + excuses[Math.floor(Math.random() * excuses.length)];
+        }
+
+        const text = `上司の目を盗んで【${Math.floor(this.score)}】サボりました。バレてクビになりました。 称号：[${this.ui.rankTextEl.innerText}]\n${reasonText}`;
         const url = "https://hajikkoroom.xsrv.jp/stealth-slacker/";
         const hashtags = "限界ステルスサボタージュ,はじっこぐらし";
         window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtags)}`);
