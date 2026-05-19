@@ -13,6 +13,28 @@ const CONFIG = {
 
 const STATE = { START: 0, PLAYING: 1, GAMEOVER: 2 };
 
+function readBestScore() {
+    try {
+        const raw = localStorage.getItem('sorting_best_score');
+        if (raw === null) return null;
+        const value = parseInt(raw, 10);
+        return Number.isFinite(value) && value >= 0 ? value : null;
+    } catch (error) {
+        console.warn('ベストスコアの読み込みに失敗しました。', error);
+        return null;
+    }
+}
+
+function writeBestScore(score) {
+    try {
+        localStorage.setItem('sorting_best_score', String(score));
+        return true;
+    } catch (error) {
+        console.warn('ベストスコアの保存に失敗しました。', error);
+        return false;
+    }
+}
+
 // ==========================================
 // AudioManager
 // ==========================================
@@ -487,13 +509,11 @@ class GameController {
         this.screenShake = 15;
         setTimeout(() => { this.container.style.backgroundColor = '#111118'; }, 100);
 
+        let bestScore = readBestScore();
         let isNewRecord = false;
-        let bestScore = localStorage.getItem('sorting_best_score');
-        
-        bestScore = bestScore ? parseInt(bestScore) : null;
 
-        if (!bestScore || this.score > bestScore) {
-            localStorage.setItem('sorting_best_score', this.score.toString());
+        if (bestScore === null || this.score > bestScore) {
+            writeBestScore(this.score);
             bestScore = this.score;
             isNewRecord = true;
         }
@@ -642,12 +662,42 @@ class GameController {
         }
     }
 
-    shareResult(e) {
+    async shareResult(e) {
         e.stopPropagation();
+        e.preventDefault();
+
         const text = `脳の処理限界に到達…！ 【${this.score}個】のアイテムを仕分けました！ 称号：[${this.ui.rankTextEl.innerText}]`;
         const url = "https://hajikkoroom.xsrv.jp/sorting-factory/";
         const hashtags = "はじっこぐらし,超絶仕分け工場";
-        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtags)}`);
+        const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtags)}`;
+
+        try {
+            if (navigator.share) {
+                await navigator.share({ title: '超絶！仕分け工場', text, url });
+                return;
+            }
+
+            if (navigator.clipboard?.writeText) {
+                await navigator.clipboard.writeText(`${text} ${url} #${hashtags.replace(',', ' #')}`);
+                this.showShareFeedback('コピーしました');
+                return;
+            }
+        } catch (error) {
+            console.warn('共有に失敗しました。', error);
+        }
+
+        const popup = window.open(shareUrl, '_blank', 'noopener,noreferrer');
+        if (!popup) this.showShareFeedback('ポップアップを許可してください');
+    }
+
+    showShareFeedback(message) {
+        const shareBtn = document.getElementById('share-btn');
+        const original = shareBtn.innerText;
+        shareBtn.innerText = message;
+        window.clearTimeout(this.shareFeedbackTimer);
+        this.shareFeedbackTimer = window.setTimeout(() => {
+            shareBtn.innerText = original;
+        }, 1600);
     }
 }
 
