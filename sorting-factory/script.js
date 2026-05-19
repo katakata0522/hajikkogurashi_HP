@@ -75,6 +75,17 @@ class AudioManager {
         osc.start(now);
         osc.stop(now + 1.0);
     }
+
+    playSlam() {
+        if (!this.audioCtx) return;
+        const now = this.audioCtx.currentTime;
+        const { osc, gain } = this._createOscillator('square', 100);
+        osc.frequency.exponentialRampToValueAtTime(10, now + 0.15);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+        osc.start(now);
+        osc.stop(now + 0.15);
+    }
 }
 
 // ==========================================
@@ -191,18 +202,20 @@ class Item {
         if (!this.isSorted) {
             this.y += fallSpeed * dt;
         } else {
-            this.x += this.sortDir * 1000 * dt;
-            this.y += 300 * dt;
+            this.x += this.sortDir * 1200 * dt;
+            this.y += 2000 * dt; // 重みのある落下
             this.alpha -= 5 * dt;
         }
     }
 
-    draw(ctx) {
+    draw(ctx, currentRule) {
         if (this.alpha <= 0) return;
         ctx.globalAlpha = Math.max(0, this.alpha);
-        ctx.fillStyle = this.color;
         
-        ctx.shadowBlur = 20;
+        const isShapeRule = currentRule === CONFIG.RULES.SHAPE;
+        
+        ctx.fillStyle = isShapeRule ? '#333' : this.color;
+        ctx.shadowBlur = isShapeRule ? 0 : 20;
         ctx.shadowColor = this.color;
 
         ctx.beginPath();
@@ -214,15 +227,25 @@ class Item {
             ctx.fill();
         }
 
-        ctx.fillStyle = 'rgba(255,255,255,0.6)';
-        ctx.shadowBlur = 0;
-        ctx.beginPath();
-        if (this.shape === CONFIG.SHAPES.CIRCLE) {
-            ctx.arc(this.x - 15, this.y - 15, 12, 0, Math.PI * 2);
+        if (isShapeRule) {
+            // 形ルールの時は白くクッキリ発光させる
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 6;
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = '#fff';
+            ctx.stroke();
+            ctx.shadowBlur = 0;
         } else {
-            ctx.roundRect(this.x - this.size/2 + 10, this.y - this.size/2 + 10, 20, 20, 4);
+            ctx.fillStyle = 'rgba(255,255,255,0.6)';
+            ctx.shadowBlur = 0;
+            ctx.beginPath();
+            if (this.shape === CONFIG.SHAPES.CIRCLE) {
+                ctx.arc(this.x - 15, this.y - 15, 12, 0, Math.PI * 2);
+            } else {
+                ctx.roundRect(this.x - this.size/2 + 10, this.y - this.size/2 + 10, 20, 20, 4);
+            }
+            ctx.fill();
         }
-        ctx.fill();
 
         ctx.globalAlpha = 1.0;
     }
@@ -398,6 +421,9 @@ class GameController {
         this.lastTime = 0;
         this.screenShake = 0;
         this.freezeTimer = 0;
+        this.flipperAngleLeft = 0;
+        this.flipperAngleRight = 0;
+        this.sortsUntilChange = this.getRandomRuleChangeCount();
         this.items = [];
         this.particles.clear();
         this.ui.hideRuleAlert();
@@ -408,6 +434,10 @@ class GameController {
 
         if(this.animationId) cancelAnimationFrame(this.animationId);
         this.animationId = requestAnimationFrame((t) => this.loop(t));
+    }
+
+    getRandomRuleChangeCount() {
+        return Math.floor(Math.random() * 11) + 5; // 5回〜15回
     }
 
     setRule(newRule) {
@@ -442,9 +472,12 @@ class GameController {
         }
 
         if (direction === expectedDir) {
-            this.audio.playSort(this.combo);
+            this.audio.playSlam();
             targetItem.isSorted = true;
             targetItem.sortDir = direction;
+            if (direction === -1) this.flipperAngleLeft = Math.PI / 3;
+            else this.flipperAngleRight = Math.PI / 3;
+
             this.particles.spawn(targetItem.x, targetItem.y, targetItem.color);
             
             this.score++;
@@ -454,8 +487,10 @@ class GameController {
             this.fallSpeed = Math.min(this.fallSpeed + 10, 1500);
             this.spawnIntervalTime = Math.max(this.spawnIntervalTime - 0.02, 0.4);
 
-            if (this.score > 10 && Math.random() < 0.15) {
+            this.sortsUntilChange--;
+            if (this.sortsUntilChange <= 0) {
                 this.setRule(this.currentRule === CONFIG.RULES.COLOR ? CONFIG.RULES.SHAPE : CONFIG.RULES.COLOR);
+                this.sortsUntilChange = this.getRandomRuleChangeCount();
             }
 
             this.ui.updateScore(this.score, this.combo);
@@ -499,6 +534,9 @@ class GameController {
             this.screenShake -= 30 * dt;
             if (this.screenShake < 0) this.screenShake = 0;
         }
+        
+        if (this.flipperAngleLeft > 0) this.flipperAngleLeft = Math.max(0, this.flipperAngleLeft - 15 * dt);
+        if (this.flipperAngleRight > 0) this.flipperAngleRight = Math.max(0, this.flipperAngleRight - 15 * dt);
 
         // タイムフリーズ中の処理
         if (this.freezeTimer > 0) {
@@ -531,35 +569,63 @@ class GameController {
     drawBoxes() {
         const boxY = CONFIG.LOGICAL_HEIGHT - 150;
         const boxWidth = CONFIG.LOGICAL_WIDTH / 2;
+        const isColor = this.currentRule === CONFIG.RULES.COLOR;
         
         // Left Box
-        this.ctx.fillStyle = 'rgba(255, 51, 102, 0.1)';
+        this.ctx.fillStyle = isColor ? 'rgba(255, 51, 102, 0.5)' : 'rgba(30, 30, 40, 0.8)';
         this.ctx.fillRect(0, boxY, boxWidth, 150);
-        this.ctx.strokeStyle = CONFIG.COLORS.RED;
+        this.ctx.strokeStyle = isColor ? CONFIG.COLORS.RED : '#555';
         this.ctx.lineWidth = 4;
         this.ctx.beginPath(); this.ctx.moveTo(0, boxY); this.ctx.lineTo(boxWidth, boxY); this.ctx.stroke();
 
         // Right Box
-        this.ctx.fillStyle = 'rgba(0, 195, 255, 0.1)';
+        this.ctx.fillStyle = isColor ? 'rgba(0, 195, 255, 0.5)' : 'rgba(30, 30, 40, 0.8)';
         this.ctx.fillRect(boxWidth, boxY, boxWidth, 150);
-        this.ctx.strokeStyle = CONFIG.COLORS.BLUE;
+        this.ctx.strokeStyle = isColor ? CONFIG.COLORS.BLUE : '#555';
         this.ctx.beginPath(); this.ctx.moveTo(boxWidth, boxY); this.ctx.lineTo(CONFIG.LOGICAL_WIDTH, boxY); this.ctx.stroke();
 
-        // Line
+        // Shape Icons
+        if (!isColor) {
+            this.ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+            this.ctx.lineWidth = 10;
+            this.ctx.shadowBlur = 20;
+            this.ctx.shadowColor = '#fff';
+            // Circle left
+            this.ctx.beginPath(); this.ctx.arc(boxWidth/2, boxY + 75, 40, 0, Math.PI*2); this.ctx.stroke();
+            // Square right
+            this.ctx.beginPath(); this.ctx.roundRect(boxWidth + boxWidth/2 - 40, boxY + 35, 80, 80, 10); this.ctx.stroke();
+            this.ctx.shadowBlur = 0;
+        }
+
+        // 境界線
         this.ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+        this.ctx.lineWidth = 4;
         this.ctx.beginPath(); this.ctx.moveTo(boxWidth, 0); this.ctx.lineTo(boxWidth, CONFIG.LOGICAL_HEIGHT); this.ctx.stroke();
         
-        // Labels
-        this.ctx.fillStyle = 'rgba(255,255,255,0.7)';
-        this.ctx.font = 'bold 30px "M PLUS Rounded 1c"';
+        // フリッパー（仕分けゲート）の描画
+        this.ctx.strokeStyle = '#ffd700';
+        this.ctx.lineWidth = 10;
+        this.ctx.lineCap = 'round';
+        
+        // Left Flipper
+        this.ctx.save();
+        this.ctx.translate(boxWidth, boxY);
+        this.ctx.rotate(Math.PI - this.flipperAngleLeft);
+        this.ctx.beginPath(); this.ctx.moveTo(0, 0); this.ctx.lineTo(boxWidth - 20, 0); this.ctx.stroke();
+        this.ctx.restore();
+
+        // Right Flipper
+        this.ctx.save();
+        this.ctx.translate(boxWidth, boxY);
+        this.ctx.rotate(this.flipperAngleRight);
+        this.ctx.beginPath(); this.ctx.moveTo(0, 0); this.ctx.lineTo(boxWidth - 20, 0); this.ctx.stroke();
+        this.ctx.restore();
+
+        // 次のルール変更までのカウントダウン
+        this.ctx.fillStyle = '#ffd700';
+        this.ctx.font = 'bold 24px "Teko"';
         this.ctx.textAlign = 'center';
-        if(this.currentRule === CONFIG.RULES.COLOR) {
-            this.ctx.fillText('赤', boxWidth/2, boxY + 80);
-            this.ctx.fillText('青', boxWidth + boxWidth/2, boxY + 80);
-        } else {
-            this.ctx.fillText('● (丸)', boxWidth/2, boxY + 80);
-            this.ctx.fillText('■ (四角)', boxWidth + boxWidth/2, boxY + 80);
-        }
+        this.ctx.fillText(`NEXT OVERRIDE IN : ${this.sortsUntilChange}`, CONFIG.LOGICAL_WIDTH / 2, boxY - 30);
     }
 
     draw() {
@@ -573,7 +639,7 @@ class GameController {
         this.drawBoxes();
 
         for (let item of this.items) {
-            item.draw(this.ctx);
+            item.draw(this.ctx, this.currentRule);
         }
 
         this.ctx.restore();
