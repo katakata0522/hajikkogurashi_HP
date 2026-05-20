@@ -4,26 +4,22 @@ const ctx = canvas.getContext('2d');
 const uiTitle = document.getElementById('title');
 const uiInstruction = document.getElementById('instruction');
 const startBtn = document.getElementById('start-btn');
-const restartBtn = document.getElementById('restart-btn');
-const gameClearScreen = document.getElementById('game-clear');
 const hud = document.getElementById('hud');
 const scoreDisplay = document.getElementById('score-display');
-const clearTimeDisplay = document.getElementById('clear-time');
 const bestTimeDisplay = document.getElementById('best-time-display');
-const newRecordDisplay = document.getElementById('new-record');
 const pauseBtn = document.getElementById('pause-btn');
 const pauseScreen = document.getElementById('pause-screen');
 const resumeBtn = document.getElementById('resume-btn');
 const quitBtn = document.getElementById('quit-btn');
 const milestoneDisplay = document.getElementById('milestone-display');
+const newRecordDisplay = document.getElementById('in-game-new-record');
+const runFlash = document.getElementById('run-flash');
 
-let gameState = 'start'; // start, playing, dead, clear, paused
+let gameState = 'start'; // start, playing, dead, paused
 let currentDistance = 0;
 let maxDistance = 0;
 let cameraY = 0;
 let highestY = 0;
-let hasReachedGoal = false;
-let isClearSoundPlayed = false;
 let hasShownNewRecordPopup = false;
 let nextMilestone = 50;
 
@@ -31,16 +27,39 @@ let nextMilestone = 50;
 let screenShake = 0;
 
 // Best Distance
-let bestDistance = parseInt(localStorage.getItem('wallJumperBestDistance') || '0', 10);
+function safeReadBestDistance() {
+    try {
+        const value = Number.parseInt(localStorage.getItem('wallJumperBestDistance') || '0', 10);
+        return Number.isFinite(value) && value > 0 ? value : 0;
+    } catch (_) {
+        return 0;
+    }
+}
+
+function safeWriteBestDistance(value) {
+    try {
+        localStorage.setItem('wallJumperBestDistance', String(value));
+    } catch (_) {
+        // 記録保存に失敗してもプレイは止めない。
+    }
+}
+
+let bestDistance = safeReadBestDistance();
 
 // Audio Context
 let audioCtx;
 function initAudio() {
-    if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
+    try {
+        const AudioCtor = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtor) return;
+        if (!audioCtx) {
+            audioCtx = new AudioCtor();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+    } catch (_) {
+        audioCtx = null;
     }
 }
 
@@ -77,16 +96,6 @@ function playSound(type) {
         gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
         osc.start(now);
         osc.stop(now + 0.3);
-    } else if (type === 'clear') {
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(440, now); // A4
-        osc.frequency.setValueAtTime(554, now + 0.1); // C#5
-        osc.frequency.setValueAtTime(659, now + 0.2); // E5
-        osc.frequency.setValueAtTime(880, now + 0.3); // A5
-        gainNode.gain.setValueAtTime(0.3, now);
-        gainNode.gain.linearRampToValueAtTime(0.01, now + 0.6);
-        osc.start(now);
-        osc.stop(now + 0.6);
     }
 }
 
@@ -127,9 +136,7 @@ const JUMP_FORCE = -10;
 const WALL_JUMP_FORCE_X = 8;
 const WALL_JUMP_FORCE_Y = -10;
 const MOVE_SPEED = 5.5;
-
-// Goal height
-const GOAL_Y = -8000;
+const WALL_KICK_LOCK_FRAMES = 10;
 
 const player = {
     x: 200,
@@ -151,13 +158,13 @@ let spikes = [];
 let particles = [];
 let jumpRings = [];
 let stars = [];
-let goalBlock = null;
+let wallKickLockFrames = 0;
 
 function updateBestDistanceUI() {
     if (bestDistance > 0) {
-        bestTimeDisplay.innerText = bestDistance + "m";
+        bestTimeDisplay.innerText = "BEST " + bestDistance + "m";
     } else {
-        bestTimeDisplay.innerText = "--m";
+        bestTimeDisplay.innerText = "BEST --m";
     }
 }
 
@@ -179,12 +186,11 @@ function initGame() {
     maxDistance = 0;
     cameraY = 0;
     highestY = player.y;
-    hasReachedGoal = false;
-    isClearSoundPlayed = false;
     hasShownNewRecordPopup = false;
     nextMilestone = 50;
     newRecordDisplay.style.display = 'none';
     milestoneDisplay.style.display = 'none';
+    runFlash.classList.remove('show');
     
     platforms = [
         { x: 0, y: canvas.height - 20, width: canvas.width, height: 20 } 
@@ -192,7 +198,7 @@ function initGame() {
     spikes = [];
     particles = [];
     jumpRings = [];
-    goalBlock = null;
+    wallKickLockFrames = 0;
     screenShake = 0;
     
     // 星の生成
@@ -200,7 +206,7 @@ function initGame() {
     for (let i = 0; i < 150; i++) {
         stars.push({
             x: Math.random() * canvas.width,
-            y: -Math.random() * 8500, 
+            y: -Math.random() * 12000,
             size: Math.random() * 2 + 1,
             opacity: Math.random()
         });
@@ -209,36 +215,58 @@ function initGame() {
     generateLevel(-1500);
 }
 
+function rand(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
+function getDifficultyForDistance(distance) {
+    const t = Math.min(1, distance / 500);
+    return {
+        minGap: 105 + t * 15,
+        maxGap: 135 + t * 25,
+        minWidth: 135 - t * 30,
+        maxWidth: 170 - t * 25,
+        maxShift: 95 + t * 35,
+        spikeChance: 0.12 + t * 0.22
+    };
+}
+
+function createPlatformCandidate(y, difficulty, previousPlatform) {
+    const width = rand(difficulty.minWidth, difficulty.maxWidth);
+    const previousCenter = previousPlatform
+        ? previousPlatform.x + previousPlatform.width / 2
+        : canvas.width / 2;
+    const targetCenter = Math.max(
+        width / 2 + 18,
+        Math.min(canvas.width - width / 2 - 18, previousCenter + rand(-difficulty.maxShift, difficulty.maxShift))
+    );
+    return {
+        x: targetCenter - width / 2,
+        y,
+        width,
+        height: 10
+    };
+}
+
 function generateLevel(targetY) {
-    let currentY = platforms.length > 1 ? platforms[platforms.length-1].y : canvas.height - 150;
-    
-    if (targetY <= GOAL_Y && !goalBlock) {
-        targetY = GOAL_Y;
-    }
+    let lastPlatform = platforms[platforms.length - 1];
+    let currentY = lastPlatform ? lastPlatform.y : canvas.height - 150;
     
     while (currentY > targetY) {
-        currentY -= Math.random() * 60 + 120; 
-        
-        if (Math.random() > 0.15) {
-            let pw = Math.random() * 100 + 80;
-            let px = Math.random() * (canvas.width - pw); 
-            platforms.push({ x: px, y: currentY, width: pw, height: 10 });
-        }
-        
-        if (Math.random() > 0.3) {
-            let isLeft = Math.random() > 0.5;
-            let sx = isLeft ? 0 : canvas.width - 15;
-            spikes.push({ x: sx, y: currentY - 40, width: 15, height: 60 });
-            
-            let pw = 120;
-            let px = (canvas.width - pw) / 2;
-            platforms.push({ x: px, y: currentY - 10, width: pw, height: 10 });
-        }
-    }
+        const distanceAtY = Math.max(0, Math.floor((canvas.height - currentY) / 50));
+        const difficulty = getDifficultyForDistance(distanceAtY);
+        currentY -= rand(difficulty.minGap, difficulty.maxGap);
 
-    if (targetY <= GOAL_Y && !goalBlock) {
-        goalBlock = { x: 0, y: GOAL_Y - 50, width: canvas.width, height: 50 };
-        platforms.push(goalBlock);
+        const platform = createPlatformCandidate(currentY, difficulty, lastPlatform);
+        platforms.push(platform);
+        lastPlatform = platform;
+
+        if (currentY < canvas.height - 280 && Math.random() < difficulty.spikeChance) {
+            let isLeft = Math.random() > 0.5;
+            const spikeHeight = 44 + Math.random() * 16;
+            let sx = isLeft ? 0 : canvas.width - 14;
+            spikes.push({ x: sx, y: currentY - spikeHeight - 12, width: 14, height: spikeHeight });
+        }
     }
 }
 
@@ -312,6 +340,7 @@ function jump() {
     } else if (isWallLeft) {
         player.vy = WALL_JUMP_FORCE_Y;
         player.vx = WALL_JUMP_FORCE_X;
+        wallKickLockFrames = WALL_KICK_LOCK_FRAMES;
         player.canDoubleJump = true;
         player.scaleX = 0.5;
         player.scaleY = 1.5;
@@ -319,6 +348,7 @@ function jump() {
     } else if (isWallRight) {
         player.vy = WALL_JUMP_FORCE_Y;
         player.vx = -WALL_JUMP_FORCE_X;
+        wallKickLockFrames = WALL_KICK_LOCK_FRAMES;
         player.canDoubleJump = true;
         player.scaleX = 0.5;
         player.scaleY = 1.5;
@@ -354,9 +384,15 @@ function update() {
     player.scaleX += (1.0 - player.scaleX) * 0.15;
     player.scaleY += (1.0 - player.scaleY) * 0.15;
     
-    if (player.vx > 0) player.vx = MOVE_SPEED;
-    if (player.vx < 0) player.vx = -MOVE_SPEED;
-    if (player.vx === 0) player.vx = MOVE_SPEED;
+    if (wallKickLockFrames > 0) {
+        wallKickLockFrames--;
+    } else if (player.vx > 0) {
+        player.vx = Math.max(MOVE_SPEED, player.vx * 0.94);
+    } else if (player.vx < 0) {
+        player.vx = Math.min(-MOVE_SPEED, player.vx * 0.94);
+    } else {
+        player.vx = MOVE_SPEED;
+    }
     
     let isGroundedCurrently = false;
     
@@ -424,9 +460,6 @@ function update() {
                 player.vx = MOVE_SPEED;
             }
 
-            if (p === goalBlock) {
-                hasReachedGoal = true;
-            }
         }
     }
     
@@ -469,7 +502,7 @@ function update() {
         }
         
         // Milestone
-        if (maxDistance >= nextMilestone && nextMilestone <= 150) {
+        if (maxDistance >= nextMilestone) {
             milestoneDisplay.innerText = nextMilestone + "m 突破!!";
             milestoneDisplay.style.display = 'block';
             milestoneDisplay.style.animation = 'none';
@@ -483,7 +516,7 @@ function update() {
     const checkAndSaveRecord = () => {
         if (maxDistance > bestDistance) {
             bestDistance = maxDistance;
-            localStorage.setItem('wallJumperBestDistance', bestDistance);
+            safeWriteBestDistance(bestDistance);
             updateBestDistanceUI();
             newRecordDisplay.style.display = 'block';
         }
@@ -496,6 +529,7 @@ function update() {
         screenShake = 15;
         gameState = 'dead';
         pauseBtn.style.display = 'none';
+        runFlash.classList.add('show');
         setTimeout(() => {
             if (gameState === 'dead') {
                 gameState = 'playing';
@@ -505,21 +539,6 @@ function update() {
         }, 500);
         return;
     }
-
-    if (hasReachedGoal) {
-        gameState = 'clear';
-        pauseBtn.style.display = 'none';
-        hud.style.display = 'none';
-        if (!isClearSoundPlayed) {
-            playSound('clear');
-            isClearSoundPlayed = true;
-            checkAndSaveRecord();
-        }
-        
-        gameClearScreen.style.display = 'flex';
-        clearTimeDisplay.innerText = maxDistance;
-        return;
-    }
     
     scoreDisplay.innerText = maxDistance + "m";
     
@@ -527,7 +546,7 @@ function update() {
     if (targetCameraY > 0) targetCameraY = 0; 
     cameraY += (targetCameraY - cameraY) * 0.1;
     
-    if (cameraY < platforms[platforms.length-1].y + 1000 && !goalBlock) {
+    if (cameraY < platforms[platforms.length-1].y + 1000) {
         generateLevel(cameraY - 2000);
     }
     
@@ -571,25 +590,13 @@ function draw() {
     }
     
     for (let p of platforms) {
-        if (p === goalBlock) {
-            ctx.fillStyle = '#00aa00';
-            ctx.fillRect(p.x, p.y, p.width, p.height);
-            ctx.fillStyle = '#00ff00';
-            ctx.fillRect(p.x, p.y, p.width, 3);
-            
-            ctx.fillStyle = '#fff';
-            ctx.fillRect(canvas.width/2, p.y - 80, 4, 80);
-            ctx.fillStyle = '#ffcc00';
-            ctx.beginPath();
-            ctx.moveTo(canvas.width/2 + 4, p.y - 80);
-            ctx.lineTo(canvas.width/2 + 40, p.y - 65);
-            ctx.lineTo(canvas.width/2 + 4, p.y - 50);
-            ctx.fill();
-        } else {
-            ctx.fillStyle = '#444';
-            ctx.fillRect(p.x, p.y, p.width, p.height);
-            ctx.fillStyle = '#666';
-            ctx.fillRect(p.x, p.y, p.width, 3);
+        ctx.fillStyle = '#2b2b35';
+        ctx.fillRect(p.x, p.y, p.width, p.height);
+        ctx.fillStyle = '#8b8b72';
+        ctx.fillRect(p.x, p.y, p.width, 3);
+        ctx.fillStyle = 'rgba(255, 215, 0, 0.25)';
+        for (let x = p.x + 6; x < p.x + p.width - 6; x += 18) {
+            ctx.fillRect(x, p.y + 4, 8, 2);
         }
     }
     
@@ -653,8 +660,12 @@ function draw() {
         ctx.translate(cx, cy);
         ctx.scale(player.scaleX, player.scaleY);
         
+        ctx.fillStyle = '#7a120e';
+        ctx.fillRect(-player.width / 2 - 2, -player.height + 2, player.width + 4, player.height);
         ctx.fillStyle = player.color;
         ctx.fillRect(-player.width / 2, -player.height, player.width, player.height);
+        ctx.fillStyle = '#ff8a65';
+        ctx.fillRect(-player.width / 2 + 3, -player.height + 3, player.width - 6, 4);
         
         ctx.shadowBlur = 0; 
         
@@ -673,7 +684,7 @@ function draw() {
     
     ctx.restore(); 
 
-    // Progress Bar
+    // Height marker
     if (gameState === 'playing' || gameState === 'paused') {
         const barWidth = 6;
         const barHeight = 200;
@@ -683,8 +694,8 @@ function draw() {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
         ctx.fillRect(barX, barY, barWidth, barHeight);
         
-        let progress = Math.max(0, Math.min(1, player.y / GOAL_Y));
-        ctx.fillStyle = '#00ff00';
+        const progress = (maxDistance % 100) / 100;
+        ctx.fillStyle = '#ffd700';
         let markerY = barY + barHeight - (barHeight * progress);
         ctx.fillRect(barX - 4, markerY - 2, barWidth + 8, 4);
     }
@@ -781,15 +792,9 @@ startBtn.addEventListener('click', () => {
     initGame();
 });
 
-restartBtn.addEventListener('click', () => {
-    gameState = 'playing';
-    gameClearScreen.style.display = 'none';
-    hud.style.display = 'flex';
-    pauseBtn.style.display = 'flex';
-    initGame();
-});
-
 initGame();
 gameState = 'start';
+hud.style.display = 'none';
+pauseBtn.style.display = 'none';
 draw();
 requestAnimationFrame(gameLoop);
