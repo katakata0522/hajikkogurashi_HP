@@ -14,19 +14,97 @@ const STATE = {
 };
 
 const ACHIEVEMENTS = [
-    { score: 0, name: '新人火消し', description: 'まずは宇宙のゴミ掃除を始めた' },
-    { score: 500, name: '一人前の掃除屋', description: '小さな炎上なら吸い込める' },
-    { score: 2000, name: '炎上プロジェクトキラー', description: '厄介なターゲットをまとめて処理できる' },
-    { score: 5000, name: 'ブラックホールマスター', description: '重力を読んで大物を逃さない' },
-    { score: 10000, name: '宇宙の特異点', description: 'もはや掃除される側が震える存在' }
+    { id: 'rookie', kind: 'score', target: 0, name: '新人火消し', description: 'まずは宇宙のゴミ掃除を始めた' },
+    { id: 'first-sweep', kind: 'score', target: 300, name: '初回吸引成功', description: 'ターゲットを吸い込む感覚をつかんだ' },
+    { id: 'cleaner', kind: 'score', target: 800, name: '一人前の掃除屋', description: '小さな炎上なら吸い込める' },
+    { id: 'combo-two', kind: 'combo', target: 2, name: '二連重力使い', description: '2体同時吸引を決めた' },
+    { id: 'area-control', kind: 'area', target: 250, name: '広域封鎖担当', description: '大きなブラックホールで場を制した' },
+    { id: 'no-damage', kind: 'noDamage', target: 1, name: '無傷の清掃員', description: 'シールドを割らずに任務を終えた' },
+    { id: 'project-killer', kind: 'score', target: 2000, name: '炎上プロジェクトキラー', description: '厄介なターゲットをまとめて処理できる' },
+    { id: 'blackhole-master', kind: 'score', target: 5000, name: 'ブラックホールマスター', description: '重力を読んで大物を逃さない' },
+    { id: 'singularity', kind: 'score', target: 10000, name: '宇宙の特異点', description: 'もはや掃除される側が震える存在' }
 ];
 
 function getRank(score) {
     let rank = ACHIEVEMENTS[0].name;
     for (const achievement of ACHIEVEMENTS) {
-        if (score >= achievement.score) rank = achievement.name;
+        if (achievement.kind === 'score' && score >= achievement.target) rank = achievement.name;
     }
     return rank;
+}
+
+function getDefaultAchievementStats() {
+    return { bestScore: 0, maxCombo: 0, maxAreaBonus: 0, noDamageClear: false };
+}
+
+function readAchievementStats() {
+    const stats = getDefaultAchievementStats();
+    try {
+        const rawStats = JSON.parse(localStorage.getItem('blackhole_achievement_stats') || '{}');
+        return {
+            bestScore: Math.max(stats.bestScore, Number(rawStats.bestScore) || 0, readBestScore() || 0),
+            maxCombo: Math.max(stats.maxCombo, Number(rawStats.maxCombo) || 0),
+            maxAreaBonus: Math.max(stats.maxAreaBonus, Number(rawStats.maxAreaBonus) || 0),
+            noDamageClear: Boolean(rawStats.noDamageClear)
+        };
+    } catch (error) {
+        stats.bestScore = readBestScore() || 0;
+        return stats;
+    }
+}
+
+function writeAchievementStats(stats) {
+    try {
+        localStorage.setItem('blackhole_achievement_stats', JSON.stringify(stats));
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
+
+function hasSeenTutorial() {
+    try {
+        return localStorage.getItem('blackhole_tutorial_seen') === '1';
+    } catch (error) {
+        return false;
+    }
+}
+
+function markTutorialSeen() {
+    try {
+        localStorage.setItem('blackhole_tutorial_seen', '1');
+    } catch (error) {
+        // Tutorial state is optional.
+    }
+}
+
+function mergeAchievementStats(previous, run) {
+    return {
+        bestScore: Math.max(previous.bestScore || 0, run.bestScore || 0),
+        maxCombo: Math.max(previous.maxCombo || 0, run.maxCombo || 0),
+        maxAreaBonus: Math.max(previous.maxAreaBonus || 0, run.maxAreaBonus || 0),
+        noDamageClear: Boolean(previous.noDamageClear || run.noDamageClear)
+    };
+}
+
+function isAchievementUnlocked(achievement, stats) {
+    if (achievement.kind === 'score') return (stats.bestScore || 0) >= achievement.target;
+    if (achievement.kind === 'combo') return (stats.maxCombo || 0) >= achievement.target;
+    if (achievement.kind === 'area') return (stats.maxAreaBonus || 0) >= achievement.target;
+    if (achievement.kind === 'noDamage') return Boolean(stats.noDamageClear);
+    return false;
+}
+
+function getAchievementProgressLabel(achievement, stats) {
+    if (achievement.kind === 'score') return achievement.target === 0 ? 'START' : `${achievement.target}pt`;
+    if (achievement.kind === 'combo') return `${achievement.target}体同時`;
+    if (achievement.kind === 'area') return `AREA+${achievement.target}`;
+    if (achievement.kind === 'noDamage') return 'NO DAMAGE';
+    return '';
+}
+
+function getNextAchievement(stats) {
+    return ACHIEVEMENTS.find((achievement) => !isAchievementUnlocked(achievement, stats)) || null;
 }
 
 function readBestScore() {
@@ -160,6 +238,10 @@ class AudioManager {
             case 'damage':
                 this.playTone(150, 'sawtooth', 0.3, 0.8);
                 break;
+            case 'miss':
+                this.playTone(260, 'triangle', 0.08, 0.35);
+                setTimeout(() => this.playTone(180, 'triangle', 0.08, 0.25), 70);
+                break;
             case 'gameover':
                 this.playTone(200, 'square', 0.2);
                 setTimeout(() => this.playTone(150, 'square', 0.3), 200);
@@ -178,29 +260,33 @@ class UIManager {
         this.resultScreen = document.getElementById('result-screen');
         this.hud = document.getElementById('hud');
         this.hintText = document.getElementById('hint-text');
+        this.tutorialOverlay = document.getElementById('tutorial-overlay');
 
         this.scoreValueEl = document.getElementById('score-value');
         this.finalScoreEl = document.getElementById('final-score');
         this.bestScoreValueEl = document.getElementById('best-score-value');
         this.newRecordBadge = document.getElementById('new-record-badge');
         this.rankTextEl = document.getElementById('rank-text');
+        this.nextAchievementTextEl = document.getElementById('next-achievement-text');
         this.hearts = document.querySelectorAll('.heart');
         this.achievementsModal = document.getElementById('achievements-modal');
         this.achievementsList = document.getElementById('achievements-list');
         this.toastContainer = document.getElementById('toast-container');
     }
 
-    startGameUI() {
+    startGameUI(showTutorial) {
         this.startScreen.classList.remove('active');
         this.resultScreen.classList.remove('active');
         this.hud.classList.remove('hidden');
         this.hintText.classList.remove('hidden');
+        this.tutorialOverlay.classList.toggle('hidden', !showTutorial);
         this.updateScore(0);
         this.updateLife(3);
     }
 
     hideHint() {
         this.hintText.classList.add('hidden');
+        this.tutorialOverlay.classList.add('hidden');
     }
 
     updateScore(score) {
@@ -223,6 +309,7 @@ class UIManager {
         this.finalScoreEl.innerText = Math.floor(score);
         this.rankTextEl.innerText = rank;
         this.bestScoreValueEl.innerText = bestScore !== null ? Math.floor(bestScore) : '--';
+        this.updateNextAchievement(readAchievementStats());
         
         if (isNewRecord) {
             this.newRecordBadge.classList.remove('hidden');
@@ -233,8 +320,17 @@ class UIManager {
         setTimeout(() => { this.resultScreen.classList.add('active'); }, 1000);
     }
 
-    openAchievements(bestScore) {
-        this.renderAchievements(bestScore);
+    updateNextAchievement(stats) {
+        const nextAchievement = getNextAchievement(stats);
+        if (!nextAchievement) {
+            this.nextAchievementTextEl.textContent = '称号図鑑コンプリート';
+            return;
+        }
+        this.nextAchievementTextEl.textContent = `次: ${nextAchievement.name} / ${getAchievementProgressLabel(nextAchievement, stats)}`;
+    }
+
+    openAchievements(stats) {
+        this.renderAchievements(stats);
         this.achievementsModal.classList.remove('hidden');
     }
 
@@ -242,14 +338,13 @@ class UIManager {
         this.achievementsModal.classList.add('hidden');
     }
 
-    renderAchievements(bestScore) {
-        const unlockedScore = bestScore ?? 0;
+    renderAchievements(stats) {
         this.achievementsList.innerHTML = ACHIEVEMENTS.map((achievement) => {
-            const unlocked = unlockedScore >= achievement.score;
-            const scoreLabel = achievement.score === 0 ? 'START' : `${achievement.score}pt`;
+            const unlocked = isAchievementUnlocked(achievement, stats);
+            const progressLabel = getAchievementProgressLabel(achievement, stats);
             return `
                 <div class="achievement-card ${unlocked ? 'unlocked' : 'locked'}">
-                    <div class="achievement-score">${scoreLabel}</div>
+                    <div class="achievement-score">${progressLabel}</div>
                     <div>
                         <div class="achievement-name">${unlocked ? achievement.name : '???'}</div>
                         <div class="achievement-desc">${unlocked ? achievement.description : 'まだ重力が足りない'}</div>
@@ -462,6 +557,9 @@ class GameController {
         this.screenShake = 0;
         this.empWave = null; // EMP波エフェクト
         this.invincibleTimer = 0; // 無敵時間
+        this.maxCombo = 0;
+        this.maxAreaBonus = 0;
+        this.tookDamage = false;
         
         this.spawnTimer = 0;
         this.difficultyTimer = 0;
@@ -527,6 +625,7 @@ class GameController {
                 this.mouseX = pos.x;
                 this.mouseY = pos.y;
                 this.ui.hideHint();
+                markTutorialSeen();
             }
         };
 
@@ -583,7 +682,7 @@ class GameController {
         document.getElementById('retry-btn').addEventListener('click', () => this.startGame());
         document.getElementById('share-btn').addEventListener('click', (e) => this.shareResult(e));
         document.getElementById('menu-btn').addEventListener('click', () => { window.location.href = '../minigames.html'; });
-        document.getElementById('trophy-btn').addEventListener('click', () => this.ui.openAchievements(readBestScore()));
+        document.getElementById('trophy-btn').addEventListener('click', () => this.ui.openAchievements(readAchievementStats()));
         document.getElementById('close-modal-btn').addEventListener('click', () => this.ui.closeAchievements());
     }
 
@@ -605,12 +704,15 @@ class GameController {
         this.screenShake = 0;
         this.empWave = null;
         this.invincibleTimer = 0;
+        this.maxCombo = 0;
+        this.maxAreaBonus = 0;
+        this.tookDamage = false;
         this.ui.closeAchievements();
 
         // Initial enemies
         for(let i=0; i<3; i++) this.spawnEnemy();
 
-        this.ui.startGameUI();
+        this.ui.startGameUI(!hasSeenTutorial());
 
         if (this.animationId) cancelAnimationFrame(this.animationId);
         this.animationId = requestAnimationFrame((t) => this.loop(t));
@@ -657,8 +759,22 @@ class GameController {
             }
         }
 
+        const previousStats = readAchievementStats();
+        const currentStats = mergeAchievementStats(previousStats, {
+            bestScore: finalScore,
+            maxCombo: this.maxCombo,
+            maxAreaBonus: this.maxAreaBonus,
+            noDamageClear: finalScore > 0 && !this.tookDamage
+        });
+        writeAchievementStats(currentStats);
+
         this.ui.showGameOver(this.score, bestScore, isNewRecord);
-        if (isNewRecord && getRank(finalScore) !== getRank(previousBest ?? 0)) {
+        const newlyUnlocked = ACHIEVEMENTS.filter((achievement) => (
+            !isAchievementUnlocked(achievement, previousStats) && isAchievementUnlocked(achievement, currentStats)
+        ));
+        if (newlyUnlocked.length > 0) {
+            this.ui.showToast(`称号獲得: ${newlyUnlocked[0].name}`);
+        } else if (isNewRecord && getRank(finalScore) !== getRank(previousBest ?? 0)) {
             this.ui.showToast(`称号獲得: ${getRank(finalScore)}`);
         }
     }
@@ -724,6 +840,7 @@ class GameController {
         // 新機能：ターゲットを1匹も囲んでいない（空振り）の場合は、ブラックホールを発動せず無効（フラフープ稼ぎの完全排除）
         if (caught === 0) {
             this.addMissEffect(cx, cy);
+            this.audio.playEffect('miss');
             return;
         }
 
@@ -748,6 +865,8 @@ class GameController {
 
         const pts = (caught * 100 * multiplier) + areaBonus;
         this.score += pts;
+        this.maxCombo = Math.max(this.maxCombo, caught);
+        this.maxAreaBonus = Math.max(this.maxAreaBonus, areaBonus);
         this.ui.updateScore(this.score);
 
         if (caught >= 4 || areaBonus > 200) this.screenShake = 15;
@@ -787,6 +906,7 @@ class GameController {
                 if (distSq < threshold * threshold) {
                     // ダメージ・被弾処理
                     this.life--;
+                    this.tookDamage = true;
                     this.ui.updateLife(this.life);
                     this.audio.playEffect('damage');
                     this.screenShake = 15;
