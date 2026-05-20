@@ -44,7 +44,10 @@
                     <p>一気に囲むと<span class="text-yellow">コンボボーナス！</span></p>
                     <p class="warning">引いている途中の線にターゲットがぶつかるとダメージ！</p>
                 </div>
-                <button id="start-btn" class="cyber-btn">SWEEP START</button>
+                <div class="menu-buttons-vertical">
+                    <button id="start-btn" class="cyber-btn">SWEEP START</button>
+                    <button id="trophy-btn" class="cyber-btn secondary">🏆 称号図鑑</button>
+                </div>
             </div>
 
             <!-- リザルト画面 -->
@@ -71,6 +74,20 @@
                     </div>
                 </div>
             </div>
+
+            <!-- 称号図鑑モーダル -->
+            <div id="achievements-modal" class="modal hidden">
+                <div class="modal-content cyber-panel">
+                    <h2 class="modal-title">🏆 SWEEPER 称号図鑑</h2>
+                    <div class="achievements-list" id="achievements-list">
+                        <!-- 動的に称号プレートが生成されます -->
+                    </div>
+                    <button id="close-modal-btn" class="cyber-btn">閉じる</button>
+                </div>
+            </div>
+
+            <!-- 称号獲得リアルタイムトースト -->
+            <div id="toast-container" class="toast-container"></div>
         </div>
     </div>
     

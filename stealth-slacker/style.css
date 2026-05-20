@@ -212,6 +212,11 @@ canvas {
     pointer-events: auto;
     overflow-y: auto; /* 内容がはみ出る場合はスクロール可能に */
     padding: 20px;
+    touch-action: pan-y;
+}
+
+.screen * {
+    touch-action: pan-y;
 }
 
 .screen.active {
@@ -291,6 +296,7 @@ canvas {
     box-shadow: 4px 4px 0 var(--border-color);
     transition: all 0.1s;
     border-radius: 8px;
+    touch-action: manipulation;
 }
 
 .comic-btn:active {
@@ -389,6 +395,10 @@ canvas {
     background: #fff;
     color: var(--border-color);
 }
+.comic-btn.copied {
+    background: var(--secondary-color);
+    color: #fff;
+}
 .comic-btn.tertiary {
     background: #ccc;
     color: var(--border-color);
@@ -402,6 +412,8 @@ canvas {
     top: 10px;
     right: 10px;
     z-index: 100;
+    pointer-events: auto;
+    touch-action: manipulation;
 }
 .dark-mode-checkbox { display: none; }
 .dark-mode-label {

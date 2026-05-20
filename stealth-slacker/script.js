@@ -18,6 +18,25 @@ const EMOJIS = {
     SWEAT: '💦'
 };
 
+function readBestScore() {
+    try {
+        const rawScore = localStorage.getItem('stealth_best_score');
+        const bestScore = Number.parseInt(rawScore, 10);
+        return Number.isFinite(bestScore) && bestScore > 0 ? bestScore : null;
+    } catch (error) {
+        return null;
+    }
+}
+
+function writeBestScore(score) {
+    try {
+        localStorage.setItem('stealth_best_score', String(score));
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
+
 // ==========================================
 // AudioManager
 // ==========================================
@@ -138,14 +157,27 @@ class UIManager {
         this.bestScoreValueEl = document.getElementById('best-score-value');
         this.newRecordBadge = document.getElementById('new-record-badge');
         this.rankTextEl = document.getElementById('rank-text');
+        this.shareBtn = document.getElementById('share-btn');
+        this.shareFeedbackTimer = null;
 
         this.darkModeToggle = document.getElementById('dark-mode-toggle');
+        this.darkModeLabel = document.querySelector('.dark-mode-label');
         if (this.darkModeToggle) {
+            if (this.darkModeLabel) {
+                this.darkModeLabel.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.darkModeToggle.checked = !this.darkModeToggle.checked;
+                    this.applyDarkMode(this.darkModeToggle.checked);
+                });
+            }
             this.darkModeToggle.addEventListener('change', (e) => {
-                if (e.target.checked) document.body.classList.add('dark-mode');
-                else document.body.classList.remove('dark-mode');
+                this.applyDarkMode(e.target.checked);
             });
         }
+    }
+
+    applyDarkMode(isDark) {
+        document.body.classList.toggle('dark-mode', isDark);
     }
 
     startGameUI() {
@@ -232,6 +264,19 @@ class UIManager {
 
         setTimeout(() => { this.resultScreen.classList.add('active'); }, 1000);
     }
+
+    showShareFeedback(message = 'コピーしました！') {
+        if (!this.shareBtn) return;
+        clearTimeout(this.shareFeedbackTimer);
+        const defaultText = this.shareBtn.dataset.defaultText || this.shareBtn.textContent;
+        this.shareBtn.dataset.defaultText = defaultText;
+        this.shareBtn.textContent = message;
+        this.shareBtn.classList.add('copied');
+        this.shareFeedbackTimer = setTimeout(() => {
+            this.shareBtn.textContent = defaultText;
+            this.shareBtn.classList.remove('copied');
+        }, 1800);
+    }
 }
 
 // ==========================================
@@ -306,20 +351,24 @@ class GameController {
     }
 
     bindEvents() {
+        const isUiControlEvent = (e) => e?.target?.closest?.('button, .dark-mode-container');
+
         const handleDown = (e) => {
+            if (isUiControlEvent(e)) return;
             if (e) { e.stopPropagation(); e.preventDefault(); }
-            if (this.gameState === STATE.START || this.gameState === STATE.RESULT) return;
+            if (this.gameState !== STATE.PLAYING) return;
             this.startSlacking();
         };
 
         const handleUp = (e) => {
+            if (isUiControlEvent(e)) return;
             if (e) { e.stopPropagation(); e.preventDefault(); }
             this.stopSlacking();
         };
 
         let lastTapTime = 0;
         const handleDoubleTap = () => {
-            if (this.gameState === STATE.RESULT) {
+            if (this.gameState === STATE.GAMEOVER) {
                 const now = Date.now();
                 if (now - lastTapTime < 300) {
                     this.startGame();
@@ -334,14 +383,15 @@ class GameController {
         window.addEventListener('touchend', (e) => { handleUp(e); handleDoubleTap(); }, {passive: false});
         window.addEventListener('touchcancel', handleUp, {passive: false});
         
-        // コンテキストメニュー（右クリック・長押しメニュー）を無効化
-        window.addEventListener('contextmenu', (e) => { e.preventDefault(); });
+        this.container.addEventListener('contextmenu', (e) => {
+            if (this.gameState === STATE.PLAYING) e.preventDefault();
+        });
 
         // スペースキー対応
         window.addEventListener('keydown', (e) => {
             if (e.code === 'Space') {
                 if (e.target.tagName !== 'BUTTON') e.preventDefault();
-                if (this.gameState === STATE.START || this.gameState === STATE.RESULT) return;
+                if (this.gameState !== STATE.PLAYING) return;
                 if (!e.repeat) this.startSlacking();
             }
         });
@@ -424,14 +474,15 @@ class GameController {
         this.ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
         this.ctx.fillRect(0, 0, CONFIG.LOGICAL_WIDTH, CONFIG.LOGICAL_HEIGHT);
         
+        const finalScore = Math.floor(this.score);
         let isNewRecord = false;
-        let bestScore = localStorage.getItem('stealth_best_score');
-        bestScore = bestScore ? parseInt(bestScore) : null;
+        let bestScore = readBestScore();
 
-        if (!bestScore || this.score > bestScore) {
-            localStorage.setItem('stealth_best_score', Math.floor(this.score).toString());
-            bestScore = this.score;
-            isNewRecord = true;
+        if (finalScore > 0 && (bestScore === null || finalScore > bestScore)) {
+            if (writeBestScore(finalScore)) {
+                bestScore = finalScore;
+                isNewRecord = true;
+            }
         }
 
         this.ui.showGameOver(this.score, bestScore, isNewRecord, reason);
@@ -759,8 +810,11 @@ class GameController {
         }
     }
 
-    shareResult(e) {
-        if (e) e.stopPropagation();
+    async shareResult(e) {
+        if (e) {
+            e.stopPropagation();
+            e.preventDefault();
+        }
         
         let reasonText = "";
         if (this.deathReason === 'karoushi') {
@@ -782,7 +836,30 @@ class GameController {
         const text = `上司の目を盗んで【${Math.floor(this.score)}】サボりました。バレてクビになりました。 称号：[${this.ui.rankTextEl.innerText}]\n${reasonText}`;
         const url = "https://hajikkoroom.xsrv.jp/stealth-slacker/";
         const hashtags = "限界ステルスサボタージュ,はじっこぐらし";
-        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtags)}`);
+        const shareText = `${text}\n${url}\n#限界ステルスサボタージュ #はじっこぐらし`;
+        const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtags)}`;
+
+        if (navigator.share) {
+            try {
+                await navigator.share({ text: shareText, url });
+                return;
+            } catch (error) {
+                if (error.name === 'AbortError') return;
+            }
+        }
+
+        if (navigator.clipboard?.writeText) {
+            try {
+                await navigator.clipboard.writeText(shareText);
+                this.ui.showShareFeedback();
+                return;
+            } catch (error) {
+                // Fall through to the tweet intent when clipboard access is blocked.
+            }
+        }
+
+        const shareWindow = window.open(tweetUrl, '_blank', 'noopener,noreferrer');
+        if (shareWindow) shareWindow.opener = null;
     }
 }
 

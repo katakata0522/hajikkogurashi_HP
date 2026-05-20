@@ -235,6 +235,17 @@ body {
     color: #000;
 }
 
+.menu-buttons-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: min(260px, 90%);
+}
+
+.menu-buttons-vertical .cyber-btn {
+    width: 100%;
+}
+
 .cyber-btn.primary {
     background: var(--primary-color);
     color: #000;
@@ -326,6 +337,108 @@ body {
     display: none !important;
 }
 
+.modal {
+    position: absolute;
+    inset: 0;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.82);
+    padding: 18px;
+    pointer-events: auto;
+}
+
+.modal-content {
+    width: min(520px, 96%);
+    max-height: 88%;
+    overflow-y: auto;
+    background: rgba(31, 40, 51, 0.98);
+    border: 2px solid var(--primary-color);
+    border-radius: 10px;
+    padding: 18px;
+    box-shadow: 0 0 30px rgba(0, 229, 255, 0.35);
+}
+
+.modal-title {
+    color: #fff;
+    text-align: center;
+    font-size: 1.35rem;
+}
+
+.achievements-list {
+    display: grid;
+    gap: 10px;
+}
+
+.achievement-card {
+    display: grid;
+    grid-template-columns: 74px 1fr;
+    gap: 10px;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: rgba(11, 12, 16, 0.85);
+}
+
+.achievement-card.unlocked {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 12px rgba(0, 229, 255, 0.18);
+}
+
+.achievement-card.locked {
+    opacity: 0.55;
+    filter: grayscale(1);
+}
+
+.achievement-score {
+    color: var(--accent-color);
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+.achievement-name {
+    color: #fff;
+    font-size: 1rem;
+}
+
+.achievement-desc {
+    color: #9ca3af;
+    font-size: 0.78rem;
+    line-height: 1.4;
+}
+
+.toast-container {
+    position: absolute;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%);
+    z-index: 50;
+    display: grid;
+    gap: 8px;
+    width: min(360px, 90%);
+    pointer-events: none;
+}
+
+.toast {
+    opacity: 0;
+    transform: translateY(10px);
+    background: rgba(0, 229, 255, 0.92);
+    color: #001318;
+    border-radius: 8px;
+    padding: 10px 14px;
+    text-align: center;
+    font-weight: bold;
+    box-shadow: 0 0 18px rgba(0, 229, 255, 0.35);
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
 .blink {
     animation: blinker 1s linear infinite;
     color: var(--danger-color);
@@ -337,4 +450,3 @@ body {
 }
 
 /* --- 残業モード（ダークモード）トグル --- */
-

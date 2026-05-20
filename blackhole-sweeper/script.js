@@ -13,6 +13,41 @@ const STATE = {
     GAMEOVER: 2
 };
 
+const ACHIEVEMENTS = [
+    { score: 0, name: '新人火消し', description: 'まずは宇宙のゴミ掃除を始めた' },
+    { score: 500, name: '一人前の掃除屋', description: '小さな炎上なら吸い込める' },
+    { score: 2000, name: '炎上プロジェクトキラー', description: '厄介なターゲットをまとめて処理できる' },
+    { score: 5000, name: 'ブラックホールマスター', description: '重力を読んで大物を逃さない' },
+    { score: 10000, name: '宇宙の特異点', description: 'もはや掃除される側が震える存在' }
+];
+
+function getRank(score) {
+    let rank = ACHIEVEMENTS[0].name;
+    for (const achievement of ACHIEVEMENTS) {
+        if (score >= achievement.score) rank = achievement.name;
+    }
+    return rank;
+}
+
+function readBestScore() {
+    try {
+        const rawScore = localStorage.getItem('blackhole_best_score');
+        const bestScore = Number.parseInt(rawScore, 10);
+        return Number.isFinite(bestScore) && bestScore > 0 ? bestScore : null;
+    } catch (error) {
+        return null;
+    }
+}
+
+function writeBestScore(score) {
+    try {
+        localStorage.setItem('blackhole_best_score', String(score));
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
+
 // ==========================================
 // Utils & Math
 // ==========================================
@@ -150,6 +185,9 @@ class UIManager {
         this.newRecordBadge = document.getElementById('new-record-badge');
         this.rankTextEl = document.getElementById('rank-text');
         this.hearts = document.querySelectorAll('.heart');
+        this.achievementsModal = document.getElementById('achievements-modal');
+        this.achievementsList = document.getElementById('achievements-list');
+        this.toastContainer = document.getElementById('toast-container');
     }
 
     startGameUI() {
@@ -180,12 +218,7 @@ class UIManager {
         this.hud.classList.add('hidden');
         this.hintText.classList.add('hidden');
         
-        let rank = "";
-        if (score < 500) rank = "新人火消し";
-        else if (score < 2000) rank = "一人前の掃除屋";
-        else if (score < 5000) rank = "炎上プロジェクトキラー";
-        else if (score < 10000) rank = "ブラックホールマスター";
-        else rank = "宇宙の特異点";
+        const rank = getRank(score);
 
         this.finalScoreEl.innerText = Math.floor(score);
         this.rankTextEl.innerText = rank;
@@ -198,6 +231,45 @@ class UIManager {
         }
 
         setTimeout(() => { this.resultScreen.classList.add('active'); }, 1000);
+    }
+
+    openAchievements(bestScore) {
+        this.renderAchievements(bestScore);
+        this.achievementsModal.classList.remove('hidden');
+    }
+
+    closeAchievements() {
+        this.achievementsModal.classList.add('hidden');
+    }
+
+    renderAchievements(bestScore) {
+        const unlockedScore = bestScore ?? 0;
+        this.achievementsList.innerHTML = ACHIEVEMENTS.map((achievement) => {
+            const unlocked = unlockedScore >= achievement.score;
+            const scoreLabel = achievement.score === 0 ? 'START' : `${achievement.score}pt`;
+            return `
+                <div class="achievement-card ${unlocked ? 'unlocked' : 'locked'}">
+                    <div class="achievement-score">${scoreLabel}</div>
+                    <div>
+                        <div class="achievement-name">${unlocked ? achievement.name : '???'}</div>
+                        <div class="achievement-desc">${unlocked ? achievement.description : 'まだ重力が足りない'}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    showToast(message) {
+        if (!this.toastContainer) return;
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = message;
+        this.toastContainer.appendChild(toast);
+        setTimeout(() => toast.classList.add('show'), 10);
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 250);
+        }, 1800);
     }
 }
 
@@ -385,6 +457,7 @@ class GameController {
         this.isDrawing = false;
         
         this.blackholes = []; // Visual effects for loops
+        this.missEffects = [];
         this.particles = [];
         this.screenShake = 0;
         this.empWave = null; // EMP波エフェクト
@@ -474,6 +547,7 @@ class GameController {
         };
 
         const handleUp = (e) => {
+            if (e?.target?.tagName === 'BUTTON') return;
             if (e) { e.preventDefault(); }
             this.isDrawing = false;
             this.points = [];
@@ -484,8 +558,7 @@ class GameController {
         // Double tap retry
         let lastTap = 0;
         const checkDoubleTap = () => {
-            if (this.gameState === STATE.GAMEOVER || this.gameState === STATE.START) {
-                // スタートまたはゲームオーバー画面でのみ機能
+            if (this.gameState === STATE.GAMEOVER) {
                 const now = Date.now();
                 if (now - lastTap < 300) {
                     this.startGame();
@@ -500,13 +573,18 @@ class GameController {
         
         this.canvas.addEventListener('touchstart', handleDown, {passive: false});
         this.canvas.addEventListener('touchmove', handleMove, {passive: false});
-        window.addEventListener('touchend', (e) => { handleUp(e); checkDoubleTap(); }, {passive: false});
+        window.addEventListener('touchend', (e) => {
+            handleUp(e);
+            if (e.target.tagName !== 'BUTTON') checkDoubleTap();
+        }, {passive: false});
         window.addEventListener('touchcancel', handleUp, {passive: false});
 
         document.getElementById('start-btn').addEventListener('click', () => this.startGame());
         document.getElementById('retry-btn').addEventListener('click', () => this.startGame());
         document.getElementById('share-btn').addEventListener('click', (e) => this.shareResult(e));
         document.getElementById('menu-btn').addEventListener('click', () => { window.location.href = '../minigames.html'; });
+        document.getElementById('trophy-btn').addEventListener('click', () => this.ui.openAchievements(readBestScore()));
+        document.getElementById('close-modal-btn').addEventListener('click', () => this.ui.closeAchievements());
     }
 
     startGame() {
@@ -518,6 +596,7 @@ class GameController {
         this.enemies = [];
         this.points = [];
         this.blackholes = [];
+        this.missEffects = [];
         this.particles = [];
         this.isDrawing = false;
         this.spawnTimer = 1000;
@@ -526,6 +605,7 @@ class GameController {
         this.screenShake = 0;
         this.empWave = null;
         this.invincibleTimer = 0;
+        this.ui.closeAchievements();
 
         // Initial enemies
         for(let i=0; i<3; i++) this.spawnEnemy();
@@ -565,17 +645,22 @@ class GameController {
         this.screenShake = 20;
         if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
 
+        const finalScore = Math.floor(this.score);
+        const previousBest = readBestScore();
         let isNewRecord = false;
-        let bestScore = localStorage.getItem('blackhole_best_score');
-        bestScore = bestScore ? parseInt(bestScore) : null;
+        let bestScore = previousBest;
 
-        if (!bestScore || this.score > bestScore) {
-            localStorage.setItem('blackhole_best_score', Math.floor(this.score).toString());
-            bestScore = this.score;
-            isNewRecord = true;
+        if (finalScore > 0 && (bestScore === null || finalScore > bestScore)) {
+            if (writeBestScore(finalScore)) {
+                bestScore = finalScore;
+                isNewRecord = true;
+            }
         }
 
         this.ui.showGameOver(this.score, bestScore, isNewRecord);
+        if (isNewRecord && getRank(finalScore) !== getRank(previousBest ?? 0)) {
+            this.ui.showToast(`称号獲得: ${getRank(finalScore)}`);
+        }
     }
 
     checkIntersection() {
@@ -623,6 +708,7 @@ class GameController {
         let cx = 0, cy = 0;
         loopPoints.forEach(p => { cx += p.x; cy += p.y; });
         cx /= loopPoints.length;
+        cy /= loopPoints.length;
 
         // 判定：ブラックホールの中にターゲットがいるかどうかを事前カウント
         let caught = 0;
@@ -637,6 +723,7 @@ class GameController {
 
         // 新機能：ターゲットを1匹も囲んでいない（空振り）の場合は、ブラックホールを発動せず無効（フラフープ稼ぎの完全排除）
         if (caught === 0) {
+            this.addMissEffect(cx, cy);
             return;
         }
 
@@ -674,6 +761,16 @@ class GameController {
             pts: pts,
             areaBonus: areaBonus 
         });
+    }
+
+    addMissEffect(x, y) {
+        this.missEffects.push({
+            x,
+            y,
+            life: 1.0,
+            radius: 14
+        });
+        this.screenShake = Math.max(this.screenShake, 4);
     }
 
     checkDamage() {
@@ -837,6 +934,14 @@ class GameController {
             this.blackholes[i].life -= 1.5 * dt;
             if (this.blackholes[i].life <= 0) this.blackholes.splice(i, 1);
         }
+
+        // Empty-loop miss feedback
+        for (let i = this.missEffects.length - 1; i >= 0; i--) {
+            const miss = this.missEffects[i];
+            miss.life -= 2.5 * dt;
+            miss.radius += 220 * dt;
+            if (miss.life <= 0) this.missEffects.splice(i, 1);
+        }
     }
 
     draw() {
@@ -874,6 +979,25 @@ class GameController {
             }
         }
         this.ctx.globalAlpha = 1.0;
+
+        // Empty-loop miss effects
+        for (const miss of this.missEffects) {
+            const alpha = Math.max(0, miss.life);
+            this.ctx.save();
+            this.ctx.globalAlpha = alpha;
+            this.ctx.strokeStyle = '#ff3366';
+            this.ctx.lineWidth = 4;
+            this.ctx.shadowBlur = 12;
+            this.ctx.shadowColor = '#ff3366';
+            this.ctx.beginPath();
+            this.ctx.arc(miss.x, miss.y, miss.radius, 0, Math.PI * 2);
+            this.ctx.stroke();
+            this.ctx.lineWidth = 2;
+            this.ctx.beginPath();
+            this.ctx.arc(miss.x, miss.y, miss.radius * 0.55, 0, Math.PI * 2);
+            this.ctx.stroke();
+            this.ctx.restore();
+        }
 
         // EMP衝撃波の描画
         if (this.empWave) {
@@ -989,12 +1113,38 @@ class GameController {
         }
     }
 
-    shareResult(e) {
-        if (e) e.stopPropagation();
+    async shareResult(e) {
+        if (e) {
+            e.stopPropagation();
+            e.preventDefault();
+        }
         const text = `ブラックホールでターゲットを【${Math.floor(this.score)}】点分吸い込みました！ 評価：[${this.ui.rankTextEl.innerText}]`;
         const url = "https://hajikkoroom.xsrv.jp/blackhole-sweeper/";
         const hashtags = "ブラックホールスイーパー,はじっこぐらし";
-        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtags)}`);
+        const shareText = `${text}\n${url}\n#ブラックホールスイーパー #はじっこぐらし`;
+        const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtags)}`;
+
+        if (navigator.share) {
+            try {
+                await navigator.share({ text: shareText, url });
+                return;
+            } catch (error) {
+                if (error.name === 'AbortError') return;
+            }
+        }
+
+        if (navigator.clipboard?.writeText) {
+            try {
+                await navigator.clipboard.writeText(shareText);
+                this.ui.showToast('結果をコピーしました');
+                return;
+            } catch (error) {
+                // Fall through to the tweet intent when clipboard access is blocked.
+            }
+        }
+
+        const shareWindow = window.open(tweetUrl, '_blank', 'noopener,noreferrer');
+        if (shareWindow) shareWindow.opener = null;
     }
 }
 
