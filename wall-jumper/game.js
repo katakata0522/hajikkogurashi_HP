@@ -4,22 +4,26 @@ const ctx = canvas.getContext('2d');
 const uiTitle = document.getElementById('title');
 const uiInstruction = document.getElementById('instruction');
 const startBtn = document.getElementById('start-btn');
+const restartBtn = document.getElementById('restart-btn');
+const gameClearScreen = document.getElementById('game-clear');
 const hud = document.getElementById('hud');
 const scoreDisplay = document.getElementById('score-display');
+const clearTimeDisplay = document.getElementById('clear-time');
 const bestTimeDisplay = document.getElementById('best-time-display');
+const newRecordDisplay = document.getElementById('new-record');
 const pauseBtn = document.getElementById('pause-btn');
 const pauseScreen = document.getElementById('pause-screen');
 const resumeBtn = document.getElementById('resume-btn');
 const quitBtn = document.getElementById('quit-btn');
 const milestoneDisplay = document.getElementById('milestone-display');
-const newRecordDisplay = document.getElementById('in-game-new-record');
-const runFlash = document.getElementById('run-flash');
 
-let gameState = 'start'; // start, playing, dead, paused
+let gameState = 'start'; // start, playing, dead, clear, paused
 let currentDistance = 0;
 let maxDistance = 0;
 let cameraY = 0;
 let highestY = 0;
+let hasReachedGoal = false;
+let isClearSoundPlayed = false;
 let hasShownNewRecordPopup = false;
 let nextMilestone = 50;
 
@@ -27,39 +31,16 @@ let nextMilestone = 50;
 let screenShake = 0;
 
 // Best Distance
-function safeReadBestDistance() {
-    try {
-        const value = Number.parseInt(localStorage.getItem('wallJumperBestDistance') || '0', 10);
-        return Number.isFinite(value) && value > 0 ? value : 0;
-    } catch (_) {
-        return 0;
-    }
-}
-
-function safeWriteBestDistance(value) {
-    try {
-        localStorage.setItem('wallJumperBestDistance', String(value));
-    } catch (_) {
-        // 記録保存に失敗してもプレイは止めない。
-    }
-}
-
-let bestDistance = safeReadBestDistance();
+let bestDistance = parseInt(localStorage.getItem('wallJumperBestDistance') || '0', 10);
 
 // Audio Context
 let audioCtx;
 function initAudio() {
-    try {
-        const AudioCtor = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtor) return;
-        if (!audioCtx) {
-            audioCtx = new AudioCtor();
-        }
-        if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
-    } catch (_) {
-        audioCtx = null;
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
     }
 }
 
@@ -96,6 +77,16 @@ function playSound(type) {
         gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
         osc.start(now);
         osc.stop(now + 0.3);
+    } else if (type === 'clear') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(440, now); // A4
+        osc.frequency.setValueAtTime(554, now + 0.1); // C#5
+        osc.frequency.setValueAtTime(659, now + 0.2); // E5
+        osc.frequency.setValueAtTime(880, now + 0.3); // A5
+        gainNode.gain.setValueAtTime(0.3, now);
+        gainNode.gain.linearRampToValueAtTime(0.01, now + 0.6);
+        osc.start(now);
+        osc.stop(now + 0.6);
     }
 }
 
@@ -136,7 +127,9 @@ const JUMP_FORCE = -10;
 const WALL_JUMP_FORCE_X = 8;
 const WALL_JUMP_FORCE_Y = -10;
 const MOVE_SPEED = 5.5;
-const WALL_KICK_LOCK_FRAMES = 10;
+
+// Goal height
+const GOAL_Y = -8000;
 
 const player = {
     x: 200,
@@ -158,13 +151,13 @@ let spikes = [];
 let particles = [];
 let jumpRings = [];
 let stars = [];
-let wallKickLockFrames = 0;
+let goalBlock = null;
 
 function updateBestDistanceUI() {
     if (bestDistance > 0) {
-        bestTimeDisplay.innerText = "BEST " + bestDistance + "m";
+        bestTimeDisplay.innerText = bestDistance + "m";
     } else {
-        bestTimeDisplay.innerText = "BEST --m";
+        bestTimeDisplay.innerText = "--m";
     }
 }
 
@@ -186,11 +179,12 @@ function initGame() {
     maxDistance = 0;
     cameraY = 0;
     highestY = player.y;
+    hasReachedGoal = false;
+    isClearSoundPlayed = false;
     hasShownNewRecordPopup = false;
     nextMilestone = 50;
     newRecordDisplay.style.display = 'none';
     milestoneDisplay.style.display = 'none';
-    runFlash.classList.remove('show');
     
     platforms = [
         { x: 0, y: canvas.height - 20, width: canvas.width, height: 20 } 
@@ -198,7 +192,7 @@ function initGame() {
     spikes = [];
     particles = [];
     jumpRings = [];
-    wallKickLockFrames = 0;
+    goalBlock = null;
     screenShake = 0;
     
     // 星の生成
@@ -206,7 +200,7 @@ function initGame() {
     for (let i = 0; i < 150; i++) {
         stars.push({
             x: Math.random() * canvas.width,
-            y: -Math.random() * 12000,
+            y: -Math.random() * 8500, 
             size: Math.random() * 2 + 1,
             opacity: Math.random()
         });
@@ -215,58 +209,36 @@ function initGame() {
     generateLevel(-1500);
 }
 
-function rand(min, max) {
-    return Math.random() * (max - min) + min;
-}
-
-function getDifficultyForDistance(distance) {
-    const t = Math.min(1, distance / 500);
-    return {
-        minGap: 105 + t * 15,
-        maxGap: 135 + t * 25,
-        minWidth: 135 - t * 30,
-        maxWidth: 170 - t * 25,
-        maxShift: 95 + t * 35,
-        spikeChance: 0.12 + t * 0.22
-    };
-}
-
-function createPlatformCandidate(y, difficulty, previousPlatform) {
-    const width = rand(difficulty.minWidth, difficulty.maxWidth);
-    const previousCenter = previousPlatform
-        ? previousPlatform.x + previousPlatform.width / 2
-        : canvas.width / 2;
-    const targetCenter = Math.max(
-        width / 2 + 18,
-        Math.min(canvas.width - width / 2 - 18, previousCenter + rand(-difficulty.maxShift, difficulty.maxShift))
-    );
-    return {
-        x: targetCenter - width / 2,
-        y,
-        width,
-        height: 10
-    };
-}
-
 function generateLevel(targetY) {
-    let lastPlatform = platforms[platforms.length - 1];
-    let currentY = lastPlatform ? lastPlatform.y : canvas.height - 150;
+    let currentY = platforms.length > 1 ? platforms[platforms.length-1].y : canvas.height - 150;
+    
+    if (targetY <= GOAL_Y && !goalBlock) {
+        targetY = GOAL_Y;
+    }
     
     while (currentY > targetY) {
-        const distanceAtY = Math.max(0, Math.floor((canvas.height - currentY) / 50));
-        const difficulty = getDifficultyForDistance(distanceAtY);
-        currentY -= rand(difficulty.minGap, difficulty.maxGap);
-
-        const platform = createPlatformCandidate(currentY, difficulty, lastPlatform);
-        platforms.push(platform);
-        lastPlatform = platform;
-
-        if (currentY < canvas.height - 280 && Math.random() < difficulty.spikeChance) {
-            let isLeft = Math.random() > 0.5;
-            const spikeHeight = 44 + Math.random() * 16;
-            let sx = isLeft ? 0 : canvas.width - 14;
-            spikes.push({ x: sx, y: currentY - spikeHeight - 12, width: 14, height: spikeHeight });
+        currentY -= Math.random() * 60 + 120; 
+        
+        if (Math.random() > 0.15) {
+            let pw = Math.random() * 100 + 80;
+            let px = Math.random() * (canvas.width - pw); 
+            platforms.push({ x: px, y: currentY, width: pw, height: 10 });
         }
+        
+        if (Math.random() > 0.3) {
+            let isLeft = Math.random() > 0.5;
+            let sx = isLeft ? 0 : canvas.width - 15;
+            spikes.push({ x: sx, y: currentY - 40, width: 15, height: 60 });
+            
+            let pw = 120;
+            let px = (canvas.width - pw) / 2;
+            platforms.push({ x: px, y: currentY - 10, width: pw, height: 10 });
+        }
+    }
+
+    if (targetY <= GOAL_Y && !goalBlock) {
+        goalBlock = { x: 0, y: GOAL_Y - 50, width: canvas.width, height: 50 };
+        platforms.push(goalBlock);
     }
 }
 
@@ -340,7 +312,6 @@ function jump() {
     } else if (isWallLeft) {
         player.vy = WALL_JUMP_FORCE_Y;
         player.vx = WALL_JUMP_FORCE_X;
-        wallKickLockFrames = WALL_KICK_LOCK_FRAMES;
         player.canDoubleJump = true;
         player.scaleX = 0.5;
         player.scaleY = 1.5;
@@ -348,7 +319,6 @@ function jump() {
     } else if (isWallRight) {
         player.vy = WALL_JUMP_FORCE_Y;
         player.vx = -WALL_JUMP_FORCE_X;
-        wallKickLockFrames = WALL_KICK_LOCK_FRAMES;
         player.canDoubleJump = true;
         player.scaleX = 0.5;
         player.scaleY = 1.5;
@@ -381,25 +351,12 @@ function update() {
 
     if (gameState !== 'playing') return;
     
-    let targetScaleX = 1.0;
-    let targetScaleY = 1.0;
-    if (player.wasGrounded) {
-        const breath = Math.sin(performance.now() * 0.007) * 0.04;
-        targetScaleX = 1.0 + breath;
-        targetScaleY = 1.0 - breath;
-    }
-    player.scaleX += (targetScaleX - player.scaleX) * 0.15;
-    player.scaleY += (targetScaleY - player.scaleY) * 0.15;
+    player.scaleX += (1.0 - player.scaleX) * 0.15;
+    player.scaleY += (1.0 - player.scaleY) * 0.15;
     
-    if (wallKickLockFrames > 0) {
-        wallKickLockFrames--;
-    } else if (player.vx > 0) {
-        player.vx = Math.max(MOVE_SPEED, player.vx * 0.94);
-    } else if (player.vx < 0) {
-        player.vx = Math.min(-MOVE_SPEED, player.vx * 0.94);
-    } else {
-        player.vx = MOVE_SPEED;
-    }
+    if (player.vx > 0) player.vx = MOVE_SPEED;
+    if (player.vx < 0) player.vx = -MOVE_SPEED;
+    if (player.vx === 0) player.vx = MOVE_SPEED;
     
     let isGroundedCurrently = false;
     
@@ -467,6 +424,9 @@ function update() {
                 player.vx = MOVE_SPEED;
             }
 
+            if (p === goalBlock) {
+                hasReachedGoal = true;
+            }
         }
     }
     
@@ -509,7 +469,7 @@ function update() {
         }
         
         // Milestone
-        if (maxDistance >= nextMilestone) {
+        if (maxDistance >= nextMilestone && nextMilestone <= 150) {
             milestoneDisplay.innerText = nextMilestone + "m 突破!!";
             milestoneDisplay.style.display = 'block';
             milestoneDisplay.style.animation = 'none';
@@ -523,7 +483,7 @@ function update() {
     const checkAndSaveRecord = () => {
         if (maxDistance > bestDistance) {
             bestDistance = maxDistance;
-            safeWriteBestDistance(bestDistance);
+            localStorage.setItem('wallJumperBestDistance', bestDistance);
             updateBestDistanceUI();
             newRecordDisplay.style.display = 'block';
         }
@@ -536,7 +496,6 @@ function update() {
         screenShake = 15;
         gameState = 'dead';
         pauseBtn.style.display = 'none';
-        runFlash.classList.add('show');
         setTimeout(() => {
             if (gameState === 'dead') {
                 gameState = 'playing';
@@ -546,6 +505,21 @@ function update() {
         }, 500);
         return;
     }
+
+    if (hasReachedGoal) {
+        gameState = 'clear';
+        pauseBtn.style.display = 'none';
+        hud.style.display = 'none';
+        if (!isClearSoundPlayed) {
+            playSound('clear');
+            isClearSoundPlayed = true;
+            checkAndSaveRecord();
+        }
+        
+        gameClearScreen.style.display = 'flex';
+        clearTimeDisplay.innerText = maxDistance;
+        return;
+    }
     
     scoreDisplay.innerText = maxDistance + "m";
     
@@ -553,7 +527,7 @@ function update() {
     if (targetCameraY > 0) targetCameraY = 0; 
     cameraY += (targetCameraY - cameraY) * 0.1;
     
-    if (cameraY < platforms[platforms.length-1].y + 1000) {
+    if (cameraY < platforms[platforms.length-1].y + 1000 && !goalBlock) {
         generateLevel(cameraY - 2000);
     }
     
@@ -597,13 +571,25 @@ function draw() {
     }
     
     for (let p of platforms) {
-        ctx.fillStyle = '#2b2b35';
-        ctx.fillRect(p.x, p.y, p.width, p.height);
-        ctx.fillStyle = '#8b8b72';
-        ctx.fillRect(p.x, p.y, p.width, 3);
-        ctx.fillStyle = 'rgba(255, 215, 0, 0.25)';
-        for (let x = p.x + 6; x < p.x + p.width - 6; x += 18) {
-            ctx.fillRect(x, p.y + 4, 8, 2);
+        if (p === goalBlock) {
+            ctx.fillStyle = '#00aa00';
+            ctx.fillRect(p.x, p.y, p.width, p.height);
+            ctx.fillStyle = '#00ff00';
+            ctx.fillRect(p.x, p.y, p.width, 3);
+            
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(canvas.width/2, p.y - 80, 4, 80);
+            ctx.fillStyle = '#ffcc00';
+            ctx.beginPath();
+            ctx.moveTo(canvas.width/2 + 4, p.y - 80);
+            ctx.lineTo(canvas.width/2 + 40, p.y - 65);
+            ctx.lineTo(canvas.width/2 + 4, p.y - 50);
+            ctx.fill();
+        } else {
+            ctx.fillStyle = '#444';
+            ctx.fillRect(p.x, p.y, p.width, p.height);
+            ctx.fillStyle = '#666';
+            ctx.fillRect(p.x, p.y, p.width, 3);
         }
     }
     
@@ -667,104 +653,27 @@ function draw() {
         ctx.translate(cx, cy);
         ctx.scale(player.scaleX, player.scaleY);
         
-        // 1. 黒い輪郭線（角を少し丸めたオクトゴン形状）
-        ctx.fillStyle = '#111118';
-        ctx.fillRect(-9, -21, 18, 22); // 本体
-        ctx.fillRect(-11, -19, 22, 18); // 左右拡張
-        
-        // 2. スライムの赤いベース色
-        ctx.fillStyle = player.color; // '#f44336'
-        ctx.fillRect(-8, -20, 16, 20);
-        ctx.fillRect(-10, -18, 20, 16);
-        
-        // 3. 立体感を出す下部の暗い影
-        ctx.fillStyle = '#7a120e';
-        ctx.fillRect(-8, -4, 16, 4);
-        ctx.fillRect(-10, -6, 20, 2);
-        
-        // 4. うるおいを表現する上部の明るいハイライト
-        ctx.fillStyle = '#ff8a65';
-        ctx.fillRect(-8, -20, 16, 2);
-        ctx.fillRect(-6, -18, 12, 2);
+        ctx.fillStyle = player.color;
+        ctx.fillRect(-player.width / 2, -player.height, player.width, player.height);
         
         ctx.shadowBlur = 0; 
         
-        // 5. 状態に応じた感情豊かな目（ピクセル表情）
+        ctx.fillStyle = 'black';
         let lookDir = player.vx > 0 ? 1 : -1;
-        let isLeftWall = player.x <= 0.1;
-        let isRightWall = player.x + player.width >= canvas.width - 0.1;
-        let isWallSliding = (isLeftWall || isRightWall) && !player.wasGrounded;
-
-        ctx.fillStyle = '#111118'; // 目の色
-
-        if (isWallSliding) {
-            // 壁スライディング中：壁を警戒して必死に張り付くおろおろ顔
-            if (isLeftWall) {
-                // 左目（壁側）: つぶれ目
-                ctx.fillRect(-6, -12, 3, 1);
-                // 右目（反対側）: 怯え目
-                ctx.fillRect(3, -11, 2, 2);
-                ctx.fillRect(4, -9, 1, 1);
-            } else {
-                // 左目（反対側）: 怯え目
-                ctx.fillRect(-5, -11, 2, 2);
-                ctx.fillRect(-5, -9, 1, 1);
-                // 右目（壁側）: つぶれ目
-                ctx.fillRect(3, -12, 3, 1);
-            }
-        } else if (player.vy < -1) {
-            // 上昇中（ジャンプ時）：キリッとした戦闘顔！
-            if (lookDir > 0) {
-                // 右向き上昇
-                ctx.fillRect(-2, -13, 3, 2);
-                ctx.fillRect(-3, -12, 1, 1);
-                ctx.fillRect(4, -13, 3, 2);
-                ctx.fillRect(3, -12, 1, 1);
-            } else {
-                // 左向き上昇
-                ctx.fillRect(-5, -13, 3, 2);
-                ctx.fillRect(-2, -12, 1, 1);
-                ctx.fillRect(1, -13, 3, 2);
-                ctx.fillRect(4, -12, 1, 1);
-            }
-        } else if (player.vy > 2) {
-            // 落下中（スリル！）：焦った「＞＜」の目！
-            if (lookDir > 0) {
-                // 左目 ＞
-                ctx.fillRect(-3, -13, 2, 1);
-                ctx.fillRect(-2, -12, 1, 1);
-                ctx.fillRect(-3, -11, 2, 1);
-                // 右目 ＜
-                ctx.fillRect(4, -13, 2, 1);
-                ctx.fillRect(3, -12, 1, 1);
-                ctx.fillRect(4, -11, 2, 1);
-            } else {
-                // 左目 ＞
-                ctx.fillRect(-5, -13, 2, 1);
-                ctx.fillRect(-4, -12, 1, 1);
-                ctx.fillRect(-5, -11, 2, 1);
-                // 右目 ＜
-                ctx.fillRect(2, -13, 2, 1);
-                ctx.fillRect(1, -12, 1, 1);
-                ctx.fillRect(2, -11, 2, 1);
-            }
-        } else {
-            // 通常・接地中：きょとんとした可愛い丸目（進行方向を見る）
-            let eyeOffset = lookDir * 2;
-            ctx.fillRect(-4 + eyeOffset, -12, 3, 3);
-            ctx.fillRect(2 + eyeOffset, -12, 3, 3);
-        }
+        ctx.fillRect(-player.width/2 + player.width/2 + lookDir*4 - 2, -player.height + 4, 4, 4);
+        ctx.fillRect(-player.width/2 + player.width/2 + lookDir*4 + 4, -player.height + 4, 4, 4);
         
         ctx.restore();
     }
     
-    // パーティクルの描画（修復）
     for (let p of particles) {
         ctx.fillStyle = `rgba(255, 0, 0, ${p.life})`;
         ctx.fillRect(p.x, p.y, 4, 4);
     }
+    
+    ctx.restore(); 
 
-    // Height marker
+    // Progress Bar
     if (gameState === 'playing' || gameState === 'paused') {
         const barWidth = 6;
         const barHeight = 200;
@@ -774,8 +683,8 @@ function draw() {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
         ctx.fillRect(barX, barY, barWidth, barHeight);
         
-        const progress = (maxDistance % 100) / 100;
-        ctx.fillStyle = '#ffd700';
+        let progress = Math.max(0, Math.min(1, player.y / GOAL_Y));
+        ctx.fillStyle = '#00ff00';
         let markerY = barY + barHeight - (barHeight * progress);
         ctx.fillRect(barX - 4, markerY - 2, barWidth + 8, 4);
     }
@@ -872,9 +781,15 @@ startBtn.addEventListener('click', () => {
     initGame();
 });
 
+restartBtn.addEventListener('click', () => {
+    gameState = 'playing';
+    gameClearScreen.style.display = 'none';
+    hud.style.display = 'flex';
+    pauseBtn.style.display = 'flex';
+    initGame();
+});
+
 initGame();
 gameState = 'start';
-hud.style.display = 'none';
-pauseBtn.style.display = 'none';
 draw();
 requestAnimationFrame(gameLoop);
