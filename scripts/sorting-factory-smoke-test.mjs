@@ -61,3 +61,15 @@ assert.doesNotMatch(
   /\bcombo\b|\bmaxCombo\b|playSort/,
   'one-miss game should not keep unused combo-era code'
 );
+
+assert.match(
+  script,
+  /this\.canvas\.addEventListener\('pointerdown',\s*\(e\)\s*=>\s*this\.handleCanvasPointer\(e\)\)/,
+  'canvas should provide a pointer fallback when touch zones are not hit'
+);
+
+assert.match(
+  script,
+  /handleCanvasPointer\(e\)\s*\{[\s\S]*?const direction = clientX < rect\.left \+ rect\.width \/ 2 \? -1 : 1;[\s\S]*?this\.processInput\(direction\);/,
+  'canvas pointer fallback should sort by left/right half'
+);

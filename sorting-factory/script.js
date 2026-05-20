@@ -369,6 +369,7 @@ class GameController {
         this.ui.touchRight.addEventListener('touchstart', (e) => handleInput(1, e), {passive: false});
         this.ui.touchLeft.addEventListener('mousedown', (e) => handleInput(-1, e));
         this.ui.touchRight.addEventListener('mousedown', (e) => handleInput(1, e));
+        this.canvas.addEventListener('pointerdown', (e) => this.handleCanvasPointer(e));
 
         const startBtn = document.getElementById('start-btn');
         const retryBtn = document.getElementById('retry-btn');
@@ -387,6 +388,15 @@ class GameController {
         const goMenu = (e) => { e.stopPropagation(); window.location.href = '../minigames.html'; };
         menuBtn.addEventListener('click', goMenu);
         menuBtn.addEventListener('touchstart', goMenu);
+    }
+
+    handleCanvasPointer(e) {
+        if (this.state !== STATE.PLAYING) return;
+        e.preventDefault();
+        const rect = this.canvas.getBoundingClientRect();
+        const clientX = e.clientX;
+        const direction = clientX < rect.left + rect.width / 2 ? -1 : 1;
+        this.processInput(direction);
     }
 
     startGame() {
