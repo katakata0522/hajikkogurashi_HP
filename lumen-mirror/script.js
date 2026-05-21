@@ -715,6 +715,8 @@ class GameController {
         document.getElementById('start-screen').classList.remove('hidden');
         document.getElementById('stage-select').classList.add('hidden');
         document.getElementById('overlay').classList.add('hidden');
+        document.getElementById('hud').style.opacity = '0.3';
+        document.getElementById('controls').style.opacity = '0.3';
     }
 
     _showStageSelect() {
@@ -722,6 +724,8 @@ class GameController {
         document.getElementById('start-screen').classList.add('hidden');
         document.getElementById('stage-select').classList.remove('hidden');
         document.getElementById('overlay').classList.add('hidden');
+        document.getElementById('hud').style.opacity = '0.3';
+        document.getElementById('controls').style.opacity = '0.3';
         this._buildStageCards();
     }
 
@@ -766,6 +770,9 @@ class GameController {
         this.state = STATE.PLAYING;
         document.getElementById('stage-select').classList.add('hidden');
         document.getElementById('overlay').classList.add('hidden');
+        // Restore HUD and controls visibility
+        document.getElementById('hud').style.opacity = '1';
+        document.getElementById('controls').style.opacity = '1';
         this.loadStage(idx);
     }
 
@@ -1266,28 +1273,153 @@ class GameController {
     }
 
     _drawTutorialOverlay() {
-        this.ctx.save();
-        const pulse = Math.sin(Date.now() * 0.005) * 0.15;
+        const ctx = this.ctx;
+        ctx.save();
+        const t = Date.now() * 0.004;
+        const pulse = Math.sin(t) * 0.15;
+        const fadeAlpha = 0.85 + pulse;
 
-        // Guide line suggestion
-        this.ctx.strokeStyle = `rgba(255, 255, 255, ${0.15 + pulse})`;
-        this.ctx.lineWidth = 1.5; this.ctx.setLineDash([4, 6]);
-        this.ctx.beginPath(); this.ctx.moveTo(220, 350); this.ctx.lineTo(380, 490); this.ctx.stroke();
-        this.ctx.setLineDash([]);
+        // ---- Helper: rounded rect (iOS Safari compatible) ----
+        const roundRect = (x, y, w, h, r) => {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.lineTo(x + w - r, y);
+            ctx.arcTo(x + w, y, x + w, y + r, r);
+            ctx.lineTo(x + w, y + h - r);
+            ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+            ctx.lineTo(x + r, y + h);
+            ctx.arcTo(x, y + h, x, y + h - r, r);
+            ctx.lineTo(x, y + r);
+            ctx.arcTo(x, y, x + r, y, r);
+            ctx.closePath();
+        };
 
-        // Arrow
-        _ctxArrow(this.ctx, { x: 195, y: 300 }, { x: 230, y: 340 }, `rgba(0, 243, 255, ${0.5 + pulse})`);
+        // ============================================================
+        // PANEL: Upper-center hint box
+        // Placed at y=180 to avoid overlapping emitter at (80,150)
+        // ============================================================
+        const panelW = 370, panelH = 104;
+        const panelX = (CONFIG.WIDTH - panelW) / 2; // centered
+        const panelY = 185;
 
-        // Japanese label
-        this.ctx.shadowBlur = 6; this.ctx.shadowColor = 'rgba(0, 243, 255, 0.5)';
-        this.ctx.fillStyle = `rgba(255, 255, 255, ${0.65 + pulse})`;
-        this.ctx.font = "11px 'Noto Sans JP', sans-serif";
-        this.ctx.textAlign = 'left';
-        this.ctx.fillText("ここに鏡を引いてみよう", 205, 330);
-        this.ctx.fillStyle = `rgba(0, 243, 255, ${0.45 + pulse})`;
-        this.ctx.font = "9px 'Inter', monospace";
-        this.ctx.fillText("← Drag Here to Draw Mirror", 218, 512);
-        this.ctx.restore();
+        // Panel BG
+        ctx.fillStyle = 'rgba(3, 3, 8, 0.82)';
+        roundRect(panelX, panelY, panelW, panelH, 8);
+        ctx.fill();
+
+        // Panel border (animated glow)
+        ctx.strokeStyle = `rgba(0, 243, 255, ${0.2 + pulse * 0.6})`;
+        ctx.lineWidth = 1.5;
+        roundRect(panelX, panelY, panelW, panelH, 8);
+        ctx.stroke();
+
+        // Top accent line
+        ctx.strokeStyle = `rgba(0, 243, 255, ${0.5 + pulse})`;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(panelX + 12, panelY);
+        ctx.lineTo(panelX + panelW - 12, panelY);
+        ctx.stroke();
+
+        // TUTORIAL label
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = 'rgba(0, 243, 255, 0.7)';
+        ctx.fillStyle = `rgba(0, 243, 255, ${0.8 + pulse})`;
+        ctx.font = "bold 9px 'Inter', monospace";
+        ctx.textAlign = 'center';
+        ctx.letterSpacing = '0.15em';
+        ctx.fillText('▸ TUTORIAL: STAGE 1', CONFIG.WIDTH / 2, panelY + 20);
+
+        // Main hint Japanese
+        ctx.shadowBlur = 4;
+        ctx.shadowColor = 'rgba(255,255,255,0.3)';
+        ctx.fillStyle = `rgba(255, 255, 255, ${fadeAlpha})`;
+        ctx.font = "14px 'Noto Sans JP', sans-serif";
+        ctx.fillText('斜めに鏡を引いて、光を結晶へ導け', CONFIG.WIDTH / 2, panelY + 48);
+
+        // Sub hint English
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = `rgba(180, 180, 200, 0.6)`;
+        ctx.font = "9px 'Inter', monospace";
+        ctx.fillText('Drag diagonally across the laser path to place a mirror', CONFIG.WIDTH / 2, panelY + 68);
+
+        // Operation hint
+        ctx.fillStyle = `rgba(0, 243, 255, 0.5)`;
+        ctx.font = "9px 'Inter', monospace";
+        ctx.fillText('[ Drag = Draw Mirror ]   [ Tap Mirror = Erase ]   [ EMIT = Fire ]', CONFIG.WIDTH / 2, panelY + 87);
+
+        // ============================================================
+        // GUIDE: Show the laser beam path and where a mirror goes
+        // Emitter at (80,150) angle=0 → laser travels RIGHT at y=150
+        // We hint: place a mirror crossing the laser path around x=300-400
+        // A 45° mirror crossing y=150 at x=370 will redirect beam toward prism
+        // ============================================================
+
+        // Laser trace hint (show where the laser will travel)
+        ctx.save();
+        ctx.strokeStyle = `rgba(0, 243, 255, ${0.12 + pulse * 0.1})`;
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 5]);
+        ctx.beginPath();
+        ctx.moveTo(this.emitter.x + 18, this.emitter.y);
+        ctx.lineTo(560, this.emitter.y); // horizontal laser at y=150
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.restore();
+
+        // Mirror guide line: 45° crossing the laser at approx (370, 150)
+        // Goes from (300, 80) to (440, 220) - crossing the laser at y=150
+        const mx1 = 300, my1 = 80, mx2 = 440, my2 = 220;
+        ctx.save();
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = `rgba(192, 192, 216, ${0.5 + pulse})`;
+        ctx.strokeStyle = `rgba(192, 192, 216, ${0.35 + pulse})`;
+        ctx.lineWidth = 2.5;
+        ctx.setLineDash([8, 5]);
+        ctx.beginPath();
+        ctx.moveTo(mx1, my1);
+        ctx.lineTo(mx2, my2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Endpoint circles
+        ctx.fillStyle = `rgba(192, 192, 216, ${0.5 + pulse})`;
+        ctx.shadowBlur = 6;
+        ctx.beginPath(); ctx.arc(mx1, my1, 5, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(mx2, my2, 5, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+
+        // Label "← ここに鏡を引く"
+        ctx.save();
+        ctx.fillStyle = `rgba(192, 192, 216, ${0.7 + pulse})`;
+        ctx.font = "11px 'Noto Sans JP', sans-serif";
+        ctx.textAlign = 'left';
+        ctx.shadowBlur = 4;
+        ctx.shadowColor = 'rgba(192, 192, 216, 0.5)';
+        ctx.fillText('← ここに鏡を引く', mx2 + 8, (my1 + my2) / 2 + 4);
+        ctx.restore();
+
+        // Arrow: from emitter → toward mirror guide
+        _ctxArrow(ctx,
+            { x: this.emitter.x + 22, y: this.emitter.y - 2 },
+            { x: mx1 - 8, y: (my1 + my2) / 2 + 2 },
+            `rgba(0, 243, 255, ${0.4 + pulse})`);
+
+        // Arrow: from prism → upward hint
+        _ctxArrow(ctx,
+            { x: this.prism.x, y: this.prism.y - 28 },
+            { x: this.prism.x - 10, y: this.prism.y - 60 },
+            `rgba(255, 0, 127, ${0.4 + pulse})`);
+
+        // Prism label
+        ctx.save();
+        ctx.fillStyle = `rgba(255, 0, 127, ${0.55 + pulse})`;
+        ctx.font = "9px 'Inter', monospace";
+        ctx.textAlign = 'center';
+        ctx.fillText('TARGET', this.prism.x, this.prism.y - 66);
+        ctx.restore();
+
+        ctx.restore();
     }
 
     _drawTuningLine() {

@@ -217,7 +217,7 @@ body {
     background-size: 200px 200px;
 }
 
-/* 6. Screens & Overlays */
+/* 6. Screens & Overlays - Base */
 #start-screen, #overlay, #stage-select {
     position: absolute;
     top: 0; left: 0;
@@ -228,10 +228,10 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 30px 24px;
+    padding: 24px 24px;
     text-align: center;
     transition: opacity 0.4s ease, visibility 0.4s ease;
-    overflow-y: auto;
+    overflow: hidden; /* No scroll on title/overlay */
 }
 
 #start-screen.hidden, #overlay.hidden, #stage-select.hidden {
@@ -242,7 +242,7 @@ body {
 
 /* Title Screen */
 .title-logo {
-    margin-bottom: 36px;
+    margin-bottom: 24px;
 }
 
 .title-logo h1 {
@@ -265,13 +265,13 @@ body {
 .instruction-box {
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 24px;
+    padding: 18px 22px;
     border-radius: 6px;
     width: 100%;
     max-width: 400px;
-    margin-bottom: 32px;
+    margin-bottom: 24px;
     font-size: 12px;
-    line-height: 1.8;
+    line-height: 1.7;
 }
 
 .instruction-box p {
@@ -301,7 +301,9 @@ body {
 /* 7. Stage Select Screen */
 #stage-select {
     justify-content: flex-start;
-    padding-top: 24px;
+    padding-top: 20px;
+    overflow-y: auto; /* Stage select needs scroll for 7 cards */
+    overflow-x: hidden;
 }
 
 .stage-select-header {
@@ -517,10 +519,20 @@ body {
 .overlay-btn-row {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
     align-items: center;
     width: 100%;
     max-width: 280px;
+}
+
+/* Override: overlay STAGE_SELECT button matches NEXT_STAGE size */
+.overlay-btn-row .control-btn {
+    width: 100%;
+    padding: 12px 32px;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    border-color: rgba(255, 255, 255, 0.15);
+    text-align: center;
 }
 
 /* 9. Buttons */
@@ -649,9 +661,10 @@ body {
 }
 
 .active-emit {
-    padding: 9px 22px !important;
+    padding: 9px 20px !important;
     font-size: 10px !important;
     width: auto !important;
+    flex-shrink: 0;
 }
 
 /* 11. Mode Indicator */
@@ -659,15 +672,16 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 6px 12px;
+    padding: 5px 10px;
     border-radius: 3px;
-    font-size: 9px;
+    font-size: 8px;
     font-weight: 400;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.12em;
     border: 1px solid;
     transition: all 0.2s ease;
     white-space: nowrap;
-    min-width: 90px;
+    min-width: 80px;
+    flex-shrink: 0;
 }
 
 .mode-indicator.draw-mode {
