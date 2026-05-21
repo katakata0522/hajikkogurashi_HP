@@ -59,9 +59,9 @@ body {
 
 /* 3. Main Game Container */
 #game-container {
-    width: 100%;
+    width: min(100vw, calc(100vh * 3 / 4));
+    height: min(100vh, calc(100vw * 4 / 3));
     max-width: var(--logical-width);
-    height: 100%;
     max-height: var(--logical-height);
     background-color: var(--bg-surface);
     border: 1.5px solid var(--border-color);
@@ -292,6 +292,7 @@ body {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
+    display: none !important;
 }
 
 /* ========== TITLE SCREEN ========== */
@@ -869,6 +870,7 @@ body {
     visibility: hidden;
     pointer-events: none;
     transform: translateX(100%);
+    display: none !important;
 }
 
 #info-panel::-webkit-scrollbar {
