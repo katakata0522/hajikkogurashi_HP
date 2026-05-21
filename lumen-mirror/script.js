@@ -9,6 +9,20 @@ const CONFIG = {
     MAX_REFLECTIONS: 14,
     LASER_SPEED: 7200,   // quadrupled from original 1800, doubled from 3600
     PARTICLE_COUNT: 30,
+    
+    // Physical & UI Thresholds (Refactored)
+    ERASE_THRESHOLD_DRAW: 30,
+    ERASE_THRESHOLD_IDLE: 30,
+    ERASE_THRESHOLD_DEFAULT: 22,
+    MIN_DRAW_LENGTH: 8,
+    MIN_INK_DRAW: 10,
+    
+    // Animation Durations
+    CHAIN_FLASH_INTERVAL: 0.12,
+    CHAIN_FLASH_DURATION: 0.5,
+    CLEAR_OVERLAY_DELAY: 1400,
+    PORTAL_COOLDOWN_STEPS: 15,
+    MAX_SUBSTEPS: 200,
 };
 
 const STATE = {
@@ -952,11 +966,9 @@ class GameController {
     bindEvents() {
         const getPos = (e) => {
             const rect = this.canvas.getBoundingClientRect();
-            const cx = e.touches ? e.touches[0].clientX : e.clientX;
-            const cy = e.touches ? e.touches[0].clientY : e.clientY;
             return {
-                x: ((cx - rect.left) / rect.width) * CONFIG.WIDTH,
-                y: ((cy - rect.top) / rect.height) * CONFIG.HEIGHT
+                x: ((e.clientX - rect.left) / rect.width) * CONFIG.WIDTH,
+                y: ((e.clientY - rect.top) / rect.height) * CONFIG.HEIGHT
             };
         };
 
@@ -966,7 +978,7 @@ class GameController {
             if (e.target.tagName === 'BUTTON') return;
             e.preventDefault();
             const pos = getPos(e);
-            const eraseIdx = this.findMirrorAt(pos, 30);
+            const eraseIdx = this.findMirrorAt(pos, CONFIG.ERASE_THRESHOLD_DRAW);
             if (eraseIdx !== -1) {
                 const erased = this.mirrors.splice(eraseIdx, 1)[0];
                 this.inkLeft = Math.min(this.maxInkForStage, this.inkLeft + erased.length);
@@ -977,7 +989,7 @@ class GameController {
                 this.calculateLaserPath();
                 return;
             }
-            if (this.inkLeft > 10) {
+            if (this.inkLeft > CONFIG.MIN_INK_DRAW) {
                 this.isDrawing = true;
                 this.drawStart = pos; this.drawEnd = pos;
                 this.lastMousePos = pos;
@@ -1005,7 +1017,7 @@ class GameController {
                 this.calculateLaserPath();
             } else {
                 const prev = this.hoveredMirrorIdx;
-                this.hoveredMirrorIdx = this.findMirrorAt(pos, 30);
+                this.hoveredMirrorIdx = this.findMirrorAt(pos, CONFIG.ERASE_THRESHOLD_IDLE);
                 if (prev !== this.hoveredMirrorIdx) this._updateModeIndicator();
             }
         };
@@ -1015,7 +1027,7 @@ class GameController {
                 this.isDrawing = false;
                 audio.stopIceScratch();
                 const len = dist(this.drawStart, this.drawEnd);
-                if (len > 8) {
+                if (len > CONFIG.MIN_DRAW_LENGTH) {
                     this.mirrors.push(new Mirror(this.drawStart.x, this.drawStart.y, this.drawEnd.x, this.drawEnd.y));
                     this.inkLeft -= len;
                     this.updateHUD();
@@ -1025,12 +1037,9 @@ class GameController {
             }
         };
 
-        this.canvas.addEventListener('mousedown', handleDown);
-        this.canvas.addEventListener('mousemove', handleMove);
-        window.addEventListener('mouseup', handleUp);
-        this.canvas.addEventListener('touchstart', handleDown, { passive: false });
-        this.canvas.addEventListener('touchmove', handleMove, { passive: false });
-        window.addEventListener('touchend', handleUp, { passive: false });
+        this.canvas.addEventListener('pointerdown', handleDown);
+        this.canvas.addEventListener('pointermove', handleMove);
+        window.addEventListener('pointerup', handleUp);
 
         // Button wiring
         document.getElementById('start-btn').addEventListener('click', () => {
@@ -1080,7 +1089,7 @@ class GameController {
         }
     }
 
-    findMirrorAt(pos, threshold = 22) {
+    findMirrorAt(pos, threshold = CONFIG.ERASE_THRESHOLD_DEFAULT) {
         for (let i = 0; i < this.mirrors.length; i++) {
             if (this.mirrors[i].distanceToPoint(pos) <= threshold) return i;
         }
@@ -1189,7 +1198,7 @@ class GameController {
             const next = { x: pt.x + vel.x * stepSize, y: pt.y + vel.y * stepSize };
 
             // Portal check
-            if (steps - lastPortalStep > 15) {
+            if (steps - lastPortalStep > CONFIG.PORTAL_COOLDOWN_STEPS) {
                 for (const portal of this.portals) {
                     if (portal.containsEntrance(pt)) {
                         this.laserCache.push({ x: portal.inPort.x, y: portal.inPort.y });
@@ -1332,7 +1341,7 @@ class GameController {
         setTimeout(() => {
             document.getElementById('overlay').classList.remove('hidden');
             this.updateHUD();
-        }, 1400);
+        }, CONFIG.CLEAR_OVERLAY_DELAY);
     }
 
     // ---- Main Loop ----
@@ -1354,10 +1363,10 @@ class GameController {
         // Chain flash update
         if (this.chainFlashQueue.length > 0) {
             this.chainFlashTimer += dt;
-            if (this.chainFlashTimer > 0.12) {
+            if (this.chainFlashTimer > CONFIG.CHAIN_FLASH_INTERVAL) {
                 this.chainFlashTimer = 0;
                 const m = this.chainFlashQueue.shift();
-                if (m) m.flashTimer = 0.5;
+                if (m) m.flashTimer = CONFIG.CHAIN_FLASH_DURATION;
             }
         }
         // Tick mirror flash timers
@@ -1368,7 +1377,7 @@ class GameController {
         // Photon animation (Refactored: resolution-independent multi-segment leap logic)
         if (this.state === STATE.EMITTING) {
             let timeLeft = dt;
-            const maxSubSteps = 200; // Safeguard against infinite loops
+            const maxSubSteps = CONFIG.MAX_SUBSTEPS; // Safeguard against infinite loops
             let subSteps = 0;
 
             while (timeLeft > 0 && this.currentSegmentIdx < this.laserCache.length - 1 && subSteps < maxSubSteps) {
@@ -1509,21 +1518,6 @@ class GameController {
         const pulse = Math.sin(t) * 0.15;
         const fadeAlpha = 0.85 + pulse;
 
-        // ---- Helper: rounded rect (iOS Safari compatible) ----
-        const roundRect = (x, y, w, h, r) => {
-            ctx.beginPath();
-            ctx.moveTo(x + r, y);
-            ctx.lineTo(x + w - r, y);
-            ctx.arcTo(x + w, y, x + w, y + r, r);
-            ctx.lineTo(x + w, y + h - r);
-            ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
-            ctx.lineTo(x + r, y + h);
-            ctx.arcTo(x, y + h, x, y + h - r, r);
-            ctx.lineTo(x, y + r);
-            ctx.arcTo(x, y, x + r, y, r);
-            ctx.closePath();
-        };
-
         // ============================================================
         // PANEL: Upper-center hint box
         // Placed at y=180 to avoid overlapping emitter at (80,150)
@@ -1534,13 +1528,13 @@ class GameController {
 
         // Panel BG
         ctx.fillStyle = 'rgba(3, 3, 8, 0.82)';
-        roundRect(panelX, panelY, panelW, panelH, 8);
+        this._drawRoundRect(panelX, panelY, panelW, panelH, 8);
         ctx.fill();
 
         // Panel border (animated glow)
         ctx.strokeStyle = `rgba(0, 243, 255, ${0.2 + pulse * 0.6})`;
         ctx.lineWidth = 1.5;
-        roundRect(panelX, panelY, panelW, panelH, 8);
+        this._drawRoundRect(panelX, panelY, panelW, panelH, 8);
         ctx.stroke();
 
         // Top accent line
@@ -1630,13 +1624,13 @@ class GameController {
         ctx.restore();
 
         // Arrow: from emitter → toward mirror guide
-        _ctxArrow(ctx,
+        this._drawArrow(
             { x: this.emitter.x + 22, y: this.emitter.y - 2 },
             { x: mx1 - 8, y: (my1 + my2) / 2 + 2 },
             `rgba(0, 243, 255, ${0.4 + pulse})`);
 
         // Arrow: from prism → upward hint
-        _ctxArrow(ctx,
+        this._drawArrow(
             { x: this.prism.x, y: this.prism.y - 28 },
             { x: this.prism.x - 10, y: this.prism.y - 60 },
             `rgba(255, 0, 127, ${0.4 + pulse})`);
@@ -1684,21 +1678,34 @@ class GameController {
         for (let i = 1; i < path.length; i++) this.ctx.lineTo(path[i].x, path[i].y);
         this.ctx.stroke(); this.ctx.restore();
     }
-}
 
-// ============================================================
-// STANDALONE HELPERS
-// ============================================================
-function _ctxArrow(ctx, from, to, color) {
-    const angle = Math.atan2(to.y - from.y, to.x - from.x);
-    const hLen = 8;
-    ctx.save(); ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.moveTo(from.x, from.y); ctx.lineTo(to.x, to.y); ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(to.x, to.y);
-    ctx.lineTo(to.x - hLen * Math.cos(angle - Math.PI/6), to.y - hLen * Math.sin(angle - Math.PI/6));
-    ctx.lineTo(to.x - hLen * Math.cos(angle + Math.PI/6), to.y - hLen * Math.sin(angle + Math.PI/6));
-    ctx.closePath(); ctx.fill(); ctx.restore();
+    _drawRoundRect(x, y, w, h, r) {
+        const ctx = this.ctx;
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.arcTo(x + w, y, x + w, y + r, r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+        ctx.lineTo(x + r, y + h);
+        ctx.arcTo(x, y + h, x, y + h - r, r);
+        ctx.lineTo(x, y + r);
+        ctx.arcTo(x, y, x + r, y, r);
+        ctx.closePath();
+    }
+
+    _drawArrow(from, to, color) {
+        const ctx = this.ctx;
+        const angle = Math.atan2(to.y - from.y, to.x - from.x);
+        const hLen = 8;
+        ctx.save(); ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(from.x, from.y); ctx.lineTo(to.x, to.y); ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(to.x, to.y);
+        ctx.lineTo(to.x - hLen * Math.cos(angle - Math.PI/6), to.y - hLen * Math.sin(angle - Math.PI/6));
+        ctx.lineTo(to.x - hLen * Math.cos(angle + Math.PI/6), to.y - hLen * Math.sin(angle + Math.PI/6));
+        ctx.closePath(); ctx.fill(); ctx.restore();
+    }
 }
 
 // ============================================================
