@@ -1190,13 +1190,14 @@ class GameController {
                             } else if (evt.type === 'prism' && this.hasHitPrism) {
                                 this.triggerClear();
                             } else if (evt.type === 'blackhole') {
+                                // Immediately change state to prevent re-firing every frame
+                                this.state = STATE.PLAYING;
                                 this.particles.spawn(next.x, next.y, '#00f3ff', 20);
                                 this.showToast("光は幾何学から外れ、深淵に消えた");
                                 setTimeout(() => {
-                                    this.state = STATE.PLAYING;
                                     this.calculateLaserPath();
                                     this.updateHUD();
-                                }, 1000);
+                                }, 800);
                             }
                         }
                     }
@@ -1206,12 +1207,13 @@ class GameController {
                 }
             } else {
                 if (!this.hasHitPrism && this.state === STATE.EMITTING) {
+                    // Immediately change state to prevent showToast firing every frame
+                    this.state = STATE.PLAYING;
                     this.showToast("光は幾何学から外れ、深淵に消えた");
                     setTimeout(() => {
-                        this.state = STATE.PLAYING;
                         this.calculateLaserPath();
                         this.updateHUD();
-                    }, 1000);
+                    }, 800);
                 }
             }
         }
