@@ -1116,3 +1116,334 @@ body {
     line-height: 1.7;
     letter-spacing: 0.03em;
 }
+
+/* ==========================================================================
+   13. Responsive Sidebar Optimization (PC/Tablet/Mobile Layout Upgrade)
+   ========================================================================== */
+
+#app-layout {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--bg-dark);
+    overflow: hidden;
+    position: relative;
+}
+
+/* Default state: Hide PC sidebars on Mobile and Tablet */
+.pc-only-sidebar {
+    display: none !important;
+}
+
+/* Tablet & Medium Screen Responsive Layout (Activated on landscape screens 768px <= width < 1150px) */
+@media (min-width: 768px) and (max-width: 1149px) and (min-aspect-ratio: 1.1) {
+    #app-layout {
+        gap: 20px;
+        padding: 0 20px;
+        /* Subtly glowing grid lines in background for deep space aura */
+        background-image: 
+            radial-gradient(at 100% 100%, rgba(255, 0, 127, 0.03) 0px, transparent 50%),
+            linear-gradient(rgba(255, 255, 255, 0.006) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.006) 1px, transparent 1px);
+        background-size: 100% 100%, 100px 100px, 100px 100px;
+    }
+
+    #game-container {
+        /* Slightly adjust shadow blur and container scaling on tablet */
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(0, 243, 255, 0.02);
+    }
+
+    #pc-sidebar-right {
+        display: flex !important;
+        flex-direction: column;
+        width: 290px;
+        height: min(90vh, 1200px);
+        background: var(--bg-surface);
+        border: 1.5px solid var(--border-color);
+        box-shadow: 0 15px 45px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 255, 255, 0.02);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-radius: 12px;
+        padding: 20px;
+        overflow-y: auto;
+        flex-shrink: 0;
+        animation: sidebarFadeIn 0.6s cubic-bezier(0.25, 1, 0.5, 1) both;
+    }
+
+    /* Spacing optimizations for middle-size panel */
+    #pc-sidebar-right .sidebar-header {
+        border-bottom: 1.5px solid var(--border-color);
+        padding-bottom: 10px;
+        margin-bottom: 16px;
+        flex-shrink: 0;
+    }
+
+    #pc-sidebar-right .cyber-tag {
+        color: var(--color-photon);
+        font-family: 'Inter', monospace;
+        font-size: 8px;
+        letter-spacing: 0.25em;
+        font-weight: 500;
+        text-shadow: 0 0 8px var(--color-photon-glow);
+        background: rgba(0, 243, 255, 0.08);
+        border: 1px solid rgba(0, 243, 255, 0.25);
+        padding: 2px 6px;
+        border-radius: 3px;
+        text-transform: uppercase;
+    }
+
+    #pc-sidebar-right .sidebar-title {
+        font-size: 15px;
+        font-weight: 300;
+        letter-spacing: 0.15em;
+        color: rgba(255, 255, 255, 0.95);
+        margin-top: 8px;
+    }
+
+    #pc-sidebar-right .sidebar-gimmick-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 16px;
+        flex-grow: 1;
+        overflow-y: auto;
+        padding-right: 2px;
+    }
+
+    #pc-sidebar-right .sidebar-gimmick-item {
+        background: rgba(255, 255, 255, 0.015);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 6px;
+        padding: 8px 10px;
+        transition: border-color 0.25s, background 0.25s;
+    }
+
+    #pc-sidebar-right .sidebar-gimmick-desc {
+        font-size: 10.5px;
+        line-height: 1.5;
+    }
+
+    #pc-sidebar-right .hint-section {
+        border-top: 1.5px solid var(--border-color);
+        padding-top: 12px;
+        margin-bottom: 0;
+        flex-shrink: 0;
+    }
+
+    #pc-sidebar-right .hint-text {
+        font-size: 11.5px;
+        padding: 8px 10px;
+    }
+}
+
+/* Desktop Responsive Layout (Activated on landscape screens width >= 1150px) */
+@media (min-width: 1150px) and (min-aspect-ratio: 1.1) {
+    #app-layout {
+        gap: 32px;
+        padding: 0 40px;
+        /* Stylized abstract glowing grid lines in background for deep space aura */
+        background-image: 
+            radial-gradient(at 0% 0%, rgba(0, 243, 255, 0.05) 0px, transparent 50%),
+            radial-gradient(at 100% 100%, rgba(255, 0, 127, 0.04) 0px, transparent 50%),
+            linear-gradient(rgba(255, 255, 255, 0.01) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+        background-size: 100% 100%, 100% 100%, 120px 120px, 120px 120px;
+    }
+
+    #game-container {
+        /* Slightly adjust shadow blur and container scaling on PC */
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.95), 0 0 40px rgba(0, 243, 255, 0.04);
+    }
+
+    .pc-only-sidebar {
+        display: flex !important;
+        flex-direction: column;
+        width: 330px;
+        height: min(90vh, 1200px);
+        background: var(--bg-surface);
+        border: 1.5px solid var(--border-color);
+        box-shadow: 0 15px 45px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 255, 255, 0.02);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-radius: 12px;
+        padding: 26px;
+        overflow-y: auto;
+        flex-shrink: 0;
+        animation: sidebarFadeIn 0.7s cubic-bezier(0.25, 1, 0.5, 1) both;
+    }
+
+    #pc-sidebar-left {
+        animation-delay: 0.1s;
+    }
+    #pc-sidebar-right {
+        animation-delay: 0.2s;
+    }
+
+    @keyframes sidebarFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Sidebar Internal Components styling */
+    .sidebar-header {
+        border-bottom: 1.5px solid var(--border-color);
+        padding-bottom: 14px;
+        margin-bottom: 20px;
+        flex-shrink: 0;
+    }
+
+    .cyber-tag {
+        color: var(--color-photon);
+        font-family: 'Inter', monospace;
+        font-size: 8px;
+        letter-spacing: 0.25em;
+        font-weight: 500;
+        text-shadow: 0 0 8px var(--color-photon-glow);
+        background: rgba(0, 243, 255, 0.08);
+        border: 1px solid rgba(0, 243, 255, 0.25);
+        padding: 2px 6px;
+        border-radius: 3px;
+        text-transform: uppercase;
+    }
+
+    .sidebar-title {
+        font-size: 16px;
+        font-weight: 300;
+        letter-spacing: 0.15em;
+        color: rgba(255, 255, 255, 0.95);
+        margin-top: 10px;
+    }
+
+    .sidebar-section {
+        margin-bottom: 22px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .section-label {
+        font-size: 9px;
+        color: var(--color-text-dim);
+        letter-spacing: 0.15em;
+        font-weight: 400;
+    }
+
+    .stg-badge {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: #ffffff;
+        font-size: 12px;
+        font-weight: 400;
+        letter-spacing: 0.05em;
+        padding: 8px 12px;
+        border-radius: 6px;
+        text-shadow: 0 0 5px rgba(255,255,255,0.2);
+    }
+
+    .sidebar-text {
+        font-size: 13px;
+        line-height: 1.8;
+        color: rgba(230, 230, 240, 0.9);
+        letter-spacing: 0.04em;
+        font-weight: 300;
+        text-align: justify;
+    }
+    
+    .sidebar-text.font-serif {
+        font-family: 'Noto Sans JP', sans-serif;
+        font-weight: 300;
+    }
+
+    /* Gimmick list styling */
+    .sidebar-gimmick-container {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 22px;
+        flex-grow: 1;
+        overflow-y: auto;
+        padding-right: 2px;
+    }
+
+    .sidebar-gimmick-item {
+        background: rgba(255, 255, 255, 0.015);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 6px;
+        padding: 10px 12px;
+        transition: border-color 0.25s, background 0.25s;
+    }
+
+    .sidebar-gimmick-item:hover {
+        background: rgba(255, 255, 255, 0.03);
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-gimmick-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 6px;
+    }
+
+    .gimmick-visual-mini {
+        width: 14px;
+        height: 14px;
+        border-radius: 3px;
+        border: 1px solid;
+    }
+    
+    .gimmick-visual-mini.mirror { border-color: var(--color-mirror); box-shadow: 0 0 5px var(--color-mirror-glow); background: rgba(192,192,216,0.1); }
+    .gimmick-visual-mini.prism { border-color: var(--color-prism); box-shadow: 0 0 5px var(--color-prism-glow); background: rgba(255,0,127,0.1); }
+    .gimmick-visual-mini.blackhole { border-color: #00f3ff; box-shadow: 0 0 5px rgba(0, 243, 255, 0.4); background: #000; }
+    .gimmick-visual-mini.wormhole { border-color: #00bfff; box-shadow: 0 0 5px rgba(0,191,255,0.4); background: rgba(0,191,255,0.1); }
+    .gimmick-visual-mini.block { border-color: var(--color-block); box-shadow: 0 0 5px var(--color-block-glow); background: var(--color-block-bg); }
+
+    .sidebar-gimmick-name {
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.08em;
+        color: #ffffff;
+    }
+
+    .sidebar-gimmick-desc {
+        font-size: 11px;
+        line-height: 1.6;
+        color: var(--color-text-dim);
+        letter-spacing: 0.02em;
+        font-weight: 300;
+    }
+
+    /* Hints Panel inside sidebar */
+    .hint-section {
+        border-top: 1.5px solid var(--border-color);
+        padding-top: 16px;
+        margin-bottom: 0;
+        flex-shrink: 0;
+    }
+
+    .hint-text {
+        font-size: 12px;
+        color: #00f3ff;
+        text-shadow: 0 0 5px var(--color-photon-glow);
+        background: rgba(0, 243, 255, 0.02);
+        border: 1px dashed rgba(0, 243, 255, 0.15);
+        padding: 10px 12px;
+        border-radius: 6px;
+        line-height: 1.6;
+    }
+    
+    .hint-item {
+        margin-bottom: 4px;
+    }
+    .hint-item:last-child {
+        margin-bottom: 0;
+    }
+}

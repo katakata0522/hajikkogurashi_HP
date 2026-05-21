@@ -11,149 +11,192 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="game-container">
-        <!-- HEADER / HUD -->
-        <header id="hud">
-            <div class="hud-item left">
-                <span class="label">SYSTEM:</span>
-                <span id="stage-name" class="value">TUNING_01</span>
+    <div id="app-layout">
+        <!-- PC用の左サイドバー -->
+        <aside id="pc-sidebar-left" class="pc-only-sidebar">
+            <div class="sidebar-header">
+                <span class="cyber-tag">SYSTEM_STATUS</span>
+                <h2 class="sidebar-title">LUMEN_MIRROR</h2>
             </div>
             
-            <div class="hud-item center">
-                <div class="ink-meter-container">
-                    <span class="label">INK:</span>
-                    <div class="ink-bar-wrapper">
-                        <div id="ink-bar"></div>
-                        <div class="ink-ticks">
-                            <span></span><span></span><span></span><span></span><span></span>
-                            <span></span><span></span><span></span><span></span><span></span>
+            <div class="sidebar-section">
+                <div class="section-label">◈ ACTIVE_STAGE</div>
+                <div id="pc-stg-info" class="stg-badge">STG_01: REFLECTION</div>
+            </div>
+            
+            <div class="sidebar-section">
+                <div class="section-label">◈ MISSION_OBJECTIVE</div>
+                <p id="pc-mission-text" class="sidebar-text">—</p>
+            </div>
+            
+            <div class="sidebar-section">
+                <div class="section-label">◈ QUANTUM_STORY</div>
+                <p id="pc-story-text" class="sidebar-text font-serif">—</p>
+            </div>
+        </aside>
+
+        <!-- メインのゲーム画面 -->
+        <div id="game-container">
+            <!-- HEADER / HUD -->
+            <header id="hud">
+                <div class="hud-item left">
+                    <span class="label">SYSTEM:</span>
+                    <span id="stage-name" class="value">TUNING_01</span>
+                </div>
+                
+                <div class="hud-item center">
+                    <div class="ink-meter-container">
+                        <span class="label">INK:</span>
+                        <div class="ink-bar-wrapper">
+                            <div id="ink-bar"></div>
+                            <div class="ink-ticks">
+                                <span></span><span></span><span></span><span></span><span></span>
+                                <span></span><span></span><span></span><span></span><span></span>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                <div class="hud-item right">
+                    <span id="stability-value" class="value stb-value">100%</span>
+                    <button id="info-chip" class="info-chip-btn" title="ステージ情報を表示">
+                        <span class="info-chip-icon">?</span>
+                        <span class="info-chip-label">INFO</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- VIEWPORT / CANVAS -->
+            <div id="viewport">
+                <div class="grid-overlay"></div>
+                <canvas id="game-canvas"></canvas>
+
+                <!-- ========== INFO PANEL ========== -->
+                <div id="info-panel" class="hidden">
+                    <div class="info-panel-inner">
+                        <div class="info-panel-header">
+                            <div>
+                                <span id="info-stg-num" class="info-stg-num">STG_01</span>
+                                <h2 id="info-stg-name" class="info-stg-name">REFLECTION</h2>
+                            </div>
+                            <button id="info-close" class="info-close-btn">✕</button>
+                        </div>
+
+                        <div class="info-section">
+                            <div class="info-section-label">◈ MISSION</div>
+                            <div id="info-objective" class="info-objective-text">—</div>
+                        </div>
+
+                        <div class="info-section">
+                            <div class="info-section-label">◈ STORY</div>
+                            <div id="info-story" class="info-story-text">—</div>
+                        </div>
+
+                        <div class="info-section">
+                            <div class="info-section-label">◈ GIMMICKS</div>
+                            <div id="info-gimmicks" class="info-gimmicks-list"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- STAGE CLEAR OVERLAY -->
+                <div id="overlay" class="hidden">
+                    <div class="overlay-content">
+                        <h2 id="overlay-title">SYSTEM_TUNED</h2>
+                        <p id="overlay-subtitle">幾何学の調律に成功しました</p>
+                        <div id="best-banner" class="best-banner hidden">✦ NEW BEST RANK ✦</div>
+                        <div class="stats-box">
+                            <div class="stat-line">
+                                <span>REFLECT_COUNT:</span>
+                                <span id="stat-reflect" class="stat-val">--</span>
+                            </div>
+                            <div class="stat-line">
+                                <span>RANK:</span>
+                                <span id="stat-rank" class="stat-val">--</span>
+                            </div>
+                            <div class="stat-line">
+                                <span>BEST_RANK:</span>
+                                <span id="stat-best" class="stat-val dim-val">--</span>
+                            </div>
+                        </div>
+                        <div class="overlay-btn-row">
+                            <button id="next-btn" class="glow-btn">NEXT_STAGE</button>
+                            <button id="select-btn" class="control-btn">STAGE_SELECT</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STAGE SELECT SCREEN -->
+                <div id="stage-select" class="hidden">
+                    <div class="stage-select-header">
+                        <h2 class="select-title">GEOMETRIC_ARCHIVE</h2>
+                        <p class="select-subtitle">調律するステージを選択せよ</p>
+                    </div>
+                    <div id="stage-cards-container"></div>
+                    <button id="select-back-btn" class="flat-btn">← RETURN_TO_TITLE</button>
+                </div>
+
+                <!-- TITLE / START SCREEN -->
+                <div id="start-screen" class="active">
+                    <div class="title-logo">
+                        <h1>
+                            <span class="title-lumen">LUMEN</span><span class="title-sep">_</span><span class="title-mirror">MIRROR</span>
+                        </h1>
+                        <p class="subtitle">幾何学と光紡ぎの美学</p>
+                    </div>
+                    <div class="instruction-box">
+                        <p>指先で虚空に［鏡］を紡ぎ、光を導け</p>
+                        <div class="control-hints">
+                          <div><span>Drag:</span> 鏡を引く（角度と長さの調律）</div>
+                          <div><span>Tap:</span> 鏡の消去（鏡に近い場所をタップ）</div>
+                          <div><span>EMIT:</span> 光子の放射</div>
+                          <div><span>RESET:</span> ステージをリセット</div>
+                        </div>
+                    </div>
+                    <button id="start-btn" class="glow-btn">INITIALIZE_SYSTEM</button>
+                    <button id="menu-back-btn" class="flat-btn">RETURN_TO_ARCHIVE</button>
+                </div>
             </div>
 
-            <div class="hud-item right">
-                <span id="stability-value" class="value stb-value">100%</span>
-                <button id="info-chip" class="info-chip-btn" title="ステージ情報を表示">
-                    <span class="info-chip-icon">?</span>
-                    <span class="info-chip-label">INFO</span>
+            <!-- FOOTER / CONTROLS -->
+            <footer id="controls">
+                <button id="back-btn" class="icon-btn" title="メインメニューへ">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
+                    <span>ARCHIVE</span>
                 </button>
-            </div>
-        </header>
 
-        <!-- VIEWPORT / CANVAS -->
-        <div id="viewport">
-            <div class="grid-overlay"></div>
-            <canvas id="game-canvas"></canvas>
-
-            <!-- ========== INFO PANEL ========== -->
-            <div id="info-panel" class="hidden">
-                <div class="info-panel-inner">
-                    <div class="info-panel-header">
-                        <div>
-                            <span id="info-stg-num" class="info-stg-num">STG_01</span>
-                            <h2 id="info-stg-name" class="info-stg-name">REFLECTION</h2>
-                        </div>
-                        <button id="info-close" class="info-close-btn">✕</button>
-                    </div>
-
-                    <div class="info-section">
-                        <div class="info-section-label">◈ MISSION</div>
-                        <div id="info-objective" class="info-objective-text">—</div>
-                    </div>
-
-                    <div class="info-section">
-                        <div class="info-section-label">◈ STORY</div>
-                        <div id="info-story" class="info-story-text">—</div>
-                    </div>
-
-                    <div class="info-section">
-                        <div class="info-section-label">◈ GIMMICKS</div>
-                        <div id="info-gimmicks" class="info-gimmicks-list"></div>
-                    </div>
+                <div id="mode-indicator" class="mode-indicator draw-mode">
+                    <span id="mode-label">DRAW</span>
                 </div>
-            </div>
-            
-            <!-- STAGE CLEAR OVERLAY -->
-            <div id="overlay" class="hidden">
-                <div class="overlay-content">
-                    <h2 id="overlay-title">SYSTEM_TUNED</h2>
-                    <p id="overlay-subtitle">幾何学の調律に成功しました</p>
-                    <div id="best-banner" class="best-banner hidden">✦ NEW BEST RANK ✦</div>
-                    <div class="stats-box">
-                        <div class="stat-line">
-                            <span>REFLECT_COUNT:</span>
-                            <span id="stat-reflect" class="stat-val">--</span>
-                        </div>
-                        <div class="stat-line">
-                            <span>RANK:</span>
-                            <span id="stat-rank" class="stat-val">--</span>
-                        </div>
-                        <div class="stat-line">
-                            <span>BEST_RANK:</span>
-                            <span id="stat-best" class="stat-val dim-val">--</span>
-                        </div>
-                    </div>
-                    <div class="overlay-btn-row">
-                        <button id="next-btn" class="glow-btn">NEXT_STAGE</button>
-                        <button id="select-btn" class="control-btn">STAGE_SELECT</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- STAGE SELECT SCREEN -->
-            <div id="stage-select" class="hidden">
-                <div class="stage-select-header">
-                    <h2 class="select-title">GEOMETRIC_ARCHIVE</h2>
-                    <p class="select-subtitle">調律するステージを選択せよ</p>
-                </div>
-                <div id="stage-cards-container"></div>
-                <button id="select-back-btn" class="flat-btn">← RETURN_TO_TITLE</button>
-            </div>
-
-            <!-- TITLE / START SCREEN -->
-            <div id="start-screen" class="active">
-                <div class="title-logo">
-                    <h1>
-                        <span class="title-lumen">LUMEN</span><span class="title-sep">_</span><span class="title-mirror">MIRROR</span>
-                    </h1>
-                    <p class="subtitle">幾何学と光紡ぎの美学</p>
-                </div>
-                <div class="instruction-box">
-                    <p>指先で虚空に［鏡］を紡ぎ、光を導け</p>
-                    <div class="control-hints">
-                        <div><span>Drag:</span> 鏡を引く（角度と長さの調律）</div>
-                        <div><span>Tap:</span> 鏡の消去（鏡に近い場所をタップ）</div>
-                        <div><span>EMIT:</span> 光子の放射</div>
-                        <div><span>RESET:</span> ステージをリセット</div>
-                    </div>
-                </div>
-                <button id="start-btn" class="glow-btn">INITIALIZE_SYSTEM</button>
-                <button id="menu-back-btn" class="flat-btn">RETURN_TO_ARCHIVE</button>
-            </div>
+                
+                <button id="reset-btn" class="control-btn" disabled>
+                    <span>RESET</span>
+                </button>
+                
+                <button id="emit-btn" class="glow-btn active-emit" disabled>
+                    <span>EMIT_PHOTON</span>
+                </button>
+            </footer>
         </div>
 
-        <!-- FOOTER / CONTROLS -->
-        <footer id="controls">
-            <button id="back-btn" class="icon-btn" title="メインメニューへ">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path d="M19 12H5M12 19l-7-7 7-7"/>
-                </svg>
-                <span>ARCHIVE</span>
-            </button>
-
-            <div id="mode-indicator" class="mode-indicator draw-mode">
-                <span id="mode-label">DRAW</span>
+        <!-- PC用の右サイドバー -->
+        <aside id="pc-sidebar-right" class="pc-only-sidebar">
+            <div class="sidebar-header">
+                <span class="cyber-tag">DATABASE</span>
+                <h2 class="sidebar-title">GIMMICK_ANALYZE</h2>
             </div>
             
-            <button id="reset-btn" class="control-btn" disabled>
-                <span>RESET</span>
-            </button>
+            <div id="pc-gimmick-list" class="sidebar-gimmick-container">
+                <!-- ここに動的にギミック解説を展開 -->
+            </div>
             
-            <button id="emit-btn" class="glow-btn active-emit" disabled>
-                <span>EMIT_PHOTON</span>
-            </button>
-        </footer>
+            <div class="sidebar-section hint-section">
+                <div class="section-label">◈ TUNING_HINT</div>
+                <div id="pc-hint-text" class="sidebar-text hint-text">—</div>
+            </div>
+        </aside>
     </div>
 
     <div id="toast-container"></div>

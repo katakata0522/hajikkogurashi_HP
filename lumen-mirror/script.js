@@ -7,7 +7,7 @@ const CONFIG = {
     WIDTH: 600,
     HEIGHT: 800,
     MAX_REFLECTIONS: 14,
-    LASER_SPEED: 7200,   // quadrupled from original 1800, doubled from 3600
+    LASER_SPEED: 2880,   // adjusted to 40% of 7200 for fluid, visible trajectory
     PARTICLE_COUNT: 30,
     
     // Physical & UI Thresholds (Refactored)
@@ -1144,6 +1144,51 @@ class GameController {
         } else {
             emitBtn.disabled = true;
             resetBtn.disabled = true;
+        }
+
+        this._syncPCSidebar();
+    }
+
+    _syncPCSidebar() {
+        const tmpl = STAGE_TEMPLATES[this.currentStageIdx];
+        if (!tmpl) return;
+
+        // タイトルの同期
+        const stgBadge = document.getElementById('pc-stg-info');
+        if (stgBadge) stgBadge.textContent = `STG_0${this.currentStageIdx + 1}: ${tmpl.name}`;
+
+        // ミッションの同期
+        const missionText = document.getElementById('pc-mission-text');
+        if (missionText) missionText.textContent = tmpl.objective || '結晶へ光子を届けよ';
+
+        // ストーリーの同期
+        const storyText = document.getElementById('pc-story-text');
+        if (storyText) storyText.textContent = tmpl.story || '';
+
+        // ヒントの同期
+        const hintText = document.getElementById('pc-hint-text');
+        if (hintText) {
+            hintText.innerHTML = (tmpl.hints && tmpl.hints.length > 0)
+                ? tmpl.hints.map(h => `<div class="hint-item">▸ ${h}</div>`).join('')
+                : '——';
+        }
+
+        // ギミックリストの同期
+        const container = document.getElementById('pc-gimmick-list');
+        if (container) {
+            container.innerHTML = '';
+            (tmpl.gimmickList || []).forEach(g => {
+                const item = document.createElement('div');
+                item.className = 'sidebar-gimmick-item';
+                item.innerHTML = `
+                    <div class="sidebar-gimmick-header">
+                        <div class="gimmick-visual-mini ${g.type}"></div>
+                        <span class="sidebar-gimmick-name">${g.name}</span>
+                    </div>
+                    <p class="sidebar-gimmick-desc">${g.desc}</p>
+                `;
+                container.appendChild(item);
+            });
         }
     }
 
