@@ -7,7 +7,7 @@ const CONFIG = {
     WIDTH: 600,
     HEIGHT: 800,
     MAX_REFLECTIONS: 14,
-    LASER_SPEED: 2880,   // adjusted to 40% of 7200 for fluid, visible trajectory
+    LASER_SPEED: 720,   // adjusted to 1/4 of 2880 for elegant, highly visible tracking
     PARTICLE_COUNT: 30,
     
     // Physical & UI Thresholds (Refactored)
