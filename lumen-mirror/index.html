@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LUMEN_MIRROR - 幾何学と光紡ぎの美学</title>
+    <!-- Google Fonts: Inter & Noto Sans JP (Thin/Light/Regular) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400&family=Noto+Sans+JP:wght@100;300;400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <!-- HEADER / HUD -->
+        <header id="hud">
+            <div class="hud-item left">
+                <span class="label">SYSTEM:</span>
+                <span id="stage-name" class="value">TUNING_01</span>
+            </div>
+            
+            <div class="hud-item center">
+                <div class="ink-meter-container">
+                    <span class="label">MIRROR_INK:</span>
+                    <div class="ink-bar-wrapper">
+                        <div id="ink-bar"></div>
+                        <div class="ink-ticks">
+                            <span></span><span></span><span></span><span></span><span></span>
+                            <span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hud-item right">
+                <span class="label">STABILITY:</span>
+                <span id="stability-value" class="value">100.0%</span>
+            </div>
+        </header>
+
+        <!-- VIEWPORT / CANVAS -->
+        <div id="viewport">
+            <div class="grid-overlay"></div>
+            <canvas id="game-canvas"></canvas>
+            
+            <!-- STAGE CLEAR / OVERLAY -->
+            <div id="overlay" class="hidden">
+                <div class="overlay-content">
+                    <h2 id="overlay-title">SYSTEM_TUNED</h2>
+                    <p id="overlay-subtitle">幾何学の調律に成功しました</p>
+                    <div class="stats-box">
+                        <div class="stat-line">
+                            <span>REFLECT_COUNT:</span>
+                            <span id="stat-reflect" class="stat-val">--</span>
+                        </div>
+                        <div class="stat-line">
+                            <span>RANK:</span>
+                            <span id="stat-rank" class="stat-val">--</span>
+                        </div>
+                    </div>
+                    <button id="next-btn" class="glow-btn">NEXT_STAGE</button>
+                </div>
+            </div>
+
+            <!-- TITLE / START SCREEN -->
+            <div id="start-screen" class="active">
+                <div class="title-logo">
+                    <h1>LUMEN_MIRROR</h1>
+                    <p class="subtitle">幾何学と光紡ぎの美学</p>
+                </div>
+                <div class="instruction-box">
+                    <p>指先で虚空に［鏡］を紡ぎ、光を導け</p>
+                    <div class="control-hints">
+                        <div><span>Drag:</span> 鏡を引く（角度と長さの調律）</div>
+                        <div><span>Click:</span> 鏡の消去</div>
+                        <div><span>EMIT:</span> 光子の放射</div>
+                    </div>
+                </div>
+                <button id="start-btn" class="glow-btn">INITIALIZE_SYSTEM</button>
+                <button id="menu-back-btn" class="flat-btn">RETURN_TO_ARCHIVE</button>
+            </div>
+        </div>
+
+        <!-- FOOTER / CONTROLS -->
+        <footer id="controls">
+            <button id="back-btn" class="icon-btn" title="メインメニューへ">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </</svg>
+                <span>ARCHIVE</span>
+            </button>
+            
+            <button id="reset-btn" class="control-btn" disabled>
+                <span>RESET</span>
+            </button>
+            
+            <button id="emit-btn" class="glow-btn active-emit" disabled>
+                <span>EMIT_PHOTON</span>
+            </button>
+        </footer>
+    </div>
+
+    <!-- TOAST CONTAINER FOR NOTIFICATIONS -->
+    <div id="toast-container"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
