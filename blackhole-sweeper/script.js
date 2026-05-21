@@ -739,8 +739,8 @@ class GameController {
             tutorialEnemy.isStatic = true;
             this.enemies.push(tutorialEnemy);
         } else {
-            // 通常開始時は初期の敵3匹を配置
-            for(let i=0; i<3; i++) this.spawnEnemy();
+            // 通常開始時は初期の敵3匹（すべて緑）を配置
+            for(let i=0; i<3; i++) this.spawnEnemy(0);
         }
 
         this.ui.startGameUI(this.isTutorialMode);
@@ -749,7 +749,7 @@ class GameController {
         this.animationId = requestAnimationFrame((t) => this.loop(t));
     }
 
-    spawnEnemy() {
+    spawnEnemy(forcedType = null) {
         // ハードリミット：画面上の敵が12匹以上の場合はスポーンをスキップして「詰み」を防止
         if (this.enemies.filter(e => !e.isSucked).length >= 12) return;
 
@@ -761,11 +761,15 @@ class GameController {
         else { x = CONFIG.LOGICAL_WIDTH + 20; y = Math.random() * CONFIG.LOGICAL_HEIGHT; }
 
         let type = 0;
-        const r = Math.random();
-        // Difficulty scaling
-        const diff = Math.min(this.difficultyTimer / 60000, 1); // Max difficulty at 60s
-        if (r < 0.2 + diff * 0.3) type = 1;
-        else if (r > 0.9 - diff * 0.4) type = 2;
+        if (forcedType !== null) {
+            type = forcedType;
+        } else {
+            const r = Math.random();
+            // Difficulty scaling
+            const diff = Math.min(this.difficultyTimer / 60000, 1); // Max difficulty at 60s
+            if (r < 0.2 + diff * 0.3) type = 1;
+            else if (r > 0.9 - diff * 0.4) type = 2;
+        }
 
         this.enemies.push(new Enemy(type, x, y));
     }
@@ -898,9 +902,9 @@ class GameController {
                 this.ui.hideHint();
                 this.ui.showToast('チュートリアル完了！本番スタート！');
                 
-                // 本番用の敵3匹を配置
+                // 本番用の敵3匹（すべて緑）を配置
                 for (let i = 0; i < 3; i++) {
-                    this.spawnEnemy();
+                    this.spawnEnemy(0);
                 }
                 // タイマーを初期化して本番ゲームのスポーンを開始
                 this.spawnTimer = 2000;
