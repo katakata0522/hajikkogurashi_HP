@@ -356,10 +356,11 @@ class Emitter {
 }
 
 class Prism {
-    constructor(x, y, radius = 20) {
+    constructor(x, y, radius = 20, targetColor = null) {
         this.x = x; this.y = y; this.radius = radius;
         this.angle = 0; this.isTuned = false;
         this.clearRipples = []; // radial ripple animation on clear
+        this.targetColor = targetColor; // null, or hex e.g., '#ff003c'
     }
 
     update(dt) {
@@ -379,14 +380,17 @@ class Prism {
     }
 
     draw(ctx) {
+        const baseColor = this.targetColor || '#ff007f';
+        const glowColor = this.targetColor ? (this.targetColor + 'aa') : 'rgba(255, 0, 127, 0.45)';
+
         // Draw ripples first (behind the prism)
         for (const rp of this.clearRipples) {
             if (rp.alpha <= 0) continue;
             ctx.save();
-            ctx.strokeStyle = `rgba(0, 243, 255, ${rp.alpha})`;
+            ctx.strokeStyle = this.targetColor || `rgba(0, 243, 255, ${rp.alpha})`;
             ctx.lineWidth = 1.5;
             ctx.shadowBlur = 8;
-            ctx.shadowColor = 'rgba(0, 243, 255, 0.5)';
+            ctx.shadowColor = this.targetColor || 'rgba(0, 243, 255, 0.5)';
             ctx.beginPath();
             ctx.arc(this.x, this.y, rp.r, 0, Math.PI * 2);
             ctx.stroke();
@@ -396,17 +400,18 @@ class Prism {
         ctx.save();
         ctx.translate(this.x, this.y); ctx.rotate(this.angle);
         ctx.shadowBlur = this.isTuned ? 35 : 12;
-        ctx.shadowColor = this.isTuned ? 'rgba(255, 0, 127, 0.95)' : 'rgba(255, 0, 127, 0.45)';
-        ctx.strokeStyle = '#ff007f';
+        ctx.shadowColor = this.isTuned ? 'rgba(255, 255, 255, 0.95)' : glowColor;
+        ctx.strokeStyle = this.isTuned ? '#ffffff' : baseColor;
         ctx.lineWidth = this.isTuned ? 3.0 : 1.8;
         ctx.beginPath();
         ctx.moveTo(0, -this.radius); ctx.lineTo(this.radius, 0);
         ctx.lineTo(0, this.radius); ctx.lineTo(-this.radius, 0);
         ctx.closePath(); ctx.stroke();
-        ctx.strokeStyle = this.isTuned ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 0, 127, 0.25)';
+        
+        ctx.strokeStyle = this.isTuned ? 'rgba(255, 255, 255, 0.9)' : (this.targetColor ? (this.targetColor + '44') : 'rgba(255, 0, 127, 0.25)');
         ctx.lineWidth = 1;
         ctx.beginPath(); ctx.arc(0, 0, this.radius * 0.4, 0, Math.PI * 2); ctx.stroke();
-        ctx.fillStyle = this.isTuned ? '#ffffff' : 'rgba(255, 0, 127, 0.15)';
+        ctx.fillStyle = this.isTuned ? '#ffffff' : (this.targetColor ? (this.targetColor + '22') : 'rgba(255, 0, 127, 0.15)');
         ctx.beginPath(); ctx.arc(0, 0, 4.5, 0, Math.PI * 2); ctx.fill();
         ctx.restore();
     }
@@ -516,15 +521,38 @@ class Wormhole {
 }
 
 class Block {
-    constructor(x, y, radius = 18) {
+    constructor(x, y, radius = 18, moveOptions = null) {
         this.x = x;
         this.y = y;
+        this.startX = x;
+        this.startY = y;
         this.radius = radius;
         this.angle = 0;
+        this.moveOptions = moveOptions; // { targetX, targetY, speed }
+        this.progress = 0;
+        this.direction = 1;
     }
 
     update(dt) {
         this.angle += 1.2 * dt;
+        
+        if (this.moveOptions) {
+            const { targetX, targetY, speed } = this.moveOptions;
+            const totalDist = Math.hypot(targetX - this.startX, targetY - this.startY);
+            if (totalDist > 0) {
+                const step = (speed / totalDist) * dt;
+                this.progress += step * this.direction;
+                if (this.progress >= 1.0) {
+                    this.progress = 1.0;
+                    this.direction = -1;
+                } else if (this.progress <= 0.0) {
+                    this.progress = 0.0;
+                    this.direction = 1;
+                }
+                this.x = this.startX + (targetX - this.startX) * this.progress;
+                this.y = this.startY + (targetY - this.startY) * this.progress;
+            }
+        }
     }
 
     draw(ctx) {
@@ -534,8 +562,10 @@ class Block {
 
         // 外周のデジタル八角形ネオン
         ctx.shadowBlur = 15;
-        ctx.shadowColor = 'rgba(255, 0, 60, 0.85)';
-        ctx.strokeStyle = '#ff003c';
+        const neonColor = this.moveOptions ? '#ffaa00' : '#ff003c';
+        const shadowColor = this.moveOptions ? 'rgba(255, 170, 0, 0.85)' : 'rgba(255, 0, 60, 0.85)';
+        ctx.shadowColor = shadowColor;
+        ctx.strokeStyle = neonColor;
         ctx.lineWidth = 2.0;
 
         ctx.beginPath();
@@ -557,7 +587,7 @@ class Block {
         ctx.fill();
 
         // ハニカム調グリッド
-        ctx.strokeStyle = 'rgba(255, 0, 60, 0.2)';
+        ctx.strokeStyle = this.moveOptions ? 'rgba(255, 170, 0, 0.2)' : 'rgba(255, 0, 60, 0.2)';
         ctx.lineWidth = 0.8;
         ctx.beginPath();
         ctx.moveTo(-this.radius + 4, 0); ctx.lineTo(this.radius - 4, 0);
@@ -566,11 +596,67 @@ class Block {
 
         // 中央の警告テキスト (回転を打ち消す)
         ctx.rotate(-this.angle);
-        ctx.fillStyle = '#ff003c';
+        ctx.fillStyle = neonColor;
         ctx.font = "bold 9px 'Inter', sans-serif";
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('BLOCK', 0, 0);
+        ctx.fillText(this.moveOptions ? 'PATROL' : 'BLOCK', 0, 0);
+
+        ctx.restore();
+    }
+
+    containsPoint(p) {
+        return dist(p, this) <= this.radius;
+    }
+}
+
+class ColorFilter {
+    constructor(x, y, color = '#ff003c', radius = 18) {
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        this.radius = radius;
+        this.pulse = 0;
+    }
+
+    update(dt) {
+        this.pulse += 2.0 * dt;
+    }
+
+    draw(ctx) {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+
+        const pulseRad = this.radius + Math.sin(this.pulse) * 1.5;
+        ctx.shadowBlur = 18;
+        ctx.shadowColor = this.color;
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = 2.0;
+
+        // 円形スリット
+        ctx.beginPath();
+        ctx.arc(0, 0, pulseRad, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // 内側の半透明カラー
+        ctx.fillStyle = this.color + '22';
+        ctx.beginPath();
+        ctx.arc(0, 0, pulseRad - 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 中心コア
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.arc(0, 0, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // ラベル
+        ctx.fillStyle = this.color;
+        ctx.shadowBlur = 0;
+        ctx.font = "8px 'Inter', monospace";
+        ctx.textAlign = 'center';
+        ctx.fillText("FILTER", 0, -pulseRad - 6);
 
         ctx.restore();
     }
@@ -778,6 +864,51 @@ const STAGE_TEMPLATES = [
         ],
         parMirrorLength: 600, inkCapacity: 900,
         hints: ["重力による湾曲と、遮光ブロックの位置関係を見極めよ"]
+    },
+    {
+        id: 7,
+        name: "COLOR_SYMPHONY",
+        displayName: "TUNING_08: COLOR_SYMPHONY",
+        gimmicks: "カラーフィルター (新ギミック)",
+        story: "幾何学空間の波長が遷移した。終着点（PRISM）は特定の色彩波長（赤）のみを受け入れる。光子を赤色に調律し、共鳴させよ。",
+        objective: "光子をカラーフィルターに通して『赤』に変化させ、赤色の結晶へ届けよ",
+        gimmickList: [
+            { type: 'colorfilter', name: 'COLOR FILTER (カラーフィルター) [NEW]', desc: '波長同調環。通過した光子の色（波長）をフィルターと同じ色へ強制変化させる。' },
+            { type: 'mirror', name: 'MIRROR (鏡)', desc: 'カラーフィルターを通過させ、さらに結晶へ導く精密な折り返し経路を描け。' },
+            { type: 'wormhole', name: 'PRISM (結晶)', desc: '今回は「赤」に調律された光のみを受け入れる。異なる色の光はすり抜ける。' }
+        ],
+        emitter: { x: 80, y: 150, angle: Math.PI * 0.1 },
+        prism: { x: 520, y: 650, radius: 20, targetColor: '#ff003c' },
+        blackholes: [],
+        portals: [{ inX: 450, inY: 200, outX: 150, outY: 550 }],
+        blocks: [{ x: 300, y: 400, radius: 22 }],
+        colorFilters: [{ x: 300, y: 220, color: '#ff003c', radius: 18 }],
+        parMirrorLength: 420, inkCapacity: 720,
+        hints: ["結晶（PRISM）は、ターゲットと同じ色（赤）の光しか受け入れない", "光をまず右上のポータルから左下のエリアへワープさせ、そこから鏡で反射させて中央上の赤いカラーフィルターを通し、結晶へ導こう"]
+    },
+    {
+        id: 8,
+        name: "DYNAMIC_INTERFERENCE",
+        displayName: "TUNING_09: DYNAMIC_INTERFERENCE",
+        gimmicks: "動的障壁 + カラーフィルター",
+        story: "防衛機構が作動。動的遮光ブロック『PATROL』が領域を巡回し、光の経路を遮断しようとしている。予測軌道がリアルタイムに変化するのを見極め、巡回ルートを回避せよ。",
+        objective: "動く障害物（黄色）の軌道を完全に避け、緑のカラーフィルターを経由して結晶へ届けよ",
+        gimmickList: [
+            { type: 'patrol', name: 'PATROL BLOCK (動的遮光障壁) [NEW]', desc: '領域を巡回（往復）する黄色のブロック。予測レーザー軌道は障害物の動きに連動してリアルタイムに変化する。' },
+            { type: 'colorfilter', name: 'COLOR FILTER (カラーフィルター)', desc: '今回は光子を「緑」に同調させて結晶へ導く必要がある。' },
+            { type: 'wormhole', name: 'PRISM (結晶)', desc: '緑色に調律された光のみを受け入れるため、必ず緑のフィルターを通過させよ。' }
+        ],
+        emitter: { x: 80, y: 450, angle: -Math.PI * 0.15 },
+        prism: { x: 520, y: 420, radius: 20, targetColor: '#00ff3c' },
+        blackholes: [],
+        portals: [{ inX: 280, inY: 180, outX: 180, outY: 620 }],
+        blocks: [
+            { x: 280, y: 350, radius: 18, moveOptions: { targetX: 280, targetY: 520, speed: 70 } },
+            { x: 450, y: 600, radius: 18, moveOptions: { targetX: 220, targetY: 600, speed: 90 } }
+        ],
+        colorFilters: [{ x: 460, y: 220, color: '#00ff3c', radius: 18 }],
+        parMirrorLength: 500, inkCapacity: 850,
+        hints: ["黄色のパトロールブロックは一定速度で往復運動している", "予測線がうねうねと変化して遮断されるのを見ながら、常に遮断されない安全な反射経路を引こう", "まずは右上の緑のカラーフィルターを通し、そこから結晶へ導く軌道を描け"]
     }
 ];
 
@@ -798,6 +929,7 @@ class GameController {
         this.blackholes = [];
         this.portals = [];
         this.blocks = [];
+        this.colorFilters = [];
 
         this.isDrawing = false;
         this.drawStart = { x: 0, y: 0 };
@@ -1102,10 +1234,11 @@ class GameController {
         const tmpl = STAGE_TEMPLATES[idx];
 
         this.emitter = new Emitter(tmpl.emitter.x, tmpl.emitter.y, tmpl.emitter.angle);
-        this.prism = new Prism(tmpl.prism.x, tmpl.prism.y, tmpl.prism.radius);
+        this.prism = new Prism(tmpl.prism.x, tmpl.prism.y, tmpl.prism.radius, tmpl.prism.targetColor || null);
         this.blackholes = (tmpl.blackholes || []).map(b => new BlackHole(b.x, b.y, b.mass, b.radius));
         this.portals = (tmpl.portals || []).map(p => new Wormhole(p.inX, p.inY, p.outX, p.outY));
-        this.blocks = (tmpl.blocks || []).map(b => new Block(b.x, b.y, b.radius || 18));
+        this.blocks = (tmpl.blocks || []).map(b => new Block(b.x, b.y, b.radius || 18, b.moveOptions || null));
+        this.colorFilters = (tmpl.colorFilters || []).map(f => new ColorFilter(f.x, f.y, f.color, f.radius || 18));
 
         this.mirrors = [];
         this.maxInkForStage = tmpl.inkCapacity || 500;
@@ -1224,7 +1357,8 @@ class GameController {
     // ---- Physics ----
     calculateLaserPath() {
         const rayStart = { x: this.emitter.x, y: this.emitter.y };
-        this.laserCache = [{ ...rayStart }];
+        let currentColor = '#00f3ff'; // Default neon cyan
+        this.laserCache = [{ ...rayStart, color: currentColor }];
         this.reflectionPoints = [];
         this.hasHitPrism = false;
 
@@ -1242,14 +1376,30 @@ class GameController {
         while (steps < maxSteps) {
             const next = { x: pt.x + vel.x * stepSize, y: pt.y + vel.y * stepSize };
 
+            // Color filter check
+            if (this.colorFilters) {
+                for (const filter of this.colorFilters) {
+                    if (filter.containsPoint(pt)) {
+                        if (currentColor !== filter.color) {
+                            currentColor = filter.color;
+                            // Register color change event
+                            const alreadyRegistered = this.reflectionPoints.some(rp => rp.type === 'colorfilter' && dist(rp, pt) < 6.0);
+                            if (!alreadyRegistered) {
+                                this.reflectionPoints.push({ x: pt.x, y: pt.y, type: 'colorfilter', color: filter.color });
+                            }
+                        }
+                    }
+                }
+            }
+
             // Portal check
             if (steps - lastPortalStep > CONFIG.PORTAL_COOLDOWN_STEPS) {
                 for (const portal of this.portals) {
                     if (portal.containsEntrance(pt)) {
-                        this.laserCache.push({ x: portal.inPort.x, y: portal.inPort.y });
+                        this.laserCache.push({ x: portal.inPort.x, y: portal.inPort.y, color: currentColor });
                         this.reflectionPoints.push({ x: portal.inPort.x, y: portal.inPort.y, type: 'portal', exitX: portal.outPort.x, exitY: portal.outPort.y });
                         pt = { x: portal.outPort.x, y: portal.outPort.y };
-                        this.laserCache.push({ ...pt });
+                        this.laserCache.push({ ...pt, color: currentColor });
                         lastPortalStep = steps;
                         break;
                     }
@@ -1264,7 +1414,11 @@ class GameController {
                         let angle = Math.atan2(pt.y - bh.y, pt.x - bh.x);
                         for (let j = 0; j < 45; j++) {
                             angle += 0.22;
-                            this.laserCache.push({ x: bh.x + Math.cos(angle) * d * (45 - j) / 45, y: bh.y + Math.sin(angle) * d * (45 - j) / 45 });
+                            this.laserCache.push({ 
+                                x: bh.x + Math.cos(angle) * d * (45 - j) / 45, 
+                                y: bh.y + Math.sin(angle) * d * (45 - j) / 45,
+                                color: currentColor
+                            });
                         }
                         this.reflectionPoints.push({ x: pt.x, y: pt.y, type: 'blackhole' });
                         return;
@@ -1287,21 +1441,23 @@ class GameController {
                 }
             }
             if (hitBlock) {
-                this.laserCache.push({ ...pt });
+                this.laserCache.push({ ...pt, color: currentColor });
                 break;
             }
 
             // Boundary
             if (next.x < -15 || next.x > CONFIG.WIDTH + 15 || next.y < -15 || next.y > CONFIG.HEIGHT + 15) {
-                this.laserCache.push(next); break;
+                this.laserCache.push({ ...next, color: currentColor }); break;
             }
 
             // Prism
             if (this.prism.containsPoint(next)) {
-                this.laserCache.push(next);
-                this.hasHitPrism = true;
-                this.reflectionPoints.push({ x: next.x, y: next.y, type: 'prism' });
-                break;
+                if (!this.prism.targetColor || currentColor === this.prism.targetColor) {
+                    this.laserCache.push({ ...next, color: currentColor });
+                    this.hasHitPrism = true;
+                    this.reflectionPoints.push({ x: next.x, y: next.y, type: 'prism' });
+                    break;
+                }
             }
 
             // Mirror collisions
@@ -1322,7 +1478,7 @@ class GameController {
                 const dot = vel.x * nx + vel.y * ny;
                 vel.x -= 2 * dot * nx; vel.y -= 2 * dot * ny;
                 pt = { x: hitInfo.x + vel.x * 1.5, y: hitInfo.y + vel.y * 1.5 };
-                this.laserCache.push(hitInfo);
+                this.laserCache.push({ ...hitInfo, color: currentColor });
                 this.reflectionPoints.push({ x: hitInfo.x, y: hitInfo.y, type: 'mirror', mirrorRef: colMirror });
                 lastBouncedMirror = colMirror;
                 if (this.reflectionPoints.filter(p => p.type === 'mirror').length > CONFIG.MAX_REFLECTIONS) break;
@@ -1330,7 +1486,7 @@ class GameController {
                 pt = next;
             }
 
-            this.laserCache.push({ ...pt });
+            this.laserCache.push({ ...pt, color: currentColor });
             steps++;
         }
     }
@@ -1404,6 +1560,13 @@ class GameController {
         this.particles.update(dt);
         if (this.portals) this.portals.forEach(p => p.update(dt));
         if (this.blocks) this.blocks.forEach(b => b.update(dt));
+        if (this.colorFilters) this.colorFilters.forEach(f => f.update(dt));
+
+        // Dynamically recalculate laser path if there are moving patrol blocks
+        const hasMovingBlocks = this.blocks && this.blocks.some(b => b.moveOptions !== null);
+        if (this.state === STATE.PLAYING && hasMovingBlocks) {
+            this.calculateLaserPath();
+        }
 
         // Chain flash update
         if (this.chainFlashQueue.length > 0) {
@@ -1449,14 +1612,14 @@ class GameController {
                     this.currentSegmentIdx++;
                     this.segmentProgress = 0;
 
-                    // Evaluate midpoint/node events (reflection, portal warp, prisms, blackholes, blocks)
+                    // Evaluate midpoint/node events (reflection, portal warp, prisms, blackholes, blocks, colorfilters)
                     const next = this.laserCache[this.currentSegmentIdx];
                     if (next) {
                         const evt = this.reflectionPoints.find(rp => dist(rp, next) < 2.0);
                         if (evt) {
                             if (evt.type === 'mirror') {
                                 audio.playCrystalClang(next.x);
-                                this.particles.spawn(next.x, next.y, '#00f3ff', 20);
+                                this.particles.spawn(next.x, next.y, next.color || '#00f3ff', 20);
                             } else if (evt.type === 'portal') {
                                 audio.playPortalWarp(evt.x, evt.exitX);
                                 this.particles.spawn(evt.x, evt.y, '#00bfff', 15);
@@ -1466,7 +1629,7 @@ class GameController {
                                 return; // Stop executing update immediately on level clear
                             } else if (evt.type === 'blackhole') {
                                 this.state = STATE.PLAYING;
-                                this.particles.spawn(next.x, next.y, '#00f3ff', 20);
+                                this.particles.spawn(next.x, next.y, next.color || '#00f3ff', 20);
                                 this.showToast("光は幾何学から外れ、深淵に消えた");
                                 setTimeout(() => {
                                     this.calculateLaserPath();
@@ -1483,6 +1646,9 @@ class GameController {
                                     this.updateHUD();
                                 }, 800);
                                 return;
+                            } else if (evt.type === 'colorfilter') {
+                                audio.playCrystalClang(next.x);
+                                this.particles.spawn(next.x, next.y, evt.color, 25);
                             }
                         }
                     }
@@ -1491,6 +1657,7 @@ class GameController {
                     this.segmentProgress += timeLeft / segTime;
                     this.photonPosition.x = p1.x + (p2.x - p1.x) * this.segmentProgress;
                     this.photonPosition.y = p1.y + (p2.y - p1.y) * this.segmentProgress;
+                    this.photonPosition.color = p1.color || '#00f3ff';
                     timeLeft = 0;
                 }
             }
@@ -1519,6 +1686,7 @@ class GameController {
         this.prism.draw(this.ctx);
         this.blackholes.forEach(bh => bh.draw(this.ctx));
         this.portals.forEach(p => p.draw(this.ctx));
+        if (this.colorFilters) this.colorFilters.forEach(f => f.draw(this.ctx));
         this.blocks.forEach(b => b.draw(this.ctx));
 
         // Tutorial overlay (only STG1 with no mirrors)
@@ -1545,7 +1713,8 @@ class GameController {
             this._drawLaserPath(segs, '#00f3ff', 2.2, false);
             // Photon core
             this.ctx.save();
-            this.ctx.shadowBlur = 20; this.ctx.shadowColor = '#00f3ff';
+            const photonColor = this.photonPosition.color || '#00f3ff';
+            this.ctx.shadowBlur = 20; this.ctx.shadowColor = photonColor;
             this.ctx.fillStyle = '#ffffff';
             this.ctx.beginPath(); this.ctx.arc(this.photonPosition.x, this.photonPosition.y, 4.5, 0, Math.PI * 2); this.ctx.fill();
             this.ctx.restore();
@@ -1712,16 +1881,57 @@ class GameController {
         this.ctx.restore();
     }
 
-    _drawLaserPath(path, color, width, isDashed) {
+    _drawLaserPath(path, defaultColor, width, isDashed) {
         if (path.length < 2) return;
         this.ctx.save();
-        this.ctx.strokeStyle = color; this.ctx.lineWidth = width;
+        this.ctx.lineWidth = width;
         this.ctx.shadowBlur = width > 1.5 ? 15 : 6;
-        this.ctx.shadowColor = 'rgba(0, 243, 255, 0.8)';
         if (isDashed) this.ctx.setLineDash([8, 12]);
-        this.ctx.beginPath(); this.ctx.moveTo(path[0].x, path[0].y);
-        for (let i = 1; i < path.length; i++) this.ctx.lineTo(path[i].x, path[i].y);
-        this.ctx.stroke(); this.ctx.restore();
+
+        const getStrokeColor = (col) => {
+            if (isDashed) {
+                // 予測線（点線）は少し透明にして美しくなじませる
+                if (col.startsWith('#')) {
+                    return col + '73'; // 透明度 約45%
+                }
+                return col;
+            }
+            return col;
+        };
+
+        const getShadowColor = (col) => {
+            if (col.startsWith('#')) {
+                return col + 'cc'; // ネオングロー用の強めの半透明
+            }
+            return col;
+        };
+
+        let currentSegmentColor = path[0].color || defaultColor;
+        this.ctx.strokeStyle = getStrokeColor(currentSegmentColor);
+        this.ctx.shadowColor = getShadowColor(currentSegmentColor);
+
+        this.ctx.beginPath();
+        this.ctx.moveTo(path[0].x, path[0].y);
+
+        for (let i = 1; i < path.length; i++) {
+            const nextColor = path[i].color || defaultColor;
+            if (nextColor !== currentSegmentColor) {
+                // 現在の色で線を描画してパスをストローク
+                this.ctx.lineTo(path[i].x, path[i].y);
+                this.ctx.stroke();
+
+                // 新しい色に切り替えて、新たなパスを開始する
+                currentSegmentColor = nextColor;
+                this.ctx.strokeStyle = getStrokeColor(currentSegmentColor);
+                this.ctx.shadowColor = getShadowColor(currentSegmentColor);
+                this.ctx.beginPath();
+                this.ctx.moveTo(path[i].x, path[i].y);
+            } else {
+                this.ctx.lineTo(path[i].x, path[i].y);
+            }
+        }
+        this.ctx.stroke();
+        this.ctx.restore();
     }
 
     _drawRoundRect(x, y, w, h, r) {
