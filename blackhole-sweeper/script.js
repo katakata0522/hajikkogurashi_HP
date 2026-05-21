@@ -424,9 +424,9 @@ class Enemy {
         // スタン状態の処理
         if (this.stunTimer > 0) {
             this.stunTimer -= dt;
-            // スタン中は摩擦で減速
-            this.vx *= Math.exp(-2 * dt);
-            this.vy *= Math.exp(-2 * dt);
+            // スタン中は摩擦で減速（摩擦を少し強化してスムーズに停止させる）
+            this.vx *= Math.exp(-3 * dt);
+            this.vy *= Math.exp(-3 * dt);
             this.x += this.vx * dt;
             this.y += this.vy * dt;
             // 境界チェック
@@ -476,11 +476,24 @@ class Enemy {
     }
 
     bounceCheck() {
-        // Bounce off walls
-        if (this.x < this.radius) { this.x = this.radius; this.vx *= -1; }
-        if (this.x > CONFIG.LOGICAL_WIDTH - this.radius) { this.x = CONFIG.LOGICAL_WIDTH - this.radius; this.vx *= -1; }
-        if (this.y < this.radius) { this.y = this.radius; this.vy *= -1; }
-        if (this.y > CONFIG.LOGICAL_HEIGHT - this.radius) { this.y = CONFIG.LOGICAL_HEIGHT - this.radius; this.vy *= -1; }
+        // Bounce off walls (If stunned, absorb velocity to stick to the wall and prevent instant rebounds)
+        const isStunned = this.stunTimer > 0;
+        if (this.x < this.radius) { 
+            this.x = this.radius; 
+            this.vx = isStunned ? 0 : this.vx * -1; 
+        }
+        if (this.x > CONFIG.LOGICAL_WIDTH - this.radius) { 
+            this.x = CONFIG.LOGICAL_WIDTH - this.radius; 
+            this.vx = isStunned ? 0 : this.vx * -1; 
+        }
+        if (this.y < this.radius) { 
+            this.y = this.radius; 
+            this.vy = isStunned ? 0 : this.vy * -1; 
+        }
+        if (this.y > CONFIG.LOGICAL_HEIGHT - this.radius) { 
+            this.y = CONFIG.LOGICAL_HEIGHT - this.radius; 
+            this.vy = isStunned ? 0 : this.vy * -1; 
+        }
     }
 
     draw(ctx) {
@@ -900,10 +913,25 @@ class GameController {
             const e = this.enemies[i];
             if (e.isSucked) continue; // 吸引中の敵からは被弾しない
 
+            const threshold = e.radius + 5; // Line width is ~5
+            const thresholdSq = threshold * threshold;
+
             for (let j = 0; j < this.points.length - 1; j++) {
-                const distSq = distToSegmentSquared(e, this.points[j], this.points[j+1]);
-                const threshold = e.radius + 5; // Line width is ~5
-                if (distSq < threshold * threshold) {
+                const p1 = this.points[j];
+                const p2 = this.points[j+1];
+
+                // AABB（軸平行境界ボックス）事前判定による衝突判定の軽量化（O(N*M)の距離二乗計算をほぼバイパス）
+                const minX = Math.min(p1.x, p2.x) - threshold;
+                const maxX = Math.max(p1.x, p2.x) + threshold;
+                if (e.x < minX || e.x > maxX) continue;
+
+                const minY = Math.min(p1.y, p2.y) - threshold;
+                const maxY = Math.max(p1.y, p2.y) + threshold;
+                if (e.y < minY || e.y > maxY) continue;
+
+                // 境界ボックス内にある場合のみ、高価な距離二乗計算を実行
+                const distSq = distToSegmentSquared(e, p1, p2);
+                if (distSq < thresholdSq) {
                     // ダメージ・被弾処理
                     this.life--;
                     this.tookDamage = true;
@@ -917,8 +945,8 @@ class GameController {
 
                     // 詰み防止：被弾時EMPバーストの発生
                     // 線と敵の衝突点をバーストの中心にする
-                    const hitX = this.points[j].x;
-                    const hitY = this.points[j].y;
+                    const hitX = p1.x;
+                    const hitY = p1.y;
                     this.triggerEmpBurst(hitX, hitY);
                     
                     // Clear line to prevent multiple hits
@@ -1020,7 +1048,19 @@ class GameController {
 
             if (this.isDrawing && this.points.length >= 2) {
                 for (let j = 0; j < this.points.length - 1; j++) {
-                    const distSq = distToSegmentSquared(e, this.points[j], this.points[j+1]);
+                    const p1 = this.points[j];
+                    const p2 = this.points[j+1];
+
+                    // AABB（軸平行境界ボックス）による事前判定で高負荷な距離計算を回避
+                    const minX = Math.min(p1.x, p2.x) - slowThreshold;
+                    const maxX = Math.max(p1.x, p2.x) + slowThreshold;
+                    if (e.x < minX || e.x > maxX) continue;
+
+                    const minY = Math.min(p1.y, p2.y) - slowThreshold;
+                    const maxY = Math.max(p1.y, p2.y) + slowThreshold;
+                    if (e.y < minY || e.y > maxY) continue;
+
+                    const distSq = distToSegmentSquared(e, p1, p2);
                     if (distSq < slowThresholdSq) {
                         e.isSlowed = true;
                         break;
