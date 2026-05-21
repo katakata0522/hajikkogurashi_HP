@@ -398,6 +398,7 @@ class Enemy {
         this.suckTarget = null;
         this.isDead = false; // 完全消滅フラグ
         this.isSlowed = false; // 重力スロー状態
+        this.isStatic = false; // 動かない練習用ターゲット
     }
 
     update(dt, targetX, targetY, isDrawing) {
@@ -411,6 +412,11 @@ class Enemy {
             // 重心へ引き寄せ
             this.x += (this.suckTarget.x - this.x) * 10 * dt;
             this.y += (this.suckTarget.y - this.y) * 10 * dt;
+            return;
+        }
+
+        // 動かない敵は移動や寿命、スタン等をスキップ
+        if (this.isStatic) {
             return;
         }
 
@@ -637,8 +643,10 @@ class GameController {
                 this.points.push(pos);
                 this.mouseX = pos.x;
                 this.mouseY = pos.y;
-                this.ui.hideHint();
-                markTutorialSeen();
+                if (!this.isTutorialMode) {
+                    this.ui.hideHint();
+                    markTutorialSeen();
+                }
             }
         };
 
@@ -722,10 +730,20 @@ class GameController {
         this.tookDamage = false;
         this.ui.closeAchievements();
 
-        // Initial enemies
-        for(let i=0; i<3; i++) this.spawnEnemy();
+        // チュートリアル中かどうかの判定
+        this.isTutorialMode = !hasSeenTutorial();
 
-        this.ui.startGameUI(!hasSeenTutorial());
+        if (this.isTutorialMode) {
+            // チュートリアル中は画面中央に動かない敵を1匹だけ配置
+            const tutorialEnemy = new Enemy(0, CONFIG.LOGICAL_WIDTH / 2, CONFIG.LOGICAL_HEIGHT / 2);
+            tutorialEnemy.isStatic = true;
+            this.enemies.push(tutorialEnemy);
+        } else {
+            // 通常開始時は初期の敵3匹を配置
+            for(let i=0; i<3; i++) this.spawnEnemy();
+        }
+
+        this.ui.startGameUI(this.isTutorialMode);
 
         if (this.animationId) cancelAnimationFrame(this.animationId);
         this.animationId = requestAnimationFrame((t) => this.loop(t));
@@ -858,13 +876,37 @@ class GameController {
         }
 
         // ターゲットを吸引
+        let hasSuckedTutorialEnemy = false;
         targetsToSuck.forEach(e => {
             e.isSucked = true;
             e.suckTarget = { x: cx, y: cy };
             this.spawnParticles(e.x, e.y, e.color);
+            if (e.isStatic) {
+                hasSuckedTutorialEnemy = true;
+            }
         });
 
         this.audio.playEffect('blackhole');
+
+        // チュートリアル敵を吸い込んだ場合の本番移行プロセス
+        if (hasSuckedTutorialEnemy && this.isTutorialMode) {
+            this.isTutorialMode = false;
+            markTutorialSeen();
+            
+            // 吸い込まれたアニメーション（約0.25秒）の余韻を残して1秒後に本番スタート
+            setTimeout(() => {
+                this.ui.hideHint();
+                this.ui.showToast('チュートリアル完了！本番スタート！');
+                
+                // 本番用の敵3匹を配置
+                for (let i = 0; i < 3; i++) {
+                    this.spawnEnemy();
+                }
+                // タイマーを初期化して本番ゲームのスポーンを開始
+                this.spawnTimer = 2000;
+                this.difficultyTimer = 0;
+            }, 1000);
+        }
         
         // コンボ倍率
         let multiplier = 1;
@@ -1023,14 +1065,17 @@ class GameController {
             }
         }
 
-        this.difficultyTimer += dt * 1000;
-        
-        // Spawning
-        this.spawnTimer -= dt * 1000;
-        if (this.spawnTimer <= 0) {
-            this.spawnEnemy();
-            const diff = Math.min(this.difficultyTimer / 60000, 1);
-            this.spawnTimer = 2000 - (diff * 1200); // gets faster
+        // チュートリアル中はゲーム内の難易度タイマーやスポーンタイマーを進めない
+        if (!this.isTutorialMode) {
+            this.difficultyTimer += dt * 1000;
+            
+            // Spawning
+            this.spawnTimer -= dt * 1000;
+            if (this.spawnTimer <= 0) {
+                this.spawnEnemy();
+                const diff = Math.min(this.difficultyTimer / 60000, 1);
+                this.spawnTimer = 2000 - (diff * 1200); // gets faster
+            }
         }
 
         // Target for trackers
