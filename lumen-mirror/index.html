@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>LUMEN_MIRROR - 幾何学と光紡ぎの美学</title>
-    <!-- Google Fonts: Inter & Noto Sans JP (Thin/Light/Regular) -->
+    <meta name="description" content="指先で虚空に鏡を紡ぎ、光を導く物理反射パズルゲーム。ブラックホールの重力湾曲とワームホールの空間転送を攻略せよ。">
+    <!-- Google Fonts: Inter & Noto Sans JP -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400&family=Noto+Sans+JP:wght@100;300;400&display=swap" rel="stylesheet">
@@ -48,6 +49,7 @@
                 <div class="overlay-content">
                     <h2 id="overlay-title">SYSTEM_TUNED</h2>
                     <p id="overlay-subtitle">幾何学の調律に成功しました</p>
+                    <div id="best-banner" class="best-banner hidden">✦ NEW BEST RANK ✦</div>
                     <div class="stats-box">
                         <div class="stat-line">
                             <span>REFLECT_COUNT:</span>
@@ -57,9 +59,26 @@
                             <span>RANK:</span>
                             <span id="stat-rank" class="stat-val">--</span>
                         </div>
+                        <div class="stat-line">
+                            <span>BEST_RANK:</span>
+                            <span id="stat-best" class="stat-val dim-val">--</span>
+                        </div>
                     </div>
-                    <button id="next-btn" class="glow-btn">NEXT_STAGE</button>
+                    <div class="overlay-btn-row">
+                        <button id="next-btn" class="glow-btn">NEXT_STAGE</button>
+                        <button id="select-btn" class="control-btn">STAGE_SELECT</button>
+                    </div>
                 </div>
+            </div>
+
+            <!-- STAGE SELECT SCREEN -->
+            <div id="stage-select" class="hidden">
+                <div class="stage-select-header">
+                    <h2 class="select-title">GEOMETRIC_ARCHIVE</h2>
+                    <p class="select-subtitle">調律するステージを選択せよ</p>
+                </div>
+                <div id="stage-cards-container"></div>
+                <button id="select-back-btn" class="flat-btn">← RETURN_TO_TITLE</button>
             </div>
 
             <!-- TITLE / START SCREEN -->
@@ -72,8 +91,9 @@
                     <p>指先で虚空に［鏡］を紡ぎ、光を導け</p>
                     <div class="control-hints">
                         <div><span>Drag:</span> 鏡を引く（角度と長さの調律）</div>
-                        <div><span>Click:</span> 鏡の消去</div>
+                        <div><span>Tap:</span> 鏡の消去（鏡に近い場所をタップ）</div>
                         <div><span>EMIT:</span> 光子の放射</div>
+                        <div><span>RESET:</span> ステージをリセット</div>
                     </div>
                 </div>
                 <button id="start-btn" class="glow-btn">INITIALIZE_SYSTEM</button>
@@ -84,11 +104,15 @@
         <!-- FOOTER / CONTROLS -->
         <footer id="controls">
             <button id="back-btn" class="icon-btn" title="メインメニューへ">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                     <path d="M19 12H5M12 19l-7-7 7-7"/>
-                </</svg>
+                </svg>
                 <span>ARCHIVE</span>
             </button>
+
+            <div id="mode-indicator" class="mode-indicator draw-mode">
+                <span id="mode-label">DRAW_MODE</span>
+            </div>
             
             <button id="reset-btn" class="control-btn" disabled>
                 <span>RESET</span>

@@ -1,5 +1,5 @@
 /* ==========================================================================
-   LUMEN_MIRROR - PERFECTED CORE ENGINE & AUDIO SYNTHESIZER
+   LUMEN_MIRROR - MAXIMUM QUALITY ENGINE v2.0
    ========================================================================== */
 
 // --- Constants & Config ---
@@ -7,22 +7,83 @@ const CONFIG = {
     WIDTH: 600,
     HEIGHT: 800,
     MAX_REFLECTIONS: 14,
-    LASER_SPEED: 1800, // px per second
+    LASER_SPEED: 1800,
     PARTICLE_COUNT: 30,
 };
 
 const STATE = {
     TITLE: 0,
-    PLAYING: 1,
-    EMITTING: 2,
-    CLEAR: 3,
+    STAGE_SELECT: 1,
+    PLAYING: 2,
+    EMITTING: 3,
+    CLEAR: 4,
 };
 
-// --- Web Audio API Synth (3D Stereo ASMR, Portal Warp & Crystal Sound) ---
+// ============================================================
+// SCORE MANAGER (localStorage persistence)
+// ============================================================
+const RANK_ORDER = ['S', 'A', 'B', 'C'];
+
+class ScoreManager {
+    constructor() {
+        this.KEY = 'lumen_mirror_scores_v2';
+        this.data = this._load();
+    }
+
+    _load() {
+        try {
+            const raw = localStorage.getItem(this.KEY);
+            return raw ? JSON.parse(raw) : {};
+        } catch (e) {
+            return {};
+        }
+    }
+
+    _save() {
+        try {
+            localStorage.setItem(this.KEY, JSON.stringify(this.data));
+        } catch (e) { /* storage unavailable */ }
+    }
+
+    getBest(stageIdx) {
+        return this.data[stageIdx] || null;
+    }
+
+    // Returns true if this is a new best rank
+    update(stageIdx, rank, reflectCount) {
+        const current = this.data[stageIdx];
+        let isNewBest = false;
+
+        if (!current) {
+            isNewBest = true;
+        } else {
+            const curRankIdx = RANK_ORDER.indexOf(current.rank);
+            const newRankIdx = RANK_ORDER.indexOf(rank);
+            if (newRankIdx < curRankIdx) isNewBest = true;
+            else if (newRankIdx === curRankIdx && reflectCount < current.reflectCount) isNewBest = true;
+        }
+
+        if (isNewBest) {
+            this.data[stageIdx] = { rank, reflectCount };
+            this._save();
+        }
+        return isNewBest;
+    }
+
+    isUnlocked(stageIdx) {
+        if (stageIdx === 0) return true;
+        return this.data[stageIdx - 1] != null;
+    }
+}
+
+const scoreManager = new ScoreManager();
+
+// ============================================================
+// WEB AUDIO API SYNTH
+// ============================================================
 class AudioManager {
     constructor() {
         this.ctx = null;
-        this.iceNoiseNode = null;
         this.iceGain = null;
         this.iceFilter = null;
         this.icePanner = null;
@@ -31,21 +92,17 @@ class AudioManager {
 
     init() {
         if (this.ctx) return;
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        this.ctx = new AudioContext();
-        this.setupIceSynth();
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return;
+        this.ctx = new AC();
+        this._setupIceSynth();
     }
 
-    setupIceSynth() {
-        if (!this.ctx) return;
-
-        // Generate 2 seconds of high quality white noise for ASMR
+    _setupIceSynth() {
         const bufferSize = this.ctx.sampleRate * 2;
         const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
         const data = buffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) {
-            data[i] = Math.random() * 2 - 1;
-        }
+        for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
 
         const noise = this.ctx.createBufferSource();
         noise.buffer = buffer;
@@ -57,13 +114,11 @@ class AudioManager {
         this.iceFilter.Q.value = 8.0;
 
         this.iceGain = this.ctx.createGain();
-        this.iceGain.gain.value = 0; // silent
+        this.iceGain.gain.value = 0;
 
-        // 3D Stereo Panning
         if (this.ctx.createStereoPanner) {
             this.icePanner = this.ctx.createStereoPanner();
             this.icePanner.pan.value = 0;
-
             noise.connect(this.iceFilter);
             this.iceFilter.connect(this.iceGain);
             this.iceGain.connect(this.icePanner);
@@ -73,541 +128,400 @@ class AudioManager {
             this.iceFilter.connect(this.iceGain);
             this.iceGain.connect(this.ctx.destination);
         }
-
         noise.start(0);
-        this.iceNoiseNode = noise;
     }
 
-    updatePan(x) {
+    _resume() { if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume(); }
+    _pan(x) {
         if (!this.ctx || !this.icePanner) return;
-        const pan = Math.max(-1.0, Math.min(1.0, (x / 300) - 1.0));
+        const pan = Math.max(-1, Math.min(1, (x / 300) - 1));
         this.icePanner.pan.setValueAtTime(pan, this.ctx.currentTime);
     }
 
     startIceScratch(x) {
-        this.init();
-        if (this.ctx.state === 'suspended') this.ctx.resume();
-        this.updatePan(x);
+        this.init(); this._resume(); this._pan(x);
         if (this.isPlayingIce) return;
-
         this.iceGain.gain.cancelScheduledValues(this.ctx.currentTime);
         this.iceGain.gain.linearRampToValueAtTime(0.05, this.ctx.currentTime + 0.05);
         this.isPlayingIce = true;
     }
 
     updateIceScratch(speed, x) {
-        if (!this.isPlayingIce) return;
-        this.updatePan(x);
-
-        // Organic variable friction modulations
-        const volume = Math.min(0.015 + (speed / 2500), 0.08);
-        const baseFreq = Math.min(2000 + speed * 1.5, 4800);
-        const organicNoise = Math.sin(Date.now() * 0.08) * 180;
-        const frequency = baseFreq + organicNoise;
-        
-        const qVal = Math.min(5.0 + (speed / 400), 12.0);
-
-        this.iceGain.gain.setValueAtTime(volume, this.ctx.currentTime);
-        this.iceFilter.frequency.setValueAtTime(frequency, this.ctx.currentTime);
-        this.iceFilter.Q.setValueAtTime(qVal, this.ctx.currentTime);
+        if (!this.isPlayingIce || !this.ctx) return;
+        this._pan(x);
+        const vol = Math.min(0.015 + speed / 2500, 0.08);
+        const freq = Math.min(2000 + speed * 1.5, 4800) + Math.sin(Date.now() * 0.08) * 180;
+        const q = Math.min(5 + speed / 400, 12);
+        this.iceGain.gain.setValueAtTime(vol, this.ctx.currentTime);
+        this.iceFilter.frequency.setValueAtTime(freq, this.ctx.currentTime);
+        this.iceFilter.Q.setValueAtTime(q, this.ctx.currentTime);
     }
 
     stopIceScratch() {
-        if (!this.isPlayingIce) return;
+        if (!this.isPlayingIce || !this.ctx) return;
         this.iceGain.gain.cancelScheduledValues(this.ctx.currentTime);
         this.iceGain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.08);
         this.isPlayingIce = false;
     }
 
     playCrystalClang(x) {
-        this.init();
-        if (this.ctx.state === 'suspended') this.ctx.resume();
-        
+        this.init(); this._resume();
+        if (!this.ctx) return;
         const now = this.ctx.currentTime;
         const osc1 = this.ctx.createOscillator();
         const osc2 = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
-        
-        osc1.type = 'sine';
-        osc1.frequency.setValueAtTime(1800, now);
-        osc1.frequency.exponentialRampToValueAtTime(1500, now + 0.35);
-
-        osc2.type = 'sine';
-        osc2.frequency.setValueAtTime(2600, now);
-        osc2.frequency.exponentialRampToValueAtTime(2400, now + 0.15);
-
-        gain.gain.setValueAtTime(0.20, now);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.45);
-
+        osc1.type = 'sine'; osc1.frequency.setValueAtTime(1800, now); osc1.frequency.exponentialRampToValueAtTime(1500, now + 0.35);
+        osc2.type = 'sine'; osc2.frequency.setValueAtTime(2600, now); osc2.frequency.exponentialRampToValueAtTime(2400, now + 0.15);
+        gain.gain.setValueAtTime(0.20, now); gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.45);
         const filter = this.ctx.createBiquadFilter();
-        filter.type = 'bandpass';
-        filter.frequency.value = 1900;
-        filter.Q.value = 5.0;
-
-        osc1.connect(gain);
-        osc2.connect(gain);
-        gain.connect(filter);
-
+        filter.type = 'bandpass'; filter.frequency.value = 1900; filter.Q.value = 5.0;
+        osc1.connect(gain); osc2.connect(gain); gain.connect(filter);
         if (this.ctx.createStereoPanner && x !== undefined) {
-            const pan = Math.max(-1.0, Math.min(1.0, (x / 300) - 1.0));
+            const pan = Math.max(-1, Math.min(1, (x / 300) - 1));
             const panner = this.ctx.createStereoPanner();
             panner.pan.setValueAtTime(pan, now);
-            filter.connect(panner);
-            panner.connect(this.ctx.destination);
-        } else {
-            filter.connect(this.ctx.destination);
-        }
-
-        osc1.start(now);
-        osc2.start(now);
-        osc1.stop(now + 0.5);
-        osc2.stop(now + 0.5);
+            filter.connect(panner); panner.connect(this.ctx.destination);
+        } else { filter.connect(this.ctx.destination); }
+        osc1.start(now); osc2.start(now); osc1.stop(now + 0.5); osc2.stop(now + 0.5);
     }
 
-    // Portal Warp Sound Synth (Sweep frequency simulating dimensional portal bypass)
     playPortalWarp(xIn, xOut) {
-        this.init();
-        if (this.ctx.state === 'suspended') this.ctx.resume();
-
+        this.init(); this._resume();
+        if (!this.ctx) return;
         const now = this.ctx.currentTime;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
-
         osc.type = 'sine';
         osc.frequency.setValueAtTime(1500, now);
         osc.frequency.exponentialRampToValueAtTime(320, now + 0.10);
         osc.frequency.exponentialRampToValueAtTime(2000, now + 0.25);
-
-        gain.gain.setValueAtTime(0.15, now);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.28);
-
+        gain.gain.setValueAtTime(0.15, now); gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.28);
         const filter = this.ctx.createBiquadFilter();
-        filter.type = 'peaking';
-        filter.frequency.value = 1100;
-        filter.Q.value = 6.0;
-
-        osc.connect(gain);
-        gain.connect(filter);
-
+        filter.type = 'peaking'; filter.frequency.value = 1100; filter.Q.value = 6.0;
+        osc.connect(gain); gain.connect(filter);
         if (this.ctx.createStereoPanner) {
-            // Dimensional warp panning: sound sweeps from portal entrance to portal exit!
-            const panIn = Math.max(-1.0, Math.min(1.0, (xIn / 300) - 1.0));
-            const panOut = Math.max(-1.0, Math.min(1.0, (xOut / 300) - 1.0));
+            const panIn = Math.max(-1, Math.min(1, (xIn / 300) - 1));
+            const panOut = Math.max(-1, Math.min(1, (xOut / 300) - 1));
             const panner = this.ctx.createStereoPanner();
-            panner.pan.setValueAtTime(panIn, now);
-            panner.pan.linearRampToValueAtTime(panOut, now + 0.25);
-            
-            filter.connect(panner);
-            panner.connect(this.ctx.destination);
-        } else {
-            filter.connect(this.ctx.destination);
-        }
-
-        osc.start(now);
-        osc.stop(now + 0.3);
+            panner.pan.setValueAtTime(panIn, now); panner.pan.linearRampToValueAtTime(panOut, now + 0.25);
+            filter.connect(panner); panner.connect(this.ctx.destination);
+        } else { filter.connect(this.ctx.destination); }
+        osc.start(now); osc.stop(now + 0.3);
     }
 
     playClearChord() {
-        this.init();
-        if (this.ctx.state === 'suspended') this.ctx.resume();
-
+        this.init(); this._resume();
+        if (!this.ctx) return;
         const now = this.ctx.currentTime;
-        const frequencies = [349.23, 440.00, 523.25, 659.25]; // F Major 7th
+        const freqs = [349.23, 440.00, 523.25, 659.25];
         const gain = this.ctx.createGain();
         gain.gain.setValueAtTime(0, now);
         gain.gain.linearRampToValueAtTime(0.20, now + 0.5);
         gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.8);
-
-        frequencies.forEach((freq, idx) => {
+        freqs.forEach((freq, idx) => {
             const osc = this.ctx.createOscillator();
-            osc.type = 'triangle';
-            osc.frequency.value = freq;
-            
+            osc.type = 'triangle'; osc.frequency.value = freq;
             if (this.ctx.createStereoPanner) {
                 const pan = (idx - 1.5) * 0.5;
                 const panner = this.ctx.createStereoPanner();
                 panner.pan.setValueAtTime(pan, now);
-                osc.connect(panner);
-                panner.connect(gain);
-            } else {
-                osc.connect(gain);
-            }
-            
-            osc.start(now);
-            osc.stop(now + 3.2);
+                osc.connect(panner); panner.connect(gain);
+            } else { osc.connect(gain); }
+            osc.start(now); osc.stop(now + 3.2);
         });
-
         const lp = this.ctx.createBiquadFilter();
-        lp.type = 'lowpass';
-        lp.frequency.setValueAtTime(900, now);
-        lp.frequency.exponentialRampToValueAtTime(350, now + 2.6);
-
-        gain.connect(lp);
-        lp.connect(this.ctx.destination);
+        lp.type = 'lowpass'; lp.frequency.setValueAtTime(900, now); lp.frequency.exponentialRampToValueAtTime(350, now + 2.6);
+        gain.connect(lp); lp.connect(this.ctx.destination);
     }
 }
 
 const audio = new AudioManager();
 
-// --- Linear Algebra & Vector Helpers ---
-function dist(p1, p2) {
-    return Math.hypot(p2.x - p1.x, p2.y - p1.y);
-}
+// ============================================================
+// MATH HELPERS
+// ============================================================
+function dist(p1, p2) { return Math.hypot(p2.x - p1.x, p2.y - p1.y); }
 
 function getIntersection(p1, p2, p3, p4) {
     const denom = (p4.y - p3.y) * (p2.x - p1.x) - (p4.x - p3.x) * (p2.y - p1.y);
-    if (Math.abs(denom) < 1e-8) return null; // Parallel
-
+    if (Math.abs(denom) < 1e-8) return null;
     const ua = ((p4.x - p3.x) * (p1.y - p3.y) - (p4.y - p3.y) * (p1.x - p3.x)) / denom;
     const ub = ((p2.x - p1.x) * (p1.y - p3.y) - (p2.y - p1.y) * (p1.x - p3.x)) / denom;
-
     if (ua >= 0 && ua <= 1 && ub >= 0 && ub <= 1) {
-        return {
-            x: p1.x + ua * (p2.x - p1.x),
-            y: p1.y + ua * (p2.y - p1.y),
-            ua: ua,
-            ub: ub
-        };
+        return { x: p1.x + ua * (p2.x - p1.x), y: p1.y + ua * (p2.y - p1.y), ua, ub };
     }
     return null;
 }
 
-// --- Entities ---
-
+// ============================================================
+// ENTITY CLASSES
+// ============================================================
 class Mirror {
     constructor(x1, y1, x2, y2) {
         this.p1 = { x: x1, y: y1 };
         this.p2 = { x: x2, y: y2 };
         this.length = dist(this.p1, this.p2);
-        this.pulse = 0;
+        this.flashTimer = 0; // for chain flash on clear
     }
 
     draw(ctx, isHovered) {
         ctx.save();
-        ctx.lineWidth = isHovered ? 3.5 : 1.8;
-        
-        // Neon pulse effect
-        const alpha = isHovered 
-            ? 0.85 + Math.sin(Date.now() * 0.02) * 0.15 
-            : 0.6 + Math.sin(Date.now() * 0.008 + this.length) * 0.2;
-            
-        ctx.shadowBlur = isHovered ? 14 : 6;
-        ctx.shadowColor = isHovered ? 'rgba(255, 255, 255, 0.95)' : 'rgba(192, 192, 216, 0.7)';
-        ctx.strokeStyle = isHovered ? '#ffffff' : `rgba(192, 192, 216, ${alpha})`;
-        
+        const flashAlpha = this.flashTimer > 0 ? Math.min(1, this.flashTimer * 3) : 0;
+        const baseAlpha = 0.6 + Math.sin(Date.now() * 0.008 + this.length) * 0.2;
+
+        ctx.lineWidth = isHovered ? 3.5 : (flashAlpha > 0 ? 2.5 : 1.8);
+        ctx.shadowBlur = isHovered ? 14 : (flashAlpha > 0 ? 20 : 6);
+        ctx.shadowColor = flashAlpha > 0
+            ? `rgba(255, 255, 255, ${flashAlpha})`
+            : isHovered ? 'rgba(255, 255, 255, 0.95)' : 'rgba(192, 192, 216, 0.7)';
+        ctx.strokeStyle = flashAlpha > 0
+            ? `rgba(255, 255, 255, ${0.6 + flashAlpha * 0.4})`
+            : isHovered ? '#ffffff' : `rgba(192, 192, 216, ${baseAlpha})`;
+
         ctx.beginPath();
         ctx.moveTo(this.p1.x, this.p1.y);
         ctx.lineTo(this.p2.x, this.p2.y);
         ctx.stroke();
-        
-        // End points
-        ctx.fillStyle = isHovered ? '#ffffff' : '#c0c0d8';
+
+        ctx.fillStyle = flashAlpha > 0 ? '#ffffff' : (isHovered ? '#ffffff' : '#c0c0d8');
         ctx.shadowBlur = isHovered ? 8 : 3;
         ctx.beginPath();
         ctx.arc(this.p1.x, this.p1.y, isHovered ? 4.5 : 3, 0, Math.PI * 2);
         ctx.arc(this.p2.x, this.p2.y, isHovered ? 4.5 : 3, 0, Math.PI * 2);
         ctx.fill();
-        
-        // Bracket Focus overlay on hovered
+
         if (isHovered) {
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
-            ctx.lineWidth = 1;
-            ctx.shadowBlur = 0;
-            this.drawCyberBrackets(ctx, this.p1);
-            this.drawCyberBrackets(ctx, this.p2);
+            ctx.lineWidth = 1; ctx.shadowBlur = 0;
+            this._drawBrackets(ctx, this.p1);
+            this._drawBrackets(ctx, this.p2);
         }
-        
         ctx.restore();
     }
 
-    drawCyberBrackets(ctx, p) {
-        const size = 10;
+    _drawBrackets(ctx, p) {
+        const s = 10;
         ctx.beginPath();
-        ctx.moveTo(p.x - size, p.y - size / 2);
-        ctx.lineTo(p.x - size, p.y - size);
-        ctx.lineTo(p.x - size / 2, p.y - size);
-        
-        ctx.moveTo(p.x + size, p.y - size / 2);
-        ctx.lineTo(p.x + size, p.y - size);
-        ctx.lineTo(p.x + size / 2, p.y - size);
-        
-        ctx.moveTo(p.x - size, p.y + size / 2);
-        ctx.lineTo(p.x - size, p.y + size);
-        ctx.lineTo(p.x - size / 2, p.y + size);
-        
-        ctx.moveTo(p.x + size, p.y + size / 2);
-        ctx.lineTo(p.x + size, p.y + size);
-        ctx.lineTo(p.x + size / 2, p.y + size);
+        ctx.moveTo(p.x - s, p.y - s/2); ctx.lineTo(p.x - s, p.y - s); ctx.lineTo(p.x - s/2, p.y - s);
+        ctx.moveTo(p.x + s, p.y - s/2); ctx.lineTo(p.x + s, p.y - s); ctx.lineTo(p.x + s/2, p.y - s);
+        ctx.moveTo(p.x - s, p.y + s/2); ctx.lineTo(p.x - s, p.y + s); ctx.lineTo(p.x - s/2, p.y + s);
+        ctx.moveTo(p.x + s, p.y + s/2); ctx.lineTo(p.x + s, p.y + s); ctx.lineTo(p.x + s/2, p.y + s);
         ctx.stroke();
     }
 
     distanceToPoint(p) {
         const l2 = this.length * this.length;
         if (l2 === 0) return dist(p, this.p1);
-        
         let t = ((p.x - this.p1.x) * (this.p2.x - this.p1.x) + (p.y - this.p1.y) * (this.p2.y - this.p1.y)) / l2;
         t = Math.max(0, Math.min(1, t));
-        
-        return dist(p, {
-            x: this.p1.x + t * (this.p2.x - this.p1.x),
-            y: this.p1.y + t * (this.p2.y - this.p1.y)
-        });
+        return dist(p, { x: this.p1.x + t * (this.p2.x - this.p1.x), y: this.p1.y + t * (this.p2.y - this.p1.y) });
     }
 }
 
 class Emitter {
-    constructor(x, y, angle) {
-        this.x = x;
-        this.y = y;
-        this.angle = angle;
-    }
+    constructor(x, y, angle) { this.x = x; this.y = y; this.angle = angle; }
 
     draw(ctx) {
         ctx.save();
-        ctx.translate(this.x, this.y);
-        ctx.rotate(this.angle);
-
-        ctx.shadowBlur = 18;
-        ctx.shadowColor = 'rgba(0, 243, 255, 0.9)';
-        ctx.strokeStyle = '#00f3ff';
-        ctx.lineWidth = 2.0;
-        
-        ctx.beginPath();
-        ctx.arc(0, 0, 14, 0, Math.PI * 2);
-        ctx.stroke();
-
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = 'rgba(0, 243, 255, 0.5)';
+        ctx.translate(this.x, this.y); ctx.rotate(this.angle);
+        ctx.shadowBlur = 18; ctx.shadowColor = 'rgba(0, 243, 255, 0.9)';
+        ctx.strokeStyle = '#00f3ff'; ctx.lineWidth = 2.0;
+        ctx.beginPath(); ctx.arc(0, 0, 14, 0, Math.PI * 2); ctx.stroke();
+        ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(0, 243, 255, 0.5)';
         ctx.beginPath();
         ctx.moveTo(-20, 0); ctx.lineTo(-14, 0);
         ctx.moveTo(14, 0); ctx.lineTo(20, 0);
         ctx.moveTo(0, -20); ctx.lineTo(0, -14);
         ctx.moveTo(0, 14); ctx.lineTo(0, 20);
         ctx.stroke();
-
         ctx.fillStyle = '#00f3ff';
-        ctx.beginPath();
-        ctx.moveTo(10, 0);
-        ctx.lineTo(4, -5);
-        ctx.lineTo(4, 5);
-        ctx.fill();
-
+        ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(4, -5); ctx.lineTo(4, 5); ctx.fill();
         ctx.restore();
     }
 }
 
 class Prism {
     constructor(x, y, radius = 20) {
-        this.x = x;
-        this.y = y;
-        this.radius = radius;
-        this.angle = 0;
-        this.isTuned = false;
+        this.x = x; this.y = y; this.radius = radius;
+        this.angle = 0; this.isTuned = false;
+        this.clearRipples = []; // radial ripple animation on clear
     }
 
     update(dt) {
         this.angle += (this.isTuned ? 4.5 : 0.75) * dt;
+        // Update clear ripples
+        for (let i = this.clearRipples.length - 1; i >= 0; i--) {
+            this.clearRipples[i].r += 160 * dt;
+            this.clearRipples[i].alpha -= 1.6 * dt;
+            if (this.clearRipples[i].alpha <= 0) this.clearRipples.splice(i, 1);
+        }
+    }
+
+    spawnClearRipple() {
+        for (let i = 0; i < 4; i++) {
+            this.clearRipples.push({ r: this.radius, alpha: 0.9 - i * 0.15, delay: i * 0.08 });
+        }
     }
 
     draw(ctx) {
-        ctx.save();
-        ctx.translate(this.x, this.y);
-        ctx.rotate(this.angle);
+        // Draw ripples first (behind the prism)
+        for (const rp of this.clearRipples) {
+            if (rp.alpha <= 0) continue;
+            ctx.save();
+            ctx.strokeStyle = `rgba(0, 243, 255, ${rp.alpha})`;
+            ctx.lineWidth = 1.5;
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = 'rgba(0, 243, 255, 0.5)';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, rp.r, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.restore();
+        }
 
-        ctx.shadowBlur = this.isTuned ? 30 : 12;
+        ctx.save();
+        ctx.translate(this.x, this.y); ctx.rotate(this.angle);
+        ctx.shadowBlur = this.isTuned ? 35 : 12;
         ctx.shadowColor = this.isTuned ? 'rgba(255, 0, 127, 0.95)' : 'rgba(255, 0, 127, 0.45)';
         ctx.strokeStyle = '#ff007f';
         ctx.lineWidth = this.isTuned ? 3.0 : 1.8;
-
         ctx.beginPath();
-        ctx.moveTo(0, -this.radius);
-        ctx.lineTo(this.radius, 0);
-        ctx.lineTo(0, this.radius);
-        ctx.lineTo(-this.radius, 0);
-        ctx.closePath();
-        ctx.stroke();
-
+        ctx.moveTo(0, -this.radius); ctx.lineTo(this.radius, 0);
+        ctx.lineTo(0, this.radius); ctx.lineTo(-this.radius, 0);
+        ctx.closePath(); ctx.stroke();
         ctx.strokeStyle = this.isTuned ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 0, 127, 0.25)';
         ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.arc(0, 0, this.radius * 0.4, 0, Math.PI * 2);
-        ctx.stroke();
-
+        ctx.beginPath(); ctx.arc(0, 0, this.radius * 0.4, 0, Math.PI * 2); ctx.stroke();
         ctx.fillStyle = this.isTuned ? '#ffffff' : 'rgba(255, 0, 127, 0.15)';
-        ctx.beginPath();
-        ctx.arc(0, 0, 4.5, 0, Math.PI * 2);
-        ctx.fill();
-
+        ctx.beginPath(); ctx.arc(0, 0, 4.5, 0, Math.PI * 2); ctx.fill();
         ctx.restore();
     }
 
-    containsPoint(p) {
-        return dist(p, this) <= this.radius;
-    }
+    containsPoint(p) { return dist(p, this) <= this.radius; }
 }
 
 class BlackHole {
     constructor(x, y, mass = 60, pullRadius = 150) {
-        this.x = x;
-        this.y = y;
-        this.mass = mass;
-        this.pullRadius = pullRadius;
-        this.pulse = 0;
+        this.x = x; this.y = y; this.mass = mass; this.pullRadius = pullRadius;
+        this.pulse = 0; this.warpAngle = 0;
     }
 
     draw(ctx) {
-        this.pulse += 0.05;
+        this.pulse += 0.05; this.warpAngle += 0.012;
         const pulseRad = 3 + Math.sin(this.pulse) * 1.5;
 
         ctx.save();
-        
-        ctx.strokeStyle = 'rgba(0, 243, 255, 0.035)';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.pullRadius, 0, Math.PI * 2);
-        ctx.arc(this.x, this.y, this.pullRadius * 0.6, 0, Math.PI * 2);
-        ctx.stroke();
 
-        ctx.shadowBlur = 25;
-        ctx.shadowColor = 'rgba(0, 243, 255, 0.3)';
+        // Gravity field visualization: visible swirling gradient rings
+        const numRings = 4;
+        for (let i = 0; i < numRings; i++) {
+            const ratio = (i + 1) / numRings;
+            const r = this.pullRadius * ratio;
+            const alpha = 0.04 + (1 - ratio) * 0.06;
+
+            // Draw rotated ellipse (warp distortion illusion)
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.warpAngle + (i * Math.PI / numRings));
+            ctx.scale(1, 0.7 - ratio * 0.2);
+            ctx.strokeStyle = `rgba(0, 243, 255, ${alpha})`;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(0, 0, r, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        // CAUTION label
+        ctx.save();
+        ctx.fillStyle = 'rgba(0, 243, 255, 0.22)';
+        ctx.font = "8px 'Inter', monospace";
+        ctx.textAlign = 'center';
+        ctx.fillText("⚠ GRAVITY FIELD", this.x, this.y - this.pullRadius - 6);
+        ctx.restore();
+
+        // Event Horizon Glow
+        ctx.shadowBlur = 25; ctx.shadowColor = 'rgba(0, 243, 255, 0.3)';
         const grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, 25);
         grad.addColorStop(0, '#000000');
         grad.addColorStop(0.5, '#020205');
         grad.addColorStop(0.8, 'rgba(0, 243, 255, 0.18)');
         grad.addColorStop(1, 'transparent');
-        
         ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, 25, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.beginPath(); ctx.arc(this.x, this.y, 25, 0, Math.PI * 2); ctx.fill();
 
-        ctx.shadowBlur = 0;
-        ctx.fillStyle = '#000000';
-        ctx.strokeStyle = 'rgba(0, 243, 255, 0.7)';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, 10 + pulseRad, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
+        // Core Singularity
+        ctx.shadowBlur = 0; ctx.fillStyle = '#000000';
+        ctx.strokeStyle = 'rgba(0, 243, 255, 0.7)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(this.x, this.y, 10 + pulseRad, 0, Math.PI * 2);
+        ctx.fill(); ctx.stroke();
 
         ctx.restore();
     }
 
-    containsPoint(p) {
-        return dist(p, this) <= 18;
-    }
+    containsPoint(p) { return dist(p, this) <= 18; }
 }
 
-// --- WORMHOLE Portal Gimmick (Port A entries warp instantly to Port B exits) ---
 class Wormhole {
     constructor(inX, inY, outX, outY, radius = 16) {
         this.inPort = { x: inX, y: inY };
         this.outPort = { x: outX, y: outY };
-        this.radius = radius;
-        this.pulse = 0;
+        this.radius = radius; this.pulse = 0;
     }
 
-    update(dt) {
-        this.pulse += 2.0 * dt;
-    }
+    update(dt) { this.pulse += 2.0 * dt; }
 
     draw(ctx) {
         ctx.save();
-        
-        const drawPortalRing = (p, color, glow) => {
-            const radVar = this.radius + Math.sin(this.pulse + p.x) * 2;
-            
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = glow;
-            ctx.strokeStyle = color;
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, radVar, 0, Math.PI * 2);
-            ctx.stroke();
-
-            // Intersecting orbit lines (Cyber look)
-            ctx.lineWidth = 0.8;
-            ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+        const drawRing = (p, color, glow, phaseOffset) => {
+            const radVar = this.radius + Math.sin(this.pulse + phaseOffset) * 2;
+            ctx.shadowBlur = 15; ctx.shadowColor = glow;
+            ctx.strokeStyle = color; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(p.x, p.y, radVar, 0, Math.PI * 2); ctx.stroke();
+            ctx.lineWidth = 0.8; ctx.strokeStyle = 'rgba(255,255,255,0.12)';
             ctx.setLineDash([4, 4]);
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, radVar * 0.7, 0, Math.PI * 2);
-            ctx.stroke();
+            ctx.beginPath(); ctx.arc(p.x, p.y, radVar * 0.65, 0, Math.PI * 2); ctx.stroke();
             ctx.setLineDash([]);
-            
-            // Core swirling dot
-            ctx.fillStyle = '#ffffff';
-            ctx.shadowBlur = 5;
-            ctx.shadowColor = '#ffffff';
+            ctx.fillStyle = '#ffffff'; ctx.shadowBlur = 5; ctx.shadowColor = '#ffffff';
+            const angle = this.pulse * 0.5 + phaseOffset;
             ctx.beginPath();
-            const angle = this.pulse * 0.5 + (p.x === this.inPort.x ? 0 : Math.PI);
-            ctx.arc(p.x + Math.cos(angle) * (radVar * 0.45), p.y + Math.sin(angle) * (radVar * 0.45), 2.5, 0, Math.PI * 2);
+            ctx.arc(p.x + Math.cos(angle) * radVar * 0.45, p.y + Math.sin(angle) * radVar * 0.45, 2.5, 0, Math.PI * 2);
             ctx.fill();
         };
-
-        // Portal A (Entrance - Blue Neon)
-        drawPortalRing(this.inPort, '#00bfff', 'rgba(0, 191, 255, 0.55)');
-        // Portal B (Exit - Orange/Gold Neon)
-        drawPortalRing(this.outPort, '#ff8c00', 'rgba(255, 140, 0, 0.55)');
-
-        // Portal text indicator labels (Cyber aesthetics)
+        drawRing(this.inPort, '#00bfff', 'rgba(0, 191, 255, 0.55)', 0);
+        drawRing(this.outPort, '#ff8c00', 'rgba(255, 140, 0, 0.55)', Math.PI);
         ctx.shadowBlur = 0;
-        ctx.fillStyle = '#00bfff';
-        ctx.font = "8px 'Inter', monospace";
-        ctx.fillText("PORT_IN", this.inPort.x - 20, this.inPort.y - this.radius - 6);
-        
+        ctx.fillStyle = '#00bfff'; ctx.font = "8px 'Inter', monospace"; ctx.textAlign = 'center';
+        ctx.fillText("PORT_IN", this.inPort.x, this.inPort.y - this.radius - 7);
         ctx.fillStyle = '#ff8c00';
-        ctx.fillText("PORT_OUT", this.outPort.x - 22, this.outPort.y - this.radius - 6);
-
+        ctx.fillText("PORT_OUT", this.outPort.x, this.outPort.y - this.radius - 7);
         ctx.restore();
     }
 
-    containsEntrance(p) {
-        return dist(p, this.inPort) <= this.radius;
-    }
+    containsEntrance(p) { return dist(p, this.inPort) <= this.radius; }
 }
 
 class ParticleSystem {
-    constructor() {
-        this.particles = [];
-    }
+    constructor() { this.particles = []; }
 
     spawn(x, y, color, count = CONFIG.PARTICLE_COUNT) {
         for (let i = 0; i < count; i++) {
             const angle = Math.random() * Math.PI * 2;
             const speed = Math.random() * 90 + 35;
-            this.particles.push({
-                x,
-                y,
-                vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed,
-                life: 1.0,
-                decay: Math.random() * 1.6 + 1.2,
-                color
-            });
+            this.particles.push({ x, y, vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed, life: 1.0, decay: Math.random()*1.6+1.2, color });
         }
     }
 
     spawnMirrorDissolve(m) {
-        const step = 8;
-        const count = Math.floor(m.length / step);
-        
+        const count = Math.floor(m.length / 8);
         for (let i = 0; i <= count; i++) {
             const ratio = i / count;
             const x = m.p1.x + (m.p2.x - m.p1.x) * ratio;
             const y = m.p1.y + (m.p2.y - m.p1.y) * ratio;
-            
             for (let j = 0; j < 3; j++) {
                 const angle = Math.random() * Math.PI * 2;
                 const speed = Math.random() * 45 + 15;
-                this.particles.push({
-                    x,
-                    y,
-                    vx: Math.cos(angle) * speed,
-                    vy: Math.sin(angle) * speed,
-                    life: 0.9,
-                    decay: Math.random() * 1.5 + 1.0,
-                    color: 'rgba(192, 192, 216, 0.85)'
-                });
+                this.particles.push({ x, y, vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed, life: 0.9, decay: Math.random()*1.5+1.0, color: 'rgba(192, 192, 216, 0.85)' });
             }
         }
     }
@@ -615,12 +529,8 @@ class ParticleSystem {
     update(dt) {
         for (let i = this.particles.length - 1; i >= 0; i--) {
             const p = this.particles[i];
-            p.x += p.vx * dt;
-            p.y += p.vy * dt;
-            p.life -= p.decay * dt;
-            if (p.life <= 0) {
-                this.particles.splice(i, 1);
-            }
+            p.x += p.vx * dt; p.y += p.vy * dt; p.life -= p.decay * dt;
+            if (p.life <= 0) this.particles.splice(i, 1);
         }
     }
 
@@ -628,117 +538,149 @@ class ParticleSystem {
         ctx.save();
         for (const p of this.particles) {
             ctx.globalAlpha = p.life;
-            ctx.fillStyle = p.color;
-            ctx.shadowBlur = 6;
-            ctx.shadowColor = p.color;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.fillStyle = p.color; ctx.shadowBlur = 6; ctx.shadowColor = p.color;
+            ctx.beginPath(); ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2); ctx.fill();
         }
         ctx.restore();
     }
 }
 
-// --- Serialized Stage Database (Factory Design Stage Loader templates) ---
+// ============================================================
+// STAGE DATABASE (Serialized templates for easy expansion)
+// ============================================================
 const STAGE_TEMPLATES = [
     {
-        name: "TUNING_01: REFLECTION",
+        id: 0,
+        name: "REFLECTION",
+        displayName: "TUNING_01: REFLECTION",
+        gimmicks: "基本反射",
         emitter: { x: 80, y: 150, angle: 0 },
         prism: { x: 520, y: 650, radius: 20 },
-        blackholes: [],
-        portals: [],
-        parMirrorLength: 220,
-        inkCapacity: 500, // Expanded capacity for user margin
-        hint: "斜めに銀の鏡を引いて、光を右下の結晶へ導け"
+        blackholes: [], portals: [],
+        parMirrorLength: 220, inkCapacity: 520,
+        tutorialStage: true,
+        hints: ["斜めに銀の鏡を引いて、光を右下の結晶へ導け"]
     },
     {
-        name: "TUNING_02: DOUBLE_ANGLE",
+        id: 1,
+        name: "DOUBLE_ANGLE",
+        displayName: "TUNING_02: DOUBLE_ANGLE",
+        gimmicks: "二段階反射",
         emitter: { x: 80, y: 150, angle: Math.PI * 0.25 },
         prism: { x: 500, y: 150, radius: 20 },
-        blackholes: [],
-        portals: [],
-        parMirrorLength: 360,
-        inkCapacity: 600,
-        hint: "光を二段階反射させて、ターゲットへと紡ぎ戻せ"
+        blackholes: [], portals: [],
+        parMirrorLength: 360, inkCapacity: 620,
+        hints: ["光を二段階反射させて、ターゲットへと紡ぎ戻せ"]
     },
     {
-        name: "TUNING_03: GRAVITY_WELL",
+        id: 2,
+        name: "GRAVITY_WELL",
+        displayName: "TUNING_03: GRAVITY_WELL",
+        gimmicks: "ブラックホール",
         emitter: { x: 80, y: 400, angle: 0 },
         prism: { x: 520, y: 400, radius: 20 },
         blackholes: [{ x: 300, y: 400, mass: 75, radius: 140 }],
         portals: [],
-        parMirrorLength: 420,
-        inkCapacity: 650,
-        hint: "中心のブラックホールの超重力を避け、鏡線で光を迂回させよ"
+        parMirrorLength: 420, inkCapacity: 680,
+        hints: ["⚠ 点線の重力圏の外側を通るよう鏡を配置しよう", "光は引力圏に近づくと曲がる。迂回ルートを作れ"]
     },
     {
-        name: "TUNING_04: PORTAL_JUMP",
+        id: 3,
+        name: "PORTAL_JUMP",
+        displayName: "TUNING_04: PORTAL_JUMP",
+        gimmicks: "ワームホール",
         emitter: { x: 80, y: 150, angle: Math.PI * 0.15 },
         prism: { x: 520, y: 650, radius: 20 },
         blackholes: [],
-        // Portal entrance in center-top, Portal exit in center-bottom
         portals: [{ inX: 300, inY: 280, outX: 180, outY: 580 }],
-        parMirrorLength: 350,
-        inkCapacity: 600,
-        hint: "ポータルに入った光は、別の場所へ同じ速度・角度で転送される"
+        parMirrorLength: 350, inkCapacity: 620,
+        hints: ["青いポータル(PORT_IN)に光を当てよ", "光はオレンジ(PORT_OUT)から同じ角度で飛び出す"]
     },
     {
-        name: "TUNING_05: CELESTIAL_DESIGNS",
+        id: 4,
+        name: "CELESTIAL_DESIGNS",
+        displayName: "TUNING_05: CELESTIAL_DESIGNS",
+        gimmicks: "BH + ワームホール",
         emitter: { x: 80, y: 120, angle: 0 },
         prism: { x: 520, y: 700, radius: 20 },
         blackholes: [{ x: 250, y: 550, mass: 90, radius: 150 }],
         portals: [{ inX: 520, inY: 180, outX: 120, outY: 420 }],
-        parMirrorLength: 500,
-        inkCapacity: 800,
-        hint: "ポータルへの反射転送と、ブラックホールの空間湾曲を併用せよ"
+        parMirrorLength: 500, inkCapacity: 820,
+        hints: []
+    },
+    {
+        id: 5,
+        name: "MIRROR_MAZE",
+        displayName: "TUNING_06: MIRROR_MAZE",
+        gimmicks: "精密多重反射",
+        emitter: { x: 80, y: 700, angle: -Math.PI * 0.35 },
+        prism: { x: 520, y: 100, radius: 20 },
+        blackholes: [],
+        portals: [{ inX: 480, inY: 500, outX: 120, outY: 250 }],
+        parMirrorLength: 480, inkCapacity: 750,
+        hints: []
+    },
+    {
+        id: 6,
+        name: "SINGULARITY",
+        displayName: "TUNING_07: SINGULARITY",
+        gimmicks: "BH×2 + ワームホール",
+        emitter: { x: 80, y: 400, angle: -Math.PI * 0.2 },
+        prism: { x: 520, y: 650, radius: 20 },
+        blackholes: [
+            { x: 200, y: 250, mass: 60, radius: 120 },
+            { x: 420, y: 500, mass: 70, radius: 130 }
+        ],
+        portals: [{ inX: 300, inY: 180, outX: 480, outY: 300 }],
+        parMirrorLength: 600, inkCapacity: 900,
+        hints: []
     }
 ];
 
-// --- Main Game Controller ---
+// ============================================================
+// MAIN GAME CONTROLLER
+// ============================================================
 class GameController {
     constructor() {
         this.canvas = document.getElementById('game-canvas');
         this.ctx = this.canvas.getContext('2d');
-        
+
         this.state = STATE.TITLE;
         this.currentStageIdx = 0;
-        
-        // Active stage instances
+
         this.mirrors = [];
         this.emitter = null;
         this.prism = null;
         this.blackholes = [];
         this.portals = [];
-        
-        // Drawing trace
+
         this.isDrawing = false;
         this.drawStart = { x: 0, y: 0 };
         this.drawEnd = { x: 0, y: 0 };
         this.inkLeft = 0;
         this.maxInkForStage = 0;
-        
-        // Emit Animation Pulse variables
+
         this.photonPosition = { x: 0, y: 0 };
         this.currentSegmentIdx = 0;
         this.segmentProgress = 0;
-        
+
         this.particles = new ParticleSystem();
-        
-        // Hover/Erase Assistance states
+
         this.hoveredMirrorIdx = -1;
         this.lastMousePos = { x: 0, y: 0 };
-        this.mouseSpeed = 0;
 
-        // Path Cache
         this.laserCache = [];
         this.reflectionPoints = [];
         this.hasHitPrism = false;
-        
+
+        // Chain flash animation state
+        this.chainFlashQueue = [];
+        this.chainFlashTimer = 0;
+
         this.initCanvas();
         this.bindEvents();
-        this.loadStage(0);
-        
-        // Game Loop
+        this._showTitleScreen();
+
         this.lastTime = 0;
         requestAnimationFrame((t) => this.loop(t));
     }
@@ -753,70 +695,112 @@ class GameController {
         const aspect = CONFIG.WIDTH / CONFIG.HEIGHT;
         let w = container.clientWidth;
         let h = container.clientHeight;
-        
-        if (w / h > aspect) {
-            w = h * aspect;
-        } else {
-            h = w / aspect;
-        }
-        
+        if (w / h > aspect) w = h * aspect; else h = w / aspect;
         this.canvas.style.width = `${w}px`;
         this.canvas.style.height = `${h}px`;
-
         const dpr = window.devicePixelRatio || 1;
         this.canvas.width = CONFIG.WIDTH * dpr;
         this.canvas.height = CONFIG.HEIGHT * dpr;
-
         this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
-    bindEvents() {
-        // Robust browser activation for Web Audio API Policy
-        const unlockAudio = () => {
-            audio.init();
-            if (audio.ctx && audio.ctx.state === 'suspended') {
-                audio.ctx.resume();
-            }
-        };
+    // ---- UI Helpers ----
+    _unlock() {
+        audio.init();
+        if (audio.ctx && audio.ctx.state === 'suspended') audio.ctx.resume();
+    }
 
-        const getLogicalPos = (e) => {
+    _showTitleScreen() {
+        this.state = STATE.TITLE;
+        document.getElementById('start-screen').classList.remove('hidden');
+        document.getElementById('stage-select').classList.add('hidden');
+        document.getElementById('overlay').classList.add('hidden');
+    }
+
+    _showStageSelect() {
+        this.state = STATE.STAGE_SELECT;
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('stage-select').classList.remove('hidden');
+        document.getElementById('overlay').classList.add('hidden');
+        this._buildStageCards();
+    }
+
+    _buildStageCards() {
+        const container = document.getElementById('stage-cards-container');
+        container.innerHTML = '';
+        STAGE_TEMPLATES.forEach((tmpl, idx) => {
+            const unlocked = scoreManager.isUnlocked(idx);
+            const best = scoreManager.getBest(idx);
+            const card = document.createElement('button');
+            card.className = 'stage-card' + (unlocked ? '' : ' locked');
+            card.setAttribute('aria-label', `ステージ${idx + 1}: ${tmpl.name}`);
+
+            const rankHtml = best
+                ? `<span class="card-rank rank-${best.rank.toLowerCase()}">${best.rank}</span>`
+                : `<span class="card-rank rank-none">—</span>`;
+
+            const rightHtml = unlocked
+                ? rankHtml
+                : `<span class="card-lock-icon">🔒</span>`;
+
+            card.innerHTML = `
+                <span class="card-num">STG_0${idx + 1}</span>
+                <div class="card-info">
+                    <div class="card-name">${tmpl.name}</div>
+                    <div class="card-gimmicks">${tmpl.gimmicks}</div>
+                </div>
+                ${rightHtml}
+            `;
+
+            if (unlocked) {
+                card.addEventListener('click', () => {
+                    this._unlock();
+                    this._startStage(idx);
+                });
+            }
+            container.appendChild(card);
+        });
+    }
+
+    _startStage(idx) {
+        this.state = STATE.PLAYING;
+        document.getElementById('stage-select').classList.add('hidden');
+        document.getElementById('overlay').classList.add('hidden');
+        this.loadStage(idx);
+    }
+
+    // ---- Event Binding ----
+    bindEvents() {
+        const getPos = (e) => {
             const rect = this.canvas.getBoundingClientRect();
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            
+            const cx = e.touches ? e.touches[0].clientX : e.clientX;
+            const cy = e.touches ? e.touches[0].clientY : e.clientY;
             return {
-                x: ((clientX - rect.left) / rect.width) * CONFIG.WIDTH,
-                y: ((clientY - rect.top) / rect.height) * CONFIG.HEIGHT
+                x: ((cx - rect.left) / rect.width) * CONFIG.WIDTH,
+                y: ((cy - rect.top) / rect.height) * CONFIG.HEIGHT
             };
         };
 
         const handleDown = (e) => {
-            unlockAudio();
+            this._unlock();
             if (this.state !== STATE.PLAYING) return;
             if (e.target.tagName === 'BUTTON') return;
             e.preventDefault();
-            
-            const pos = getLogicalPos(e);
-            
-            // Comfort-sized erase tap (30px)
-            const mirrorToEraseIdx = this.findMirrorAt(pos, 30);
-            if (mirrorToEraseIdx !== -1) {
-                const erased = this.mirrors.splice(mirrorToEraseIdx, 1)[0];
+            const pos = getPos(e);
+            const eraseIdx = this.findMirrorAt(pos, 30);
+            if (eraseIdx !== -1) {
+                const erased = this.mirrors.splice(eraseIdx, 1)[0];
                 this.inkLeft = Math.min(this.maxInkForStage, this.inkLeft + erased.length);
                 this.updateHUD();
-                
                 audio.playCrystalClang(pos.x);
                 this.particles.spawnMirrorDissolve(erased);
-                
                 this.hoveredMirrorIdx = -1;
                 this.calculateLaserPath();
                 return;
             }
-
             if (this.inkLeft > 10) {
                 this.isDrawing = true;
-                this.drawStart = pos;
-                this.drawEnd = pos;
+                this.drawStart = pos; this.drawEnd = pos;
                 this.lastMousePos = pos;
                 audio.startIceScratch(pos.x);
             }
@@ -825,9 +809,7 @@ class GameController {
         const handleMove = (e) => {
             if (this.state !== STATE.PLAYING) return;
             e.preventDefault();
-            
-            const pos = getLogicalPos(e);
-            
+            const pos = getPos(e);
             if (this.isDrawing) {
                 const d = dist(this.drawStart, pos);
                 if (d <= this.inkLeft) {
@@ -839,44 +821,42 @@ class GameController {
                         y: this.drawStart.y + (pos.y - this.drawStart.y) * ratio
                     };
                 }
-
-                const speed = dist(this.lastMousePos, pos) / 0.016;
-                audio.updateIceScratch(speed, pos.x);
+                audio.updateIceScratch(dist(this.lastMousePos, pos) / 0.016, pos.x);
                 this.lastMousePos = pos;
-                
                 this.calculateLaserPath();
             } else {
+                const prev = this.hoveredMirrorIdx;
                 this.hoveredMirrorIdx = this.findMirrorAt(pos, 30);
+                if (prev !== this.hoveredMirrorIdx) this._updateModeIndicator();
             }
         };
 
-        const handleUp = (e) => {
+        const handleUp = () => {
             if (this.isDrawing) {
                 this.isDrawing = false;
                 audio.stopIceScratch();
-                
-                const newLength = dist(this.drawStart, this.drawEnd);
-                if (newLength > 8) {
+                const len = dist(this.drawStart, this.drawEnd);
+                if (len > 8) {
                     this.mirrors.push(new Mirror(this.drawStart.x, this.drawStart.y, this.drawEnd.x, this.drawEnd.y));
-                    this.inkLeft -= newLength;
+                    this.inkLeft -= len;
                     this.updateHUD();
                     this.calculateLaserPath();
                 }
+                this._updateModeIndicator();
             }
         };
 
-        // Universal triggers
         this.canvas.addEventListener('mousedown', handleDown);
         this.canvas.addEventListener('mousemove', handleMove);
         window.addEventListener('mouseup', handleUp);
-
         this.canvas.addEventListener('touchstart', handleDown, { passive: false });
         this.canvas.addEventListener('touchmove', handleMove, { passive: false });
         window.addEventListener('touchend', handleUp, { passive: false });
 
+        // Button wiring
         document.getElementById('start-btn').addEventListener('click', () => {
-            unlockAudio();
-            this.startGame();
+            this._unlock();
+            this._showStageSelect();
         });
         document.getElementById('menu-back-btn').addEventListener('click', () => {
             window.location.href = '../minigames.html';
@@ -884,69 +864,83 @@ class GameController {
         document.getElementById('back-btn').addEventListener('click', () => {
             window.location.href = '../minigames.html';
         });
-
         document.getElementById('emit-btn').addEventListener('click', () => {
-            unlockAudio();
-            this.emitPhoton();
+            this._unlock(); this.emitPhoton();
         });
         document.getElementById('reset-btn').addEventListener('click', () => {
-            unlockAudio();
-            this.resetStage();
+            this._unlock(); this.resetStage();
         });
         document.getElementById('next-btn').addEventListener('click', () => {
-            unlockAudio();
-            this.nextStage();
+            this._unlock(); this.nextStage();
         });
+        document.getElementById('select-btn').addEventListener('click', () => {
+            this._unlock(); this._showStageSelect();
+        });
+        document.getElementById('select-back-btn').addEventListener('click', () => {
+            this._showTitleScreen();
+        });
+    }
+
+    _updateModeIndicator() {
+        const indicator = document.getElementById('mode-indicator');
+        const label = document.getElementById('mode-label');
+        if (this.hoveredMirrorIdx !== -1) {
+            indicator.className = 'mode-indicator erase-mode';
+            label.textContent = 'ERASE_MODE';
+        } else {
+            indicator.className = 'mode-indicator draw-mode';
+            label.textContent = 'DRAW_MODE';
+        }
     }
 
     findMirrorAt(pos, threshold = 22) {
         for (let i = 0; i < this.mirrors.length; i++) {
-            if (this.mirrors[i].distanceToPoint(pos) <= threshold) {
-                return i;
-            }
+            if (this.mirrors[i].distanceToPoint(pos) <= threshold) return i;
         }
         return -1;
     }
 
-    // Dynamic Level Loader (Reads serialization stages and configures active instances)
+    // ---- Stage Loading ----
     loadStage(idx) {
         this.currentStageIdx = idx;
-        const temp = STAGE_TEMPLATES[this.currentStageIdx];
-        
-        // Emitter Factory
-        this.emitter = new Emitter(temp.emitter.x, temp.emitter.y, temp.emitter.angle);
-        
-        // Prism Target Factory
-        this.prism = new Prism(temp.prism.x, temp.prism.y, temp.prism.radius);
-        
-        // Black Hole Factory
-        this.blackholes = (temp.blackholes || []).map(b => new BlackHole(b.x, b.y, b.mass, b.radius));
-        
-        // Wormhole Portal Factory
-        this.portals = (temp.portals || []).map(p => new Wormhole(p.inX, p.inY, p.outX, p.outY));
+        const tmpl = STAGE_TEMPLATES[idx];
+
+        this.emitter = new Emitter(tmpl.emitter.x, tmpl.emitter.y, tmpl.emitter.angle);
+        this.prism = new Prism(tmpl.prism.x, tmpl.prism.y, tmpl.prism.radius);
+        this.blackholes = (tmpl.blackholes || []).map(b => new BlackHole(b.x, b.y, b.mass, b.radius));
+        this.portals = (tmpl.portals || []).map(p => new Wormhole(p.inX, p.inY, p.outX, p.outY));
 
         this.mirrors = [];
-        this.maxInkForStage = temp.inkCapacity || 450;
+        this.maxInkForStage = tmpl.inkCapacity || 500;
         this.inkLeft = this.maxInkForStage;
         this.hasHitPrism = false;
         this.hoveredMirrorIdx = -1;
-        
+        this.chainFlashQueue = [];
+        this.chainFlashTimer = 0;
+
         this.updateHUD();
         this.calculateLaserPath();
+        this._updateModeIndicator();
 
-        this.showToast(`STG_${idx + 1}: ${temp.name}`);
-        this.showToast(temp.hint);
+        this.showToast(`STG_0${idx + 1}: ${tmpl.name}`, false);
+        // Show stage-specific hints
+        if (tmpl.hints && tmpl.hints.length > 0) {
+            tmpl.hints.forEach((hint, i) => {
+                setTimeout(() => this.showToast(hint, true), 1200 + i * 2000);
+            });
+        }
     }
 
     updateHUD() {
         document.getElementById('stage-name').innerText = `STG_0${this.currentStageIdx + 1}`;
         const inkPercent = (this.inkLeft / this.maxInkForStage) * 100;
         document.getElementById('ink-bar').style.width = `${inkPercent}%`;
+        const inkBar = document.getElementById('ink-bar');
+        if (inkPercent < 20) inkBar.classList.add('low'); else inkBar.classList.remove('low');
         document.getElementById('stability-value').innerText = `${inkPercent.toFixed(1)}%`;
 
         const emitBtn = document.getElementById('emit-btn');
         const resetBtn = document.getElementById('reset-btn');
-        
         if (this.state === STATE.PLAYING) {
             emitBtn.disabled = false;
             resetBtn.disabled = this.mirrors.length === 0;
@@ -954,13 +948,6 @@ class GameController {
             emitBtn.disabled = true;
             resetBtn.disabled = true;
         }
-    }
-
-    startGame() {
-        audio.init();
-        this.state = STATE.PLAYING;
-        document.getElementById('start-screen').classList.add('hidden');
-        this.loadStage(0);
     }
 
     resetStage() {
@@ -971,286 +958,246 @@ class GameController {
 
     nextStage() {
         document.getElementById('overlay').classList.add('hidden');
-        this.state = STATE.PLAYING;
-        
         if (this.currentStageIdx + 1 < STAGE_TEMPLATES.length) {
-            this.loadStage(this.currentStageIdx + 1);
+            this._startStage(this.currentStageIdx + 1);
         } else {
             this.showToast("幾何学アーカイブをすべてクリアしました！");
-            setTimeout(() => {
-                window.location.href = '../minigames.html';
-            }, 2000);
+            setTimeout(() => this._showStageSelect(), 2000);
         }
     }
 
-    showToast(message) {
+    showToast(message, isHint = false) {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
-        toast.className = 'toast';
+        toast.className = 'toast' + (isHint ? ' hint-toast' : '');
         toast.textContent = message;
         container.appendChild(toast);
-        
         setTimeout(() => toast.classList.add('show'), 10);
         setTimeout(() => {
             toast.classList.remove('show');
             setTimeout(() => toast.remove(), 300);
-        }, 3200);
+        }, isHint ? 4000 : 2800);
     }
 
-    // --- Trace ray intersection with everything ---
+    // ---- Physics ----
     calculateLaserPath() {
-        let rayStart = { x: this.emitter.x, y: this.emitter.y };
-        let rayAngle = this.emitter.angle;
-        
+        const rayStart = { x: this.emitter.x, y: this.emitter.y };
         this.laserCache = [{ ...rayStart }];
         this.reflectionPoints = [];
         this.hasHitPrism = false;
-        
-        let activePoint = { ...rayStart };
-        let activeVel = { x: Math.cos(rayAngle), y: Math.sin(rayAngle) };
-        let stepCount = 0;
+
+        let pt = { ...rayStart };
+        let vel = { x: Math.cos(this.emitter.angle), y: Math.sin(this.emitter.angle) };
+        let steps = 0;
         const maxSteps = 1600;
         const stepSize = 1.35;
-
         let lastBouncedMirror = null;
-        let lastPortalTime = -999; // Anti loop portal block cooldown
-        let checkDrawLine = this.isDrawing ? new Mirror(this.drawStart.x, this.drawStart.y, this.drawEnd.x, this.drawEnd.y) : null;
+        let lastPortalStep = -999;
+        const drawLine = this.isDrawing
+            ? new Mirror(this.drawStart.x, this.drawStart.y, this.drawEnd.x, this.drawEnd.y)
+            : null;
 
-        while (stepCount < maxSteps) {
-            let nextPoint = {
-                x: activePoint.x + activeVel.x * stepSize,
-                y: activePoint.y + activeVel.y * stepSize
-            };
+        while (steps < maxSteps) {
+            const next = { x: pt.x + vel.x * stepSize, y: pt.y + vel.y * stepSize };
 
-            // 1. Wormhole Portal checks (Dimensional jumps)
-            if (stepCount - lastPortalTime > 15) {
-                let crossedPortal = null;
-                for (const p of this.portals) {
-                    if (p.containsEntrance(activePoint)) {
-                        crossedPortal = p;
+            // Portal check
+            if (steps - lastPortalStep > 15) {
+                for (const portal of this.portals) {
+                    if (portal.containsEntrance(pt)) {
+                        this.laserCache.push({ x: portal.inPort.x, y: portal.inPort.y });
+                        this.reflectionPoints.push({ x: portal.inPort.x, y: portal.inPort.y, type: 'portal', exitX: portal.outPort.x, exitY: portal.outPort.y });
+                        pt = { x: portal.outPort.x, y: portal.outPort.y };
+                        this.laserCache.push({ ...pt });
+                        lastPortalStep = steps;
                         break;
                     }
                 }
-                if (crossedPortal) {
-                    // Instantly warp coords to Portal B
-                    activePoint = {
-                        x: crossedPortal.outPort.x,
-                        y: crossedPortal.outPort.y
-                    };
-                    nextPoint = {
-                        x: activePoint.x + activeVel.x * stepSize,
-                        y: activePoint.y + activeVel.y * stepSize
-                    };
-                    
-                    this.laserCache.push({ x: crossedPortal.inPort.x, y: crossedPortal.inPort.y });
-                    this.laserCache.push({ ...activePoint });
-                    
-                    this.reflectionPoints.push({
-                        x: crossedPortal.inPort.x,
-                        y: crossedPortal.inPort.y,
-                        type: 'portal',
-                        exitX: crossedPortal.outPort.x,
-                        exitY: crossedPortal.outPort.y
-                    });
-                    
-                    lastPortalTime = stepCount;
-                    continue;
-                }
             }
 
-            // 2. Gravity pull calculation from Black Holes
+            // Black hole gravity
             for (const bh of this.blackholes) {
-                const d = dist(activePoint, bh);
+                const d = dist(pt, bh);
                 if (d < bh.pullRadius) {
-                    if (bh.containsPoint(activePoint)) {
-                        // Singular collapse spiral
-                        const spiralSteps = 45;
-                        let rDist = d;
-                        let angle = Math.atan2(activePoint.y - bh.y, activePoint.x - bh.x);
-                        
-                        for (let j = 0; j < spiralSteps; j++) {
-                            const ratio = (spiralSteps - j) / spiralSteps;
-                            const r = rDist * ratio;
+                    if (bh.containsPoint(pt)) {
+                        let angle = Math.atan2(pt.y - bh.y, pt.x - bh.x);
+                        for (let j = 0; j < 45; j++) {
                             angle += 0.22;
-                            this.laserCache.push({
-                                x: bh.x + Math.cos(angle) * r,
-                                y: bh.y + Math.sin(angle) * r
-                            });
+                            this.laserCache.push({ x: bh.x + Math.cos(angle) * d * (45 - j) / 45, y: bh.y + Math.sin(angle) * d * (45 - j) / 45 });
                         }
-                        
-                        this.reflectionPoints.push({ x: activePoint.x, y: activePoint.y, type: 'blackhole' });
+                        this.reflectionPoints.push({ x: pt.x, y: pt.y, type: 'blackhole' });
                         return;
                     }
-                    
                     const force = (bh.mass / (d * d)) * stepSize * 0.18;
-                    const pullX = (bh.x - activePoint.x) / d;
-                    const pullY = (bh.y - activePoint.y) / d;
-
-                    activeVel.x += pullX * force;
-                    activeVel.y += pullY * force;
-                    
-                    const speed = Math.hypot(activeVel.x, activeVel.y);
-                    activeVel.x /= speed;
-                    activeVel.y /= speed;
+                    vel.x += (bh.x - pt.x) / d * force;
+                    vel.y += (bh.y - pt.y) / d * force;
+                    const spd = Math.hypot(vel.x, vel.y);
+                    vel.x /= spd; vel.y /= spd;
                 }
             }
 
-            // 3. Out of bounds check
-            if (nextPoint.x < -15 || nextPoint.x > CONFIG.WIDTH + 15 || nextPoint.y < -15 || nextPoint.y > CONFIG.HEIGHT + 15) {
-                this.laserCache.push(nextPoint);
-                break;
+            // Boundary
+            if (next.x < -15 || next.x > CONFIG.WIDTH + 15 || next.y < -15 || next.y > CONFIG.HEIGHT + 15) {
+                this.laserCache.push(next); break;
             }
 
-            // 4. Prism target check
-            if (this.prism.containsPoint(nextPoint)) {
-                this.laserCache.push(nextPoint);
+            // Prism
+            if (this.prism.containsPoint(next)) {
+                this.laserCache.push(next);
                 this.hasHitPrism = true;
-                this.reflectionPoints.push({ x: nextPoint.x, y: nextPoint.y, type: 'prism' });
+                this.reflectionPoints.push({ x: next.x, y: next.y, type: 'prism' });
                 break;
             }
 
-            // 5. Mirror collision checks
-            let collidedMirror = null;
-            let hitInfo = null;
-
+            // Mirror collisions
             const allMirrors = [...this.mirrors];
-            if (checkDrawLine) allMirrors.push(checkDrawLine);
-
+            if (drawLine) allMirrors.push(drawLine);
+            let colMirror = null, hitInfo = null;
             for (const m of allMirrors) {
                 if (m === lastBouncedMirror) continue;
-                
-                const hit = getIntersection(activePoint, nextPoint, m.p1, m.p2);
-                if (hit) {
-                    collidedMirror = m;
-                    hitInfo = hit;
-                    break;
-                }
+                const hit = getIntersection(pt, next, m.p1, m.p2);
+                if (hit) { colMirror = m; hitInfo = hit; break; }
             }
 
-            if (collidedMirror && hitInfo) {
-                const mx = collidedMirror.p2.x - collidedMirror.p1.x;
-                const my = collidedMirror.p2.y - collidedMirror.p1.y;
-                const mLen = collidedMirror.length;
-                
-                const nx = -my / mLen;
-                const ny = mx / mLen;
-
-                const dotProduct = activeVel.x * nx + activeVel.y * ny;
-                
-                activeVel.x = activeVel.x - 2 * dotProduct * nx;
-                activeVel.y = activeVel.y - 2 * dotProduct * ny;
-
-                // 1.5px expansion for complete float rounding safety
-                activePoint = {
-                    x: hitInfo.x + activeVel.x * 1.5,
-                    y: hitInfo.y + activeVel.y * 1.5
-                };
-
+            if (colMirror && hitInfo) {
+                const mx = colMirror.p2.x - colMirror.p1.x;
+                const my = colMirror.p2.y - colMirror.p1.y;
+                const mLen = colMirror.length;
+                const nx = -my / mLen; const ny = mx / mLen;
+                const dot = vel.x * nx + vel.y * ny;
+                vel.x -= 2 * dot * nx; vel.y -= 2 * dot * ny;
+                pt = { x: hitInfo.x + vel.x * 1.5, y: hitInfo.y + vel.y * 1.5 };
                 this.laserCache.push(hitInfo);
-                this.reflectionPoints.push({ x: hitInfo.x, y: hitInfo.y, type: 'mirror' });
-                lastBouncedMirror = collidedMirror;
-                
+                this.reflectionPoints.push({ x: hitInfo.x, y: hitInfo.y, type: 'mirror', mirrorRef: colMirror });
+                lastBouncedMirror = colMirror;
                 if (this.reflectionPoints.filter(p => p.type === 'mirror').length > CONFIG.MAX_REFLECTIONS) break;
             } else {
-                activePoint = nextPoint;
+                pt = next;
             }
 
-            this.laserCache.push({ ...activePoint });
-            stepCount++;
+            this.laserCache.push({ ...pt });
+            steps++;
         }
     }
 
     emitPhoton() {
         if (this.state !== STATE.PLAYING) return;
-        
         this.state = STATE.EMITTING;
         this.updateHUD();
-        
         this.calculateLaserPath();
-        
         this.currentSegmentIdx = 0;
         this.segmentProgress = 0;
         this.photonPosition = { ...this.laserCache[0] };
-        
         audio.playCrystalClang(this.emitter.x);
     }
 
     triggerClear() {
         this.state = STATE.CLEAR;
         this.prism.isTuned = true;
-        this.particles.spawn(this.prism.x, this.prism.y, '#ff007f');
+        this.prism.spawnClearRipple();
+        this.particles.spawn(this.prism.x, this.prism.y, '#ff007f', 50);
         audio.playClearChord();
 
-        const reflectCount = this.reflectionPoints.filter(p => p.type === 'mirror').length;
-        let rank = "S";
-        const inkUsed = CONFIG.MAX_INK - this.inkLeft;
-        const stage = STAGE_TEMPLATES[this.currentStageIdx];
+        // Chain flash: queue all mirrors in reverse order
+        this.chainFlashQueue = [...this.mirrors].reverse();
+        this.chainFlashTimer = 0;
 
-        if (inkUsed > stage.parMirrorLength * 0.9) rank = "A";
-        if (inkUsed > stage.parMirrorLength * 1.2) rank = "B";
-        if (inkUsed > stage.parMirrorLength * 1.5) rank = "C";
+        const reflectCount = this.reflectionPoints.filter(p => p.type === 'mirror').length;
+        const inkUsed = this.maxInkForStage - this.inkLeft;
+        const tmpl = STAGE_TEMPLATES[this.currentStageIdx];
+        let rank = 'S';
+        if (inkUsed > tmpl.parMirrorLength * 0.9) rank = 'A';
+        if (inkUsed > tmpl.parMirrorLength * 1.2) rank = 'B';
+        if (inkUsed > tmpl.parMirrorLength * 1.5) rank = 'C';
+
+        const isNewBest = scoreManager.update(this.currentStageIdx, rank, reflectCount);
+        const prevBest = scoreManager.getBest(this.currentStageIdx);
 
         document.getElementById('stat-reflect').innerText = reflectCount;
-        document.getElementById('stat-rank').innerText = rank;
+        const rankEl = document.getElementById('stat-rank');
+        rankEl.innerText = rank;
+        rankEl.className = `stat-val rank-${rank.toLowerCase()}`;
+
+        const bestEl = document.getElementById('stat-best');
+        bestEl.innerText = prevBest ? prevBest.rank : rank;
+
+        const banner = document.getElementById('best-banner');
+        if (isNewBest) banner.classList.remove('hidden'); else banner.classList.add('hidden');
+
+        // Show NEXT_STAGE or hide it on last stage
+        const nextBtn = document.getElementById('next-btn');
+        nextBtn.style.display = this.currentStageIdx + 1 < STAGE_TEMPLATES.length ? 'block' : 'none';
 
         setTimeout(() => {
             document.getElementById('overlay').classList.remove('hidden');
             this.updateHUD();
-        }, 1200);
+        }, 1400);
     }
 
+    // ---- Main Loop ----
     loop(timestamp) {
         if (!this.lastTime) this.lastTime = timestamp;
         const dt = Math.min((timestamp - this.lastTime) / 1000, 0.1);
         this.lastTime = timestamp;
-
         this.update(dt);
         this.draw();
-
         requestAnimationFrame((t) => this.loop(t));
     }
 
     update(dt) {
-        this.prism.update(dt);
+        if (this.prism) this.prism.update(dt);
         this.particles.update(dt);
-        this.portals.forEach(p => p.update(dt));
+        if (this.portals) this.portals.forEach(p => p.update(dt));
 
+        // Chain flash update
+        if (this.chainFlashQueue.length > 0) {
+            this.chainFlashTimer += dt;
+            if (this.chainFlashTimer > 0.12) {
+                this.chainFlashTimer = 0;
+                const m = this.chainFlashQueue.shift();
+                if (m) m.flashTimer = 0.5;
+            }
+        }
+        // Tick mirror flash timers
+        for (const m of this.mirrors) {
+            if (m.flashTimer > 0) m.flashTimer = Math.max(0, m.flashTimer - dt);
+        }
+
+        // Photon animation
         if (this.state === STATE.EMITTING) {
             if (this.currentSegmentIdx < this.laserCache.length - 1) {
                 const p1 = this.laserCache[this.currentSegmentIdx];
                 const p2 = this.laserCache[this.currentSegmentIdx + 1];
                 const segLen = dist(p1, p2);
-                
-                const segmentTime = segLen / CONFIG.LASER_SPEED;
-                this.segmentProgress += (segmentTime > 0) ? (dt / segmentTime) : 1.0;
+                const segTime = segLen / CONFIG.LASER_SPEED;
+                this.segmentProgress += segTime > 0 ? dt / segTime : 1;
 
-                if (this.segmentProgress >= 1.0) {
+                if (this.segmentProgress >= 1) {
                     this.photonPosition = { ...p2 };
                     this.currentSegmentIdx++;
                     this.segmentProgress = 0;
 
-                    const nextPoint = this.laserCache[this.currentSegmentIdx];
-                    const matchedEvent = this.reflectionPoints.find(rp => dist(rp, nextPoint) < 2.0);
-                    
-                    if (matchedEvent) {
-                        if (matchedEvent.type === 'mirror') {
-                            audio.playCrystalClang(nextPoint.x);
-                            this.particles.spawn(nextPoint.x, nextPoint.y, '#00f3ff');
-                        } else if (matchedEvent.type === 'portal') {
-                            // Dynamic 3D Portal spatial sound trigger
-                            audio.playPortalWarp(matchedEvent.x, matchedEvent.exitX);
-                            this.particles.spawn(matchedEvent.x, matchedEvent.y, '#00bfff', 15);
-                            this.particles.spawn(matchedEvent.exitX, matchedEvent.exitY, '#ff8c00', 15);
-                        } else if (matchedEvent.type === 'prism' && this.hasHitPrism) {
-                            this.triggerClear();
-                        } else if (matchedEvent.type === 'blackhole') {
-                            this.particles.spawn(nextPoint.x, nextPoint.y, '#00f3ff');
-                            this.showToast("光は幾何学から外れ、深淵に消えた");
-                            setTimeout(() => {
-                                this.state = STATE.PLAYING;
-                                this.calculateLaserPath();
-                                this.updateHUD();
-                            }, 1000);
+                    const next = this.laserCache[this.currentSegmentIdx];
+                    if (next) {
+                        const evt = this.reflectionPoints.find(rp => dist(rp, next) < 2.0);
+                        if (evt) {
+                            if (evt.type === 'mirror') {
+                                audio.playCrystalClang(next.x);
+                                this.particles.spawn(next.x, next.y, '#00f3ff', 20);
+                            } else if (evt.type === 'portal') {
+                                audio.playPortalWarp(evt.x, evt.exitX);
+                                this.particles.spawn(evt.x, evt.y, '#00bfff', 15);
+                                this.particles.spawn(evt.exitX, evt.exitY, '#ff8c00', 15);
+                            } else if (evt.type === 'prism' && this.hasHitPrism) {
+                                this.triggerClear();
+                            } else if (evt.type === 'blackhole') {
+                                this.particles.spawn(next.x, next.y, '#00f3ff', 20);
+                                this.showToast("光は幾何学から外れ、深淵に消えた");
+                                setTimeout(() => {
+                                    this.state = STATE.PLAYING;
+                                    this.calculateLaserPath();
+                                    this.updateHUD();
+                                }, 1000);
+                            }
                         }
                     }
                 } else {
@@ -1258,7 +1205,7 @@ class GameController {
                     this.photonPosition.y = p1.y + (p2.y - p1.y) * this.segmentProgress;
                 }
             } else {
-                if (!this.hasHitPrism) {
+                if (!this.hasHitPrism && this.state === STATE.EMITTING) {
                     this.showToast("光は幾何学から外れ、深淵に消えた");
                     setTimeout(() => {
                         this.state = STATE.PLAYING;
@@ -1270,195 +1217,127 @@ class GameController {
         }
     }
 
+    // ---- Rendering ----
     draw() {
         this.ctx.clearRect(0, 0, CONFIG.WIDTH, CONFIG.HEIGHT);
 
-        // 1. Draw structural objects
+        if (!this.emitter) return; // Not yet initialized
+
         this.emitter.draw(this.ctx);
         this.prism.draw(this.ctx);
         this.blackholes.forEach(bh => bh.draw(this.ctx));
         this.portals.forEach(p => p.draw(this.ctx));
 
-        // 2. Dynamic visual tutorial guide overlays (First stage, absolute visual clarity)
-        if (this.currentStageIdx === 0 && this.mirrors.length === 0 && !this.isDrawing) {
-            this.drawTutorialGuideOverlay();
+        // Tutorial overlay (only STG1 with no mirrors)
+        if (this.currentStageIdx === 0 && this.state === STATE.PLAYING && this.mirrors.length === 0 && !this.isDrawing) {
+            this._drawTutorialOverlay();
         }
 
-        // 3. Placed mirrors
+        // Mirrors
         for (let i = 0; i < this.mirrors.length; i++) {
             this.mirrors[i].draw(this.ctx, i === this.hoveredMirrorIdx);
         }
 
-        // 4. Drawing Line HUD
-        if (this.isDrawing) {
-            this.drawTuningDrawingLine();
-        }
+        // Active draw line with cyber HUD
+        if (this.isDrawing) this._drawTuningLine();
 
-        // 5. Laser Paths
+        // Laser
         if (this.state === STATE.PLAYING) {
-            this.drawLaserPath(this.laserCache, 'rgba(0, 243, 255, 0.45)', 1.2, true);
+            this._drawLaserPath(this.laserCache, 'rgba(0, 243, 255, 0.45)', 1.2, true);
         } else if (this.state === STATE.EMITTING) {
-            const activeSegments = this.laserCache.slice(0, this.currentSegmentIdx + 1);
+            const segs = this.laserCache.slice(0, this.currentSegmentIdx + 1);
             if (this.segmentProgress > 0 && this.currentSegmentIdx < this.laserCache.length - 1) {
-                activeSegments.push({ ...this.photonPosition });
+                segs.push({ ...this.photonPosition });
             }
-            this.drawLaserPath(activeSegments, '#00f3ff', 2.2, false);
-            
-            // Core photon
+            this._drawLaserPath(segs, '#00f3ff', 2.2, false);
+            // Photon core
             this.ctx.save();
-            this.ctx.shadowBlur = 18;
-            this.ctx.shadowColor = '#00f3ff';
+            this.ctx.shadowBlur = 20; this.ctx.shadowColor = '#00f3ff';
             this.ctx.fillStyle = '#ffffff';
-            this.ctx.beginPath();
-            this.ctx.arc(this.photonPosition.x, this.photonPosition.y, 4.5, 0, Math.PI * 2);
-            this.ctx.fill();
+            this.ctx.beginPath(); this.ctx.arc(this.photonPosition.x, this.photonPosition.y, 4.5, 0, Math.PI * 2); this.ctx.fill();
             this.ctx.restore();
         } else if (this.state === STATE.CLEAR) {
-            this.drawLaserPath(this.laserCache, '#00f3ff', 3.2, false);
+            this._drawLaserPath(this.laserCache, '#00f3ff', 3.2, false);
         }
 
         this.particles.draw(this.ctx);
     }
 
-    // Dynamic Graphic Hand Drag Tutorial Guide (Perfect Usability integration)
-    drawTutorialGuideOverlay() {
+    _drawTutorialOverlay() {
         this.ctx.save();
-        
-        // 1. Draw silver guide line where the mirror should be placed
-        const gStart = { x: 230, y: 350 };
-        const gEnd = { x: 370, y: 490 };
-        
-        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.22)';
-        this.ctx.lineWidth = 1.5;
-        this.ctx.setLineDash([4, 4]);
-        this.ctx.beginPath();
-        this.ctx.moveTo(gStart.x, gStart.y);
-        this.ctx.lineTo(gEnd.x, gEnd.y);
-        this.ctx.stroke();
+        const pulse = Math.sin(Date.now() * 0.005) * 0.15;
 
-        // 2. Draw pulsing neon target portal focus brackets
-        const timePulse = Math.sin(Date.now() * 0.007) * 4;
-        
-        ctxArrow(this.ctx, { x: 200, y: 300 }, { x: 230, y: 330 }, 'rgba(0, 243, 255, 0.5)');
-        
-        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-        this.ctx.font = "11px 'Inter', sans-serif";
-        this.ctx.shadowBlur = 4;
-        this.ctx.shadowColor = 'rgba(0, 243, 255, 0.5)';
-        this.ctx.fillText("ここに指で鏡を引いてみよう", 215, 330 - timePulse);
-        
-        this.ctx.fillStyle = 'rgba(0, 243, 255, 0.4)';
-        this.ctx.fillText("Drag Here to Draw Mirror", 225, 520 + timePulse);
-
-        this.ctx.restore();
-    }
-
-    drawTuningDrawingLine() {
-        const p1 = this.drawStart;
-        const p2 = this.drawEnd;
-        const length = dist(p1, p2);
-        const angleDeg = (Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI).toFixed(1);
-
-        this.ctx.save();
-        
-        this.ctx.shadowBlur = 10;
-        this.ctx.shadowColor = 'rgba(255, 255, 255, 0.6)';
-        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-        this.ctx.lineWidth = 2.0;
-        this.ctx.setLineDash([6, 6]);
-        
-        this.ctx.beginPath();
-        this.ctx.moveTo(p1.x, p1.y);
-        this.ctx.lineTo(p2.x, p2.y);
-        this.ctx.stroke();
-        
+        // Guide line suggestion
+        this.ctx.strokeStyle = `rgba(255, 255, 255, ${0.15 + pulse})`;
+        this.ctx.lineWidth = 1.5; this.ctx.setLineDash([4, 6]);
+        this.ctx.beginPath(); this.ctx.moveTo(220, 350); this.ctx.lineTo(380, 490); this.ctx.stroke();
         this.ctx.setLineDash([]);
-        this.ctx.shadowBlur = 0;
-        this.ctx.strokeStyle = 'rgba(0, 243, 255, 0.6)';
-        this.ctx.fillStyle = 'rgba(0, 243, 255, 0.9)';
-        this.ctx.lineWidth = 1;
-        
-        const drawCross = (p) => {
-            this.ctx.beginPath();
-            this.ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
-            this.ctx.fill();
-            this.ctx.beginPath();
-            this.ctx.moveTo(p.x - 12, p.y); this.ctx.lineTo(p.x + 12, p.y);
-            this.ctx.moveTo(p.x, p.y - 12); this.ctx.lineTo(p.x, p.y + 12);
-            this.ctx.stroke();
-        };
 
-        drawCross(p1);
-        drawCross(p2);
+        // Arrow
+        _ctxArrow(this.ctx, { x: 195, y: 300 }, { x: 230, y: 340 }, `rgba(0, 243, 255, ${0.5 + pulse})`);
 
-        this.ctx.fillStyle = 'rgba(0, 243, 255, 0.7)';
-        this.ctx.font = "10px 'Inter', monospace";
-        this.ctx.fillText(`X:${p1.x.toFixed(0)} Y:${p1.y.toFixed(0)}`, p1.x + 15, p1.y - 8);
-        this.ctx.fillText(`LEN:${length.toFixed(0)}px ANG:${angleDeg}°`, p2.x + 15, p2.y - 8);
-
+        // Japanese label
+        this.ctx.shadowBlur = 6; this.ctx.shadowColor = 'rgba(0, 243, 255, 0.5)';
+        this.ctx.fillStyle = `rgba(255, 255, 255, ${0.65 + pulse})`;
+        this.ctx.font = "11px 'Noto Sans JP', sans-serif";
+        this.ctx.textAlign = 'left';
+        this.ctx.fillText("ここに鏡を引いてみよう", 205, 330);
+        this.ctx.fillStyle = `rgba(0, 243, 255, ${0.45 + pulse})`;
+        this.ctx.font = "9px 'Inter', monospace";
+        this.ctx.fillText("← Drag Here to Draw Mirror", 218, 512);
         this.ctx.restore();
     }
 
-    drawLaserPath(path, color, width, isDashed) {
-        if (path.length < 2) return;
-        
+    _drawTuningLine() {
+        const p1 = this.drawStart; const p2 = this.drawEnd;
+        const len = dist(p1, p2);
+        const ang = (Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI).toFixed(1);
         this.ctx.save();
-        this.ctx.strokeStyle = color;
-        this.ctx.lineWidth = width;
+        this.ctx.shadowBlur = 10; this.ctx.shadowColor = 'rgba(255,255,255,0.6)';
+        this.ctx.strokeStyle = 'rgba(255,255,255,0.8)'; this.ctx.lineWidth = 2.0; this.ctx.setLineDash([6, 6]);
+        this.ctx.beginPath(); this.ctx.moveTo(p1.x, p1.y); this.ctx.lineTo(p2.x, p2.y); this.ctx.stroke();
+        this.ctx.setLineDash([]); this.ctx.shadowBlur = 0;
+        this.ctx.strokeStyle = 'rgba(0, 243, 255, 0.6)'; this.ctx.fillStyle = 'rgba(0, 243, 255, 0.9)'; this.ctx.lineWidth = 1;
+        const cross = (p) => {
+            this.ctx.beginPath(); this.ctx.arc(p.x, p.y, 3, 0, Math.PI * 2); this.ctx.fill();
+            this.ctx.beginPath(); this.ctx.moveTo(p.x-12, p.y); this.ctx.lineTo(p.x+12, p.y); this.ctx.moveTo(p.x, p.y-12); this.ctx.lineTo(p.x, p.y+12); this.ctx.stroke();
+        };
+        cross(p1); cross(p2);
+        this.ctx.fillStyle = 'rgba(0, 243, 255, 0.7)'; this.ctx.font = "9px 'Inter', monospace"; this.ctx.textAlign = 'left';
+        this.ctx.fillText(`X:${p1.x.toFixed(0)} Y:${p1.y.toFixed(0)}`, p1.x+14, p1.y-7);
+        this.ctx.fillText(`LEN:${len.toFixed(0)}px ANG:${ang}°`, p2.x+14, p2.y-7);
+        this.ctx.restore();
+    }
+
+    _drawLaserPath(path, color, width, isDashed) {
+        if (path.length < 2) return;
+        this.ctx.save();
+        this.ctx.strokeStyle = color; this.ctx.lineWidth = width;
         this.ctx.shadowBlur = width > 1.5 ? 15 : 6;
         this.ctx.shadowColor = 'rgba(0, 243, 255, 0.8)';
-        
-        if (isDashed) {
-            this.ctx.setLineDash([8, 12]);
-        }
-
-        this.ctx.beginPath();
-        this.ctx.moveTo(path[0].x, path[0].y);
-        
-        for (let i = 1; i < path.length; i++) {
-            this.ctx.lineTo(path[i].x, path[i].y);
-        }
-        
-        this.ctx.stroke();
-        this.ctx.restore();
+        if (isDashed) this.ctx.setLineDash([8, 12]);
+        this.ctx.beginPath(); this.ctx.moveTo(path[0].x, path[0].y);
+        for (let i = 1; i < path.length; i++) this.ctx.lineTo(path[i].x, path[i].y);
+        this.ctx.stroke(); this.ctx.restore();
     }
 }
 
-// --- Helper Functions ---
-function ctxLine(ctx, p1, p2, color, width = 1, dash = []) {
-    ctx.save();
-    ctx.strokeStyle = color;
-    ctx.lineWidth = width;
-    if (dash.length > 0) ctx.setLineDash(dash);
-    ctx.beginPath();
-    ctx.moveTo(p1.x, p1.y);
-    ctx.lineTo(p2.x, p2.y);
-    ctx.stroke();
-    ctx.restore();
-}
-
-function ctxArrow(ctx, from, to, color) {
+// ============================================================
+// STANDALONE HELPERS
+// ============================================================
+function _ctxArrow(ctx, from, to, color) {
     const angle = Math.atan2(to.y - from.y, to.x - from.x);
-    const headLen = 8;
-    ctx.save();
-    ctx.strokeStyle = color;
-    ctx.fillStyle = color;
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(from.x, from.y);
-    ctx.lineTo(to.x, to.y);
-    ctx.stroke();
-
+    const hLen = 8;
+    ctx.save(); ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(from.x, from.y); ctx.lineTo(to.x, to.y); ctx.stroke();
     ctx.beginPath();
     ctx.moveTo(to.x, to.y);
-    ctx.lineTo(to.x - headLen * Math.cos(angle - Math.PI / 6), to.y - headLen * Math.sin(angle - Math.PI / 6));
-    ctx.lineTo(to.x - headLen * Math.cos(angle + Math.PI / 6), to.y - headLen * Math.sin(angle + Math.PI / 6));
-    ctx.closePath();
-    ctx.fill();
-    ctx.restore();
+    ctx.lineTo(to.x - hLen * Math.cos(angle - Math.PI/6), to.y - hLen * Math.sin(angle - Math.PI/6));
+    ctx.lineTo(to.x - hLen * Math.cos(angle + Math.PI/6), to.y - hLen * Math.sin(angle + Math.PI/6));
+    ctx.closePath(); ctx.fill(); ctx.restore();
 }
 
-// --- Initialize On Load ---
-window.addEventListener('DOMContentLoaded', () => {
-    new GameController();
-});
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('DOMContentLoaded', () => { new GameController(); });
