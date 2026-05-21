@@ -31,6 +31,9 @@ const STATE = {
     PLAYING: 2,
     EMITTING: 3,
     CLEAR: 4,
+    EDITING: 5,
+    EDIT_PLAYING: 6,
+    EDIT_CLEAR: 7
 };
 
 // ============================================================
@@ -954,8 +957,21 @@ class GameController {
         this.chainFlashQueue = [];
         this.chainFlashTimer = 0;
 
+        // Stage Editor States
+        this.editorActiveGimmick = 'emitter';
+        this.editorSelectedObject = null;
+        this.editorTool = 'select'; // 'select', 'place', 'erase'
+        this.editorHasCleared = false;
+        this.customStageData = null;
+        this.editorDraggingObject = null;
+        this.editorDragPart = null;
+        this.editorDraggingPatrolTarget = false;
+        this.editorDragOffset = { x: 0, y: 0 };
+        this.modalMode = 'import';
+
         this.initCanvas();
         this.bindEvents();
+        this.initEditorEvents();
         this._showTitleScreen();
 
         this.lastTime = 0;
@@ -1106,66 +1122,78 @@ class GameController {
 
         const handleDown = (e) => {
             this._unlock();
-            if (this.state !== STATE.PLAYING) return;
             if (e.target.tagName === 'BUTTON') return;
             e.preventDefault();
             const pos = getPos(e);
-            const eraseIdx = this.findMirrorAt(pos, CONFIG.ERASE_THRESHOLD_DRAW);
-            if (eraseIdx !== -1) {
-                const erased = this.mirrors.splice(eraseIdx, 1)[0];
-                this.inkLeft = Math.min(this.maxInkForStage, this.inkLeft + erased.length);
-                this.updateHUD();
-                audio.playCrystalClang(pos.x);
-                this.particles.spawnMirrorDissolve(erased);
-                this.hoveredMirrorIdx = -1;
-                this.calculateLaserPath();
-                return;
-            }
-            if (this.inkLeft > CONFIG.MIN_INK_DRAW) {
-                this.isDrawing = true;
-                this.drawStart = pos; this.drawEnd = pos;
-                this.lastMousePos = pos;
-                audio.startIceScratch(pos.x);
+
+            if (this.state === STATE.PLAYING || this.state === STATE.EDIT_PLAYING) {
+                const eraseIdx = this.findMirrorAt(pos, CONFIG.ERASE_THRESHOLD_DRAW);
+                if (eraseIdx !== -1) {
+                    const erased = this.mirrors.splice(eraseIdx, 1)[0];
+                    this.inkLeft = Math.min(this.maxInkForStage, this.inkLeft + erased.length);
+                    this.updateHUD();
+                    audio.playCrystalClang(pos.x);
+                    this.particles.spawnMirrorDissolve(erased);
+                    this.hoveredMirrorIdx = -1;
+                    this.calculateLaserPath();
+                    return;
+                }
+                if (this.inkLeft > CONFIG.MIN_INK_DRAW) {
+                    this.isDrawing = true;
+                    this.drawStart = pos; this.drawEnd = pos;
+                    this.lastMousePos = pos;
+                    audio.startIceScratch(pos.x);
+                }
+            } else if (this.state === STATE.EDITING) {
+                this.handleEditorPointerDown(pos, e);
             }
         };
 
         const handleMove = (e) => {
-            if (this.state !== STATE.PLAYING) return;
             e.preventDefault();
             const pos = getPos(e);
-            if (this.isDrawing) {
-                const d = dist(this.drawStart, pos);
-                if (d <= this.inkLeft) {
-                    this.drawEnd = pos;
+
+            if (this.state === STATE.PLAYING || this.state === STATE.EDIT_PLAYING) {
+                if (this.isDrawing) {
+                    const d = dist(this.drawStart, pos);
+                    if (d <= this.inkLeft) {
+                        this.drawEnd = pos;
+                    } else {
+                        const ratio = this.inkLeft / d;
+                        this.drawEnd = {
+                            x: this.drawStart.x + (pos.x - this.drawStart.x) * ratio,
+                            y: this.drawStart.y + (pos.y - this.drawStart.y) * ratio
+                        };
+                    }
+                    audio.updateIceScratch(dist(this.lastMousePos, pos) / 0.016, pos.x);
+                    this.lastMousePos = pos;
+                    this.calculateLaserPath();
                 } else {
-                    const ratio = this.inkLeft / d;
-                    this.drawEnd = {
-                        x: this.drawStart.x + (pos.x - this.drawStart.x) * ratio,
-                        y: this.drawStart.y + (pos.y - this.drawStart.y) * ratio
-                    };
+                    const prev = this.hoveredMirrorIdx;
+                    this.hoveredMirrorIdx = this.findMirrorAt(pos, CONFIG.ERASE_THRESHOLD_IDLE);
+                    if (prev !== this.hoveredMirrorIdx) this._updateModeIndicator();
                 }
-                audio.updateIceScratch(dist(this.lastMousePos, pos) / 0.016, pos.x);
-                this.lastMousePos = pos;
-                this.calculateLaserPath();
-            } else {
-                const prev = this.hoveredMirrorIdx;
-                this.hoveredMirrorIdx = this.findMirrorAt(pos, CONFIG.ERASE_THRESHOLD_IDLE);
-                if (prev !== this.hoveredMirrorIdx) this._updateModeIndicator();
+            } else if (this.state === STATE.EDITING) {
+                this.handleEditorPointerMove(pos, e);
             }
         };
 
-        const handleUp = () => {
-            if (this.isDrawing) {
-                this.isDrawing = false;
-                audio.stopIceScratch();
-                const len = dist(this.drawStart, this.drawEnd);
-                if (len > CONFIG.MIN_DRAW_LENGTH) {
-                    this.mirrors.push(new Mirror(this.drawStart.x, this.drawStart.y, this.drawEnd.x, this.drawEnd.y));
-                    this.inkLeft -= len;
-                    this.updateHUD();
-                    this.calculateLaserPath();
+        const handleUp = (e) => {
+            if (this.state === STATE.PLAYING || this.state === STATE.EDIT_PLAYING) {
+                if (this.isDrawing) {
+                    this.isDrawing = false;
+                    audio.stopIceScratch();
+                    const len = dist(this.drawStart, this.drawEnd);
+                    if (len > CONFIG.MIN_DRAW_LENGTH) {
+                        this.mirrors.push(new Mirror(this.drawStart.x, this.drawStart.y, this.drawEnd.x, this.drawEnd.y));
+                        this.inkLeft -= len;
+                        this.updateHUD();
+                        this.calculateLaserPath();
+                    }
+                    this._updateModeIndicator();
                 }
-                this._updateModeIndicator();
+            } else if (this.state === STATE.EDITING) {
+                this.handleEditorPointerUp();
             }
         };
 
@@ -1229,9 +1257,15 @@ class GameController {
     }
 
     // ---- Stage Loading ----
-    loadStage(idx) {
-        this.currentStageIdx = idx;
-        const tmpl = STAGE_TEMPLATES[idx];
+    loadStage(idx, isCustom = false, customTmpl = null) {
+        let tmpl;
+        if (isCustom) {
+            tmpl = customTmpl;
+            this.currentStageIdx = -1; // special value for custom stages
+        } else {
+            this.currentStageIdx = idx;
+            tmpl = STAGE_TEMPLATES[idx];
+        }
 
         this.emitter = new Emitter(tmpl.emitter.x, tmpl.emitter.y, tmpl.emitter.angle);
         this.prism = new Prism(tmpl.prism.x, tmpl.prism.y, tmpl.prism.radius, tmpl.prism.targetColor || null);
@@ -1252,17 +1286,23 @@ class GameController {
         this.calculateLaserPath();
         this._updateModeIndicator();
 
-        this.showToast(`STG_0${idx + 1}: ${tmpl.name}`, false);
-        // Show stage-specific hints
-        if (tmpl.hints && tmpl.hints.length > 0) {
-            tmpl.hints.forEach((hint, i) => {
-                setTimeout(() => this.showToast(hint, true), 1200 + i * 2000);
-            });
+        if (!isCustom) {
+            this.showToast(`STG_0${idx + 1}: ${tmpl.name}`, false);
+            // Show stage-specific hints
+            if (tmpl.hints && tmpl.hints.length > 0) {
+                tmpl.hints.forEach((hint, i) => {
+                    setTimeout(() => this.showToast(hint, true), 1200 + i * 2000);
+                });
+            }
         }
     }
 
     updateHUD() {
-        document.getElementById('stage-name').innerText = `STG_0${this.currentStageIdx + 1}`;
+        if (this.currentStageIdx === -1) {
+            document.getElementById('stage-name').innerText = `CUSTOM_STG`;
+        } else {
+            document.getElementById('stage-name').innerText = `STG_0${this.currentStageIdx + 1}`;
+        }
         const inkPercent = (this.inkLeft / this.maxInkForStage) * 100;
         document.getElementById('ink-bar').style.width = `${inkPercent}%`;
         const inkBar = document.getElementById('ink-bar');
@@ -1275,8 +1315,23 @@ class GameController {
             emitBtn.disabled = false;
             resetBtn.disabled = this.mirrors.length === 0;
         } else {
-            emitBtn.disabled = true;
-            resetBtn.disabled = true;
+            if (emitBtn) emitBtn.disabled = true;
+            if (resetBtn) resetBtn.disabled = true;
+        }
+
+        const editorTestBtn = document.getElementById('editor-test-btn');
+        const editorClearBtn = document.getElementById('editor-clear-btn');
+        if (this.state === STATE.EDIT_PLAYING) {
+            if (editorTestBtn) editorTestBtn.disabled = false;
+            if (editorClearBtn) editorClearBtn.disabled = this.mirrors.length === 0;
+        } else if (this.state === STATE.EMITTING) {
+            if (editorTestBtn) editorTestBtn.disabled = true;
+            if (editorClearBtn) editorClearBtn.disabled = true;
+        }
+
+        const exportBtn = document.getElementById('editor-export-btn');
+        if (exportBtn) {
+            exportBtn.disabled = !this.editorHasCleared;
         }
 
         this._syncPCSidebar();
@@ -1333,6 +1388,10 @@ class GameController {
 
     nextStage() {
         document.getElementById('overlay').classList.add('hidden');
+        if (this.currentStageIdx === -1) {
+            this.stopTestPlayAndReturnToEditor();
+            return;
+        }
         if (this.currentStageIdx + 1 < STAGE_TEMPLATES.length) {
             this._startStage(this.currentStageIdx + 1);
         } else {
@@ -1515,6 +1574,48 @@ class GameController {
 
         const reflectCount = this.reflectionPoints.filter(p => p.type === 'mirror').length;
         const inkUsed = this.maxInkForStage - this.inkLeft;
+
+        const banner = document.getElementById('best-banner');
+        const nextBtn = document.getElementById('next-btn');
+        const selectBtn = document.getElementById('select-btn');
+
+        if (this.currentStageIdx === -1) {
+            this.editorHasCleared = true;
+
+            document.getElementById('overlay-title').textContent = "TEST_CLEAR";
+            document.getElementById('overlay-subtitle').textContent = "ステージのクリア検証に成功しました！";
+            banner.textContent = "✦ CODE UNLOCKED ✦";
+            banner.classList.remove('hidden');
+
+            document.getElementById('stat-reflect').innerText = reflectCount;
+            const rankEl = document.getElementById('stat-rank');
+            rankEl.innerText = "PASS";
+            rankEl.className = "stat-val rank-s";
+
+            const bestEl = document.getElementById('stat-best');
+            bestEl.innerText = "CUSTOM";
+
+            nextBtn.textContent = "エディタに戻る";
+            nextBtn.style.display = 'block';
+
+            selectBtn.style.display = 'none';
+
+            setTimeout(() => {
+                document.getElementById('overlay').classList.remove('hidden');
+                this.updateHUD();
+            }, CONFIG.CLEAR_OVERLAY_DELAY);
+            return;
+        }
+
+        // Reset overlay to standard
+        document.getElementById('overlay-title').textContent = "SYSTEM_TUNED";
+        document.getElementById('overlay-subtitle').textContent = "幾何学の調律に成功しました";
+        banner.textContent = "✦ NEW BEST RANK ✦";
+        
+        nextBtn.textContent = "NEXT_STAGE";
+        
+        selectBtn.style.display = 'block';
+
         const tmpl = STAGE_TEMPLATES[this.currentStageIdx];
         let rank = 'S';
         if (inkUsed > tmpl.parMirrorLength * 0.9) rank = 'A';
@@ -1532,11 +1633,9 @@ class GameController {
         const bestEl = document.getElementById('stat-best');
         bestEl.innerText = prevBest ? prevBest.rank : rank;
 
-        const banner = document.getElementById('best-banner');
         if (isNewBest) banner.classList.remove('hidden'); else banner.classList.add('hidden');
 
         // Show NEXT_STAGE or hide it on last stage
-        const nextBtn = document.getElementById('next-btn');
         nextBtn.style.display = this.currentStageIdx + 1 < STAGE_TEMPLATES.length ? 'block' : 'none';
 
         setTimeout(() => {
@@ -1564,7 +1663,7 @@ class GameController {
 
         // Dynamically recalculate laser path if there are moving patrol blocks
         const hasMovingBlocks = this.blocks && this.blocks.some(b => b.moveOptions !== null);
-        if (this.state === STATE.PLAYING && hasMovingBlocks) {
+        if ((this.state === STATE.PLAYING || this.state === STATE.EDIT_PLAYING) && hasMovingBlocks) {
             this.calculateLaserPath();
         }
 
@@ -1628,7 +1727,7 @@ class GameController {
                                 this.triggerClear();
                                 return; // Stop executing update immediately on level clear
                             } else if (evt.type === 'blackhole') {
-                                this.state = STATE.PLAYING;
+                                this.state = (this.currentStageIdx === -1) ? STATE.EDIT_PLAYING : STATE.PLAYING;
                                 this.particles.spawn(next.x, next.y, next.color || '#00f3ff', 20);
                                 this.showToast("光は幾何学から外れ、深淵に消えた");
                                 setTimeout(() => {
@@ -1637,7 +1736,7 @@ class GameController {
                                 }, 800);
                                 return;
                             } else if (evt.type === 'block') {
-                                this.state = STATE.PLAYING;
+                                this.state = (this.currentStageIdx === -1) ? STATE.EDIT_PLAYING : STATE.PLAYING;
                                 this.particles.spawn(next.x, next.y, '#ff003c', 25);
                                 audio.playCrystalClang(next.x);
                                 this.showToast("障壁に衝突。光子は消滅しました");
@@ -1665,7 +1764,7 @@ class GameController {
             // If the photon reaches the end of the calculated laser path without level clear
             if (this.currentSegmentIdx >= this.laserCache.length - 1) {
                 if (!this.hasHitPrism && this.state === STATE.EMITTING) {
-                    this.state = STATE.PLAYING;
+                    this.state = (this.currentStageIdx === -1) ? STATE.EDIT_PLAYING : STATE.PLAYING;
                     this.showToast("光は幾何学から外れ、深淵に消えた");
                     setTimeout(() => {
                         this.calculateLaserPath();
@@ -1679,6 +1778,9 @@ class GameController {
     // ---- Rendering ----
     draw() {
         this.ctx.clearRect(0, 0, CONFIG.WIDTH, CONFIG.HEIGHT);
+        if (this.state === STATE.EDITING) {
+            this.drawGrid();
+        }
 
         if (!this.emitter) return; // Not yet initialized
 
@@ -1703,7 +1805,9 @@ class GameController {
         if (this.isDrawing) this._drawTuningLine();
 
         // Laser
-        if (this.state === STATE.PLAYING) {
+        if (this.state === STATE.PLAYING || this.state === STATE.EDITING) {
+            this._drawLaserPath(this.laserCache, 'rgba(0, 243, 255, 0.45)', 1.2, true);
+        } else if (this.state === STATE.EDIT_PLAYING) {
             this._drawLaserPath(this.laserCache, 'rgba(0, 243, 255, 0.45)', 1.2, true);
         } else if (this.state === STATE.EMITTING) {
             const segs = this.laserCache.slice(0, this.currentSegmentIdx + 1);
@@ -1723,6 +1827,9 @@ class GameController {
         }
 
         this.particles.draw(this.ctx);
+        if (this.state === STATE.EDITING) {
+            this.drawEditorSelection();
+        }
     }
 
     _drawTutorialOverlay() {
@@ -1960,6 +2067,791 @@ class GameController {
         ctx.lineTo(to.x - hLen * Math.cos(angle - Math.PI/6), to.y - hLen * Math.sin(angle - Math.PI/6));
         ctx.lineTo(to.x - hLen * Math.cos(angle + Math.PI/6), to.y - hLen * Math.sin(angle + Math.PI/6));
         ctx.closePath(); ctx.fill(); ctx.restore();
+    }
+
+    // ============================================================
+    // STAGE EDITOR (CREATIVE MODE) METHODS
+    // ============================================================
+    initEditorEvents() {
+        const editorBtn = document.getElementById('editor-btn');
+        if (editorBtn) {
+            editorBtn.addEventListener('click', () => {
+                this._unlock();
+                this.enterEditorMode();
+            });
+        }
+
+        const editorBackBtn = document.getElementById('editor-back-btn');
+        if (editorBackBtn) {
+            editorBackBtn.addEventListener('click', () => {
+                this._unlock();
+                if (this.state === STATE.EDIT_PLAYING) {
+                    this.stopTestPlayAndReturnToEditor();
+                } else {
+                    this.exitEditorMode();
+                }
+            });
+        }
+
+        const tools = ['select', 'place', 'erase'];
+        tools.forEach(t => {
+            const btn = document.getElementById(`tool-${t}`);
+            if (btn) {
+                btn.addEventListener('click', () => {
+                    this._unlock();
+                    this.editorTool = t;
+                    this.syncEditorToolUI();
+                });
+            }
+        });
+
+        const paletteItems = document.querySelectorAll('.palette-item');
+        paletteItems.forEach(item => {
+            item.addEventListener('click', () => {
+                this._unlock();
+                const type = item.getAttribute('data-type');
+                this.editorActiveGimmick = type;
+                this.editorTool = 'place';
+                this.syncEditorToolUI();
+                this.syncPaletteUI();
+            });
+        });
+
+        const clearBtn = document.getElementById('editor-clear-btn');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                this._unlock();
+                if (this.state === STATE.EDIT_PLAYING) {
+                    this.loadStage(-1, true, this.customStageData);
+                } else {
+                    this.blackholes = [];
+                    this.portals = [];
+                    this.blocks = [];
+                    this.colorFilters = [];
+                    this.editorSelectedObject = null;
+                    this.editorHasCleared = false;
+                    this.updateInspector();
+                    this.calculateLaserPath();
+                    this.updateHUD();
+                    this.showToast("すべての配置オブジェクトをクリアしました");
+                }
+            });
+        }
+
+        const testBtn = document.getElementById('editor-test-btn');
+        if (testBtn) {
+            testBtn.addEventListener('click', () => {
+                this._unlock();
+                if (this.state === STATE.EDITING) {
+                    this.startTestPlay();
+                } else if (this.state === STATE.EDIT_PLAYING) {
+                    this.emitPhoton();
+                }
+            });
+        }
+
+        const angleInput = document.getElementById('prop-angle');
+        if (angleInput) {
+            angleInput.addEventListener('input', (e) => {
+                if (this.editorSelectedObject === this.emitter) {
+                    const deg = parseInt(e.target.value);
+                    this.emitter.angle = deg * Math.PI / 180;
+                    document.getElementById('prop-angle-val').textContent = deg;
+                    this.editorHasCleared = false;
+                    this.calculateLaserPath();
+                }
+            });
+        }
+
+        const speedInput = document.getElementById('prop-speed');
+        if (speedInput) {
+            speedInput.addEventListener('input', (e) => {
+                const obj = this.editorSelectedObject;
+                if (obj && obj instanceof Block && obj.moveOptions) {
+                    const speed = parseInt(e.target.value);
+                    obj.moveOptions.speed = speed;
+                    document.getElementById('prop-speed-val').textContent = speed;
+                    this.editorHasCleared = false;
+                    this.calculateLaserPath();
+                }
+            });
+        }
+
+        const inkInput = document.getElementById('prop-ink');
+        if (inkInput) {
+            inkInput.addEventListener('input', (e) => {
+                const ink = parseInt(e.target.value);
+                this.maxInkForStage = ink;
+                this.inkLeft = ink;
+                document.getElementById('prop-ink-val').textContent = ink;
+                this.editorHasCleared = false;
+                this.updateHUD();
+            });
+        }
+
+        const colorButtons = document.querySelectorAll('.color-picker-btn');
+        colorButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                this._unlock();
+                const color = btn.getAttribute('data-color');
+                const obj = this.editorSelectedObject;
+                if (obj) {
+                    if (obj === this.prism) {
+                        obj.targetColor = (color === '#00f3ff') ? null : color;
+                    } else if (obj instanceof ColorFilter) {
+                        obj.color = color;
+                    }
+                    this.syncColorPickerButtons(color);
+                    this.editorHasCleared = false;
+                    this.calculateLaserPath();
+                }
+            });
+        });
+
+        const propDeleteBtn = document.getElementById('prop-delete-btn');
+        if (propDeleteBtn) {
+            propDeleteBtn.addEventListener('click', () => {
+                this._unlock();
+                this.deleteSelectedObject();
+            });
+        }
+
+        const importBtn = document.getElementById('editor-import-btn');
+        if (importBtn) {
+            importBtn.addEventListener('click', () => {
+                this._unlock();
+                this.modalMode = 'import';
+                document.getElementById('modal-title').textContent = "STAGE_CODE_IMPORT (インポート)";
+                document.getElementById('modal-desc').textContent = "共有された調律コード（LMN-から始まる文字列）を貼り付けてください。";
+                document.getElementById('modal-textarea').value = "";
+                document.getElementById('modal-textarea').placeholder = "ここにLMN-から始まる調律コードを貼り付け、適用ボタンを押してください...";
+                document.getElementById('modal-textarea').readOnly = false;
+                document.getElementById('modal-error').classList.add('hidden');
+                document.getElementById('modal-action-btn').textContent = "適用する";
+                document.getElementById('editor-modal').classList.remove('hidden');
+            });
+        }
+
+        const exportBtn = document.getElementById('editor-export-btn');
+        if (exportBtn) {
+            exportBtn.addEventListener('click', () => {
+                this._unlock();
+                this.modalMode = 'export';
+                const code = "LMN-" + btoa(unescape(encodeURIComponent(JSON.stringify(this.serializeStage()))));
+                document.getElementById('modal-title').textContent = "STAGE_CODE_EXPORT (エクスポート)";
+                document.getElementById('modal-desc').textContent = "このステージの調律コードが生成されました。コピーして共有してください！";
+                document.getElementById('modal-textarea').value = code;
+                document.getElementById('modal-textarea').readOnly = true;
+                document.getElementById('modal-error').classList.add('hidden');
+                document.getElementById('modal-action-btn').textContent = "コピーする";
+                document.getElementById('editor-modal').classList.remove('hidden');
+                
+                setTimeout(() => {
+                    document.getElementById('modal-textarea').select();
+                }, 100);
+            });
+        }
+
+        const modalClose = document.getElementById('modal-close');
+        if (modalClose) {
+            modalClose.addEventListener('click', () => {
+                document.getElementById('editor-modal').classList.add('hidden');
+            });
+        }
+
+        const modalCancel = document.getElementById('modal-cancel-btn');
+        if (modalCancel) {
+            modalCancel.addEventListener('click', () => {
+                document.getElementById('editor-modal').classList.add('hidden');
+            });
+        }
+
+        const modalAction = document.getElementById('modal-action-btn');
+        if (modalAction) {
+            modalAction.addEventListener('click', () => {
+                this._unlock();
+                if (this.modalMode === 'import') {
+                    const val = document.getElementById('modal-textarea').value.trim();
+                    const data = this.deserializeStage(val);
+                    if (data) {
+                        this.customStageData = data;
+                        this.editorHasCleared = false;
+                        this.loadStage(-1, true, this.customStageData);
+                        document.getElementById('editor-modal').classList.add('hidden');
+                        this.showToast("調律コードをインポートしました！");
+                        this.editorSelectedObject = null;
+                        this.updateInspector();
+                        this.calculateLaserPath();
+                        this.updateHUD();
+                    } else {
+                        document.getElementById('modal-error').classList.remove('hidden');
+                    }
+                } else if (this.modalMode === 'export') {
+                    const val = document.getElementById('modal-textarea').value;
+                    navigator.clipboard.writeText(val).then(() => {
+                        this.showToast("クリップボードにコピーしました！");
+                        document.getElementById('editor-modal').classList.add('hidden');
+                    }).catch(() => {
+                        document.getElementById('modal-textarea').select();
+                        document.execCommand('copy');
+                        this.showToast("コードを選択しました。Ctrl+Cでコピーしてください");
+                        document.getElementById('editor-modal').classList.add('hidden');
+                    });
+                }
+            });
+        }
+    }
+
+    enterEditorMode() {
+        this.state = STATE.EDITING;
+        if (!this.customStageData) {
+            this.customStageData = {
+                emitter: { x: 80, y: 150, angle: 0 },
+                prism: { x: 520, y: 650, radius: 20, targetColor: null },
+                blackholes: [], portals: [], blocks: [], colorFilters: [],
+                inkCapacity: 500
+            };
+        }
+        
+        this.loadStage(-1, true, this.customStageData);
+        this.editorSelectedObject = null;
+        this.editorTool = 'select';
+        this.editorHasCleared = false;
+        
+        document.getElementById('app-layout').classList.add('editing-mode');
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('hud').style.opacity = '1';
+        
+        document.getElementById('editor-sidebar-left').classList.remove('hidden');
+        document.getElementById('editor-sidebar-right').classList.remove('hidden');
+        document.getElementById('editor-controls').classList.remove('hidden');
+        
+        this.updateInspector();
+        this.syncEditorToolUI();
+        this.syncPaletteUI();
+        this.updateHUD();
+        this.calculateLaserPath();
+    }
+
+    exitEditorMode() {
+        document.getElementById('app-layout').classList.remove('editing-mode');
+        document.getElementById('editor-sidebar-left').classList.add('hidden');
+        document.getElementById('editor-sidebar-right').classList.add('hidden');
+        document.getElementById('editor-controls').classList.add('hidden');
+        this._showTitleScreen();
+    }
+
+    syncEditorToolUI() {
+        const tools = ['select', 'place', 'erase'];
+        tools.forEach(t => {
+            const btn = document.getElementById(`tool-${t}`);
+            if (btn) {
+                if (t === this.editorTool) btn.classList.add('active');
+                else btn.classList.remove('active');
+            }
+        });
+    }
+
+    syncPaletteUI() {
+        const items = document.querySelectorAll('.palette-item');
+        items.forEach(item => {
+            const type = item.getAttribute('data-type');
+            if (type === this.editorActiveGimmick) item.classList.add('active');
+            else item.classList.remove('active');
+        });
+    }
+
+    startTestPlay() {
+        this.customStageData = this.serializeStage();
+        this.state = STATE.EDIT_PLAYING;
+
+        document.getElementById('editor-back-btn').querySelector('span').textContent = "STOP";
+        document.getElementById('editor-clear-btn').querySelector('span').textContent = "RESET";
+        document.getElementById('editor-test-btn').querySelector('span').textContent = "EMIT";
+        document.getElementById('tool-select').parentElement.classList.add('hidden');
+
+        document.getElementById('editor-sidebar-left').style.opacity = '0.35';
+        document.getElementById('editor-sidebar-right').style.opacity = '0.35';
+
+        this.loadStage(-1, true, this.customStageData);
+        this.showToast("テストプレイ開始！鏡を引き結晶へ光を導こう", false);
+    }
+
+    stopTestPlayAndReturnToEditor() {
+        this.state = STATE.EDITING;
+
+        document.getElementById('editor-back-btn').querySelector('span').textContent = "MENU";
+        document.getElementById('editor-clear-btn').querySelector('span').textContent = "CLEAR_ALL";
+        document.getElementById('editor-test-btn').querySelector('span').textContent = "TEST_PLAY";
+        document.getElementById('tool-select').parentElement.classList.remove('hidden');
+
+        document.getElementById('editor-sidebar-left').style.opacity = '1';
+        document.getElementById('editor-sidebar-right').style.opacity = '1';
+
+        this.loadStage(-1, true, this.customStageData);
+        this.editorSelectedObject = null;
+        this.updateInspector();
+        this.calculateLaserPath();
+        this.updateHUD();
+        this.showToast("編集モードに戻りました", false);
+    }
+
+    handleEditorPointerDown(pos, e) {
+        const hit = this.findObjectAt(pos);
+
+        if (this.editorTool === 'erase') {
+            if (hit) {
+                if (hit.ref === this.emitter || hit.ref === this.prism) {
+                    this.showToast("発射台とゴール結晶は削除できません");
+                } else {
+                    this.removeObject(hit.ref);
+                    this.editorSelectedObject = null;
+                    this.editorHasCleared = false;
+                    this.updateInspector();
+                    this.calculateLaserPath();
+                    this.updateHUD();
+                }
+            }
+        } else if (this.editorTool === 'place') {
+            if (hit) {
+                this.editorSelectedObject = hit.ref;
+                this.editorTool = 'select';
+                this.syncEditorToolUI();
+                this.updateInspector();
+                this.startDragging(hit, pos);
+            } else {
+                this.placeGimmick(this.editorActiveGimmick, pos);
+            }
+        } else if (this.editorTool === 'select') {
+            if (hit) {
+                this.editorSelectedObject = hit.ref;
+                this.updateInspector();
+                this.startDragging(hit, pos);
+            } else {
+                this.editorSelectedObject = null;
+                this.updateInspector();
+            }
+        }
+    }
+
+    handleEditorPointerMove(pos, e) {
+        if (this.editorDraggingObject) {
+            const obj = this.editorDraggingObject;
+            let newX = Math.round(pos.x - this.editorDragOffset.x);
+            let newY = Math.round(pos.y - this.editorDragOffset.y);
+
+            newX = Math.max(15, Math.min(CONFIG.WIDTH - 15, newX));
+            newY = Math.max(15, Math.min(CONFIG.HEIGHT - 15, newY));
+
+            if (obj === this.emitter || obj === this.prism || obj instanceof BlackHole || obj instanceof ColorFilter) {
+                obj.x = newX;
+                obj.y = newY;
+            } else if (obj instanceof Wormhole) {
+                obj[this.editorDragPart].x = newX;
+                obj[this.editorDragPart].y = newY;
+            } else if (obj instanceof Block) {
+                if (obj.moveOptions) {
+                    const dx = newX - obj.startX;
+                    const dy = newY - obj.startY;
+                    obj.startX = newX;
+                    obj.startY = newY;
+                    obj.x = newX;
+                    obj.y = newY;
+                    obj.moveOptions.targetX += dx;
+                    obj.moveOptions.targetY += dy;
+                } else {
+                    obj.startX = newX;
+                    obj.startY = newY;
+                    obj.x = newX;
+                    obj.y = newY;
+                }
+            }
+
+            this.editorHasCleared = false;
+            this.calculateLaserPath();
+            this.updateInspector();
+        } else if (this.editorDraggingPatrolTarget) {
+            const obj = this.editorSelectedObject;
+            let newX = Math.round(pos.x);
+            let newY = Math.round(pos.y);
+
+            newX = Math.max(15, Math.min(CONFIG.WIDTH - 15, newX));
+            newY = Math.max(15, Math.min(CONFIG.HEIGHT - 15, newY));
+
+            obj.moveOptions.targetX = newX;
+            obj.moveOptions.targetY = newY;
+
+            this.editorHasCleared = false;
+            this.calculateLaserPath();
+            this.updateInspector();
+        }
+    }
+
+    handleEditorPointerUp() {
+        this.editorDraggingObject = null;
+        this.editorDragPart = null;
+        this.editorDraggingPatrolTarget = false;
+        this.updateHUD();
+    }
+
+    findObjectAt(pos) {
+        for (const p of this.portals) {
+            if (dist(pos, p.inPort) <= p.radius + 6) return { type: 'portal', ref: p, part: 'inPort' };
+            if (dist(pos, p.outPort) <= p.radius + 6) return { type: 'portal', ref: p, part: 'outPort' };
+        }
+
+        if (this.editorSelectedObject && this.editorSelectedObject instanceof Block && this.editorSelectedObject.moveOptions) {
+            const targetPos = { x: this.editorSelectedObject.moveOptions.targetX, y: this.editorSelectedObject.moveOptions.targetY };
+            if (dist(pos, targetPos) <= 15) {
+                return { type: 'patrol-target', ref: this.editorSelectedObject };
+            }
+        }
+
+        for (const b of this.blocks) {
+            if (dist(pos, b) <= b.radius + 6) return { type: 'block', ref: b };
+        }
+
+        for (const bh of this.blackholes) {
+            if (dist(pos, bh) <= bh.radius + 6) return { type: 'blackhole', ref: bh };
+        }
+
+        for (const f of this.colorFilters) {
+            if (dist(pos, f) <= f.radius + 6) return { type: 'colorfilter', ref: f };
+        }
+
+        if (dist(pos, this.prism) <= this.prism.radius + 6) return { type: 'prism', ref: this.prism };
+        if (dist(pos, this.emitter) <= 20) return { type: 'emitter', ref: this.emitter };
+
+        return null;
+    }
+
+    startDragging(hit, pos) {
+        if (hit.type === 'patrol-target') {
+            this.editorDraggingPatrolTarget = true;
+        } else {
+            this.editorDraggingObject = hit.ref;
+            this.editorDragPart = hit.part || null;
+            
+            let tx = 0, ty = 0;
+            if (hit.ref === this.emitter || hit.ref === this.prism || hit.ref instanceof BlackHole || hit.ref instanceof Block || hit.ref instanceof ColorFilter) {
+                tx = hit.ref.x; ty = hit.ref.y;
+            } else if (hit.ref instanceof Wormhole) {
+                tx = hit.ref[hit.part].x; ty = hit.ref[hit.part].y;
+            }
+            
+            this.editorDragOffset = {
+                x: pos.x - tx,
+                y: pos.y - ty
+            };
+        }
+    }
+
+    placeGimmick(type, pos) {
+        const x = Math.round(pos.x);
+        const y = Math.round(pos.y);
+        let newObj = null;
+
+        if (type === 'emitter') {
+            this.emitter.x = x;
+            this.emitter.y = y;
+            newObj = this.emitter;
+        } else if (type === 'prism') {
+            this.prism.x = x;
+            this.prism.y = y;
+            newObj = this.prism;
+        } else if (type === 'blackhole') {
+            newObj = new BlackHole(x, y, 60, 140);
+            this.blackholes.push(newObj);
+        } else if (type === 'portal') {
+            newObj = new Wormhole(x, y, Math.min(CONFIG.WIDTH - 40, x + 80), y);
+            this.portals.push(newObj);
+        } else if (type === 'block') {
+            newObj = new Block(x, y, 18, null);
+            this.blocks.push(newObj);
+        } else if (type === 'patrol') {
+            newObj = new Block(x, y, 18, {
+                targetX: Math.min(CONFIG.WIDTH - 40, x + 100),
+                targetY: y,
+                speed: 70
+            });
+            this.blocks.push(newObj);
+        } else if (type === 'colorfilter') {
+            newObj = new ColorFilter(x, y, '#ff003c', 18);
+            this.colorFilters.push(newObj);
+        }
+
+        if (newObj) {
+            this.editorSelectedObject = newObj;
+            this.editorHasCleared = false;
+            this.editorTool = 'select';
+            this.syncEditorToolUI();
+            this.updateInspector();
+            this.calculateLaserPath();
+            this.updateHUD();
+            audio.playCrystalClang(x);
+        }
+    }
+
+    removeObject(obj) {
+        if (this.blackholes.includes(obj)) {
+            this.blackholes = this.blackholes.filter(item => item !== obj);
+        } else if (this.portals.includes(obj)) {
+            this.portals = this.portals.filter(item => item !== obj);
+        } else if (this.blocks.includes(obj)) {
+            this.blocks = this.blocks.filter(item => item !== obj);
+        } else if (this.colorFilters.includes(obj)) {
+            this.colorFilters = this.colorFilters.filter(item => item !== obj);
+        }
+    }
+
+    deleteSelectedObject() {
+        const obj = this.editorSelectedObject;
+        if (!obj) return;
+        if (obj === this.emitter || obj === this.prism) {
+            this.showToast("発射台とゴール結晶は削除できません");
+            return;
+        }
+
+        this.removeObject(obj);
+        this.editorSelectedObject = null;
+        this.editorHasCleared = false;
+        this.updateInspector();
+        this.calculateLaserPath();
+        this.updateHUD();
+    }
+
+    updateInspector() {
+        const emptyEl = document.getElementById('inspector-empty');
+        const detailsEl = document.getElementById('inspector-details');
+        const typeEl = document.getElementById('prop-type');
+        const angleGroup = document.getElementById('prop-angle-group');
+        const angleInput = document.getElementById('prop-angle');
+        const angleVal = document.getElementById('prop-angle-val');
+        const colorGroup = document.getElementById('prop-color-group');
+        const speedGroup = document.getElementById('prop-speed-group');
+        const speedInput = document.getElementById('prop-speed');
+        const speedVal = document.getElementById('prop-speed-val');
+
+        const obj = this.editorSelectedObject;
+
+        if (!obj) {
+            emptyEl.classList.remove('hidden');
+            detailsEl.classList.add('hidden');
+            return;
+        }
+
+        emptyEl.classList.add('hidden');
+        detailsEl.classList.remove('hidden');
+
+        angleGroup.classList.add('hidden');
+        colorGroup.classList.add('hidden');
+        speedGroup.classList.add('hidden');
+
+        if (obj === this.emitter) {
+            typeEl.textContent = "EMITTER (発射台)";
+            angleGroup.classList.remove('hidden');
+            const deg = Math.round((obj.angle * 180 / Math.PI) % 360);
+            angleInput.value = deg;
+            angleVal.textContent = deg;
+        } else if (obj === this.prism) {
+            typeEl.textContent = "PRISM (結晶ゴール)";
+            colorGroup.classList.remove('hidden');
+            this.syncColorPickerButtons(obj.targetColor || '#00f3ff');
+        } else if (obj instanceof BlackHole) {
+            typeEl.textContent = "BLACK HOLE (ブラックホール)";
+        } else if (obj instanceof Wormhole) {
+            typeEl.textContent = "PORTAL (ワームホール)";
+        } else if (obj instanceof Block) {
+            if (obj.moveOptions) {
+                typeEl.textContent = "PATROL (巡回ブロック)";
+                speedGroup.classList.remove('hidden');
+                speedInput.value = obj.moveOptions.speed;
+                speedVal.textContent = obj.moveOptions.speed;
+            } else {
+                typeEl.textContent = "BLOCK (遮光ブロック)";
+            }
+        } else if (obj instanceof ColorFilter) {
+            typeEl.textContent = "FILTER (カラーフィルター)";
+            colorGroup.classList.remove('hidden');
+            this.syncColorPickerButtons(obj.color);
+        }
+    }
+
+    syncColorPickerButtons(activeColor) {
+        const buttons = document.querySelectorAll('.color-picker-btn');
+        buttons.forEach(btn => {
+            const color = btn.getAttribute('data-color');
+            if (color === activeColor) {
+                btn.classList.add('active');
+                btn.style.borderColor = '#ffffff';
+            } else {
+                btn.classList.remove('active');
+                btn.style.borderColor = 'transparent';
+            }
+        });
+    }
+
+    serializeStage() {
+        return {
+            v: 2,
+            ink: this.maxInkForStage,
+            emitter: {
+                x: Math.round(this.emitter.x),
+                y: Math.round(this.emitter.y),
+                angle: Number(this.emitter.angle.toFixed(4))
+            },
+            prism: {
+                x: Math.round(this.prism.x),
+                y: Math.round(this.prism.y),
+                radius: Math.round(this.prism.radius),
+                color: this.prism.targetColor
+            },
+            blackholes: this.blackholes.map(b => ({
+                x: Math.round(b.x),
+                y: Math.round(b.y),
+                mass: Math.round(b.mass),
+                radius: Math.round(b.pullRadius)
+            })),
+            portals: this.portals.map(p => ({
+                inX: Math.round(p.inPort.x),
+                inY: Math.round(p.inPort.y),
+                outX: Math.round(p.outPort.x),
+                outY: Math.round(p.outPort.y)
+            })),
+            blocks: this.blocks.map(b => ({
+                x: Math.round(b.startX),
+                y: Math.round(b.startY),
+                radius: Math.round(b.radius),
+                moveOptions: b.moveOptions ? {
+                    targetX: Math.round(b.moveOptions.targetX),
+                    targetY: Math.round(b.moveOptions.targetY),
+                    speed: Math.round(b.moveOptions.speed)
+                } : null
+            })),
+            colorFilters: this.colorFilters.map(f => ({
+                x: Math.round(f.x),
+                y: Math.round(f.y),
+                color: f.color,
+                radius: Math.round(f.radius)
+            }))
+        };
+    }
+
+    deserializeStage(code) {
+        if (!code.startsWith('LMN-')) return null;
+        const base64 = code.substring(4).trim();
+        try {
+            const json = decodeURIComponent(escape(atob(base64)));
+            const data = JSON.parse(json);
+            if (data && data.emitter && data.prism) {
+                return data;
+            }
+        } catch (e) {
+            console.error("Failed to decode stage code", e);
+        }
+        return null;
+    }
+
+    drawGrid() {
+        const ctx = this.ctx;
+        ctx.save();
+        ctx.strokeStyle = 'rgba(0, 243, 255, 0.04)';
+        ctx.lineWidth = 0.8;
+        
+        const step = 40;
+        for (let x = step; x < CONFIG.WIDTH; x += step) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, CONFIG.HEIGHT);
+            ctx.stroke();
+        }
+        for (let y = step; y < CONFIG.HEIGHT; y += step) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(CONFIG.WIDTH, y);
+            ctx.stroke();
+        }
+        ctx.restore();
+    }
+
+    drawEditorSelection() {
+        if (this.state !== STATE.EDITING || !this.editorSelectedObject) return;
+        const ctx = this.ctx;
+        const obj = this.editorSelectedObject;
+
+        ctx.save();
+        ctx.strokeStyle = '#00f3ff';
+        ctx.lineWidth = 1.5;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = 'rgba(0, 243, 255, 0.7)';
+        ctx.setLineDash([4, 4]);
+
+        let cx = 0, cy = 0, r = 22;
+        
+        if (obj === this.emitter) {
+            cx = obj.x; cy = obj.y; r = 18;
+        } else if (obj === this.prism) {
+            cx = obj.x; cy = obj.y; r = 24;
+        } else if (obj instanceof BlackHole) {
+            cx = obj.x; cy = obj.y; r = 22;
+            
+            ctx.save();
+            ctx.strokeStyle = 'rgba(0, 243, 255, 0.15)';
+            ctx.beginPath();
+            ctx.arc(cx, cy, obj.pullRadius, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.restore();
+        } else if (obj instanceof Wormhole) {
+            ctx.save();
+            ctx.strokeStyle = 'rgba(0, 191, 255, 0.3)';
+            ctx.setLineDash([2, 4]);
+            ctx.beginPath();
+            ctx.moveTo(obj.inPort.x, obj.inPort.y);
+            ctx.lineTo(obj.outPort.x, obj.outPort.y);
+            ctx.stroke();
+            ctx.restore();
+
+            ctx.beginPath();
+            ctx.arc(obj.inPort.x, obj.inPort.y, obj.radius + 4, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(obj.outPort.x, obj.outPort.y, obj.radius + 4, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.restore();
+            return;
+        } else if (obj instanceof Block) {
+            cx = obj.x; cy = obj.y; r = obj.radius + 4;
+            if (obj.moveOptions) {
+                ctx.save();
+                ctx.strokeStyle = 'rgba(255, 170, 0, 0.4)';
+                ctx.setLineDash([3, 5]);
+                ctx.beginPath();
+                ctx.moveTo(obj.startX, obj.startY);
+                ctx.lineTo(obj.moveOptions.targetX, obj.moveOptions.targetY);
+                ctx.stroke();
+
+                ctx.fillStyle = 'rgba(255, 170, 0, 0.15)';
+                ctx.strokeStyle = '#ffaa00';
+                ctx.setLineDash([]);
+                ctx.beginPath();
+                ctx.arc(obj.moveOptions.targetX, obj.moveOptions.targetY, 12, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = '#ffaa00';
+                ctx.font = "8px 'Inter', sans-serif";
+                ctx.textAlign = 'center';
+                ctx.fillText("TARGET", obj.moveOptions.targetX, obj.moveOptions.targetY - 16);
+                ctx.restore();
+            }
+        } else if (obj instanceof ColorFilter) {
+            cx = obj.x; cy = obj.y; r = obj.radius + 4;
+        }
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
     }
 }
 

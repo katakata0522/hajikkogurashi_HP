@@ -35,6 +35,47 @@
             </div>
         </aside>
 
+        <!-- PC用のエディタ左サイドバー -->
+        <aside id="editor-sidebar-left" class="pc-only-sidebar editor-only hidden">
+            <div class="sidebar-header">
+                <span class="cyber-tag">CREATIVE_MODE</span>
+                <h2 class="sidebar-title">GIMMICK_PALETTE</h2>
+            </div>
+            <div class="sidebar-section">
+                <div class="section-label">◈ ギミックを配置</div>
+                <div class="editor-palette">
+                    <div class="palette-item active" data-type="emitter">
+                        <div class="gimmick-visual-mini" style="border-color:#00f3ff; background:#000;"></div>
+                        <span>EMITTER<br>(発射台)</span>
+                    </div>
+                    <div class="palette-item" data-type="prism">
+                        <div class="gimmick-visual-mini" style="border-color:#ff007f; background:rgba(255, 0, 127, 0.1);"></div>
+                        <span>PRISM<br>(結晶ゴール)</span>
+                    </div>
+                    <div class="palette-item" data-type="blackhole">
+                        <div class="gimmick-visual-mini blackhole"></div>
+                        <span>BLACKHOLE<br>(ブラックホール)</span>
+                    </div>
+                    <div class="palette-item" data-type="portal">
+                        <div class="gimmick-visual-mini wormhole" style="border-color:#00bfff; background:rgba(0,191,255,0.1);"></div>
+                        <span>PORTAL<br>(ポータル)</span>
+                    </div>
+                    <div class="palette-item" data-type="block">
+                        <div class="gimmick-visual-mini block"></div>
+                        <span>BLOCK<br>(遮光ブロック)</span>
+                    </div>
+                    <div class="palette-item" data-type="patrol">
+                        <div class="gimmick-visual-mini patrol"></div>
+                        <span>PATROL<br>(巡回ブロック)</span>
+                    </div>
+                    <div class="palette-item" data-type="colorfilter">
+                        <div class="gimmick-visual-mini colorfilter"></div>
+                        <span>FILTER<br>(カラーフィルター)</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
         <!-- メインのゲーム画面 -->
         <div id="game-container">
             <!-- HEADER / HUD -->
@@ -154,6 +195,7 @@
                         </div>
                     </div>
                     <button id="start-btn" class="glow-btn">INITIALIZE_SYSTEM</button>
+                    <button id="editor-btn" class="control-btn" style="margin-top: 8px; width: 100%; letter-spacing: 0.15em;">CREATE_AREA (エディタ)</button>
                     <button id="menu-back-btn" class="flat-btn">RETURN_TO_ARCHIVE</button>
                 </div>
             </div>
@@ -179,6 +221,36 @@
                     <span>EMIT_PHOTON</span>
                 </button>
             </footer>
+
+            <!-- PC用のエディタ下部コントロール -->
+            <footer id="editor-controls" class="editor-only hidden">
+                <button id="editor-back-btn" class="icon-btn" title="エディタを終了してタイトルへ">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
+                    <span>MENU</span>
+                </button>
+
+                <div class="editor-tool-group">
+                    <button id="tool-select" class="tool-btn active" title="オブジェクトの移動・選択">
+                        <span>SELECT</span>
+                    </button>
+                    <button id="tool-place" class="tool-btn" title="ギミックパレットから選んで配置">
+                        <span>PLACE</span>
+                    </button>
+                    <button id="tool-erase" class="tool-btn" title="ギミックをタップして削除">
+                        <span>ERASE</span>
+                    </button>
+                </div>
+
+                <button id="editor-clear-btn" class="control-btn" style="color:#ff003c; border-color:#ff003c; min-width:80px;">
+                    <span>CLEAR_ALL</span>
+                </button>
+
+                <button id="editor-test-btn" class="glow-btn active-emit" style="min-width:110px;">
+                    <span>TEST_PLAY</span>
+                </button>
+            </footer>
         </div>
 
         <!-- PC用の右サイドバー -->
@@ -197,6 +269,87 @@
                 <div id="pc-hint-text" class="sidebar-text hint-text">—</div>
             </div>
         </aside>
+
+        <!-- PC用のエディタ右サイドバー -->
+        <aside id="editor-sidebar-right" class="pc-only-sidebar editor-only hidden">
+            <div class="sidebar-header">
+                <span class="cyber-tag">INSPECTOR</span>
+                <h2 class="sidebar-title">PROPERTIES</h2>
+            </div>
+            
+            <div id="inspector-panel" class="sidebar-section">
+                <div class="section-label">◈ オブジェクトプロパティ</div>
+                <div id="inspector-empty" class="sidebar-text">キャンバス上のオブジェクトを選択してください</div>
+                <div id="inspector-details" class="hidden">
+                    <div class="property-group">
+                        <label style="font-size:11px; color:rgba(255,255,255,0.5);">タイプ:</label>
+                        <span id="prop-type" class="prop-val" style="font-weight:bold; color:#00f3ff; margin-left:8px;">-</span>
+                    </div>
+                    
+                    <!-- 放射角度 (Emitter用) -->
+                    <div id="prop-angle-group" class="property-group hidden" style="margin-top:10px;">
+                        <label style="font-size:11px; color:rgba(255,255,255,0.5);">放射角度: <span id="prop-angle-val" style="color:#ffffff;">0</span>°</label>
+                        <input type="range" id="prop-angle" min="0" max="360" value="0" style="width:100%; margin-top:4px;">
+                    </div>
+                    
+                    <!-- 目標カラー (Prism, ColorFilter用) -->
+                    <div id="prop-color-group" class="property-group hidden" style="margin-top:10px;">
+                        <label style="font-size:11px; color:rgba(255,255,255,0.5); display:block; margin-bottom:6px;">目標カラー:</label>
+                        <div class="color-picker-buttons" style="display:flex; gap:8px;">
+                            <button class="color-picker-btn active" data-color="#00f3ff" style="background:#00f3ff; width:24px; height:24px; border:2px solid #ffffff; border-radius:4px; cursor:pointer;"></button>
+                            <button class="color-picker-btn" data-color="#ff003c" style="background:#ff003c; width:24px; height:24px; border:2px solid transparent; border-radius:4px; cursor:pointer;"></button>
+                            <button class="color-picker-btn" data-color="#00ff3c" style="background:#00ff3c; width:24px; height:24px; border:2px solid transparent; border-radius:4px; cursor:pointer;"></button>
+                        </div>
+                    </div>
+
+                    <!-- 往復速度 (Patrol用) -->
+                    <div id="prop-speed-group" class="property-group hidden" style="margin-top:10px;">
+                        <label style="font-size:11px; color:rgba(255,255,255,0.5);">巡回速度: <span id="prop-speed-val" style="color:#ffffff;">70</span>px/s</label>
+                        <input type="range" id="prop-speed" min="20" max="220" value="70" style="width:100%; margin-top:4px;">
+                        <div style="font-size:9px; color:#ffaa00; margin-top:4px; line-height:1.3;">※キャンバス上でオブジェクトを選択し、Shiftキーを押しながらクリックするかドラッグして巡回目的地（ターゲット点）を設定・移動できます。</div>
+                    </div>
+                    
+                    <button id="prop-delete-btn" class="flat-btn" style="margin-top:16px; color:#ff003c; border-color:#ff003c; width:100%; font-size:11px;">このオブジェクトを消去</button>
+                </div>
+            </div>
+
+            <!-- ステージ設定 -->
+            <div class="sidebar-section" style="margin-top:15px;">
+                <div class="section-label">◈ ステージ構成設定</div>
+                <div class="property-group">
+                    <label style="font-size:11px; color:rgba(255,255,255,0.5);">インク容量 (鏡の長さ): <span id="prop-ink-val" style="color:#ffffff;">500</span>px</label>
+                    <input type="range" id="prop-ink" min="150" max="1500" step="50" value="500" style="width:100%; margin-top:4px;">
+                </div>
+            </div>
+
+            <!-- 共有エリア -->
+            <div class="sidebar-section" style="margin-top:15px;">
+                <div class="section-label">◈ 調律コードの共有</div>
+                <button id="editor-import-btn" class="flat-btn" style="width:100%; margin-bottom:8px; font-size:11px;">コードをインポート</button>
+                <button id="editor-export-btn" class="glow-btn" style="width:100%; font-size:11px;" disabled>コードをエクスポート</button>
+                <div id="export-warning" style="font-size:9px; color:#ff007f; margin-top:6px; text-align:center; line-height:1.3;">⚠ 共有コードの発行には、自分でテストプレイを行いクリア検証（調律確認）に成功する必要があります。</div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- インポート/エクスポート用モーダル -->
+    <div id="editor-modal" class="hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">STAGE_CODE_SHARE</h3>
+                <button id="modal-close" class="info-close-btn">✕</button>
+            </div>
+            <div class="modal-body">
+                <p id="modal-desc" class="sidebar-text">調律コードを入力（貼り付け）するか、生成されたコードをコピーしてください。</p>
+                <textarea id="modal-textarea" rows="7" placeholder="ここにLMN-から始まる調律コードを貼り付け、適用ボタンを押してください..." style="width:100%; background:#030308; border:1px solid rgba(0,243,255,0.2); color:#00f3ff; font-family:monospace; padding:8px; border-radius:4px; font-size:11px; resize:none; box-sizing:border-box;"></textarea>
+                <div id="modal-error" class="hidden" style="color:#ff003c; font-size:11px; margin-top:6px; font-weight:bold;">⚠ 不正な調律コード形式です</div>
+            </div>
+            <div class="modal-footer">
+                <button id="modal-action-btn" class="glow-btn">適用する</button>
+                <button id="modal-cancel-btn" class="control-btn">閉じる</button>
+            </div>
+        </div>
     </div>
 
     <div id="toast-container"></div>
