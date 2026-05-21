@@ -7,7 +7,7 @@ const CONFIG = {
     LOGICAL_HEIGHT: 1000,
     COLORS: { RED: '#ff3366', BLUE: '#00c3ff' },
     SHAPES: { CIRCLE: 0, SQUARE: 1 },
-    SIZES: { SMALL: 80, LARGE: 140 },
+    SIZES: { SMALL: 64, LARGE: 164 },
     RULES: { COLOR: '色', SHAPE: '形', SIZE: '大きさ', NUMBER: '数字' }
 };
 
@@ -322,8 +322,6 @@ class GameController {
         const width = this.container.clientWidth;
         const height = this.container.clientHeight;
 
-        CONFIG.LOGICAL_HEIGHT = CONFIG.LOGICAL_WIDTH * (height / width);
-
         this.canvas.width = CONFIG.LOGICAL_WIDTH;
         this.canvas.height = CONFIG.LOGICAL_HEIGHT;
 
@@ -588,20 +586,9 @@ class GameController {
             this.ctx.beginPath(); this.ctx.roundRect(boxWidth + boxWidth/2 - 16, boxY + 14, 32, 32, 6); this.ctx.stroke();
             this.ctx.shadowBlur = 0;
         } else if (this.currentRule === CONFIG.RULES.SIZE) {
-            this.ctx.fillStyle = 'rgba(255,255,255,0.8)';
-            this.ctx.textAlign = 'center';
-            this.ctx.textBaseline = 'middle';
-            this.ctx.font = 'bold 24px "M PLUS Rounded 1c"';
-            this.ctx.fillText('小 (SMALL)', boxWidth/2, boxY + 30);
-            this.ctx.font = 'bold 28px "M PLUS Rounded 1c"';
-            this.ctx.fillText('大 (LARGE)', boxWidth + boxWidth/2, boxY + 30);
+            this.drawSizeGuides(boxWidth, boxY);
         } else if (this.currentRule === CONFIG.RULES.NUMBER) {
-            this.ctx.fillStyle = 'rgba(255,255,255,0.8)';
-            this.ctx.textAlign = 'center';
-            this.ctx.textBaseline = 'middle';
-            this.ctx.font = 'bold 24px "M PLUS Rounded 1c"';
-            this.ctx.fillText('奇数', boxWidth/2, boxY + 30);
-            this.ctx.fillText('偶数', boxWidth + boxWidth/2, boxY + 30);
+            this.drawNumberGuides(boxWidth, boxY);
         }
 
         // 境界線
@@ -626,6 +613,47 @@ class GameController {
         this.ctx.translate(boxWidth, boxY);
         this.ctx.rotate(this.flipperAngleRight);
         this.ctx.beginPath(); this.ctx.moveTo(0, 0); this.ctx.lineTo(boxWidth, 0); this.ctx.stroke();
+        this.ctx.restore();
+    }
+
+    drawSizeGuides(boxWidth, boxY) {
+        this.ctx.save();
+        this.ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+        this.ctx.fillStyle = 'rgba(255,255,255,0.92)';
+        this.ctx.lineWidth = 4;
+        this.ctx.shadowBlur = 10;
+        this.ctx.shadowColor = '#fff';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+
+        this.ctx.beginPath();
+        this.ctx.arc(boxWidth / 2 - 34, boxY + 30, 14, 0, Math.PI * 2);
+        this.ctx.stroke();
+        this.ctx.font = 'bold 22px "M PLUS Rounded 1c"';
+        this.ctx.fillText('小', boxWidth / 2 + 28, boxY + 30);
+
+        this.ctx.beginPath();
+        this.ctx.arc(boxWidth + boxWidth / 2 - 46, boxY + 30, 24, 0, Math.PI * 2);
+        this.ctx.stroke();
+        this.ctx.font = 'bold 28px "M PLUS Rounded 1c"';
+        this.ctx.fillText('大', boxWidth + boxWidth / 2 + 34, boxY + 30);
+        this.ctx.restore();
+    }
+
+    drawNumberGuides(boxWidth, boxY) {
+        this.ctx.save();
+        this.ctx.fillStyle = 'rgba(255,255,255,0.92)';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.shadowBlur = 10;
+        this.ctx.shadowColor = '#fff';
+        this.ctx.font = 'bold 22px "Teko", sans-serif';
+        this.ctx.fillText('1 3 5', boxWidth / 2, boxY + 22);
+        this.ctx.fillText('2 4 6', boxWidth + boxWidth / 2, boxY + 22);
+        this.ctx.shadowBlur = 0;
+        this.ctx.font = 'bold 15px "M PLUS Rounded 1c"';
+        this.ctx.fillText('奇数', boxWidth / 2, boxY + 46);
+        this.ctx.fillText('偶数', boxWidth + boxWidth / 2, boxY + 46);
         this.ctx.restore();
     }
 

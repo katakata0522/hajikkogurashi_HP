@@ -50,6 +50,11 @@ try {
   });
 
   await page.goto(`http://127.0.0.1:${port}/sorting-factory/`, { waitUntil: 'networkidle' });
+  const initialLogicalHeight = await page.evaluate(() => eval('CONFIG.LOGICAL_HEIGHT'));
+  if (initialLogicalHeight !== 1000) {
+    throw new Error(`logical height should stay fixed across aspect ratios: ${initialLogicalHeight}`);
+  }
+
   await page.tap('#start-btn');
   await page.waitForFunction(() => !document.querySelector('#score-hud').classList.contains('hidden'));
   await page.waitForTimeout(1700);

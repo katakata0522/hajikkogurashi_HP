@@ -37,6 +37,7 @@ class AudioManager {
         this.audioCtx = null;
         this.skidOscillator = null;
         this.skidGain = null;
+        this.skidIsRain = false;
     }
 
     init() {
@@ -96,22 +97,28 @@ class AudioManager {
         osc.stop(now + 0.6);
     }
 
-    playSkidStart() {
+    playSkidStart(weather) {
         if (!this.audioCtx || this.skidOscillator) return;
         const now = this.audioCtx.currentTime;
+        const isRain = weather?.name.includes('RAIN');
+        this.skidIsRain = isRain;
         
-        // 高音の摩擦悲鳴（キキキーッ）をリアルに表現するため、2つの波形オシレーターをミックス
-        const { osc, gain } = this._createOscillator('sawtooth', 850);
+        const primaryFreq = isRain ? 360 : 850;
+        const secondaryFreq = isRain ? 720 : 1700;
+        const primaryGain = isRain ? 0.035 : 0.06;
+        const secondaryGain = isRain ? 0.012 : 0.03;
+
+        const { osc, gain } = this._createOscillator(isRain ? 'triangle' : 'sawtooth', primaryFreq);
         const osc2 = this.audioCtx.createOscillator();
         const gain2 = this.audioCtx.createGain();
-        osc2.type = 'triangle';
-        osc2.frequency.setValueAtTime(1700, now);
+        osc2.type = isRain ? 'sine' : 'triangle';
+        osc2.frequency.setValueAtTime(secondaryFreq, now);
         
         osc2.connect(gain2);
         gain2.connect(this.audioCtx.destination);
         
-        gain.gain.setValueAtTime(0.06, now);
-        gain2.gain.setValueAtTime(0.03, now);
+        gain.gain.setValueAtTime(primaryGain, now);
+        gain2.gain.setValueAtTime(secondaryGain, now);
         
         osc.start(now);
         osc2.start(now);
@@ -126,14 +133,16 @@ class AudioManager {
         if (this.skidOscillator && speed > 0 && this.audioCtx) {
             const now = this.audioCtx.currentTime;
             // 速度低下に合わせて摩擦ピッチがキキーと変化するよう動的に制御
-            const baseFreq = Math.max(250, (speed / 2000) * 600 + 250);
+            const baseFreq = this.skidIsRain
+                ? Math.max(160, (speed / 2000) * 260 + 160)
+                : Math.max(250, (speed / 2000) * 600 + 250);
             
-            // ビブラート（高速揺れ）を加えてタイヤがアスファルトを削る粗い摩擦感を再現
-            const vibrato = Math.sin(now * 60) * 20;
+            const vibrato = this.skidIsRain ? Math.sin(now * 28) * 8 : Math.sin(now * 60) * 20;
             this.skidOscillator.frequency.setValueAtTime(baseFreq + vibrato, now);
             
             if (this.skidOscillator2) {
-                this.skidOscillator2.frequency.setValueAtTime((baseFreq * 2) + vibrato, now);
+                const multiplier = this.skidIsRain ? 1.55 : 2;
+                this.skidOscillator2.frequency.setValueAtTime((baseFreq * multiplier) + vibrato, now);
             }
         }
     }
@@ -145,6 +154,7 @@ class AudioManager {
             this.skidOscillator.stop(now + 0.1);
             this.skidOscillator = null;
             this.skidGain = null;
+            this.skidIsRain = false;
             
             if (this.skidOscillator2) {
                 this.skidGain2.gain.linearRampToValueAtTime(0, now + 0.1);
@@ -261,25 +271,25 @@ class UIManager {
             this.rankText.innerText = '神回避！！🔥';
             this.rankText.classList.add('rank-perfect');
         } else if (dist < 3.0) {
-            this.rankText.innerText = '凄腕ドライバー🚗💨';
-            this.rankText.classList.add('rank-success');
+            this.rankText.innerText = '崖際マスター🚗💨';
+            this.rankText.classList.add('rank-perfect');
         } else if (percent < 5) {
-            this.rankText.innerText = 'ナイス・ブレーキ👍';
+            this.rankText.innerText = 'ブレーキ職人✨';
             this.rankText.classList.add('rank-success');
-        } else if (percent < 10) {
-            this.rankText.innerText = '攻めたブレーキ⚡';
+        } else if (percent < 12) {
+            this.rankText.innerText = '攻めの一踏み⚡';
             this.rankText.classList.add('rank-success');
-        } else if (percent < 18) {
-            this.rankText.innerText = 'セーフティドライバー🔰';
+        } else if (percent < 25) {
+            this.rankText.innerText = '勝負勘ドライバー🎯';
             this.rankText.classList.add('rank-success');
-        } else if (percent < 30) {
-            this.rankText.innerText = 'まだまだ攻められる💪';
-            this.rankText.classList.add('rank-chicken');
-        } else if (percent < 45) {
+        } else if (percent < 40) {
+            this.rankText.innerText = '余裕残しの完走🏁';
+            this.rankText.classList.add('rank-success');
+        } else if (percent < 60) {
+            this.rankText.innerText = '堅実ブレーキ🛞';
+            this.rankText.classList.add('rank-success');
+        } else if (percent < 80) {
             this.rankText.innerText = 'ビビリ運転手🔰';
-            this.rankText.classList.add('rank-chicken');
-        } else if (percent < 65) {
-            this.rankText.innerText = 'チキン野郎🐔';
             this.rankText.classList.add('rank-chicken');
         } else {
             this.rankText.innerText = '歩いた方がマシ🐌';
@@ -371,7 +381,8 @@ class GameController {
             speed: 0,
             width: CONFIG.PLAYER_SIZE * 2,
             height: CONFIG.PLAYER_SIZE,
-            color: '#00f2fe'
+            color: '#00f2fe',
+            fallAngle: 0
         };
 
         this.initCanvas();
@@ -459,7 +470,6 @@ class GameController {
             { x: Math.max(0, CONFIG.CLIFF_X - 9000), text: 'あと 90m' },
             { x: Math.max(0, CONFIG.CLIFF_X - 6000), text: 'あと 60m' },
             { x: Math.max(0, CONFIG.CLIFF_X - 3000), text: 'あと 30m' },
-            { x: Math.max(0, CONFIG.CLIFF_X - 1000), text: 'あと 10m' },
             { x: Math.max(0, CONFIG.CLIFF_X - 1500), text: '⚠️ DANGER!' }
         ];
 
@@ -468,6 +478,7 @@ class GameController {
         this.player.x = 20;
         this.player.y = CONFIG.GROUND_Y - CONFIG.PLAYER_SIZE; // 落下後の再スタート時に車が画面外に取り残されるバグを修正
         this.player.speed = 0;
+        this.player.fallAngle = 0;
         this.cameraX = 0;
         this.screenShake = 0;
         this.particles.clear();
@@ -486,7 +497,7 @@ class GameController {
     }
 
     triggerBrake() {
-        this.audio.playSkidStart();
+        this.audio.playSkidStart(this.weather);
         this.state = STATE.BRAKING;
         this.ui.setStatusBrake();
     }
@@ -499,6 +510,7 @@ class GameController {
         
         let fallSpeedY = 0;
         let fallSpeedX = this.player.speed > 200 ? this.player.speed : 200;
+        let fallAngularVelocity = Math.min(5.5, Math.max(2.4, fallSpeedX / 900));
         
         const fallAnim = (timestamp) => {
             if(!this.lastTime) this.lastTime = timestamp;
@@ -510,6 +522,8 @@ class GameController {
 
             this.player.x += fallSpeedX * dt;
             this.player.y += fallSpeedY * dt;
+            this.player.fallAngle += fallAngularVelocity * dt;
+            fallAngularVelocity += 1.4 * dt;
             fallSpeedY += 1500 * dt;
 
             this.draw();
@@ -860,6 +874,11 @@ class GameController {
             this.ctx.translate((Math.random() - 0.5) * this.screenShake, (Math.random() - 0.5) * this.screenShake);
         }
         const screenX = this.player.x - this.cameraX;
+        if (this.player.fallAngle) {
+            this.ctx.translate(screenX + this.player.width / 2, this.player.y + this.player.height / 2);
+            this.ctx.rotate(this.player.fallAngle);
+            this.ctx.translate(-(screenX + this.player.width / 2), -(this.player.y + this.player.height / 2));
+        }
         
         // 1. アンダーグロー（サイバーパンクな底面発光）
         this.ctx.fillStyle = 'rgba(0, 242, 254, 0.18)';

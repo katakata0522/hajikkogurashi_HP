@@ -73,3 +73,27 @@ assert.match(
   /handleCanvasPointer\(e\)\s*\{[\s\S]*?const direction = clientX < rect\.left \+ rect\.width \/ 2 \? -1 : 1;[\s\S]*?this\.processInput\(direction\);/,
   'canvas pointer fallback should sort by left/right half'
 );
+
+assert.doesNotMatch(
+  script,
+  /CONFIG\.LOGICAL_HEIGHT\s*=\s*CONFIG\.LOGICAL_WIDTH\s*\*\s*\(height\s*\/\s*width\)/,
+  'logical playfield height should not change with device aspect ratio'
+);
+
+assert.match(
+  script,
+  /SIZES:\s*\{\s*SMALL:\s*64,\s*LARGE:\s*164\s*\}/,
+  'size rule should use a larger visual gap for fast recognition'
+);
+
+assert.match(
+  script,
+  /drawSizeGuides\(/,
+  'size rule should draw visual reference guides in the bins'
+);
+
+assert.match(
+  script,
+  /1\s+3\s+5[\s\S]*2\s+4\s+6/,
+  'number rule should show example digits, not only odd/even text'
+);

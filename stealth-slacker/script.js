@@ -4,7 +4,13 @@
 
 const CONFIG = {
     LOGICAL_WIDTH: 600,
-    LOGICAL_HEIGHT: 800
+    LOGICAL_HEIGHT: 800,
+    MIN_WARNING_TIME: 400,
+    DOUBLE_TURN_DELAY_MIN: 500,
+    DOUBLE_TURN_DELAY_MAX: 800,
+    DOUBLE_TURN_WARNING_MIN: 500,
+    DOUBLE_TURN_WARNING_MAX: 650,
+    SAFE_SLACK_AFTER_LOOK_MS: 450
 };
 
 const STATE = { START: 0, PLAYING: 1, GAMEOVER: 2 };
@@ -299,11 +305,12 @@ class GameController {
         this.currentWarningTime = 1000;
         this.doubleTurnPending = false;
         this.doubleTurnSetup = false;
+        this.safeSlackingTimer = 0;
         
         this.isSlacking = false;
         this.score = 0;
         this.stress = 0; // 0 to 100
-        this.stressRate = 18; // Increase per second when working
+        this.stressRate = 16; // Increase per second when working
         this.reliefRate = 40; // Decrease per second when slacking
 
         this.animationId = null;
@@ -444,6 +451,7 @@ class GameController {
         this.stress = 0;
         this.doubleTurnPending = false;
         this.doubleTurnSetup = false;
+        this.safeSlackingTimer = 0;
         this.bossTimer = this.getRandomInt(2000, 4000); 
         this.isSlacking = false;
         this.floatingTexts = [];
@@ -496,13 +504,17 @@ class GameController {
             this.screenShake -= 50 * dt;
             if (this.screenShake < 0) this.screenShake = 0;
         }
+        if (this.safeSlackingTimer > 0) {
+            this.safeSlackingTimer = Math.max(0, this.safeSlackingTimer - dtMs);
+        }
 
         // --- Stress Update ---
         if (this.isSlacking) {
             this.stress -= this.reliefRate * dt;
             if (this.stress < 0) this.stress = 0;
         } else {
-            this.stress += this.stressRate * dt;
+            const stressRate = this.safeSlackingTimer > 0 ? 0 : this.stressRate;
+            this.stress += stressRate * dt;
             if (this.stress >= 100) {
                 this.triggerGameOver('karoushi');
                 return;
@@ -558,10 +570,10 @@ class GameController {
                 const difficulty = Math.min(this.score / 50000, 1); // 0 to 1
 
                 if (this.doubleTurnPending) {
-                    // 二段振り向き発動（超速）
+                    // 二段振り向き発動。短すぎる即死ではなく、読める強攻撃にする。
                     this.isFeint = false;
                     this.bossState = BOSS.WARNING;
-                    this.currentWarningTime = 200; // 超短い猶予
+                    this.currentWarningTime = this.getRandomInt(CONFIG.DOUBLE_TURN_WARNING_MIN, CONFIG.DOUBLE_TURN_WARNING_MAX);
                     this.bossTimer = this.currentWarningTime;
                     this.audio.playEffect('warning');
                     this.doubleTurnPending = false;
@@ -571,7 +583,7 @@ class GameController {
                         // フェイント
                         this.isFeint = true;
                         this.bossState = BOSS.WARNING;
-                        this.currentWarningTime = 800 - (difficulty * 300);
+                        this.currentWarningTime = Math.max(CONFIG.MIN_WARNING_TIME, 800 - (difficulty * 300));
                         this.bossTimer = this.currentWarningTime;
                         this.audio.playEffect('warning');
                     } else if (rand < 0.3 + (difficulty * 0.15) && difficulty > 0.1) {
@@ -579,7 +591,7 @@ class GameController {
                         this.isFeint = false;
                         this.doubleTurnSetup = true;
                         this.bossState = BOSS.WARNING;
-                        this.currentWarningTime = Math.max(300, 1000 - (difficulty * 500));
+                        this.currentWarningTime = Math.max(CONFIG.MIN_WARNING_TIME, 1000 - (difficulty * 500));
                         this.bossTimer = this.currentWarningTime;
                         this.audio.playEffect('warning');
                     } else {
@@ -587,7 +599,7 @@ class GameController {
                         this.isFeint = false;
                         const isFast = Math.random() < difficulty; 
                         this.bossState = BOSS.WARNING;
-                        this.currentWarningTime = isFast ? Math.max(250, 600 - (difficulty * 200)) : 1000 + Math.random() * 500;
+                        this.currentWarningTime = isFast ? Math.max(CONFIG.MIN_WARNING_TIME, 700 - (difficulty * 300)) : 1000 + Math.random() * 500;
                         this.bossTimer = this.currentWarningTime;
                         this.audio.playEffect('warning');
                     }
@@ -612,8 +624,9 @@ class GameController {
             }
             if (this.bossTimer <= 0) {
                 this.bossState = BOSS.AWAY;
+                this.safeSlackingTimer = CONFIG.SAFE_SLACK_AFTER_LOOK_MS;
                 if (this.doubleTurnSetup) {
-                    this.bossTimer = 150; // 振り向いてすぐにもう一度！
+                    this.bossTimer = this.getRandomInt(CONFIG.DOUBLE_TURN_DELAY_MIN, CONFIG.DOUBLE_TURN_DELAY_MAX);
                     this.doubleTurnPending = true;
                     this.doubleTurnSetup = false;
                 } else {

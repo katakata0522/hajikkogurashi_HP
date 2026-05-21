@@ -60,6 +60,18 @@ assert.match(
   'zero-point games should not be saved as a best score'
 );
 
+assert.match(script, /stressRate\s*=\s*16/, 'working stress should rise at the requested gentler rate');
+assert.match(script, /MIN_WARNING_TIME:\s*400/, 'boss warnings should keep a human-reactable lower bound');
+assert.match(script, /DOUBLE_TURN_WARNING_MIN:\s*500/, 'double-turn warnings should not be instant deaths');
+assert.match(script, /DOUBLE_TURN_DELAY_MIN:\s*500/, 'double-turn follow-ups should leave a readable gap');
+assert.match(
+  script,
+  /safeSlackingTimer\s*=\s*CONFIG\.SAFE_SLACK_AFTER_LOOK_MS/,
+  'boss departure should grant a short safe slacking window'
+);
+assert.doesNotMatch(script, /currentWarningTime\s*=\s*200/, 'double-turn warning should not use the old 200ms trap');
+assert.doesNotMatch(script, /bossTimer\s*=\s*150/, 'double-turn delay should not use the old 150ms trap');
+
 assert.match(
   script,
   /showShareFeedback\(/,
