@@ -1072,6 +1072,26 @@ body {
     opacity: 0.8;
 }
 
+.gimmick-visual.block {
+    border-color: rgba(255, 0, 60, 0.4);
+    background: rgba(3, 3, 8, 0.85);
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.9), 0 0 6px rgba(255, 0, 60, 0.2);
+}
+
+.gimmick-visual.block::after {
+    content: 'BLOCK';
+    font-family: 'Inter', monospace;
+    font-size: 8px;
+    font-weight: bold;
+    color: #ff003c;
+    text-shadow: 0 0 8px rgba(255, 0, 60, 0.9);
+    border: 1.5px solid #ff003c;
+    padding: 2px 4px;
+    border-radius: 3px;
+    letter-spacing: 0.05em;
+    background: rgba(255, 0, 60, 0.05);
+}
+
 .gimmick-info {
     flex: 1;
 }

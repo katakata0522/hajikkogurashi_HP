@@ -7,7 +7,7 @@ const CONFIG = {
     WIDTH: 600,
     HEIGHT: 800,
     MAX_REFLECTIONS: 14,
-    LASER_SPEED: 3600,   // doubled from 1800
+    LASER_SPEED: 7200,   // quadrupled from original 1800, doubled from 3600
     PARTICLE_COUNT: 30,
 };
 
@@ -501,6 +501,71 @@ class Wormhole {
     containsEntrance(p) { return dist(p, this.inPort) <= this.radius; }
 }
 
+class Block {
+    constructor(x, y, radius = 18) {
+        this.x = x;
+        this.y = y;
+        this.radius = radius;
+        this.angle = 0;
+    }
+
+    update(dt) {
+        this.angle += 1.2 * dt;
+    }
+
+    draw(ctx) {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.angle);
+
+        // 外周のデジタル八角形ネオン
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = 'rgba(255, 0, 60, 0.85)';
+        ctx.strokeStyle = '#ff003c';
+        ctx.lineWidth = 2.0;
+
+        ctx.beginPath();
+        for (let i = 0; i < 8; i++) {
+            const angle = (i * Math.PI) / 4;
+            const px = Math.cos(angle) * this.radius;
+            const py = Math.sin(angle) * this.radius;
+            if (i === 0) ctx.moveTo(px, py);
+            else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.stroke();
+
+        // 漆黒の障壁
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#030308';
+        ctx.beginPath();
+        ctx.arc(0, 0, this.radius - 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // ハニカム調グリッド
+        ctx.strokeStyle = 'rgba(255, 0, 60, 0.2)';
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.moveTo(-this.radius + 4, 0); ctx.lineTo(this.radius - 4, 0);
+        ctx.moveTo(0, -this.radius + 4); ctx.lineTo(0, this.radius - 4);
+        ctx.stroke();
+
+        // 中央の警告テキスト (回転を打ち消す)
+        ctx.rotate(-this.angle);
+        ctx.fillStyle = '#ff003c';
+        ctx.font = "bold 9px 'Inter', sans-serif";
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('BLOCK', 0, 0);
+
+        ctx.restore();
+    }
+
+    containsPoint(p) {
+        return dist(p, this) <= this.radius;
+    }
+}
+
 class ParticleSystem {
     constructor() { this.particles = []; }
 
@@ -557,11 +622,13 @@ const STAGE_TEMPLATES = [
         story: "システム起動——調律者よ、幾何学アーカイブへようこそ。まずは基本から。虚空に鏡を引き、光の経路を紡ぎ出せ。",
         objective: "放射された光子を、右下の結晶（PRISM）へ届けよ",
         gimmickList: [
-            { type: 'mirror', name: 'MIRROR', desc: 'ドラッグで鏡を引く。光は鏡面で角度の法則に従い完全反射する。インクを節約するほど高ランクが狙える。' }
+            { type: 'mirror', name: 'MIRROR (鏡)', desc: '銀の反射面。ドラッグで配置し、完全反射の幾何学を利用して光を屈折させる。' },
+            { type: 'blackhole', name: 'EMITTER (発射台)', desc: '調律エネルギー光子の射出基部。自動で一方向に光線を放ち続ける。' },
+            { type: 'wormhole', name: 'PRISM (結晶)', desc: '調律終着点。光子がここに到達すると、空間の共鳴が完了しステージクリアとなる。' }
         ],
         emitter: { x: 80, y: 150, angle: 0 },
         prism: { x: 520, y: 650, radius: 20 },
-        blackholes: [], portals: [],
+        blackholes: [], portals: [], blocks: [],
         parMirrorLength: 220, inkCapacity: 520,
         tutorialStage: true,
         hints: ["斜めに銀の鏡を引いて、光を右下の結晶へ導け"]
@@ -574,11 +641,13 @@ const STAGE_TEMPLATES = [
         story: "第一の調律完了。次の課題——二段階の反射を制御せよ。光の角度は鏡の傾きが支配する。計算せよ。",
         objective: "二回以上の反射を経由させて、左の結晶（PRISM）へ届けよ",
         gimmickList: [
-            { type: 'mirror', name: 'MIRROR ×2', desc: '二枚の鏡を使って光を誘導する。鏡を置く順番と角度で、届く先が決まる。' }
+            { type: 'mirror', name: 'MIRROR (鏡)', desc: '二枚の鏡を組み合わせて光を誘導する。鏡を置く順番と角度で届く先が決まる。' },
+            { type: 'blackhole', name: 'EMITTER (発射台)', desc: '斜め45度に向けて光子を射出する。' },
+            { type: 'wormhole', name: 'PRISM (結晶)', desc: 'パズルをクリアするために、効率的な二段階反射ルートを構築せよ。' }
         ],
         emitter: { x: 80, y: 150, angle: Math.PI * 0.25 },
         prism: { x: 500, y: 150, radius: 20 },
-        blackholes: [], portals: [],
+        blackholes: [], portals: [], blocks: [],
         parMirrorLength: 360, inkCapacity: 620,
         hints: ["光を二段階反射させて、ターゲットへと紡ぎ戻せ"]
     },
@@ -590,13 +659,14 @@ const STAGE_TEMPLATES = [
         story: "警告——ブラックホールが近傍に出現した。その超重力場は光すら歪める。引力圏の外に、安全な経路を構築せよ。",
         objective: "重力に吸収されずに、右の結晶へ届けよ。引力圏（点線）の外側を迂回せよ",
         gimmickList: [
-            { type: 'mirror', name: 'MIRROR', desc: '迂回路を作る鏡を配置せよ。' },
-            { type: 'blackhole', name: 'BLACK HOLE', desc: '引力圏（点線）内に入った光は軌道が歪む。中心に触れた光は消滅する。⚠ GRAVITY FIELD を迂回せよ。' }
+            { type: 'blackhole', name: 'BLACK HOLE (重力特異点)', desc: '強力な重力場を展開し、光子の軌道を湾曲させる。コアに接触した光子は消滅する。' },
+            { type: 'mirror', name: 'MIRROR (鏡)', desc: '重力による湾曲を計算し、軌道を微調整するための鏡を引け。' },
+            { type: 'wormhole', name: 'PRISM (結晶)', desc: '重力圏（点線）を巧みに迂回するルート上に配置されている。' }
         ],
         emitter: { x: 80, y: 400, angle: 0 },
         prism: { x: 520, y: 400, radius: 20 },
         blackholes: [{ x: 300, y: 400, mass: 75, radius: 140 }],
-        portals: [],
+        portals: [], blocks: [],
         parMirrorLength: 420, inkCapacity: 680,
         hints: ["⚠ 点線の重力圏の外側を通るよう鏡を配置しよう", "光は引力圏に近づくと曲がる。迂回ルートを作れ"]
     },
@@ -608,13 +678,15 @@ const STAGE_TEMPLATES = [
         story: "空間に亀裂が生じた——ワームホールだ。青い入口へ光を当てよ。次の瞬間、それはオレンジの出口から同じ角度で飛び出す。",
         objective: "ポータル（青→橙）を経由させて、右下の結晶へ届けよ",
         gimmickList: [
-            { type: 'mirror', name: 'MIRROR', desc: 'ポータルへ光を向けるための鏡を引け。' },
-            { type: 'wormhole', name: 'WORMHOLE', desc: 'PORT_IN（青）へ入った光はPORT_OUT（橙）から同じ速度・同じ角度で出現する。方向転換はしない。' }
+            { type: 'wormhole', name: 'WORMHOLE (ワームホール)', desc: '青（IN）に進入した光子は、角度・速度を維持したまま即座に橙（OUT）より再射出される。' },
+            { type: 'mirror', name: 'MIRROR (鏡)', desc: 'ポータルの入口へ光を正しく導くための反射経路を作成する。' },
+            { type: 'blackhole', name: 'EMITTER (発射台)', desc: '直接ポータルに届かない角度で配置されている。鏡による中継が必要。' }
         ],
         emitter: { x: 80, y: 150, angle: Math.PI * 0.15 },
         prism: { x: 520, y: 650, radius: 20 },
         blackholes: [],
         portals: [{ inX: 300, inY: 280, outX: 180, outY: 580 }],
+        blocks: [],
         parMirrorLength: 350, inkCapacity: 620,
         hints: ["青いポータル(PORT_IN)に光を当てよ", "光はオレンジ(PORT_OUT)から同じ角度で飛び出す"]
     },
@@ -622,48 +694,62 @@ const STAGE_TEMPLATES = [
         id: 4,
         name: "CELESTIAL_DESIGNS",
         displayName: "TUNING_05: CELESTIAL_DESIGNS",
-        gimmicks: "BH + ワームホール",
-        story: "重力の井戸と次元の裂け目が同時に存在する。すべての障害を利用、あるいは回避して、光を目的地へ運べ。",
-        objective: "ブラックホールを避けつつ、ポータルを活用して結晶へ届けよ",
+        gimmicks: "BH + WH + 遮光ブロック",
+        story: "重力の井戸、次元の裂け目、そして光を吸い込む絶対障壁。すべての障害を解き明かし、唯一の調律経路を見出せ。",
+        objective: "絶対障壁を避けつつ、重力を迂回し、ポータルを活用して結晶へ届けよ",
         gimmickList: [
-            { type: 'blackhole', name: 'BLACK HOLE', desc: '引力圏を迂回するか、ギリギリを掠めて方向転換に利用せよ。' },
-            { type: 'wormhole', name: 'WORMHOLE', desc: '戦略的にポータルを通過させ、最短経路を構築せよ。' }
+            { type: 'block', name: 'BLOCK (遮光障壁) [NEW]', desc: '漆黒の幾何学ブロック。重力による歪みを発生させず、接触した光子を即座に遮断・消滅させる絶対障壁。' },
+            { type: 'blackhole', name: 'BLACK HOLE (重力特異点)', desc: '引力圏を完全に迂回するか、あるいはギリギリをかすめて重力スイングバイに利用せよ。' },
+            { type: 'wormhole', name: 'WORMHOLE (ワームホール)', desc: '絶対障壁を突破するために、戦略的にポータルを経由させよ。' },
+            { type: 'mirror', name: 'MIRROR (鏡)', desc: '狭い安全地帯に鏡を引き、極めて精密な軌道制御を試みよ。' }
         ],
         emitter: { x: 80, y: 120, angle: 0 },
         prism: { x: 520, y: 700, radius: 20 },
         blackholes: [{ x: 250, y: 550, mass: 90, radius: 150 }],
         portals: [{ inX: 520, inY: 180, outX: 120, outY: 420 }],
+        blocks: [
+            { x: 360, y: 300, radius: 18 },
+            { x: 150, y: 680, radius: 18 }
+        ],
         parMirrorLength: 500, inkCapacity: 820,
-        hints: []
+        hints: ["遮光ブロック（赤い障壁）に当たると光は消滅する。慎重に避けて進もう"]
     },
     {
         id: 5,
         name: "MIRROR_MAZE",
         displayName: "TUNING_06: MIRROR_MAZE",
-        gimmicks: "精密多重反射",
-        story: "精密さだけが生き残る。複雑な反射経路を組み上げ、見えない迷路を光で照らし出せ。",
-        objective: "多重反射とポータルを組み合わせて、右上の結晶へ届けよ",
+        gimmicks: "精密多重反射 + 障壁迷路",
+        story: "絶対障壁によって幾何学空間が分断されている。複雑な反射経路を組み上げ、目に見えない光の迷路を照らし出せ。",
+        objective: "複数の遮光ブロックで形成された迷路を抜け、ポータルを繋いで右上の結晶へ届けよ",
         gimmickList: [
-            { type: 'mirror', name: 'MIRROR（多重）', desc: '複数の鏡を精密に配置して経路を構築せよ。インクの使い方が鍵。' },
-            { type: 'wormhole', name: 'WORMHOLE', desc: '空間転送を組み合わせることで、短い経路が見えてくる。' }
+            { type: 'block', name: 'BLOCK (遮光障壁)', desc: '迷路の壁として機能する絶対障壁。僅かな隙間を通す精密な角度設計が求められる。' },
+            { type: 'mirror', name: 'MIRROR (鏡)', desc: '複数の鏡を精密に配置して、迷路の角を直角または鋭角に曲がる光路を構築する。' },
+            { type: 'wormhole', name: 'WORMHOLE (ワームホール)', desc: '絶対障壁で遮られた対角のエリアへ光子を転送するキーデバイス。' }
         ],
         emitter: { x: 80, y: 700, angle: -Math.PI * 0.35 },
         prism: { x: 520, y: 100, radius: 20 },
         blackholes: [],
         portals: [{ inX: 480, inY: 500, outX: 120, outY: 250 }],
+        blocks: [
+            { x: 300, y: 380, radius: 20 },
+            { x: 320, y: 150, radius: 20 },
+            { x: 180, y: 550, radius: 16 }
+        ],
         parMirrorLength: 480, inkCapacity: 750,
-        hints: []
+        hints: ["遮光障壁の間には、光子が通り抜けられる微小な隙間が存在する"]
     },
     {
         id: 6,
         name: "SINGULARITY",
         displayName: "TUNING_07: SINGULARITY",
-        gimmicks: "BH×2 + ワームホール",
-        story: "最終試練——二つの特異点が空間を掌握している。ワームホールを制し、二つの重力場を乗り越えよ。残存する光だけが、終着点に辿り着く。",
-        objective: "二つのブラックホールとワームホールをすべて攻略して、右下の結晶へ届けよ",
+        gimmicks: "極大重力 + 絶対障壁の崩壊",
+        story: "最終試練——二つの特異点と絶対障壁が、空間の安定性を崩壊させようとしている。幾何学調律の極致を示し、終着点へ導け。",
+        objective: "二つの重力特異点と遮光障壁をすべて攻略し、次元転送を駆使してクリアせよ",
         gimmickList: [
-            { type: 'blackhole', name: 'BLACK HOLE ×2', desc: '二つの重力場が互いに干渉する。慎重に経路を選べ。重力を方向転換に活用する高度な攻略も存在する。' },
-            { type: 'wormhole', name: 'WORMHOLE', desc: '次元転送を活用しなければ突破は難しい。ポータルの出口位置を意識して設計せよ。' }
+            { type: 'blackhole', name: 'BLACK HOLE (重力特異点)', desc: '二つの強力な重力場が干渉し合う。スイングバイの湾曲軌道を計算せよ。' },
+            { type: 'block', name: 'BLOCK (遮光障壁)', desc: '重力で曲げられた光線が最も衝突しやすい位置に配置された絶対障壁。' },
+            { type: 'wormhole', name: 'WORMHOLE (ワームホール)', desc: '重力井戸を飛び越え、最終エリアに光子を送り出すための次元の裂け目。' },
+            { type: 'mirror', name: 'MIRROR (鏡)', desc: 'インクの残り具合（鏡の全長）がシビア。最も効率的な経路を構築せよ。' }
         ],
         emitter: { x: 80, y: 400, angle: -Math.PI * 0.2 },
         prism: { x: 520, y: 650, radius: 20 },
@@ -672,8 +758,12 @@ const STAGE_TEMPLATES = [
             { x: 420, y: 500, mass: 70, radius: 130 }
         ],
         portals: [{ inX: 300, inY: 180, outX: 480, outY: 300 }],
+        blocks: [
+            { x: 300, y: 350, radius: 18 },
+            { x: 250, y: 580, radius: 18 }
+        ],
         parMirrorLength: 600, inkCapacity: 900,
-        hints: []
+        hints: ["重力による湾曲と、遮光ブロックの位置関係を見極めよ"]
     }
 ];
 
@@ -693,6 +783,7 @@ class GameController {
         this.prism = null;
         this.blackholes = [];
         this.portals = [];
+        this.blocks = [];
 
         this.isDrawing = false;
         this.drawStart = { x: 0, y: 0 };
@@ -1005,6 +1096,7 @@ class GameController {
         this.prism = new Prism(tmpl.prism.x, tmpl.prism.y, tmpl.prism.radius);
         this.blackholes = (tmpl.blackholes || []).map(b => new BlackHole(b.x, b.y, b.mass, b.radius));
         this.portals = (tmpl.portals || []).map(p => new Wormhole(p.inX, p.inY, p.outX, p.outY));
+        this.blocks = (tmpl.blocks || []).map(b => new Block(b.x, b.y, b.radius || 18));
 
         this.mirrors = [];
         this.maxInkForStage = tmpl.inkCapacity || 500;
@@ -1131,6 +1223,20 @@ class GameController {
                 }
             }
 
+            // Block collisions (Laser Obstacle)
+            let hitBlock = false;
+            for (const b of this.blocks) {
+                if (b.containsPoint(pt)) {
+                    this.reflectionPoints.push({ x: pt.x, y: pt.y, type: 'block' });
+                    hitBlock = true;
+                    break;
+                }
+            }
+            if (hitBlock) {
+                this.laserCache.push({ ...pt });
+                break;
+            }
+
             // Boundary
             if (next.x < -15 || next.x > CONFIG.WIDTH + 15 || next.y < -15 || next.y > CONFIG.HEIGHT + 15) {
                 this.laserCache.push(next); break;
@@ -1243,6 +1349,7 @@ class GameController {
         if (this.prism) this.prism.update(dt);
         this.particles.update(dt);
         if (this.portals) this.portals.forEach(p => p.update(dt));
+        if (this.blocks) this.blocks.forEach(b => b.update(dt));
 
         // Chain flash update
         if (this.chainFlashQueue.length > 0) {
@@ -1294,6 +1401,15 @@ class GameController {
                                     this.calculateLaserPath();
                                     this.updateHUD();
                                 }, 800);
+                            } else if (evt.type === 'block') {
+                                this.state = STATE.PLAYING;
+                                this.particles.spawn(next.x, next.y, '#ff003c', 25);
+                                audio.playCrystalClang(next.x);
+                                this.showToast("障壁に衝突。光子は消滅しました");
+                                setTimeout(() => {
+                                    this.calculateLaserPath();
+                                    this.updateHUD();
+                                }, 800);
                             }
                         }
                     }
@@ -1325,6 +1441,7 @@ class GameController {
         this.prism.draw(this.ctx);
         this.blackholes.forEach(bh => bh.draw(this.ctx));
         this.portals.forEach(p => p.draw(this.ctx));
+        this.blocks.forEach(b => b.draw(this.ctx));
 
         // Tutorial overlay (only STG1 with no mirrors)
         if (this.currentStageIdx === 0 && this.state === STATE.PLAYING && this.mirrors.length === 0 && !this.isDrawing) {
