@@ -6,10 +6,9 @@
 const CONFIG = {
     WIDTH: 600,
     HEIGHT: 800,
-    MAX_REFLECTIONS: 12,
-    LASER_SPEED: 1800, // px per second (faster & smoother)
+    MAX_REFLECTIONS: 14,
+    LASER_SPEED: 1800, // px per second
     PARTICLE_COUNT: 30,
-    MAX_INK: 450, // maximum ink length in px
 };
 
 const STATE = {
@@ -19,7 +18,7 @@ const STATE = {
     CLEAR: 3,
 };
 
-// --- Web Audio API Synth (3D Stereo ASMR & Crystal Sound) ---
+// --- Web Audio API Synth (3D Stereo ASMR, Portal Warp & Crystal Sound) ---
 class AudioManager {
     constructor() {
         this.ctx = null;
@@ -37,11 +36,10 @@ class AudioManager {
         this.setupIceSynth();
     }
 
-    // Line drawing sound (ASMR: Scratchy ice dust noise)
     setupIceSynth() {
         if (!this.ctx) return;
 
-        // Generate 2 seconds of high quality white noise
+        // Generate 2 seconds of high quality white noise for ASMR
         const bufferSize = this.ctx.sampleRate * 2;
         const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
         const data = buffer.getChannelData(0);
@@ -53,14 +51,13 @@ class AudioManager {
         noise.buffer = buffer;
         noise.loop = true;
 
-        // Filter to make it sound thin, icy and scratchy
         this.iceFilter = this.ctx.createBiquadFilter();
         this.iceFilter.type = 'bandpass';
-        this.iceFilter.frequency.value = 3500; // high frequency scratch
+        this.iceFilter.frequency.value = 3500;
         this.iceFilter.Q.value = 8.0;
 
         this.iceGain = this.ctx.createGain();
-        this.iceGain.gain.value = 0; // starts silent
+        this.iceGain.gain.value = 0; // silent
 
         // 3D Stereo Panning
         if (this.ctx.createStereoPanner) {
@@ -83,7 +80,6 @@ class AudioManager {
 
     updatePan(x) {
         if (!this.ctx || !this.icePanner) return;
-        // Map X coordinate (0 to 600) to Pan range (-1.0 to 1.0)
         const pan = Math.max(-1.0, Math.min(1.0, (x / 300) - 1.0));
         this.icePanner.pan.setValueAtTime(pan, this.ctx.currentTime);
     }
@@ -103,13 +99,13 @@ class AudioManager {
         if (!this.isPlayingIce) return;
         this.updatePan(x);
 
-        // Organic 변調 - simulates uneven microscopic bumps on real ice
+        // Organic variable friction modulations
         const volume = Math.min(0.015 + (speed / 2500), 0.08);
         const baseFreq = Math.min(2000 + speed * 1.5, 4800);
-        const organicNoise = Math.sin(Date.now() * 0.08) * 180; // minor speed noise
+        const organicNoise = Math.sin(Date.now() * 0.08) * 180;
         const frequency = baseFreq + organicNoise;
         
-        const qVal = Math.min(5.0 + (speed / 400), 12.0); // sharp metallic click speed
+        const qVal = Math.min(5.0 + (speed / 400), 12.0);
 
         this.iceGain.gain.setValueAtTime(volume, this.ctx.currentTime);
         this.iceFilter.frequency.setValueAtTime(frequency, this.ctx.currentTime);
@@ -123,7 +119,6 @@ class AudioManager {
         this.isPlayingIce = false;
     }
 
-    // Laser hit sound (Crystal glass clang: "カキィン" with 3D Stereo space)
     playCrystalClang(x) {
         this.init();
         if (this.ctx.state === 'suspended') this.ctx.resume();
@@ -134,17 +129,16 @@ class AudioManager {
         const gain = this.ctx.createGain();
         
         osc1.type = 'sine';
-        osc1.frequency.setValueAtTime(1800, now); // Principal thin clang
+        osc1.frequency.setValueAtTime(1800, now);
         osc1.frequency.exponentialRampToValueAtTime(1500, now + 0.35);
 
         osc2.type = 'sine';
-        osc2.frequency.setValueAtTime(2600, now); // Overtone crystal vibration
+        osc2.frequency.setValueAtTime(2600, now);
         osc2.frequency.exponentialRampToValueAtTime(2400, now + 0.15);
 
         gain.gain.setValueAtTime(0.20, now);
         gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.45);
 
-        // Add subtle bandpass to emphasize crystal resonance
         const filter = this.ctx.createBiquadFilter();
         filter.type = 'bandpass';
         filter.frequency.value = 1900;
@@ -170,28 +164,67 @@ class AudioManager {
         osc2.stop(now + 0.5);
     }
 
-    // Clear chord (Mystical major chord with stereo widening)
+    // Portal Warp Sound Synth (Sweep frequency simulating dimensional portal bypass)
+    playPortalWarp(xIn, xOut) {
+        this.init();
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1500, now);
+        osc.frequency.exponentialRampToValueAtTime(320, now + 0.10);
+        osc.frequency.exponentialRampToValueAtTime(2000, now + 0.25);
+
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.28);
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'peaking';
+        filter.frequency.value = 1100;
+        filter.Q.value = 6.0;
+
+        osc.connect(gain);
+        gain.connect(filter);
+
+        if (this.ctx.createStereoPanner) {
+            // Dimensional warp panning: sound sweeps from portal entrance to portal exit!
+            const panIn = Math.max(-1.0, Math.min(1.0, (xIn / 300) - 1.0));
+            const panOut = Math.max(-1.0, Math.min(1.0, (xOut / 300) - 1.0));
+            const panner = this.ctx.createStereoPanner();
+            panner.pan.setValueAtTime(panIn, now);
+            panner.pan.linearRampToValueAtTime(panOut, now + 0.25);
+            
+            filter.connect(panner);
+            panner.connect(this.ctx.destination);
+        } else {
+            filter.connect(this.ctx.destination);
+        }
+
+        osc.start(now);
+        osc.stop(now + 0.3);
+    }
+
     playClearChord() {
         this.init();
         if (this.ctx.state === 'suspended') this.ctx.resume();
 
         const now = this.ctx.currentTime;
-        
-        // F Major 7th chord (F4, A4, C5, E5) - beautiful, mystical and open
-        const frequencies = [349.23, 440.00, 523.25, 659.25];
+        const frequencies = [349.23, 440.00, 523.25, 659.25]; // F Major 7th
         const gain = this.ctx.createGain();
         gain.gain.setValueAtTime(0, now);
-        gain.gain.linearRampToValueAtTime(0.20, now + 0.5); // soft attack
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.8); // long decay
+        gain.gain.linearRampToValueAtTime(0.20, now + 0.5);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.8);
 
         frequencies.forEach((freq, idx) => {
             const osc = this.ctx.createOscillator();
-            osc.type = 'triangle'; // rich soft tone
+            osc.type = 'triangle';
             osc.frequency.value = freq;
             
             if (this.ctx.createStereoPanner) {
-                // Wide pan distribution for a divine sonic wrap
-                const pan = (idx - 1.5) * 0.5; // -0.75, -0.25, 0.25, 0.75
+                const pan = (idx - 1.5) * 0.5;
                 const panner = this.ctx.createStereoPanner();
                 panner.pan.setValueAtTime(pan, now);
                 osc.connect(panner);
@@ -204,7 +237,6 @@ class AudioManager {
             osc.stop(now + 3.2);
         });
 
-        // Soft filter to cut sharp frequencies dynamically
         const lp = this.ctx.createBiquadFilter();
         lp.type = 'lowpass';
         lp.frequency.setValueAtTime(900, now);
@@ -268,7 +300,7 @@ class Mirror {
         ctx.lineTo(this.p2.x, this.p2.y);
         ctx.stroke();
         
-        // Draw cold metallic endpoints
+        // End points
         ctx.fillStyle = isHovered ? '#ffffff' : '#c0c0d8';
         ctx.shadowBlur = isHovered ? 8 : 3;
         ctx.beginPath();
@@ -276,7 +308,7 @@ class Mirror {
         ctx.arc(this.p2.x, this.p2.y, isHovered ? 4.5 : 3, 0, Math.PI * 2);
         ctx.fill();
         
-        // Cybernetic bracket focus UI when hovered (very cool visual assistance)
+        // Bracket Focus overlay on hovered
         if (isHovered) {
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
             ctx.lineWidth = 1;
@@ -291,26 +323,24 @@ class Mirror {
     drawCyberBrackets(ctx, p) {
         const size = 10;
         ctx.beginPath();
-        // Top-left bracket
         ctx.moveTo(p.x - size, p.y - size / 2);
         ctx.lineTo(p.x - size, p.y - size);
         ctx.lineTo(p.x - size / 2, p.y - size);
-        // Top-right
+        
         ctx.moveTo(p.x + size, p.y - size / 2);
         ctx.lineTo(p.x + size, p.y - size);
         ctx.lineTo(p.x + size / 2, p.y - size);
-        // Bottom-left
+        
         ctx.moveTo(p.x - size, p.y + size / 2);
         ctx.lineTo(p.x - size, p.y + size);
         ctx.lineTo(p.x - size / 2, p.y + size);
-        // Bottom-right
+        
         ctx.moveTo(p.x + size, p.y + size / 2);
         ctx.lineTo(p.x + size, p.y + size);
         ctx.lineTo(p.x + size / 2, p.y + size);
         ctx.stroke();
     }
 
-    // Distance from a point to this mirror line segment
     distanceToPoint(p) {
         const l2 = this.length * this.length;
         if (l2 === 0) return dist(p, this.p1);
@@ -329,7 +359,7 @@ class Emitter {
     constructor(x, y, angle) {
         this.x = x;
         this.y = y;
-        this.angle = angle; // in radians
+        this.angle = angle;
     }
 
     draw(ctx) {
@@ -337,7 +367,6 @@ class Emitter {
         ctx.translate(this.x, this.y);
         ctx.rotate(this.angle);
 
-        // Core cyan neon emitter circle
         ctx.shadowBlur = 18;
         ctx.shadowColor = 'rgba(0, 243, 255, 0.9)';
         ctx.strokeStyle = '#00f3ff';
@@ -347,7 +376,6 @@ class Emitter {
         ctx.arc(0, 0, 14, 0, Math.PI * 2);
         ctx.stroke();
 
-        // Industrial crosshair ticks
         ctx.lineWidth = 1;
         ctx.strokeStyle = 'rgba(0, 243, 255, 0.5)';
         ctx.beginPath();
@@ -357,7 +385,6 @@ class Emitter {
         ctx.moveTo(0, 14); ctx.lineTo(0, 20);
         ctx.stroke();
 
-        // Direction pointer arrow
         ctx.fillStyle = '#00f3ff';
         ctx.beginPath();
         ctx.moveTo(10, 0);
@@ -379,7 +406,6 @@ class Prism {
     }
 
     update(dt) {
-        // Slow mechanical spin
         this.angle += (this.isTuned ? 4.5 : 0.75) * dt;
     }
 
@@ -388,7 +414,6 @@ class Prism {
         ctx.translate(this.x, this.y);
         ctx.rotate(this.angle);
 
-        // Neon Prism Diamond
         ctx.shadowBlur = this.isTuned ? 30 : 12;
         ctx.shadowColor = this.isTuned ? 'rgba(255, 0, 127, 0.95)' : 'rgba(255, 0, 127, 0.45)';
         ctx.strokeStyle = '#ff007f';
@@ -402,14 +427,12 @@ class Prism {
         ctx.closePath();
         ctx.stroke();
 
-        // Inner aesthetic geometry
         ctx.strokeStyle = this.isTuned ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 0, 127, 0.25)';
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.arc(0, 0, this.radius * 0.4, 0, Math.PI * 2);
         ctx.stroke();
 
-        // Center nuclear glow
         ctx.fillStyle = this.isTuned ? '#ffffff' : 'rgba(255, 0, 127, 0.15)';
         ctx.beginPath();
         ctx.arc(0, 0, 4.5, 0, Math.PI * 2);
@@ -427,7 +450,7 @@ class BlackHole {
     constructor(x, y, mass = 60, pullRadius = 150) {
         this.x = x;
         this.y = y;
-        this.mass = mass; // Gravity strength
+        this.mass = mass;
         this.pullRadius = pullRadius;
         this.pulse = 0;
     }
@@ -438,7 +461,6 @@ class BlackHole {
 
         ctx.save();
         
-        // Gravity pull field (Faint structural circles)
         ctx.strokeStyle = 'rgba(0, 243, 255, 0.035)';
         ctx.lineWidth = 1;
         ctx.beginPath();
@@ -446,7 +468,6 @@ class BlackHole {
         ctx.arc(this.x, this.y, this.pullRadius * 0.6, 0, Math.PI * 2);
         ctx.stroke();
 
-        // Event Horizon Glow
         ctx.shadowBlur = 25;
         ctx.shadowColor = 'rgba(0, 243, 255, 0.3)';
         const grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, 25);
@@ -460,7 +481,6 @@ class BlackHole {
         ctx.arc(this.x, this.y, 25, 0, Math.PI * 2);
         ctx.fill();
 
-        // Absorb Core Singularity
         ctx.shadowBlur = 0;
         ctx.fillStyle = '#000000';
         ctx.strokeStyle = 'rgba(0, 243, 255, 0.7)';
@@ -474,8 +494,75 @@ class BlackHole {
     }
 
     containsPoint(p) {
-        // Core absorption radius
         return dist(p, this) <= 18;
+    }
+}
+
+// --- WORMHOLE Portal Gimmick (Port A entries warp instantly to Port B exits) ---
+class Wormhole {
+    constructor(inX, inY, outX, outY, radius = 16) {
+        this.inPort = { x: inX, y: inY };
+        this.outPort = { x: outX, y: outY };
+        this.radius = radius;
+        this.pulse = 0;
+    }
+
+    update(dt) {
+        this.pulse += 2.0 * dt;
+    }
+
+    draw(ctx) {
+        ctx.save();
+        
+        const drawPortalRing = (p, color, glow) => {
+            const radVar = this.radius + Math.sin(this.pulse + p.x) * 2;
+            
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = glow;
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, radVar, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Intersecting orbit lines (Cyber look)
+            ctx.lineWidth = 0.8;
+            ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, radVar * 0.7, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Core swirling dot
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowBlur = 5;
+            ctx.shadowColor = '#ffffff';
+            ctx.beginPath();
+            const angle = this.pulse * 0.5 + (p.x === this.inPort.x ? 0 : Math.PI);
+            ctx.arc(p.x + Math.cos(angle) * (radVar * 0.45), p.y + Math.sin(angle) * (radVar * 0.45), 2.5, 0, Math.PI * 2);
+            ctx.fill();
+        };
+
+        // Portal A (Entrance - Blue Neon)
+        drawPortalRing(this.inPort, '#00bfff', 'rgba(0, 191, 255, 0.55)');
+        // Portal B (Exit - Orange/Gold Neon)
+        drawPortalRing(this.outPort, '#ff8c00', 'rgba(255, 140, 0, 0.55)');
+
+        // Portal text indicator labels (Cyber aesthetics)
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#00bfff';
+        ctx.font = "8px 'Inter', monospace";
+        ctx.fillText("PORT_IN", this.inPort.x - 20, this.inPort.y - this.radius - 6);
+        
+        ctx.fillStyle = '#ff8c00';
+        ctx.fillText("PORT_OUT", this.outPort.x - 22, this.outPort.y - this.radius - 6);
+
+        ctx.restore();
+    }
+
+    containsEntrance(p) {
+        return dist(p, this.inPort) <= this.radius;
     }
 }
 
@@ -484,8 +571,8 @@ class ParticleSystem {
         this.particles = [];
     }
 
-    spawn(x, y, color) {
-        for (let i = 0; i < CONFIG.PARTICLE_COUNT; i++) {
+    spawn(x, y, color, count = CONFIG.PARTICLE_COUNT) {
+        for (let i = 0; i < count; i++) {
             const angle = Math.random() * Math.PI * 2;
             const speed = Math.random() * 90 + 35;
             this.particles.push({
@@ -519,7 +606,7 @@ class ParticleSystem {
                     vy: Math.sin(angle) * speed,
                     life: 0.9,
                     decay: Math.random() * 1.5 + 1.0,
-                    color: 'rgba(192, 192, 216, 0.85)' // structural metallic sparkles
+                    color: 'rgba(192, 192, 216, 0.85)'
                 });
             }
         }
@@ -552,31 +639,58 @@ class ParticleSystem {
     }
 }
 
-// --- Stage Database ---
-const STAGES = [
+// --- Serialized Stage Database (Factory Design Stage Loader templates) ---
+const STAGE_TEMPLATES = [
     {
         name: "TUNING_01: REFLECTION",
-        emitter: new Emitter(80, 150, 0), // points right
-        prism: new Prism(520, 650, 20),
+        emitter: { x: 80, y: 150, angle: 0 },
+        prism: { x: 520, y: 650, radius: 20 },
         blackholes: [],
-        parMirrorLength: 200,
-        hint: "斜めに銀の鏡を引いて、光を屈折させ右下の結晶へ導け"
+        portals: [],
+        parMirrorLength: 220,
+        inkCapacity: 500, // Expanded capacity for user margin
+        hint: "斜めに銀の鏡を引いて、光を右下の結晶へ導け"
     },
     {
         name: "TUNING_02: DOUBLE_ANGLE",
-        emitter: new Emitter(80, 150, Math.PI * 0.25), // points down-right
-        prism: new Prism(500, 150, 20),
+        emitter: { x: 80, y: 150, angle: Math.PI * 0.25 },
+        prism: { x: 500, y: 150, radius: 20 },
         blackholes: [],
-        parMirrorLength: 350,
+        portals: [],
+        parMirrorLength: 360,
+        inkCapacity: 600,
         hint: "光を二段階反射させて、ターゲットへと紡ぎ戻せ"
     },
     {
         name: "TUNING_03: GRAVITY_WELL",
-        emitter: new Emitter(80, 400, 0), // points right
-        prism: new Prism(520, 400, 20),
-        blackholes: [new BlackHole(300, 400, 75, 140)],
-        parMirrorLength: 400,
+        emitter: { x: 80, y: 400, angle: 0 },
+        prism: { x: 520, y: 400, radius: 20 },
+        blackholes: [{ x: 300, y: 400, mass: 75, radius: 140 }],
+        portals: [],
+        parMirrorLength: 420,
+        inkCapacity: 650,
         hint: "中心のブラックホールの超重力を避け、鏡線で光を迂回させよ"
+    },
+    {
+        name: "TUNING_04: PORTAL_JUMP",
+        emitter: { x: 80, y: 150, angle: Math.PI * 0.15 },
+        prism: { x: 520, y: 650, radius: 20 },
+        blackholes: [],
+        // Portal entrance in center-top, Portal exit in center-bottom
+        portals: [{ inX: 300, inY: 280, outX: 180, outY: 580 }],
+        parMirrorLength: 350,
+        inkCapacity: 600,
+        hint: "ポータルに入った光は、別の場所へ同じ速度・角度で転送される"
+    },
+    {
+        name: "TUNING_05: CELESTIAL_DESIGNS",
+        emitter: { x: 80, y: 120, angle: 0 },
+        prism: { x: 520, y: 700, radius: 20 },
+        blackholes: [{ x: 250, y: 550, mass: 90, radius: 150 }],
+        portals: [{ inX: 520, inY: 180, outX: 120, outY: 420 }],
+        parMirrorLength: 500,
+        inkCapacity: 800,
+        hint: "ポータルへの反射転送と、ブラックホールの空間湾曲を併用せよ"
     }
 ];
 
@@ -588,16 +702,20 @@ class GameController {
         
         this.state = STATE.TITLE;
         this.currentStageIdx = 0;
+        
+        // Active stage instances
         this.mirrors = [];
         this.emitter = null;
         this.prism = null;
         this.blackholes = [];
+        this.portals = [];
         
         // Drawing trace
         this.isDrawing = false;
         this.drawStart = { x: 0, y: 0 };
         this.drawEnd = { x: 0, y: 0 };
-        this.inkLeft = CONFIG.MAX_INK;
+        this.inkLeft = 0;
+        this.maxInkForStage = 0;
         
         // Emit Animation Pulse variables
         this.photonPosition = { x: 0, y: 0 };
@@ -606,14 +724,14 @@ class GameController {
         
         this.particles = new ParticleSystem();
         
-        // Hover/Erase Assistance states (essential for flawless UX)
+        // Hover/Erase Assistance states
         this.hoveredMirrorIdx = -1;
         this.lastMousePos = { x: 0, y: 0 };
         this.mouseSpeed = 0;
 
-        // Path Cache (Laser data)
-        this.laserCache = [];       // Smooth high density points for smooth laser render/physics trace
-        this.reflectionPoints = []; // Pure physics events (mirrors, blackholes, target hits)
+        // Path Cache
+        this.laserCache = [];
+        this.reflectionPoints = [];
         this.hasHitPrism = false;
         
         this.initCanvas();
@@ -642,20 +760,25 @@ class GameController {
             h = w / aspect;
         }
         
-        // 1. Maintain logical display layout size (CSS style pixels)
         this.canvas.style.width = `${w}px`;
         this.canvas.style.height = `${h}px`;
 
-        // 2. High-DPI physical backing store calibration (Zero blur neon)
         const dpr = window.devicePixelRatio || 1;
         this.canvas.width = CONFIG.WIDTH * dpr;
         this.canvas.height = CONFIG.HEIGHT * dpr;
 
-        // 3. Keep drawing operations mapped to 600x800 logical canvas size
         this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
     bindEvents() {
+        // Robust browser activation for Web Audio API Policy
+        const unlockAudio = () => {
+            audio.init();
+            if (audio.ctx && audio.ctx.state === 'suspended') {
+                audio.ctx.resume();
+            }
+        };
+
         const getLogicalPos = (e) => {
             const rect = this.canvas.getBoundingClientRect();
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -668,20 +791,20 @@ class GameController {
         };
 
         const handleDown = (e) => {
+            unlockAudio();
             if (this.state !== STATE.PLAYING) return;
             if (e.target.tagName === 'BUTTON') return;
             e.preventDefault();
             
             const pos = getLogicalPos(e);
             
-            // UX check: Erase mirror on click if close enough (extended 30px threshold for mobile finger comfort)
+            // Comfort-sized erase tap (30px)
             const mirrorToEraseIdx = this.findMirrorAt(pos, 30);
             if (mirrorToEraseIdx !== -1) {
                 const erased = this.mirrors.splice(mirrorToEraseIdx, 1)[0];
-                this.inkLeft = Math.min(CONFIG.MAX_INK, this.inkLeft + erased.length);
+                this.inkLeft = Math.min(this.maxInkForStage, this.inkLeft + erased.length);
                 this.updateHUD();
                 
-                // Play stereophonic sound on erase
                 audio.playCrystalClang(pos.x);
                 this.particles.spawnMirrorDissolve(erased);
                 
@@ -690,7 +813,6 @@ class GameController {
                 return;
             }
 
-            // Start drawing new mirror if we have remaining ink capacity
             if (this.inkLeft > 10) {
                 this.isDrawing = true;
                 this.drawStart = pos;
@@ -707,7 +829,6 @@ class GameController {
             const pos = getLogicalPos(e);
             
             if (this.isDrawing) {
-                // Limit maximum length of the mirror being drawn to remaining ink capacity
                 const d = dist(this.drawStart, pos);
                 if (d <= this.inkLeft) {
                     this.drawEnd = pos;
@@ -719,14 +840,12 @@ class GameController {
                     };
                 }
 
-                // Cybernetic stereo ASMR speed pitch modulation
-                const speed = dist(this.lastMousePos, pos) / 0.016; // px per sec
+                const speed = dist(this.lastMousePos, pos) / 0.016;
                 audio.updateIceScratch(speed, pos.x);
                 this.lastMousePos = pos;
                 
                 this.calculateLaserPath();
             } else {
-                // Standard Hover check to aid visual erasing
                 this.hoveredMirrorIdx = this.findMirrorAt(pos, 30);
             }
         };
@@ -737,7 +856,7 @@ class GameController {
                 audio.stopIceScratch();
                 
                 const newLength = dist(this.drawStart, this.drawEnd);
-                if (newLength > 8) { // Minimum threshold to prevent tiny lines
+                if (newLength > 8) {
                     this.mirrors.push(new Mirror(this.drawStart.x, this.drawStart.y, this.drawEnd.x, this.drawEnd.y));
                     this.inkLeft -= newLength;
                     this.updateHUD();
@@ -746,7 +865,7 @@ class GameController {
             }
         };
 
-        // Wire canvas operations
+        // Universal triggers
         this.canvas.addEventListener('mousedown', handleDown);
         this.canvas.addEventListener('mousemove', handleMove);
         window.addEventListener('mouseup', handleUp);
@@ -755,7 +874,10 @@ class GameController {
         this.canvas.addEventListener('touchmove', handleMove, { passive: false });
         window.addEventListener('touchend', handleUp, { passive: false });
 
-        document.getElementById('start-btn').addEventListener('click', () => this.startGame());
+        document.getElementById('start-btn').addEventListener('click', () => {
+            unlockAudio();
+            this.startGame();
+        });
         document.getElementById('menu-back-btn').addEventListener('click', () => {
             window.location.href = '../minigames.html';
         });
@@ -763,9 +885,18 @@ class GameController {
             window.location.href = '../minigames.html';
         });
 
-        document.getElementById('emit-btn').addEventListener('click', () => this.emitPhoton());
-        document.getElementById('reset-btn').addEventListener('click', () => this.resetStage());
-        document.getElementById('next-btn').addEventListener('click', () => this.nextStage());
+        document.getElementById('emit-btn').addEventListener('click', () => {
+            unlockAudio();
+            this.emitPhoton();
+        });
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            unlockAudio();
+            this.resetStage();
+        });
+        document.getElementById('next-btn').addEventListener('click', () => {
+            unlockAudio();
+            this.nextStage();
+        });
     }
 
     findMirrorAt(pos, threshold = 22) {
@@ -777,29 +908,39 @@ class GameController {
         return -1;
     }
 
+    // Dynamic Level Loader (Reads serialization stages and configures active instances)
     loadStage(idx) {
         this.currentStageIdx = idx;
-        const stage = STAGES[this.currentStageIdx];
+        const temp = STAGE_TEMPLATES[this.currentStageIdx];
         
-        this.emitter = stage.emitter;
-        this.prism = stage.prism;
-        this.prism.isTuned = false;
-        this.blackholes = stage.blackholes;
+        // Emitter Factory
+        this.emitter = new Emitter(temp.emitter.x, temp.emitter.y, temp.emitter.angle);
+        
+        // Prism Target Factory
+        this.prism = new Prism(temp.prism.x, temp.prism.y, temp.prism.radius);
+        
+        // Black Hole Factory
+        this.blackholes = (temp.blackholes || []).map(b => new BlackHole(b.x, b.y, b.mass, b.radius));
+        
+        // Wormhole Portal Factory
+        this.portals = (temp.portals || []).map(p => new Wormhole(p.inX, p.inY, p.outX, p.outY));
+
         this.mirrors = [];
-        this.inkLeft = CONFIG.MAX_INK;
+        this.maxInkForStage = temp.inkCapacity || 450;
+        this.inkLeft = this.maxInkForStage;
         this.hasHitPrism = false;
         this.hoveredMirrorIdx = -1;
         
         this.updateHUD();
         this.calculateLaserPath();
 
-        this.showToast(`STG_${idx + 1}: ${stage.name}`);
-        this.showToast(stage.hint);
+        this.showToast(`STG_${idx + 1}: ${temp.name}`);
+        this.showToast(temp.hint);
     }
 
     updateHUD() {
         document.getElementById('stage-name').innerText = `STG_0${this.currentStageIdx + 1}`;
-        const inkPercent = (this.inkLeft / CONFIG.MAX_INK) * 100;
+        const inkPercent = (this.inkLeft / this.maxInkForStage) * 100;
         document.getElementById('ink-bar').style.width = `${inkPercent}%`;
         document.getElementById('stability-value').innerText = `${inkPercent.toFixed(1)}%`;
 
@@ -824,7 +965,7 @@ class GameController {
 
     resetStage() {
         if (this.state !== STATE.PLAYING) return;
-        audio.playCrystalClang(300); // sound center
+        audio.playCrystalClang(300);
         this.loadStage(this.currentStageIdx);
     }
 
@@ -832,7 +973,7 @@ class GameController {
         document.getElementById('overlay').classList.add('hidden');
         this.state = STATE.PLAYING;
         
-        if (this.currentStageIdx + 1 < STAGES.length) {
+        if (this.currentStageIdx + 1 < STAGE_TEMPLATES.length) {
             this.loadStage(this.currentStageIdx + 1);
         } else {
             this.showToast("幾何学アーカイブをすべてクリアしました！");
@@ -856,22 +997,23 @@ class GameController {
         }, 3200);
     }
 
-    // --- Trace ray intersection with everything (Aesthetic & Physics Separation) ---
+    // --- Trace ray intersection with everything ---
     calculateLaserPath() {
         let rayStart = { x: this.emitter.x, y: this.emitter.y };
         let rayAngle = this.emitter.angle;
         
         this.laserCache = [{ ...rayStart }];
-        this.reflectionPoints = []; // Capture true reflection spots for precise scores/sounds
+        this.reflectionPoints = [];
         this.hasHitPrism = false;
         
         let activePoint = { ...rayStart };
         let activeVel = { x: Math.cos(rayAngle), y: Math.sin(rayAngle) };
         let stepCount = 0;
-        const maxSteps = 1400; // Continuous step count
-        const stepSize = 1.3;
+        const maxSteps = 1600;
+        const stepSize = 1.35;
 
         let lastBouncedMirror = null;
+        let lastPortalTime = -999; // Anti loop portal block cooldown
         let checkDrawLine = this.isDrawing ? new Mirror(this.drawStart.x, this.drawStart.y, this.drawEnd.x, this.drawEnd.y) : null;
 
         while (stepCount < maxSteps) {
@@ -880,12 +1022,48 @@ class GameController {
                 y: activePoint.y + activeVel.y * stepSize
             };
 
-            // 1. Gravity pull calculation from Black Holes (Fluid integrations)
+            // 1. Wormhole Portal checks (Dimensional jumps)
+            if (stepCount - lastPortalTime > 15) {
+                let crossedPortal = null;
+                for (const p of this.portals) {
+                    if (p.containsEntrance(activePoint)) {
+                        crossedPortal = p;
+                        break;
+                    }
+                }
+                if (crossedPortal) {
+                    // Instantly warp coords to Portal B
+                    activePoint = {
+                        x: crossedPortal.outPort.x,
+                        y: crossedPortal.outPort.y
+                    };
+                    nextPoint = {
+                        x: activePoint.x + activeVel.x * stepSize,
+                        y: activePoint.y + activeVel.y * stepSize
+                    };
+                    
+                    this.laserCache.push({ x: crossedPortal.inPort.x, y: crossedPortal.inPort.y });
+                    this.laserCache.push({ ...activePoint });
+                    
+                    this.reflectionPoints.push({
+                        x: crossedPortal.inPort.x,
+                        y: crossedPortal.inPort.y,
+                        type: 'portal',
+                        exitX: crossedPortal.outPort.x,
+                        exitY: crossedPortal.outPort.y
+                    });
+                    
+                    lastPortalTime = stepCount;
+                    continue;
+                }
+            }
+
+            // 2. Gravity pull calculation from Black Holes
             for (const bh of this.blackholes) {
                 const d = dist(activePoint, bh);
                 if (d < bh.pullRadius) {
                     if (bh.containsPoint(activePoint)) {
-                        // Absorbed in gravity singularity: GLORIOUS SPIRAL CURVATURE PATHWAY
+                        // Singular collapse spiral
                         const spiralSteps = 45;
                         let rDist = d;
                         let angle = Math.atan2(activePoint.y - bh.y, activePoint.x - bh.x);
@@ -893,19 +1071,17 @@ class GameController {
                         for (let j = 0; j < spiralSteps; j++) {
                             const ratio = (spiralSteps - j) / spiralSteps;
                             const r = rDist * ratio;
-                            angle += 0.22; // smooth winding spiral rotation
+                            angle += 0.22;
                             this.laserCache.push({
                                 x: bh.x + Math.cos(angle) * r,
                                 y: bh.y + Math.sin(angle) * r
                             });
                         }
                         
-                        // Push spatial absorption event
                         this.reflectionPoints.push({ x: activePoint.x, y: activePoint.y, type: 'blackhole' });
                         return;
                     }
                     
-                    // Normal gravity calculation
                     const force = (bh.mass / (d * d)) * stepSize * 0.18;
                     const pullX = (bh.x - activePoint.x) / d;
                     const pullY = (bh.y - activePoint.y) / d;
@@ -913,20 +1089,19 @@ class GameController {
                     activeVel.x += pullX * force;
                     activeVel.y += pullY * force;
                     
-                    // Normalize velocity vector
                     const speed = Math.hypot(activeVel.x, activeVel.y);
                     activeVel.x /= speed;
                     activeVel.y /= speed;
                 }
             }
 
-            // 2. Out of bounds check
-            if (nextPoint.x < -10 || nextPoint.x > CONFIG.WIDTH + 10 || nextPoint.y < -10 || nextPoint.y > CONFIG.HEIGHT + 10) {
+            // 3. Out of bounds check
+            if (nextPoint.x < -15 || nextPoint.x > CONFIG.WIDTH + 15 || nextPoint.y < -15 || nextPoint.y > CONFIG.HEIGHT + 15) {
                 this.laserCache.push(nextPoint);
                 break;
             }
 
-            // 3. Prism target check
+            // 4. Prism target check
             if (this.prism.containsPoint(nextPoint)) {
                 this.laserCache.push(nextPoint);
                 this.hasHitPrism = true;
@@ -934,7 +1109,7 @@ class GameController {
                 break;
             }
 
-            // 4. Mirror collision checks
+            // 5. Mirror collision checks
             let collidedMirror = null;
             let hitInfo = null;
 
@@ -953,7 +1128,6 @@ class GameController {
             }
 
             if (collidedMirror && hitInfo) {
-                // Vector reflection calculation
                 const mx = collidedMirror.p2.x - collidedMirror.p1.x;
                 const my = collidedMirror.p2.y - collidedMirror.p1.y;
                 const mLen = collidedMirror.length;
@@ -966,7 +1140,7 @@ class GameController {
                 activeVel.x = activeVel.x - 2 * dotProduct * nx;
                 activeVel.y = activeVel.y - 2 * dotProduct * ny;
 
-                // Position correct expanded to 1.5px to guarantee complete safety against infinite rounding bugs
+                // 1.5px expansion for complete float rounding safety
                 activePoint = {
                     x: hitInfo.x + activeVel.x * 1.5,
                     y: hitInfo.y + activeVel.y * 1.5
@@ -981,13 +1155,11 @@ class GameController {
                 activePoint = nextPoint;
             }
 
-            // Cache EVERY physics step in high-resolution (avoids wobbly speeds or animation steps)
             this.laserCache.push({ ...activePoint });
             stepCount++;
         }
     }
 
-    // --- Action Button: Emit Pulse Animation ---
     emitPhoton() {
         if (this.state !== STATE.PLAYING) return;
         
@@ -1000,7 +1172,7 @@ class GameController {
         this.segmentProgress = 0;
         this.photonPosition = { ...this.laserCache[0] };
         
-        audio.playCrystalClang(this.emitter.x); // discharge sound (spatialized)
+        audio.playCrystalClang(this.emitter.x);
     }
 
     triggerClear() {
@@ -1009,11 +1181,10 @@ class GameController {
         this.particles.spawn(this.prism.x, this.prism.y, '#ff007f');
         audio.playClearChord();
 
-        // Calculate precise mirror reflections
         const reflectCount = this.reflectionPoints.filter(p => p.type === 'mirror').length;
         let rank = "S";
         const inkUsed = CONFIG.MAX_INK - this.inkLeft;
-        const stage = STAGES[this.currentStageIdx];
+        const stage = STAGE_TEMPLATES[this.currentStageIdx];
 
         if (inkUsed > stage.parMirrorLength * 0.9) rank = "A";
         if (inkUsed > stage.parMirrorLength * 1.2) rank = "B";
@@ -1028,7 +1199,6 @@ class GameController {
         }, 1200);
     }
 
-    // --- Main Game Loop ---
     loop(timestamp) {
         if (!this.lastTime) this.lastTime = timestamp;
         const dt = Math.min((timestamp - this.lastTime) / 1000, 0.1);
@@ -1043,8 +1213,8 @@ class GameController {
     update(dt) {
         this.prism.update(dt);
         this.particles.update(dt);
+        this.portals.forEach(p => p.update(dt));
 
-        // Fluid Emission interpolation directly matching high-density cache (No speed variations)
         if (this.state === STATE.EMITTING) {
             if (this.currentSegmentIdx < this.laserCache.length - 1) {
                 const p1 = this.laserCache[this.currentSegmentIdx];
@@ -1052,7 +1222,6 @@ class GameController {
                 const segLen = dist(p1, p2);
                 
                 const segmentTime = segLen / CONFIG.LASER_SPEED;
-                // Safe boundary check
                 this.segmentProgress += (segmentTime > 0) ? (dt / segmentTime) : 1.0;
 
                 if (this.segmentProgress >= 1.0) {
@@ -1060,20 +1229,21 @@ class GameController {
                     this.currentSegmentIdx++;
                     this.segmentProgress = 0;
 
-                    // Play spatialized reflection beep or handle absorption/clear trigger events
                     const nextPoint = this.laserCache[this.currentSegmentIdx];
-                    
-                    // Look ahead if it hits an event point
                     const matchedEvent = this.reflectionPoints.find(rp => dist(rp, nextPoint) < 2.0);
                     
                     if (matchedEvent) {
                         if (matchedEvent.type === 'mirror') {
                             audio.playCrystalClang(nextPoint.x);
                             this.particles.spawn(nextPoint.x, nextPoint.y, '#00f3ff');
+                        } else if (matchedEvent.type === 'portal') {
+                            // Dynamic 3D Portal spatial sound trigger
+                            audio.playPortalWarp(matchedEvent.x, matchedEvent.exitX);
+                            this.particles.spawn(matchedEvent.x, matchedEvent.y, '#00bfff', 15);
+                            this.particles.spawn(matchedEvent.exitX, matchedEvent.exitY, '#ff8c00', 15);
                         } else if (matchedEvent.type === 'prism' && this.hasHitPrism) {
                             this.triggerClear();
                         } else if (matchedEvent.type === 'blackhole') {
-                            // Absorption event
                             this.particles.spawn(nextPoint.x, nextPoint.y, '#00f3ff');
                             this.showToast("光は幾何学から外れ、深淵に消えた");
                             setTimeout(() => {
@@ -1088,7 +1258,6 @@ class GameController {
                     this.photonPosition.y = p1.y + (p2.y - p1.y) * this.segmentProgress;
                 }
             } else {
-                // Reached absolute termination point without hitting target
                 if (!this.hasHitPrism) {
                     this.showToast("光は幾何学から外れ、深淵に消えた");
                     setTimeout(() => {
@@ -1104,24 +1273,29 @@ class GameController {
     draw() {
         this.ctx.clearRect(0, 0, CONFIG.WIDTH, CONFIG.HEIGHT);
 
-        // 1. Draw structural items
+        // 1. Draw structural objects
         this.emitter.draw(this.ctx);
         this.prism.draw(this.ctx);
         this.blackholes.forEach(bh => bh.draw(this.ctx));
+        this.portals.forEach(p => p.draw(this.ctx));
 
-        // 2. Draw placed mirrors
+        // 2. Dynamic visual tutorial guide overlays (First stage, absolute visual clarity)
+        if (this.currentStageIdx === 0 && this.mirrors.length === 0 && !this.isDrawing) {
+            this.drawTutorialGuideOverlay();
+        }
+
+        // 3. Placed mirrors
         for (let i = 0; i < this.mirrors.length; i++) {
             this.mirrors[i].draw(this.ctx, i === this.hoveredMirrorIdx);
         }
 
-        // 3. Draw active drawing session line (GLORIOUS CYBER TUNING DRAW SYSTEM)
+        // 4. Drawing Line HUD
         if (this.isDrawing) {
             this.drawTuningDrawingLine();
         }
 
-        // 4. Draw Laser Path
+        // 5. Laser Paths
         if (this.state === STATE.PLAYING) {
-            // Elegant glowing preview trail
             this.drawLaserPath(this.laserCache, 'rgba(0, 243, 255, 0.45)', 1.2, true);
         } else if (this.state === STATE.EMITTING) {
             const activeSegments = this.laserCache.slice(0, this.currentSegmentIdx + 1);
@@ -1130,7 +1304,7 @@ class GameController {
             }
             this.drawLaserPath(activeSegments, '#00f3ff', 2.2, false);
             
-            // Draw photon core particle
+            // Core photon
             this.ctx.save();
             this.ctx.shadowBlur = 18;
             this.ctx.shadowColor = '#00f3ff';
@@ -1140,12 +1314,43 @@ class GameController {
             this.ctx.fill();
             this.ctx.restore();
         } else if (this.state === STATE.CLEAR) {
-            // Amplified laser shine on stage success
             this.drawLaserPath(this.laserCache, '#00f3ff', 3.2, false);
         }
 
-        // 5. Draw Particle systems
         this.particles.draw(this.ctx);
+    }
+
+    // Dynamic Graphic Hand Drag Tutorial Guide (Perfect Usability integration)
+    drawTutorialGuideOverlay() {
+        this.ctx.save();
+        
+        // 1. Draw silver guide line where the mirror should be placed
+        const gStart = { x: 230, y: 350 };
+        const gEnd = { x: 370, y: 490 };
+        
+        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.22)';
+        this.ctx.lineWidth = 1.5;
+        this.ctx.setLineDash([4, 4]);
+        this.ctx.beginPath();
+        this.ctx.moveTo(gStart.x, gStart.y);
+        this.ctx.lineTo(gEnd.x, gEnd.y);
+        this.ctx.stroke();
+
+        // 2. Draw pulsing neon target portal focus brackets
+        const timePulse = Math.sin(Date.now() * 0.007) * 4;
+        
+        ctxArrow(this.ctx, { x: 200, y: 300 }, { x: 230, y: 330 }, 'rgba(0, 243, 255, 0.5)');
+        
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+        this.ctx.font = "11px 'Inter', sans-serif";
+        this.ctx.shadowBlur = 4;
+        this.ctx.shadowColor = 'rgba(0, 243, 255, 0.5)';
+        this.ctx.fillText("ここに指で鏡を引いてみよう", 215, 330 - timePulse);
+        
+        this.ctx.fillStyle = 'rgba(0, 243, 255, 0.4)';
+        this.ctx.fillText("Drag Here to Draw Mirror", 225, 520 + timePulse);
+
+        this.ctx.restore();
     }
 
     drawTuningDrawingLine() {
@@ -1156,7 +1361,6 @@ class GameController {
 
         this.ctx.save();
         
-        // 1. Neon glowing preview bridge
         this.ctx.shadowBlur = 10;
         this.ctx.shadowColor = 'rgba(255, 255, 255, 0.6)';
         this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
@@ -1168,7 +1372,6 @@ class GameController {
         this.ctx.lineTo(p2.x, p2.y);
         this.ctx.stroke();
         
-        // 2. High-precision reticles (military cyber scopes)
         this.ctx.setLineDash([]);
         this.ctx.shadowBlur = 0;
         this.ctx.strokeStyle = 'rgba(0, 243, 255, 0.6)';
@@ -1188,7 +1391,6 @@ class GameController {
         drawCross(p1);
         drawCross(p2);
 
-        // 3. Coordinate HUD readings printed directly to the screen (Extremely high detailed aesthetic)
         this.ctx.fillStyle = 'rgba(0, 243, 255, 0.7)';
         this.ctx.font = "10px 'Inter', monospace";
         this.ctx.fillText(`X:${p1.x.toFixed(0)} Y:${p1.y.toFixed(0)}`, p1.x + 15, p1.y - 8);
@@ -1213,7 +1415,6 @@ class GameController {
         this.ctx.beginPath();
         this.ctx.moveTo(path[0].x, path[0].y);
         
-        // Fluid continuous trail rendering (smooth as glass)
         for (let i = 1; i < path.length; i++) {
             this.ctx.lineTo(path[i].x, path[i].y);
         }
@@ -1221,6 +1422,40 @@ class GameController {
         this.ctx.stroke();
         this.ctx.restore();
     }
+}
+
+// --- Helper Functions ---
+function ctxLine(ctx, p1, p2, color, width = 1, dash = []) {
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    if (dash.length > 0) ctx.setLineDash(dash);
+    ctx.beginPath();
+    ctx.moveTo(p1.x, p1.y);
+    ctx.lineTo(p2.x, p2.y);
+    ctx.stroke();
+    ctx.restore();
+}
+
+function ctxArrow(ctx, from, to, color) {
+    const angle = Math.atan2(to.y - from.y, to.x - from.x);
+    const headLen = 8;
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(from.x, from.y);
+    ctx.lineTo(to.x, to.y);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(to.x, to.y);
+    ctx.lineTo(to.x - headLen * Math.cos(angle - Math.PI / 6), to.y - headLen * Math.sin(angle - Math.PI / 6));
+    ctx.lineTo(to.x - headLen * Math.cos(angle + Math.PI / 6), to.y - headLen * Math.sin(angle + Math.PI / 6));
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
 }
 
 // --- Initialize On Load ---
