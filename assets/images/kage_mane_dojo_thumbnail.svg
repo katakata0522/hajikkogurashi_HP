@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">影まね道場</title>
+  <desc id="desc">月明かりの道場で師範と弟子が向かい合うミニゲームのサムネイル。</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#141c22"/>
+      <stop offset="0.58" stop-color="#241810"/>
+      <stop offset="1" stop-color="#120d0a"/>
+    </linearGradient>
+    <radialGradient id="moon" cx="42%" cy="38%" r="52%">
+      <stop offset="0" stop-color="#fff0bd"/>
+      <stop offset="0.72" stop-color="#c79a50"/>
+      <stop offset="1" stop-color="#c79a50" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <circle cx="512" cy="238" r="132" fill="url(#moon)" opacity="0.9"/>
+  <g opacity="0.16" stroke="#f5d37d" stroke-width="2">
+    <path d="M100 150h824M100 190h824M100 230h824M100 270h824M100 310h824M100 350h824"/>
+  </g>
+  <path d="M0 668h1024v356H0z" fill="#2a1810"/>
+  <g stroke="#e0b756" stroke-opacity="0.28" stroke-width="3">
+    <path d="M88 724h848M40 802h944M0 892h1024"/>
+    <path d="M190 668v356M414 668v356M638 668v356M862 668v356"/>
+  </g>
+  <g transform="translate(610 465)">
+    <rect x="-74" y="94" width="148" height="42" rx="12" fill="#090706" opacity="0.55"/>
+    <circle cx="0" cy="-72" r="44" fill="#ead7bd"/>
+    <path d="M-52-83c28-42 88-22 102 8c-38-20-70-8-102-8z" fill="#2b2118"/>
+    <rect x="-50" y="-32" width="100" height="128" rx="32" fill="#5d5548"/>
+    <path d="M-70 20h140" stroke="#e0b756" stroke-width="18" stroke-linecap="round"/>
+    <path d="M-46 94l-28 86M46 94l28 86" stroke="#15100c" stroke-width="24" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(360 590)">
+    <rect x="-74" y="94" width="148" height="42" rx="12" fill="#090706" opacity="0.55"/>
+    <circle cx="0" cy="-72" r="44" fill="#f0d8b6"/>
+    <path d="M-46-92c24-30 78-24 98 10c-35-13-66-7-98-10z" fill="#2e1c14"/>
+    <rect x="-50" y="-32" width="100" height="128" rx="30" fill="#8e3d2e"/>
+    <path d="M-70 20h140" stroke="#e0b756" stroke-width="18" stroke-linecap="round"/>
+    <path d="M-46 94l-28 86M46 94l28 86" stroke="#17100b" stroke-width="24" stroke-linecap="round"/>
+  </g>
+  <g font-family="Yu Gothic, Hiragino Sans, sans-serif" font-weight="900" text-anchor="middle">
+    <text x="512" y="436" font-size="132" fill="#f8e6b1" stroke="#5d1f18" stroke-width="8" paint-order="stroke">影まね</text>
+    <text x="512" y="560" font-size="150" fill="#f8e6b1" stroke="#5d1f18" stroke-width="8" paint-order="stroke">道場</text>
+  </g>
+  <g fill="#ffe49a" font-family="Yu Gothic, Hiragino Sans, sans-serif" font-weight="900" text-anchor="middle">
+    <circle cx="512" cy="720" r="54" fill="#0b0806" stroke="#e0b756" stroke-width="5"/>
+    <text x="512" y="739" font-size="54">上</text>
+    <circle cx="596" cy="804" r="48" fill="#0b0806" stroke="#e0b756" stroke-width="5"/>
+    <text x="596" y="822" font-size="48">右</text>
+    <circle cx="512" cy="884" r="48" fill="#0b0806" stroke="#e0b756" stroke-width="5"/>
+    <text x="512" y="902" font-size="48">下</text>
+    <circle cx="428" cy="804" r="48" fill="#0b0806" stroke="#e0b756" stroke-width="5"/>
+    <text x="428" y="822" font-size="48">左</text>
+  </g>
+</svg>

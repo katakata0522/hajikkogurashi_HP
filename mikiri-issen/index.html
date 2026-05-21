@@ -1342,9 +1342,10 @@
         { name: '町の剣士', title: '一人目', rank: '★☆☆☆☆', reactionMs: 440, cssClass: 'enemy-town', minWaitMs: 1600, maxWaitMs: 3800, flavor: 'まずは落ち着いて合図を見る相手です。' },
         { name: '道場破り', title: '二人目', rank: '★★☆☆☆', reactionMs: 350, cssClass: 'enemy-dojo', minWaitMs: 1900, maxWaitMs: 5200, flavor: '油断すると斬られます。合図だけを見ましょう。' },
         { name: '早耳の忍び', title: '三人目', rank: '★★★☆☆', reactionMs: 310, cssClass: 'enemy-ninja', minWaitMs: 2000, maxWaitMs: 6200, flavor: '速い相手です。長い待ちに飲まれないように。' },
-        { name: '無口な達人', title: '四人目', rank: '★★★★☆', reactionMs: 275, cssClass: 'enemy-master', minWaitMs: 2200, maxWaitMs: 7200, flavor: '一瞬の迷いが負けにつながります。' },
-        { name: '影の剣豪', title: '五人目', rank: '★★★★★', reactionMs: 250, cssClass: 'enemy-shadow', minWaitMs: 2400, maxWaitMs: 8500, flavor: 'ここからは本気の領域。かなり厳しい勝負です。' },
-        { name: '刹那の鬼', title: '六人目', rank: '★★★★★', reactionMs: 235, cssClass: 'enemy-demon', minWaitMs: 2600, maxWaitMs: 9200, flavor: '人間離れした速さ。勝てたら誇っていい相手です。' },
+        { name: '無口な達人', title: '四人目', rank: '★★★★☆', reactionMs: 285, cssClass: 'enemy-master', minWaitMs: 2200, maxWaitMs: 7200, flavor: '一瞬の迷いが負けにつながります。' },
+        { name: '影の剣豪', title: '五人目', rank: '★★★★★', reactionMs: 270, cssClass: 'enemy-shadow', minWaitMs: 2400, maxWaitMs: 8500, flavor: 'ここからは本気の領域。かなり厳しい勝負です。' },
+        { name: '刹那の鬼', title: '六人目', rank: '★★★★★', reactionMs: 260, cssClass: 'enemy-demon', minWaitMs: 2600, maxWaitMs: 9200, flavor: '人間離れした速さ。ここを越えれば達人です。' },
+        { name: '刹那の鬼・真', title: '隠しボス', rank: '★★★★★★', reactionMs: 235, cssClass: 'enemy-demon', minWaitMs: 2800, maxWaitMs: 9800, flavor: '限界突破の一戦。勝てなくても当然の相手です。', hidden: true },
       ];
 
       const enemyClassNames = enemies.map((enemy) => enemy.cssClass);
@@ -1451,12 +1452,21 @@
         return enemies[Math.min(game.currentEnemyIndex, enemies.length - 1)];
       }
 
-      function isFinalEnemy() {
+      function isLastEnemy() {
         return game.currentEnemyIndex >= enemies.length - 1;
       }
 
+      function isNormalFinalEnemy() {
+        const hiddenBossIndex = enemies.findIndex((enemy) => enemy.hidden === true);
+        return hiddenBossIndex > 0 && game.currentEnemyIndex === hiddenBossIndex - 1;
+      }
+
+      function isHiddenBoss() {
+        return getCurrentEnemy().hidden === true;
+      }
+
       function getNextEnemyName() {
-        if (isFinalEnemy()) return '限界突破';
+        if (isLastEnemy()) return '最初から';
         const nextIndex = game.currentEnemyIndex + 1;
         return enemies[nextIndex].name;
       }
@@ -1589,7 +1599,7 @@
       }
 
       function startNextRound() {
-        if (!game.lastResult || !game.lastResult.win) {
+        if (!game.lastResult || !game.lastResult.win || isLastEnemy()) {
           startRun();
           return;
         }
@@ -1671,8 +1681,10 @@
           enemyRank: enemy.rank,
           enemyReactionMs: enemy.reactionMs,
           diffMs,
-          judgeLabel: win && isFinalEnemy() ? '完全勝利' : judge.label,
-          comment: win && isFinalEnemy() ? '最後の相手を斬りました。ここから先は限界突破の一戦です。' : judge.comment,
+          judgeLabel: win && isHiddenBoss() ? '限界突破' : (win && isNormalFinalEnemy() ? '完全勝利' : judge.label),
+          comment: win && isHiddenBoss()
+            ? '隠しボスを斬りました。これはもう反射神経の記録として誇っていい一撃です。'
+            : (win && isNormalFinalEnemy() ? '最後の相手を斬りました。だが、奥にまだ一人だけ気配が残っています。' : judge.comment),
           isNewBest,
           waitMs: game.waitMs,
           streak: game.streak,
@@ -1773,7 +1785,9 @@
         elements.resultMaxStreak.textContent = `${game.record.maxStreak} 人`;
         elements.resultTotalWins.textContent = `${game.record.totalWins} 勝`;
         elements.nextEnemyLabel.textContent = result.win ? getNextEnemyName() : enemies[0].name;
-        elements.retryButton.textContent = result.win ? (isFinalEnemy() ? '限界突破へ' : '次の相手へ') : 'もう一回';
+        elements.retryButton.textContent = result.win
+          ? (isLastEnemy() ? '最初から' : (isNormalFinalEnemy() ? '隠しボスへ' : '次の相手へ'))
+          : 'もう一回';
         showScreen('result');
       }
 
@@ -1887,7 +1901,7 @@
           if (game.state === 'title') {
             startRun();
           } else if (game.state === 'result') {
-            if (game.lastResult && game.lastResult.win && !isFinalEnemy()) {
+            if (game.lastResult && game.lastResult.win && !isLastEnemy()) {
               startNextRound();
             } else {
               startRun(); // 敗北時、または最終敵討伐後は最初から

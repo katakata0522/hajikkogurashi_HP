@@ -65,3 +65,33 @@ assert.match(
   /\.result-card\s*\{[\s\S]*?width:\s*min\(720px,\s*100%\);/,
   'desktop result card should use a compact width'
 );
+
+assert.match(
+  script,
+  /name:\s*'無口な達人'[\s\S]*?reactionMs:\s*285[\s\S]*?name:\s*'影の剣豪'[\s\S]*?reactionMs:\s*270[\s\S]*?name:\s*'刹那の鬼'[\s\S]*?reactionMs:\s*260/,
+  'late-game enemy speeds should climb smoothly into the regular final boss'
+);
+
+assert.match(
+  script,
+  /name:\s*'刹那の鬼・真'[\s\S]*?reactionMs:\s*235[\s\S]*?hidden:\s*true/,
+  '235ms challenge should remain as a hidden boss'
+);
+
+assert.match(
+  script,
+  /function\s+isNormalFinalEnemy\(\)/,
+  'normal clear and hidden boss progression should be separated'
+);
+
+assert.match(
+  script,
+  /function\s+isLastEnemy\(\)/,
+  'last enemy detection should include the hidden boss'
+);
+
+assert.match(
+  script,
+  /隠しボスへ/,
+  'clearing the regular final enemy should invite the hidden boss challenge'
+);
