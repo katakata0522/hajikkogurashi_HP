@@ -1365,20 +1365,37 @@ class GameController {
             if (m.flashTimer > 0) m.flashTimer = Math.max(0, m.flashTimer - dt);
         }
 
-        // Photon animation
+        // Photon animation (Refactored: resolution-independent multi-segment leap logic)
         if (this.state === STATE.EMITTING) {
-            if (this.currentSegmentIdx < this.laserCache.length - 1) {
+            let timeLeft = dt;
+            const maxSubSteps = 200; // Safeguard against infinite loops
+            let subSteps = 0;
+
+            while (timeLeft > 0 && this.currentSegmentIdx < this.laserCache.length - 1 && subSteps < maxSubSteps) {
+                subSteps++;
                 const p1 = this.laserCache[this.currentSegmentIdx];
                 const p2 = this.laserCache[this.currentSegmentIdx + 1];
                 const segLen = dist(p1, p2);
                 const segTime = segLen / CONFIG.LASER_SPEED;
-                this.segmentProgress += segTime > 0 ? dt / segTime : 1;
 
-                if (this.segmentProgress >= 1) {
+                if (segTime <= 0) {
+                    // Skip invalid zero-length segments safely
+                    this.currentSegmentIdx++;
+                    this.segmentProgress = 0;
+                    continue;
+                }
+
+                // Calculate time needed to finish current segment
+                const currentSegTimeLeft = segTime * (1 - this.segmentProgress);
+
+                if (timeLeft >= currentSegTimeLeft) {
+                    // Leap completely through the current segment
+                    timeLeft -= currentSegTimeLeft;
                     this.photonPosition = { ...p2 };
                     this.currentSegmentIdx++;
                     this.segmentProgress = 0;
 
+                    // Evaluate midpoint/node events (reflection, portal warp, prisms, blackholes, blocks)
                     const next = this.laserCache[this.currentSegmentIdx];
                     if (next) {
                         const evt = this.reflectionPoints.find(rp => dist(rp, next) < 2.0);
@@ -1392,8 +1409,8 @@ class GameController {
                                 this.particles.spawn(evt.exitX, evt.exitY, '#ff8c00', 15);
                             } else if (evt.type === 'prism' && this.hasHitPrism) {
                                 this.triggerClear();
+                                return; // Stop executing update immediately on level clear
                             } else if (evt.type === 'blackhole') {
-                                // Immediately change state to prevent re-firing every frame
                                 this.state = STATE.PLAYING;
                                 this.particles.spawn(next.x, next.y, '#00f3ff', 20);
                                 this.showToast("光は幾何学から外れ、深淵に消えた");
@@ -1401,6 +1418,7 @@ class GameController {
                                     this.calculateLaserPath();
                                     this.updateHUD();
                                 }, 800);
+                                return;
                             } else if (evt.type === 'block') {
                                 this.state = STATE.PLAYING;
                                 this.particles.spawn(next.x, next.y, '#ff003c', 25);
@@ -1410,16 +1428,22 @@ class GameController {
                                     this.calculateLaserPath();
                                     this.updateHUD();
                                 }, 800);
+                                return;
                             }
                         }
                     }
                 } else {
+                    // Consume remaining frametime inside the current segment
+                    this.segmentProgress += timeLeft / segTime;
                     this.photonPosition.x = p1.x + (p2.x - p1.x) * this.segmentProgress;
                     this.photonPosition.y = p1.y + (p2.y - p1.y) * this.segmentProgress;
+                    timeLeft = 0;
                 }
-            } else {
+            }
+
+            // If the photon reaches the end of the calculated laser path without level clear
+            if (this.currentSegmentIdx >= this.laserCache.length - 1) {
                 if (!this.hasHitPrism && this.state === STATE.EMITTING) {
-                    // Immediately change state to prevent showToast firing every frame
                     this.state = STATE.PLAYING;
                     this.showToast("光は幾何学から外れ、深淵に消えた");
                     setTimeout(() => {
