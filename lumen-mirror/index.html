@@ -5,10 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>LUMEN_MIRROR - 幾何学と光紡ぎの美学</title>
     <meta name="description" content="指先で虚空に鏡を紡ぎ、光を導く物理反射パズルゲーム。ブラックホールの重力湾曲とワームホールの空間転送を攻略せよ。">
-    <!-- Google Fonts: Inter & Noto Sans JP -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400&family=Noto+Sans+JP:wght@100;300;400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&family=Noto+Sans+JP:wght@200;300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -22,7 +21,7 @@
             
             <div class="hud-item center">
                 <div class="ink-meter-container">
-                    <span class="label">MIRROR_INK:</span>
+                    <span class="label">INK:</span>
                     <div class="ink-bar-wrapper">
                         <div id="ink-bar"></div>
                         <div class="ink-ticks">
@@ -34,8 +33,11 @@
             </div>
 
             <div class="hud-item right">
-                <span class="label">STABILITY:</span>
-                <span id="stability-value" class="value">100.0%</span>
+                <span id="stability-value" class="value stb-value">100%</span>
+                <button id="info-chip" class="info-chip-btn" title="ステージ情報を表示">
+                    <span class="info-chip-icon">?</span>
+                    <span class="info-chip-label">INFO</span>
+                </button>
             </div>
         </header>
 
@@ -43,8 +45,36 @@
         <div id="viewport">
             <div class="grid-overlay"></div>
             <canvas id="game-canvas"></canvas>
+
+            <!-- ========== INFO PANEL ========== -->
+            <div id="info-panel" class="hidden">
+                <div class="info-panel-inner">
+                    <div class="info-panel-header">
+                        <div>
+                            <span id="info-stg-num" class="info-stg-num">STG_01</span>
+                            <h2 id="info-stg-name" class="info-stg-name">REFLECTION</h2>
+                        </div>
+                        <button id="info-close" class="info-close-btn">✕</button>
+                    </div>
+
+                    <div class="info-section">
+                        <div class="info-section-label">◈ MISSION</div>
+                        <div id="info-objective" class="info-objective-text">—</div>
+                    </div>
+
+                    <div class="info-section">
+                        <div class="info-section-label">◈ STORY</div>
+                        <div id="info-story" class="info-story-text">—</div>
+                    </div>
+
+                    <div class="info-section">
+                        <div class="info-section-label">◈ GIMMICKS</div>
+                        <div id="info-gimmicks" class="info-gimmicks-list"></div>
+                    </div>
+                </div>
+            </div>
             
-            <!-- STAGE CLEAR / OVERLAY -->
+            <!-- STAGE CLEAR OVERLAY -->
             <div id="overlay" class="hidden">
                 <div class="overlay-content">
                     <h2 id="overlay-title">SYSTEM_TUNED</h2>
@@ -84,7 +114,9 @@
             <!-- TITLE / START SCREEN -->
             <div id="start-screen" class="active">
                 <div class="title-logo">
-                    <h1>LUMEN_MIRROR</h1>
+                    <h1>
+                        <span class="title-lumen">LUMEN</span><span class="title-sep">_</span><span class="title-mirror">MIRROR</span>
+                    </h1>
                     <p class="subtitle">幾何学と光紡ぎの美学</p>
                 </div>
                 <div class="instruction-box">
@@ -111,7 +143,7 @@
             </button>
 
             <div id="mode-indicator" class="mode-indicator draw-mode">
-                <span id="mode-label">DRAW_MODE</span>
+                <span id="mode-label">DRAW</span>
             </div>
             
             <button id="reset-btn" class="control-btn" disabled>
@@ -124,9 +156,7 @@
         </footer>
     </div>
 
-    <!-- TOAST CONTAINER FOR NOTIFICATIONS -->
     <div id="toast-container"></div>
-
     <script src="script.js"></script>
 </body>
 </html>

@@ -7,7 +7,7 @@ const CONFIG = {
     WIDTH: 600,
     HEIGHT: 800,
     MAX_REFLECTIONS: 14,
-    LASER_SPEED: 1800,
+    LASER_SPEED: 3600,   // doubled from 1800
     PARTICLE_COUNT: 30,
 };
 
@@ -554,6 +554,11 @@ const STAGE_TEMPLATES = [
         name: "REFLECTION",
         displayName: "TUNING_01: REFLECTION",
         gimmicks: "基本反射",
+        story: "システム起動——調律者よ、幾何学アーカイブへようこそ。まずは基本から。虚空に鏡を引き、光の経路を紡ぎ出せ。",
+        objective: "放射された光子を、右下の結晶（PRISM）へ届けよ",
+        gimmickList: [
+            { type: 'mirror', name: 'MIRROR', desc: 'ドラッグで鏡を引く。光は鏡面で角度の法則に従い完全反射する。インクを節約するほど高ランクが狙える。' }
+        ],
         emitter: { x: 80, y: 150, angle: 0 },
         prism: { x: 520, y: 650, radius: 20 },
         blackholes: [], portals: [],
@@ -566,6 +571,11 @@ const STAGE_TEMPLATES = [
         name: "DOUBLE_ANGLE",
         displayName: "TUNING_02: DOUBLE_ANGLE",
         gimmicks: "二段階反射",
+        story: "第一の調律完了。次の課題——二段階の反射を制御せよ。光の角度は鏡の傾きが支配する。計算せよ。",
+        objective: "二回以上の反射を経由させて、左の結晶（PRISM）へ届けよ",
+        gimmickList: [
+            { type: 'mirror', name: 'MIRROR ×2', desc: '二枚の鏡を使って光を誘導する。鏡を置く順番と角度で、届く先が決まる。' }
+        ],
         emitter: { x: 80, y: 150, angle: Math.PI * 0.25 },
         prism: { x: 500, y: 150, radius: 20 },
         blackholes: [], portals: [],
@@ -577,6 +587,12 @@ const STAGE_TEMPLATES = [
         name: "GRAVITY_WELL",
         displayName: "TUNING_03: GRAVITY_WELL",
         gimmicks: "ブラックホール",
+        story: "警告——ブラックホールが近傍に出現した。その超重力場は光すら歪める。引力圏の外に、安全な経路を構築せよ。",
+        objective: "重力に吸収されずに、右の結晶へ届けよ。引力圏（点線）の外側を迂回せよ",
+        gimmickList: [
+            { type: 'mirror', name: 'MIRROR', desc: '迂回路を作る鏡を配置せよ。' },
+            { type: 'blackhole', name: 'BLACK HOLE', desc: '引力圏（点線）内に入った光は軌道が歪む。中心に触れた光は消滅する。⚠ GRAVITY FIELD を迂回せよ。' }
+        ],
         emitter: { x: 80, y: 400, angle: 0 },
         prism: { x: 520, y: 400, radius: 20 },
         blackholes: [{ x: 300, y: 400, mass: 75, radius: 140 }],
@@ -589,6 +605,12 @@ const STAGE_TEMPLATES = [
         name: "PORTAL_JUMP",
         displayName: "TUNING_04: PORTAL_JUMP",
         gimmicks: "ワームホール",
+        story: "空間に亀裂が生じた——ワームホールだ。青い入口へ光を当てよ。次の瞬間、それはオレンジの出口から同じ角度で飛び出す。",
+        objective: "ポータル（青→橙）を経由させて、右下の結晶へ届けよ",
+        gimmickList: [
+            { type: 'mirror', name: 'MIRROR', desc: 'ポータルへ光を向けるための鏡を引け。' },
+            { type: 'wormhole', name: 'WORMHOLE', desc: 'PORT_IN（青）へ入った光はPORT_OUT（橙）から同じ速度・同じ角度で出現する。方向転換はしない。' }
+        ],
         emitter: { x: 80, y: 150, angle: Math.PI * 0.15 },
         prism: { x: 520, y: 650, radius: 20 },
         blackholes: [],
@@ -601,6 +623,12 @@ const STAGE_TEMPLATES = [
         name: "CELESTIAL_DESIGNS",
         displayName: "TUNING_05: CELESTIAL_DESIGNS",
         gimmicks: "BH + ワームホール",
+        story: "重力の井戸と次元の裂け目が同時に存在する。すべての障害を利用、あるいは回避して、光を目的地へ運べ。",
+        objective: "ブラックホールを避けつつ、ポータルを活用して結晶へ届けよ",
+        gimmickList: [
+            { type: 'blackhole', name: 'BLACK HOLE', desc: '引力圏を迂回するか、ギリギリを掠めて方向転換に利用せよ。' },
+            { type: 'wormhole', name: 'WORMHOLE', desc: '戦略的にポータルを通過させ、最短経路を構築せよ。' }
+        ],
         emitter: { x: 80, y: 120, angle: 0 },
         prism: { x: 520, y: 700, radius: 20 },
         blackholes: [{ x: 250, y: 550, mass: 90, radius: 150 }],
@@ -613,6 +641,12 @@ const STAGE_TEMPLATES = [
         name: "MIRROR_MAZE",
         displayName: "TUNING_06: MIRROR_MAZE",
         gimmicks: "精密多重反射",
+        story: "精密さだけが生き残る。複雑な反射経路を組み上げ、見えない迷路を光で照らし出せ。",
+        objective: "多重反射とポータルを組み合わせて、右上の結晶へ届けよ",
+        gimmickList: [
+            { type: 'mirror', name: 'MIRROR（多重）', desc: '複数の鏡を精密に配置して経路を構築せよ。インクの使い方が鍵。' },
+            { type: 'wormhole', name: 'WORMHOLE', desc: '空間転送を組み合わせることで、短い経路が見えてくる。' }
+        ],
         emitter: { x: 80, y: 700, angle: -Math.PI * 0.35 },
         prism: { x: 520, y: 100, radius: 20 },
         blackholes: [],
@@ -625,6 +659,12 @@ const STAGE_TEMPLATES = [
         name: "SINGULARITY",
         displayName: "TUNING_07: SINGULARITY",
         gimmicks: "BH×2 + ワームホール",
+        story: "最終試練——二つの特異点が空間を掌握している。ワームホールを制し、二つの重力場を乗り越えよ。残存する光だけが、終着点に辿り着く。",
+        objective: "二つのブラックホールとワームホールをすべて攻略して、右下の結晶へ届けよ",
+        gimmickList: [
+            { type: 'blackhole', name: 'BLACK HOLE ×2', desc: '二つの重力場が互いに干渉する。慎重に経路を選べ。重力を方向転換に活用する高度な攻略も存在する。' },
+            { type: 'wormhole', name: 'WORMHOLE', desc: '次元転送を活用しなければ突破は難しい。ポータルの出口位置を意識して設計せよ。' }
+        ],
         emitter: { x: 80, y: 400, angle: -Math.PI * 0.2 },
         prism: { x: 520, y: 650, radius: 20 },
         blackholes: [
@@ -770,10 +810,51 @@ class GameController {
         this.state = STATE.PLAYING;
         document.getElementById('stage-select').classList.add('hidden');
         document.getElementById('overlay').classList.add('hidden');
+        this._closeInfoPanel();
         // Restore HUD and controls visibility
         document.getElementById('hud').style.opacity = '1';
         document.getElementById('controls').style.opacity = '1';
         this.loadStage(idx);
+    }
+
+    // ---- Info Panel ----
+    _openInfoPanel() {
+        if (this.state === STATE.TITLE || this.state === STATE.STAGE_SELECT || !this.emitter) {
+            this.showToast('ステージ選択後に使用できます');
+            return;
+        }
+        this._populateInfoPanel();
+        document.getElementById('info-panel').classList.remove('hidden');
+    }
+
+    _closeInfoPanel() {
+        document.getElementById('info-panel').classList.add('hidden');
+    }
+
+    _populateInfoPanel() {
+        const tmpl = STAGE_TEMPLATES[this.currentStageIdx];
+        document.getElementById('info-stg-num').textContent = `STG_0${this.currentStageIdx + 1}`;
+        document.getElementById('info-stg-name').textContent = tmpl.name;
+        document.getElementById('info-objective').textContent = tmpl.objective || '——';
+        document.getElementById('info-story').textContent = tmpl.story || '——';
+
+        const container = document.getElementById('info-gimmicks');
+        container.innerHTML = '';
+        (tmpl.gimmickList || []).forEach(g => {
+            const item = document.createElement('div');
+            item.className = 'info-gimmick-item';
+            const visual = document.createElement('div');
+            visual.className = `gimmick-visual ${g.type}`;
+            const info = document.createElement('div');
+            info.className = 'gimmick-info';
+            info.innerHTML = `
+                <div class="gimmick-name">${g.name}</div>
+                <div class="gimmick-desc">${g.desc}</div>
+            `;
+            item.appendChild(visual);
+            item.appendChild(info);
+            container.appendChild(item);
+        });
     }
 
     // ---- Event Binding ----
@@ -886,6 +967,14 @@ class GameController {
         document.getElementById('select-back-btn').addEventListener('click', () => {
             this._showTitleScreen();
         });
+        // Info chip
+        document.getElementById('info-chip').addEventListener('click', () => {
+            this._unlock();
+            this._openInfoPanel();
+        });
+        document.getElementById('info-close').addEventListener('click', () => {
+            this._closeInfoPanel();
+        });
     }
 
     _updateModeIndicator() {
@@ -893,10 +982,10 @@ class GameController {
         const label = document.getElementById('mode-label');
         if (this.hoveredMirrorIdx !== -1) {
             indicator.className = 'mode-indicator erase-mode';
-            label.textContent = 'ERASE_MODE';
+            label.textContent = 'ERASE';
         } else {
             indicator.className = 'mode-indicator draw-mode';
-            label.textContent = 'DRAW_MODE';
+            label.textContent = 'DRAW';
         }
     }
 
