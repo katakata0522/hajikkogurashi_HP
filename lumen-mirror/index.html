@@ -303,18 +303,18 @@
                     </div>
 
                     <!-- 往復速度 (Patrol用) -->
-                    <div id="prop-speed-group" class="property-group hidden" style="margin-top:10px;">
+                    <div id="prop-speed-group" class="property-group hidden" style="margin-top:8px;">
                         <label style="font-size:11px; color:rgba(255,255,255,0.5);">巡回速度: <span id="prop-speed-val" style="color:#ffffff;">70</span>px/s</label>
                         <input type="range" id="prop-speed" min="20" max="220" value="70" style="width:100%; margin-top:4px;">
-                        <div style="font-size:9px; color:#ffaa00; margin-top:4px; line-height:1.3;">※キャンバス上でオブジェクトを選択し、Shiftキーを押しながらクリックするかドラッグして巡回目的地（ターゲット点）を設定・移動できます。</div>
+                        <div style="font-size:8.5px; color:#ffaa00; margin-top:4px; line-height:1.2; letter-spacing:-0.02em;">※オブジェクト選択中、Shift+クリックまたはドラッグで巡回ターゲットを設定・移動できます。</div>
                     </div>
                     
-                    <button id="prop-delete-btn" class="flat-btn" style="margin-top:16px; color:#ff003c; border-color:#ff003c; width:100%; font-size:11px;">このオブジェクトを消去</button>
+                    <button id="prop-delete-btn" class="flat-btn" style="margin-top:12px; color:#ff003c; border-color:#ff003c; width:100%; font-size:11px;">このオブジェクトを消去</button>
                 </div>
             </div>
 
             <!-- ステージ設定 -->
-            <div class="sidebar-section" style="margin-top:15px;">
+            <div class="sidebar-section" style="margin-top:12px;">
                 <div class="section-label">◈ ステージ構成設定</div>
                 <div class="property-group">
                     <label style="font-size:11px; color:rgba(255,255,255,0.5);">インク容量 (鏡の長さ): <span id="prop-ink-val" style="color:#ffffff;">500</span>px</label>
@@ -323,11 +323,11 @@
             </div>
 
             <!-- 共有エリア -->
-            <div class="sidebar-section" style="margin-top:15px;">
+            <div class="sidebar-section" style="margin-top:12px;">
                 <div class="section-label">◈ 調律コードの共有</div>
-                <button id="editor-import-btn" class="flat-btn" style="width:100%; margin-bottom:8px; font-size:11px;">コードをインポート</button>
+                <button id="editor-import-btn" class="flat-btn" style="width:100%; margin-bottom:6px; font-size:11px;">コードをインポート</button>
                 <button id="editor-export-btn" class="glow-btn" style="width:100%; font-size:11px;" disabled>コードをエクスポート</button>
-                <div id="export-warning" style="font-size:9px; color:#ff007f; margin-top:6px; text-align:center; line-height:1.3;">⚠ 共有コードの発行には、自分でテストプレイを行いクリア検証（調律確認）に成功する必要があります。</div>
+                <div id="export-warning" style="font-size:8.5px; color:#ff007f; margin-top:4px; text-align:center; line-height:1.2; letter-spacing:-0.02em;">⚠ 自作ステージを自分で一度クリア検証（調律確認）するとエクスポートできます。</div>
             </div>
         </aside>
     </div>

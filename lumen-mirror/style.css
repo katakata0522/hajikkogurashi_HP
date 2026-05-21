@@ -84,7 +84,7 @@ body {
     height: 60px;
     border-bottom: 1.5px solid var(--border-color);
     display: grid;
-    grid-template-columns: 1fr 1.5fr 1fr;
+    grid-template-columns: minmax(80px, 1fr) minmax(140px, 1.5fr) minmax(80px, 1fr);
     align-items: center;
     padding: 0 16px;
     font-size: 11px;
@@ -98,6 +98,7 @@ body {
     display: flex;
     align-items: center;
     gap: 6px;
+    min-width: 0;
 }
 
 .hud-item.center {
@@ -121,6 +122,9 @@ body {
     font-family: 'Inter', monospace;
     font-weight: 400;
     text-shadow: 0 0 5px rgba(255, 255, 255, 0.25);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .stb-value {
@@ -179,6 +183,8 @@ body {
     align-items: center;
     gap: 8px;
     width: 100%;
+    max-width: 170px;
+    margin: 0 auto;
 }
 
 .ink-bar-wrapper {
@@ -1300,18 +1306,34 @@ body {
     .pc-only-sidebar {
         display: flex !important;
         flex-direction: column;
-        width: 330px;
-        height: min(90vh, 1200px);
+        width: 310px;
+        height: min(92vh, 1200px);
         background: var(--bg-surface);
         border: 1.5px solid var(--border-color);
         box-shadow: 0 15px 45px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 255, 255, 0.02);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
         border-radius: 12px;
-        padding: 26px;
+        padding: 16px 18px 20px 18px;
         overflow-y: auto;
+        overflow-x: hidden;
         flex-shrink: 0;
         animation: sidebarFadeIn 0.7s cubic-bezier(0.25, 1, 0.5, 1) both;
+    }
+
+    /* PCサイドバー用の細くて美しいカスタムスクロールバー */
+    .pc-only-sidebar::-webkit-scrollbar {
+        width: 6px;
+    }
+    .pc-only-sidebar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .pc-only-sidebar::-webkit-scrollbar-thumb {
+        background: rgba(0, 243, 255, 0.2);
+        border-radius: 3px;
+    }
+    .pc-only-sidebar::-webkit-scrollbar-thumb:hover {
+        background: rgba(0, 243, 255, 0.5);
     }
 
     #pc-sidebar-left {
@@ -1646,6 +1668,7 @@ body {
 #editor-modal.hidden {
     opacity: 0;
     pointer-events: none;
+    display: none !important;
 }
 
 .modal-backdrop {

@@ -2372,6 +2372,8 @@ class GameController {
 
         document.getElementById('editor-sidebar-left').style.opacity = '0.35';
         document.getElementById('editor-sidebar-right').style.opacity = '0.35';
+        document.getElementById('editor-sidebar-left').style.pointerEvents = 'none';
+        document.getElementById('editor-sidebar-right').style.pointerEvents = 'none';
 
         this.loadStage(-1, true, this.customStageData);
         this.showToast("テストプレイ開始！鏡を引き結晶へ光を導こう", false);
@@ -2387,6 +2389,8 @@ class GameController {
 
         document.getElementById('editor-sidebar-left').style.opacity = '1';
         document.getElementById('editor-sidebar-right').style.opacity = '1';
+        document.getElementById('editor-sidebar-left').style.pointerEvents = 'auto';
+        document.getElementById('editor-sidebar-right').style.pointerEvents = 'auto';
 
         this.loadStage(-1, true, this.customStageData);
         this.editorSelectedObject = null;
