@@ -2625,6 +2625,7 @@ class GameController {
     }
 
     updateInspector() {
+        const panelEl = document.getElementById('inspector-panel');
         const emptyEl = document.getElementById('inspector-empty');
         const detailsEl = document.getElementById('inspector-details');
         const typeEl = document.getElementById('prop-type');
@@ -2641,11 +2642,13 @@ class GameController {
         if (!obj) {
             emptyEl.classList.remove('hidden');
             detailsEl.classList.add('hidden');
+            if (panelEl) panelEl.classList.remove('active-panel');
             return;
         }
 
         emptyEl.classList.add('hidden');
         detailsEl.classList.remove('hidden');
+        if (panelEl) panelEl.classList.add('active-panel');
 
         angleGroup.classList.add('hidden');
         colorGroup.classList.add('hidden');
