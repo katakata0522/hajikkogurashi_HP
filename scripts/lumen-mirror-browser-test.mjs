@@ -74,12 +74,18 @@ try {
     await page.click('#editor-btn');
     const canvas = await page.locator('#game-canvas').boundingBox();
     await page.mouse.click(canvas.x + (canvas.width * 80 / 600), canvas.y + (canvas.height * 150 / 800));
-    const selectedInspectorOverflow = await page.evaluate(() => {
+    await page.locator('#prop-ink').fill('1150');
+    const selectedInspectorLayout = await page.evaluate(() => {
       const rightSidebar = document.querySelector('#editor-sidebar-right');
-      return rightSidebar.scrollHeight - rightSidebar.clientHeight;
+      const inkLabel = document.querySelector('#prop-ink').closest('.property-group').querySelector('label');
+      return {
+        overflow: rightSidebar.scrollHeight - rightSidebar.clientHeight,
+        inkLabelHeight: Math.ceil(inkLabel.getBoundingClientRect().height),
+        inkLabelOverflow: Math.max(0, Math.ceil(inkLabel.scrollWidth - inkLabel.clientWidth)),
+      };
     });
-    if (selectedInspectorOverflow > 0) {
-      throw new Error(`selected inspector is clipped in a short workspace: ${selectedInspectorOverflow}px`);
+    if (selectedInspectorLayout.overflow > 0 || selectedInspectorLayout.inkLabelHeight > 20 || selectedInspectorLayout.inkLabelOverflow > 0) {
+      throw new Error(`selected inspector is clipped or wraps in a short workspace: ${JSON.stringify(selectedInspectorLayout)}`);
     }
 
     await page.setViewportSize({ width: 1150, height: 800 });
@@ -115,6 +121,15 @@ try {
     await runEditorScenario('custom info', { width: 1280, height: 720 }, async (scenarioPage) => {
       await scenarioPage.click('#info-chip');
       if (!(await scenarioPage.locator('#info-panel').isVisible())) failures.push('custom info: INFO panel remains hidden');
+      const guide = scenarioPage.locator('#info-editor-guide');
+      if (!(await guide.isVisible())) {
+        failures.push('custom info: editor guide is unavailable');
+      } else {
+        const guideText = await guide.innerText();
+        if (!guideText.includes('TEST_PLAY') || !guideText.includes('SELECT') || !guideText.includes('コード')) {
+          failures.push(`custom info: editor guide does not explain the workflow: ${guideText}`);
+        }
+      }
     });
 
     await runEditorScenario('custom test settings', { width: 1280, height: 720 }, async (scenarioPage) => {

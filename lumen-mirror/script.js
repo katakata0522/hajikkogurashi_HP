@@ -1092,6 +1092,10 @@ class GameController {
             story: '——',
             gimmickList: []
         } : STAGE_TEMPLATES[this.currentStageIdx];
+        document.getElementById('info-editor-guide').classList.toggle('hidden', !isCustomStage);
+        ['info-mission-section', 'info-story-section', 'info-gimmicks-section'].forEach(id => {
+            document.getElementById(id).classList.toggle('hidden', isCustomStage);
+        });
         document.getElementById('info-stg-num').textContent = isCustomStage ? 'CUSTOM_STG' : `STG_0${this.currentStageIdx + 1}`;
         document.getElementById('info-stg-name').textContent = tmpl.name;
         document.getElementById('info-objective').textContent = tmpl.objective || '——';

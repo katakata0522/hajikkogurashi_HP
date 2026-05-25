@@ -1029,6 +1029,69 @@ body {
     gap: 12px;
 }
 
+.editor-guide-lead {
+    color: rgba(232, 242, 255, 0.92);
+    font-size: 13px;
+    line-height: 1.8;
+    margin-bottom: 15px;
+}
+
+.editor-guide-steps {
+    display: grid;
+    gap: 9px;
+    margin-bottom: 15px;
+}
+
+.editor-guide-step {
+    display: grid;
+    grid-template-columns: 34px 98px minmax(0, 1fr);
+    gap: 10px;
+    align-items: center;
+    padding: 11px 12px;
+    border: 1px solid rgba(0, 243, 255, 0.12);
+    border-radius: 7px;
+    background: rgba(0, 243, 255, 0.035);
+    font-size: 11px;
+    line-height: 1.5;
+    color: rgba(214, 220, 236, 0.9);
+}
+
+.editor-guide-step strong {
+    color: #ffffff;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+}
+
+.editor-guide-num {
+    color: var(--color-photon);
+    font-family: 'Inter', monospace;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+}
+
+.editor-guide-tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.editor-guide-tools span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 9px;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 5px;
+    color: rgba(210, 215, 230, 0.85);
+    font-size: 10px;
+}
+
+.editor-guide-tools b {
+    color: var(--color-photon);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+}
+
 .info-gimmick-item {
     display: flex;
     align-items: center;
@@ -2030,6 +2093,12 @@ body {
 
 /* Compact editor arrangement for zoomed or short desktop workspaces. */
 @media (min-width: 1150px) and (min-aspect-ratio: 1.1) and (max-height: 700px) {
+    #app-layout.editing-mode {
+        --desktop-sidebar-width: clamp(252px, 20vw, 270px);
+        --desktop-layout-gap: clamp(10px, 1.25vw, 18px);
+        --desktop-layout-padding: clamp(10px, 1.4vw, 20px);
+    }
+
     #app-layout.editing-mode .pc-only-sidebar {
         height: calc(100vh - 24px);
         padding: 12px 14px;
@@ -2094,5 +2163,14 @@ body {
     #editor-sidebar-right .property-group {
         margin-bottom: 7px;
         padding: 8px;
+    }
+
+    #editor-sidebar-right .property-group label {
+        gap: 7px;
+        white-space: nowrap;
+    }
+
+    #editor-sidebar-right .property-group label span {
+        flex-shrink: 0;
     }
 }

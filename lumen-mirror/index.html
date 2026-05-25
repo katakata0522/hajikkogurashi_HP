@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&family=Noto+Sans+JP:wght@200;300;400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260525-editor-fix">
+    <link rel="stylesheet" href="style.css?v=20260525-info-guide-fix">
 </head>
 <body>
     <div id="app-layout">
@@ -123,17 +123,44 @@
                             <button id="info-close" class="info-close-btn">✕</button>
                         </div>
 
-                        <div class="info-section">
+                        <div id="info-editor-guide" class="info-section editor-guide hidden">
+                            <div class="info-section-label">◈ CREATIVE_FLOW</div>
+                            <p class="editor-guide-lead">光の経路を組み、試し、クリアできた設計だけを調律コードとして共有できます。</p>
+                            <div class="editor-guide-steps">
+                                <div class="editor-guide-step">
+                                    <span class="editor-guide-num">01</span>
+                                    <strong>PLACE</strong>
+                                    <span>左のギミックを選び、キャンバスに配置</span>
+                                </div>
+                                <div class="editor-guide-step">
+                                    <span class="editor-guide-num">02</span>
+                                    <strong>TEST_PLAY</strong>
+                                    <span>鏡を引いて、EMIT で光を発射</span>
+                                </div>
+                                <div class="editor-guide-step">
+                                    <span class="editor-guide-num">03</span>
+                                    <strong>SHARE</strong>
+                                    <span>クリア後にコードをエクスポート</span>
+                                </div>
+                            </div>
+                            <div class="editor-guide-tools">
+                                <span><b>SELECT</b> 移動・設定</span>
+                                <span><b>PLACE</b> 配置</span>
+                                <span><b>ERASE</b> 消去</span>
+                            </div>
+                        </div>
+
+                        <div id="info-mission-section" class="info-section">
                             <div class="info-section-label">◈ MISSION</div>
                             <div id="info-objective" class="info-objective-text">—</div>
                         </div>
 
-                        <div class="info-section">
+                        <div id="info-story-section" class="info-section">
                             <div class="info-section-label">◈ STORY</div>
                             <div id="info-story" class="info-story-text">—</div>
                         </div>
 
-                        <div class="info-section">
+                        <div id="info-gimmicks-section" class="info-section">
                             <div class="info-section-label">◈ GIMMICKS</div>
                             <div id="info-gimmicks" class="info-gimmicks-list"></div>
                         </div>
@@ -353,6 +380,6 @@
     </div>
 
     <div id="toast-container"></div>
-    <script src="script.js?v=20260525-editor-fix"></script>
+    <script src="script.js?v=20260525-info-guide-fix"></script>
 </body>
 </html>
