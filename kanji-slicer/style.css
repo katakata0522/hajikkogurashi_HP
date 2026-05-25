@@ -1,5 +1,5 @@
 /* Kanji Slicer & Merge (漢字スライサー・マージ) */
-/* Version: v1.3.0 */
+/* Version: v1.4.0 */
 
 /* Reset & Base styles */
 *, *::before, *::after {
@@ -357,3 +357,115 @@ body {
     background: rgba(255, 255, 255, 0.1);
     color: #fff;
 }
+
+/* Pause & Dictionary Styles */
+.header-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.pause-content {
+    max-width: 440px !important;
+    width: 90% !important;
+    padding: 20px 15px !important;
+}
+
+.modal-title-pause {
+    font-family: 'Kaisei Decol', serif;
+    font-size: 1.3em;
+    color: #fff;
+    margin-bottom: 12px;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+.dictionary-container {
+    background: rgba(0, 0, 0, 0.35);
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.dictionary-desc {
+    font-size: 0.7em;
+    color: #718096;
+    margin-bottom: 10px;
+}
+
+.dictionary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    max-height: 280px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+/* Custom Scrollbar for dict */
+.dictionary-grid::-webkit-scrollbar {
+    width: 4px;
+}
+.dictionary-grid::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+}
+.dictionary-grid::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 2px;
+}
+
+/* Recipe Card inside grid */
+.recipe-card {
+    background: rgba(255, 255, 255, 0.015);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    padding: 8px 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: all 0.2s;
+}
+
+.recipe-card.unlocked {
+    background: rgba(20, 24, 30, 0.65);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.recipe-card .dict-kanji {
+    font-family: 'Kaisei Decol', serif;
+    font-size: 1.6em;
+    font-weight: bold;
+    line-height: 1;
+    margin-bottom: 2px;
+}
+
+.recipe-card .dict-reading {
+    font-size: 0.55em;
+    color: #a0aec0;
+    margin-bottom: 4px;
+}
+
+.recipe-card .dict-formula {
+    font-size: 0.5em;
+    color: #4a5568;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 2px 4px;
+    border-radius: 3px;
+    letter-spacing: 0.02em;
+}
+
+.recipe-card.locked .dict-kanji {
+    color: #4a5568 !important;
+    text-shadow: none !important;
+}
+
+.recipe-card.locked .dict-reading {
+    color: #3f4e61;
+}
+
+.recipe-card.locked .dict-formula {
+    color: #718096;
+}
+

@@ -1,5 +1,5 @@
 // Kanji Slicer & Merge (漢字スライサー・マージ)
-// Version: v1.3.0
+// Version: v1.4.0
 // Core Game Logic
 
 // Virtual coordinate space (maintains consistency across all screens)
@@ -21,32 +21,32 @@ const FLOOR_FRICTION = 0.95;
 // Kanji Database (Tiers, Colors, Glows)
 const KANJI_DATA = {
     // Tier 1 (Base)
-    '木': { tier: 1, color: '#4ab97a', glow: '#2e7d32' },
-    '日': { tier: 1, color: '#f5c242', glow: '#f57f17' },
-    '月': { tier: 1, color: '#42bcf5', glow: '#0288d1' },
-    '人': { tier: 1, color: '#f0f0f0', glow: '#9e9e9e' },
-    '女': { tier: 1, color: '#f576ba', glow: '#c2185b' },
-    '子': { tier: 1, color: '#76f0f5', glow: '#0097a7' },
-    '山': { tier: 1, color: '#a8764a', glow: '#5d4037' },
-    '石': { tier: 1, color: '#949ca8', glow: '#455a64' },
-    '門': { tier: 1, color: '#7676f5', glow: '#303f9f' },
-    '口': { tier: 1, color: '#f57a42', glow: '#e64a19' },
-    '火': { tier: 1, color: '#f54a4a', glow: '#d32f2f' },
+    '木': { tier: 1, color: '#4ab97a', glow: '#2e7d32', read: 'もく' },
+    '日': { tier: 1, color: '#f5c242', glow: '#f57f17', read: 'にち' },
+    '月': { tier: 1, color: '#42bcf5', glow: '#0288d1', read: 'げつ' },
+    '人': { tier: 1, color: '#f0f0f0', glow: '#9e9e9e', read: 'じん' },
+    '女': { tier: 1, color: '#f576ba', glow: '#c2185b', read: 'じょ' },
+    '子': { tier: 1, color: '#76f0f5', glow: '#0097a7', read: 'し' },
+    '山': { tier: 1, color: '#a8764a', glow: '#5d4037', read: 'さん' },
+    '石': { tier: 1, color: '#949ca8', glow: '#455a64', read: 'せき' },
+    '門': { tier: 1, color: '#7676f5', glow: '#303f9f', read: 'もん' },
+    '口': { tier: 1, color: '#f57a42', glow: '#e64a19', read: 'こう' },
+    '火': { tier: 1, color: '#f54a4a', glow: '#d32f2f', read: 'か' },
     
     // Tier 2 (Compounds)
-    '林': { tier: 2, color: '#68d391', glow: '#2f855a' },
-    '明': { tier: 2, color: '#faf089', glow: '#b7791f' },
-    '休': { tier: 2, color: '#81e6d9', glow: '#2c7a7b' },
-    '好': { tier: 2, color: '#fbb6ce', glow: '#b83280' },
-    '岩': { tier: 2, color: '#cbd5e0', glow: '#4a5568' },
-    '間': { tier: 2, color: '#b794f4', glow: '#553c9a' },
-    '問': { tier: 2, color: '#90cdf4', glow: '#2b6cb0' },
-    '炎': { tier: 2, color: '#fc8181', glow: '#9b2c2c' },
-    '回': { tier: 2, color: '#fbd38d', glow: '#dd6b20' },
-    '朋': { tier: 2, color: '#90cdf4', glow: '#2b6cb0' },
+    '林': { tier: 2, color: '#68d391', glow: '#2f855a', read: 'りん' },
+    '明': { tier: 2, color: '#faf089', glow: '#b7791f', read: 'めい' },
+    '休': { tier: 2, color: '#81e6d9', glow: '#2c7a7b', read: 'きゅう' },
+    '好': { tier: 2, color: '#fbb6ce', glow: '#b83280', read: 'こう' },
+    '岩': { tier: 2, color: '#cbd5e0', glow: '#4a5568', read: 'がん' },
+    '間': { tier: 2, color: '#b794f4', glow: '#553c9a', read: 'かん' },
+    '問': { tier: 2, color: '#90cdf4', glow: '#2b6cb0', read: 'もん' },
+    '炎': { tier: 2, color: '#fc8181', glow: '#9b2c2c', read: 'えん' },
+    '回': { tier: 2, color: '#fbd38d', glow: '#dd6b20', read: 'かい' },
+    '朋': { tier: 2, color: '#90cdf4', glow: '#2b6cb0', read: 'ほう' },
     
     // Tier 3
-    '森': { tier: 3, color: '#48bb78', glow: '#22543d' }
+    '森': { tier: 3, color: '#48bb78', glow: '#22543d', read: 'しん' }
 };
 
 const TIER1_KANJI = ['木', '日', '月', '人', '女', '子', '山', '石', '門', '口', '火'];
@@ -377,6 +377,14 @@ function spawnFloatingText(x, y, text, color = '#ffffff') {
     });
 }
 
+// Discovered Kanji tracking (Encyclopedia)
+let discoveredKanji = JSON.parse(localStorage.getItem('kanjislicer_discovered') || '[]');
+// Tier 1 bases are discovered by default
+TIER1_KANJI.forEach(k => {
+    if (!discoveredKanji.includes(k)) discoveredKanji.push(k);
+});
+localStorage.setItem('kanjislicer_discovered', JSON.stringify(discoveredKanji));
+
 let score = 0;
 let bestScore = 0;
 let currentMission = '林';
@@ -387,6 +395,7 @@ let previewX = V_WIDTH / 2;
 let dropCooldown = 0;
 let isDraggingPreview = false;
 let isSlicing = false;
+let isPaused = false;
 let gameOverCounter = 0;
 let isGameOver = false;
 
@@ -396,8 +405,14 @@ const ctx = canvas.getContext('2d');
 const scoreEl = document.getElementById('score');
 const bestScoreEl = document.getElementById('best-score');
 const missionKanjiEl = document.getElementById('mission-kanji');
+const missionReadingEl = document.getElementById('mission-reading');
 const nextPreviewEl = document.getElementById('next-preview');
 const btnSound = document.getElementById('btn-sound');
+const btnPause = document.getElementById('btn-pause');
+const pauseModal = document.getElementById('pause-modal');
+const btnResume = document.getElementById('btn-resume');
+const btnPauseRestart = document.getElementById('btn-pause-restart');
+const dictGrid = document.getElementById('dictionary-grid');
 const deadLineAlert = document.getElementById('dead-line-alert');
 const gameoverModal = document.getElementById('gameover-modal');
 const finalScoreEl = document.getElementById('final-score');
@@ -457,6 +472,12 @@ function chooseNewMission() {
     } while (currentMission === oldMission && pool.length > 1);
     
     missionKanjiEl.textContent = currentMission;
+    
+    // Render Rubies for accessibility and educational aids
+    const read = KANJI_DATA[currentMission].read;
+    if (missionReadingEl) {
+        missionReadingEl.textContent = `読み：${read} | 合体して作ろう！`;
+    }
     
     // Update active drop queue based on new mission base components
     currentKanji = generateNextKanji();
@@ -522,6 +543,13 @@ function checkMerge(c1, c2) {
         const newKanji = recipe.result;
         const newTier = recipe.tier;
         const newRadius = getRadiusForTier(newTier);
+        
+        // Track discovered encyclopedia
+        if (!discoveredKanji.includes(newKanji)) {
+            discoveredKanji.push(newKanji);
+            localStorage.setItem('kanjislicer_discovered', JSON.stringify(discoveredKanji));
+            spawnFloatingText(midX, midY - 35, '新漢字解放！', '#eb5e28');
+        }
         
         // Spawn particles
         spawnParticles(midX, midY, KANJI_DATA[newKanji].color, 12);
@@ -717,7 +745,7 @@ function getVirtualCoords(e) {
 
 // Mouse/Touch Listeners
 function handleStart(e) {
-    if (isGameOver) return;
+    if (isGameOver || isPaused) return;
     soundSynth.init(); // Initialize audio context on first tap
     
     const coords = getVirtualCoords(e);
@@ -737,7 +765,7 @@ function handleStart(e) {
 }
 
 function handleMove(e) {
-    if (isGameOver) return;
+    if (isGameOver || isPaused) return;
     const coords = getVirtualCoords(e);
     
     if (isDraggingPreview) {
@@ -764,6 +792,7 @@ function handleMove(e) {
 }
 
 function handleEnd(e) {
+    if (isPaused) return;
     if (isDraggingPreview && dropCooldown === 0) {
         // Drop Kanji!
         const r = getRadiusForTier(1);
@@ -809,6 +838,101 @@ btnSound.addEventListener('click', () => {
     const isEnabled = soundSynth.toggle();
     btnSound.textContent = isEnabled ? '🔊' : '🔇';
 });
+
+// Pause button click
+btnPause.addEventListener('click', (e) => {
+    e.stopPropagation(); // Prevent canvas drop trigger if clicked fast
+    if (isGameOver) return;
+    isPaused = true;
+    populateDictionary();
+    pauseModal.classList.remove('hidden');
+});
+
+// Resume button click
+btnResume.addEventListener('click', () => {
+    isPaused = false;
+    pauseModal.classList.add('hidden');
+});
+
+// Restart button from pause menu
+btnPauseRestart.addEventListener('click', () => {
+    isPaused = false;
+    pauseModal.classList.add('hidden');
+    restartGame();
+});
+
+// Get formula text for dictionary UI
+function getFormulaText(kanji) {
+    const decomp = DECOMPOSITIONS[kanji];
+    if (!decomp) return '';
+    return `${decomp[0]} + ${decomp[1]}`;
+}
+
+// Convert Hex to RGB helper for box shadow transparency
+function hexToRgb(hex) {
+    const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+    hex = hex.replace(shorthandRegex, (m, r, g, b) => r + r + g + g + b + b);
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '255, 255, 255';
+}
+
+// Dynamically generate Pause Menu Dictionary Grid
+function populateDictionary() {
+    dictGrid.innerHTML = '';
+    
+    // Show compound Kanji (Tier 2 and Tier 3)
+    const targetKanji = [...TIER2_KANJI, '森'];
+    
+    targetKanji.forEach(k => {
+        const data = KANJI_DATA[k];
+        if (!data) return;
+        
+        const isUnlocked = discoveredKanji.includes(k);
+        const card = document.createElement('div');
+        card.className = `recipe-card ${isUnlocked ? 'unlocked' : 'locked'}`;
+        
+        if (isUnlocked) {
+            card.style.borderColor = data.color;
+            card.style.boxShadow = `inset 0 0 10px rgba(${hexToRgb(data.color)}, 0.15)`;
+            
+            const kanjiEl = document.createElement('div');
+            kanjiEl.className = 'dict-kanji';
+            kanjiEl.textContent = k;
+            kanjiEl.style.color = data.color;
+            kanjiEl.style.textShadow = `0 0 8px ${data.glow}`;
+            
+            const readingEl = document.createElement('div');
+            readingEl.className = 'dict-reading';
+            readingEl.textContent = `読み: ${data.read}`;
+            
+            const formulaEl = document.createElement('div');
+            formulaEl.className = 'dict-formula';
+            formulaEl.textContent = getFormulaText(k);
+            
+            card.appendChild(kanjiEl);
+            card.appendChild(readingEl);
+            card.appendChild(formulaEl);
+        } else {
+            const kanjiEl = document.createElement('div');
+            kanjiEl.className = 'dict-kanji';
+            kanjiEl.textContent = '?';
+            
+            const readingEl = document.createElement('div');
+            readingEl.className = 'dict-reading';
+            readingEl.textContent = '???';
+            
+            const formulaEl = document.createElement('div');
+            formulaEl.className = 'dict-formula';
+            formulaEl.textContent = getFormulaText(k);
+            
+            card.appendChild(kanjiEl);
+            card.appendChild(readingEl);
+            card.appendChild(formulaEl);
+        }
+        
+        dictGrid.appendChild(card);
+    });
+}
 
 // Game loop physics updates
 function updatePhysics() {
@@ -1128,12 +1252,18 @@ function draw() {
         drawEnsoCircle(ctx, body.radius, isWarning ? '#ef4444' : data.color);
         ctx.shadowBlur = 0; // Reset
         
-        // Kanji character text
+        // Kanji character text (shifted slightly up)
         ctx.fillStyle = '#ffffff';
-        ctx.font = `bold ${body.radius * 1.15}px 'Kaisei Decol', 'Noto Serif JP', serif`;
+        ctx.font = `bold ${body.radius * 1.05}px 'Kaisei Decol', 'Noto Serif JP', serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(body.kanji, 0, 1.5);
+        ctx.fillText(body.kanji, 0, -body.radius * 0.12);
+        
+        // Furigana (Ruby) reading under the Kanji
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.62)';
+        ctx.font = `bold ${body.radius * 0.34}px 'Noto Sans JP', sans-serif`;
+        ctx.fillText(data.read, 0, body.radius * 0.45);
+        
         ctx.restore();
     }
     
@@ -1188,6 +1318,8 @@ function draw() {
 
 // Update game mechanics loops
 function update() {
+    if (isPaused) return;
+    
     if (!isGameOver) {
         updatePhysics();
         checkGameOver();

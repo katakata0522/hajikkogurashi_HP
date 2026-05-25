@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Version: v1.3.0 -->
+<!-- Version: v1.4.0 -->
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
@@ -42,7 +42,10 @@
                     <span class="label">次の一手</span>
                     <div id="next-preview">木</div>
                 </div>
-                <button id="btn-sound" class="btn-icon" aria-label="音声を切替">🔊</button>
+                <div class="header-actions">
+                    <button id="btn-sound" class="btn-icon" aria-label="音声を切替">🔊</button>
+                    <button id="btn-pause" class="btn-icon" aria-label="一時停止">⏸️</button>
+                </div>
             </div>
         </header>
 
@@ -56,6 +59,23 @@
         <footer id="game-footer">
             <p class="instruction">【操作方法】タップ/クリックで落下位置を指定 | スワイプ/ドラッグで漢字を斬る！</p>
         </footer>
+    </div>
+
+    <!-- Pause / Guide Modal -->
+    <div id="pause-modal" class="modal-overlay hidden">
+        <div class="modal-content pause-content">
+            <h2 class="modal-title-pause">一時停止 ＆ 漢字図鑑</h2>
+            <div class="dictionary-container">
+                <p class="dictionary-desc">合体させて漢字を解放し、図鑑を埋めよう！</p>
+                <div id="dictionary-grid" class="dictionary-grid">
+                    <!-- Spawns dynamically via JS -->
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button id="btn-resume" class="btn-primary">再開する</button>
+                <button id="btn-pause-restart" class="btn-secondary">最初からやり直す</button>
+            </div>
+        </div>
     </div>
 
     <!-- Game Over Modal -->
