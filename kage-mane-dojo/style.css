@@ -167,7 +167,7 @@ button {
 .screen {
   display: none;
   min-height: 100svh;
-  padding: 86px clamp(16px, 4vw, 48px) 32px;
+  padding: 72px clamp(16px, 4vw, 48px) 12px; /* 縦幅の余白を適度に詰めて1画面収まりを強化 */
   box-sizing: border-box;
 }
 
@@ -226,8 +226,8 @@ button {
 .title-wrap {
   position: relative;
   z-index: 5;
-  margin-top: 4svh;
-  margin-bottom: 24px;
+  margin-top: 1.5svh;
+  margin-bottom: 8px;
   display: inline-block;
 }
 
@@ -281,11 +281,11 @@ h1 {
 .title-desc {
   position: relative;
   z-index: 5;
-  margin: 0 auto 36px;
+  margin: 0 auto 1.5svh;
   max-width: 32rem;
-  line-height: 2;
+  line-height: 1.8;
   font-family: var(--font-serif);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 500;
   color: var(--paper-dark);
   letter-spacing: 0.15em; /* 優雅な字間 */
@@ -409,7 +409,7 @@ h1 {
 }
 
 .hud div {
-  min-height: 58px;
+  min-height: 48px; /* 58px から 48px へスリム化 */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -889,7 +889,7 @@ h1 {
 }
 
 .dir-button {
-  min-height: 60px;
+  min-height: 50px; /* 60px から 50px へスリム化 */
   border: 1px solid rgba(179, 143, 54, 0.4);
   border-radius: 6px;
   background: rgba(26, 25, 22, 0.6);
@@ -1234,12 +1234,22 @@ h1 {
 /* ==========================================
    門下生お名前入力 & 難易度選択のスタイル
    ========================================== */
+.title-setup-row {
+  display: flex;
+  gap: 24px;
+  align-items: flex-end;
+  justify-content: center;
+  margin: 0 auto 2.5svh;
+  z-index: 5;
+  position: relative;
+}
+
 .name-input-group {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  margin: 0 auto 18px;
+  margin: 0; /* フレックスレイアウト用にマージンをリセット */
   max-width: 250px;
   z-index: 5;
   position: relative;
@@ -1285,7 +1295,7 @@ h1 {
   border-radius: 6px;
   background: rgba(15, 14, 12, 0.45);
   backdrop-filter: blur(4px);
-  margin: 0 auto 28px;
+  margin: 0; /* フレックスレイアウト用にマージンをリセット */
   z-index: 5;
   position: relative;
 }
@@ -1344,7 +1354,7 @@ h1 {
   .arm { width: 34px; height: 9px; top: 36px; }
   
   .input-pad { max-width: 320px; gap: 8px; }
-  .dir-button { min-height: 52px; font-size: 1.2rem; }
+  .dir-button { min-height: 46px; font-size: 1.2rem; } /* 52px から 46px へスリム化 */
   .result-actions { grid-template-columns: 1fr; }
   
   /* スマホ用認定証・残機木札の調整 */
@@ -1362,13 +1372,20 @@ h1 {
   .cert-score { font-size: 1.5rem; }
   .cert-seal { width: 44px; height: 44px; font-size: 0.55rem; right: 6px; bottom: -12px; border-width: 2px; }
   
-  .title-wrap { margin-top: 2svh; margin-bottom: 16px; }
+  .title-wrap { margin-top: 2svh; margin-bottom: 12px; } /* 16px から 12px に微調整 */
   .title-seal {
     width: 24px;
     height: 24px;
     font-size: 0.85rem;
     right: -32px;
     bottom: 2px;
+  }
+  
+  .title-setup-row {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 2svh;
   }
 }
 

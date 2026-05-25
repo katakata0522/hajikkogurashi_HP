@@ -41,17 +41,20 @@
       </div>
       <p class="title-desc">師範の型を覚え、弟子として同じ順に打ち返せ。</p>
       
-      <!-- 門下生お名前入力 (セキュリティ・堅牢性を意識した文字数制限つき) -->
-      <div class="name-input-group">
-        <label for="usernameInput" class="name-label">門下生のお名前</label>
-        <input type="text" id="usernameInput" class="name-input" placeholder="名無しの修行者" maxlength="8" autocomplete="off">
-      </div>
+      <!-- 門下生設定エリア (縦幅節約フレックスラッパー) -->
+      <div class="title-setup-row">
+        <!-- 門下生お名前入力 (セキュリティ・堅牢性を意識した文字数制限つき) -->
+        <div class="name-input-group">
+          <label for="usernameInput" class="name-label">門下生のお名前</label>
+          <input type="text" id="usernameInput" class="name-input" placeholder="名無しの修行者" maxlength="8" autocomplete="off">
+        </div>
 
-      <!-- 難易度選択 (初級・中級・上級) -->
-      <div class="difficulty-select" id="difficultySelect">
-        <button type="button" class="diff-btn" data-diff="easy">初級</button>
-        <button type="button" class="diff-btn active" data-diff="normal">中級</button>
-        <button type="button" class="diff-btn" data-diff="hard">上級</button>
+        <!-- 難易度選択 (初級・中級・上級) -->
+        <div class="difficulty-select" id="difficultySelect">
+          <button type="button" class="diff-btn" data-diff="easy">初級</button>
+          <button type="button" class="diff-btn active" data-diff="normal">中級</button>
+          <button type="button" class="diff-btn" data-diff="hard">上級</button>
+        </div>
       </div>
 
       <button class="primary-button" id="startButton" type="button">稽古を始める</button>
