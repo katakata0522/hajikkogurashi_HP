@@ -344,7 +344,7 @@ h1 {
   margin-top: 36px;
   font-size: 0.76rem;
   color: var(--paper-dark);
-  opacity: 0.72;
+  opacity: 0.9; /* 視認性向上のため透明度を劇的に引き上げ */
   letter-spacing: 0.08em;
 }
 
@@ -394,8 +394,9 @@ h1 {
   font-size: 0.65rem;
   letter-spacing: 0.15em;
   color: var(--paper-dark);
-  opacity: 0.7;
+  opacity: 0.92; /* 視認性向上のため透明度を劇的に引き上げ */
   margin-bottom: 2px;
+  font-weight: 700;
 }
 
 .hud strong {
@@ -438,26 +439,21 @@ h1 {
   pointer-events: none;
 }
 
-/* 水墨画風の竹林 (CSSグラデーションのみで構築) */
+/* 水墨画風の竹林 (美しい手描き風SVGアセットを読み込み、保守性と表現力を大幅に向上) */
 .dojo-bamboo {
   position: absolute;
-  bottom: 40%;
+  bottom: 35%;
   left: 0;
   width: 100%;
-  height: 50%;
-  opacity: 0.15;
+  height: 55%;
+  opacity: 0.35; /* SVGで透過度を精密に調整し、情緒ある背景に */
   pointer-events: none;
-  background: 
-    /* 遠景の薄い竹 */
-    linear-gradient(90deg, transparent 8%, rgba(235, 220, 185, 0.4) 8.5%, rgba(235, 220, 185, 0.4) 9.5%, transparent 10%,
-                           transparent 35%, rgba(235, 220, 185, 0.4) 35.5%, rgba(235, 220, 185, 0.4) 36.5%, transparent 37%,
-                           transparent 75%, rgba(235, 220, 185, 0.4) 75.5%, rgba(235, 220, 185, 0.4) 77%, transparent 77.5%),
-    /* 中景の少し濃い竹 */
-    linear-gradient(90deg, transparent 20%, rgba(0,0,0,0.8) 20.6%, rgba(0,0,0,0.8) 22%, transparent 22.6%,
-                           transparent 55%, rgba(0,0,0,0.8) 55.6%, rgba(0,0,0,0.8) 57%, transparent 57.6%,
-                           transparent 85%, rgba(0,0,0,0.8) 85.6%, rgba(0,0,0,0.8) 87.2%, transparent 87.8%);
-  mask-image: linear-gradient(0deg, transparent, #fff 30%);
-  -webkit-mask-image: linear-gradient(0deg, transparent, #fff 30%);
+  background-image: url('./assets/bamboo.svg');
+  background-size: cover;
+  background-position: bottom center;
+  background-repeat: no-repeat;
+  mask-image: linear-gradient(0deg, transparent, #fff 25%);
+  -webkit-mask-image: linear-gradient(0deg, transparent, #fff 25%);
 }
 
 /* 漆調の黒い床 */
@@ -475,7 +471,7 @@ h1 {
   box-shadow: inset 0 10px 20px rgba(0,0,0,0.6);
 }
 
-/* 散り行く紅葉/桜の風流な演出 */
+/* 散り行く紅葉/桜の風流な演出 (will-changeを導入し、ハードウェアアクセラレーションで省電力化) */
 .dojo-scene::before,
 .dojo-scene::after {
   content: "";
@@ -488,6 +484,7 @@ h1 {
   opacity: 0;
   pointer-events: none;
   animation: leaf-fall 9s linear infinite;
+  will-change: transform, opacity; /* GPUレンダリングでバッテリー負荷を極小化 */
 }
 
 .dojo-scene::before {

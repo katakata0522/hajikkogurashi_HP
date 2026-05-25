@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="100%" height="100%">
+  <!-- 遠くの薄い竹 (かすれた薄墨) -->
+  <path d="M110 400 L115 0 L128 0 L123 400 Z" fill="#3d3a33" opacity="0.12" />
+  <path d="M113 90 Q120 88 127 90" stroke="#000" stroke-width="1.5" fill="none" opacity="0.08"/>
+  <path d="M112 210 Q120 208 126 210" stroke="#000" stroke-width="1.5" fill="none" opacity="0.08"/>
+  
+  <path d="M480 400 L475 0 L488 0 L493 400 Z" fill="#3d3a33" opacity="0.12" />
+  <path d="M478 120 Q483 118 490 120" stroke="#000" stroke-width="1.5" fill="none" opacity="0.08"/>
+  <path d="M477 240 Q483 238 489 240" stroke="#000" stroke-width="1.5" fill="none" opacity="0.08"/>
+  
+  <path d="M680 400 L685 0 L696 0 L691 400 Z" fill="#3d3a33" opacity="0.1" />
+
+  <!-- 近くの濃い竹 (力強い墨絵、節のディテールと味のある曲線を表現) -->
+  <!-- 左の主竹 -->
+  <path d="M220 400 L216 0 L236 0 L240 400 Z" fill="#1a1916" opacity="0.58" />
+  <path d="M218 90 Q228 88 238 90" stroke="#0d0c0a" stroke-width="2.5" fill="none" opacity="0.5"/>
+  <path d="M217 180 Q228 178 239 180" stroke="#0d0c0a" stroke-width="2.5" fill="none" opacity="0.5"/>
+  <path d="M217 270 Q228 268 240 270" stroke="#0d0c0a" stroke-width="2.5" fill="none" opacity="0.5"/>
+  
+  <!-- 右の主竹 -->
+  <path d="M580 400 L584 0 L604 0 L600 400 Z" fill="#1a1916" opacity="0.58" />
+  <path d="M582 100 Q594 98 603 100" stroke="#0d0c0a" stroke-width="2.5" fill="none" opacity="0.5"/>
+  <path d="M581 200 Q594 198 602 200" stroke="#0d0c0a" stroke-width="2.5" fill="none" opacity="0.5"/>
+  <path d="M581 300 Q594 298 601 300" stroke="#0d0c0a" stroke-width="2.5" fill="none" opacity="0.5"/>
+
+  <!-- 細い若竹 (しなやかな斜めのライン) -->
+  <path d="M330 400 L350 0 L358 0 L338 400 Z" fill="#1a1916" opacity="0.3" />
+  <path d="M344 110 Q350 109 356 110" stroke="#0d0c0a" stroke-width="1.5" fill="none" opacity="0.3"/>
+  <path d="M339 230 Q346 229 352 230" stroke="#0d0c0a" stroke-width="1.5" fill="none" opacity="0.3"/>
+</svg>

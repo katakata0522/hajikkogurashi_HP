@@ -129,6 +129,9 @@ function flashDirection(actor, direction) {
   elements.directionFlash.classList.add('show');
   button?.classList.add('flash');
 
+  // 拍子木の音 (カァン！) を鳴らす
+  playHyoshigi();
+
   window.setTimeout(() => {
     clearMoveClasses(actor);
     elements.directionFlash.classList.remove('show');
@@ -184,6 +187,10 @@ function completeLesson() {
   elements.statusText.textContent = 'よし、次の型へ';
   setInputEnabled(false);
   updateHud();
+
+  // レッスンクリア時に太鼓 (ドン！) を鳴らす
+  playTaiko();
+
   state.timers.push(window.setTimeout(startLesson, 760));
 }
 
@@ -208,6 +215,10 @@ function failLesson() {
   elements.rankText.textContent = rank;
   elements.resultComment.textContent = comment;
   state.bestLesson = Math.max(state.bestLesson, reached);
+
+  // 失敗時にお寺の鐘 (ゴーン...) を鳴らす
+  playKane();
+
   saveRecord();
   updateHud();
   showScreen('result');
@@ -283,3 +294,99 @@ loadRecord();
 updateHud();
 setInputEnabled(false);
 bindEvents();
+
+// ==========================================
+// 🔊 和風リアルタイム音響合成システム (Web Audio API)
+// ==========================================
+let audioCtx = null;
+
+function initAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+}
+
+// 拍子木の音 (カァン！) - 三角波とサイン波のブレンドで軽快な和の打撃音を合成
+function playHyoshigi() {
+  try {
+    initAudio();
+    const now = audioCtx.currentTime;
+    const osc1 = audioCtx.createOscillator();
+    const osc2 = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    
+    osc1.type = 'triangle';
+    osc1.frequency.setValueAtTime(820, now);
+    osc1.frequency.exponentialRampToValueAtTime(780, now + 0.08);
+    
+    osc2.type = 'sine';
+    osc2.frequency.setValueAtTime(1640, now); // 1オクターブ上の倍音
+    
+    gainNode.gain.setValueAtTime(0.18, now);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
+    
+    osc1.connect(gainNode);
+    osc2.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    
+    osc1.start();
+    osc2.start();
+    osc1.stop(now + 0.12);
+    osc2.stop(now + 0.12);
+  } catch (e) {
+    // 非対応環境エラー回避
+  }
+}
+
+// 和太鼓の音 (ドン！) - ピッチを急激に降下させることで、太鼓の太い皮の振動と胴鳴りを合成
+function playTaiko() {
+  try {
+    initAudio();
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(130, now);
+    osc.frequency.exponentialRampToValueAtTime(40, now + 0.2);
+    
+    gainNode.gain.setValueAtTime(0.35, now);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.4);
+    
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    
+    osc.start();
+    osc.stop(now + 0.4);
+  } catch (e) {
+    // エラー回避
+  }
+}
+
+// お寺の鐘の音 (ゴーン...) - 複数の不協和な倍音をブレンドし、深く余韻の長い鐘の響きを合成
+function playKane() {
+  try {
+    initAudio();
+    const now = audioCtx.currentTime;
+    const frequencies = [135, 202, 303, 405]; // 鐘特有 of 不協倍音
+    const gainNode = audioCtx.createGain();
+    
+    gainNode.gain.setValueAtTime(0.25, now);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 2.0);
+    gainNode.gain.connect(audioCtx.destination);
+    
+    frequencies.forEach((freq) => {
+      const osc = audioCtx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now);
+      osc.connect(gainNode);
+      osc.start();
+      osc.stop(now + 2.0);
+    });
+  } catch (e) {
+    // エラー回避
+  }
+}
