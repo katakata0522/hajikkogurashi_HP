@@ -392,49 +392,54 @@ h1 {
 }
 
 /* ==========================================
+/* ==========================================
    プレイ画面 (稽古)
    ========================================== */
 .play-screen {
-  gap: 18px;
+  gap: 12px;
   width: 100%;
   max-width: 760px;
   margin: 0 auto;
 }
 
-.hud {
-  width: 100%;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-}
-
-.hud div {
-  min-height: 48px; /* 58px から 48px へスリム化 */
+/* 道場内統合ミニHUD (引き算の美学) */
+.dojo-hud {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  z-index: 10;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(179, 143, 54, 0.25);
-  border-radius: 6px;
-  background: rgba(20, 19, 17, 0.7);
-  backdrop-filter: blur(4px);
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+  gap: 8px;
+  pointer-events: none;
 }
 
-.hud span {
-  font-size: 0.65rem;
-  letter-spacing: 0.15em;
+.dojo-hud-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(15, 14, 12, 0.85);
+  border: 1px solid rgba(179, 143, 54, 0.35);
+  border-radius: 4px;
+  padding: 4px 10px;
+  box-shadow: 
+    0 4px 8px rgba(0, 0, 0, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(4px);
+}
+
+.dojo-hud-item .label {
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
   color: var(--paper-dark);
-  opacity: 0.92; /* 視認性向上のため透明度を劇的に引き上げ */
-  margin-bottom: 2px;
   font-weight: 700;
 }
 
-.hud strong {
+.dojo-hud-item strong {
   font-family: var(--font-brush);
-  font-size: 1.3rem;
+  font-size: 0.85rem;
   color: var(--gold-bright);
   font-weight: 500;
+  margin-left: 4px;
 }
 
 /* ==========================================
@@ -1248,19 +1253,11 @@ h1 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 0;
   margin: 0; /* フレックスレイアウト用にマージンをリセット */
-  max-width: 250px;
+  max-width: 200px;
   z-index: 5;
   position: relative;
-}
-
-.name-label {
-  font-size: 0.72rem;
-  color: var(--paper-dark);
-  opacity: 0.88;
-  letter-spacing: 0.12em;
-  font-weight: 700;
 }
 
 .name-input {

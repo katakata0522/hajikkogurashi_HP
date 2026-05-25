@@ -45,8 +45,7 @@
       <div class="title-setup-row">
         <!-- 門下生お名前入力 (セキュリティ・堅牢性を意識した文字数制限つき) -->
         <div class="name-input-group">
-          <label for="usernameInput" class="name-label">門下生のお名前</label>
-          <input type="text" id="usernameInput" class="name-input" placeholder="名無しの修行者" maxlength="8" autocomplete="off">
+          <input type="text" id="usernameInput" class="name-input" placeholder="門下生のお名前 (8文字)" maxlength="8" autocomplete="off">
         </div>
 
         <!-- 難易度選択 (初級・中級・上級) -->
@@ -65,11 +64,7 @@
     </section>
 
     <section class="screen play-screen" id="playScreen" aria-label="稽古画面">
-      <div class="hud">
-        <div><span>LESSON</span><strong id="lessonLabel">1</strong></div>
-        <div><span>手数</span><strong id="lengthLabel">3</strong></div>
-        <div><span>入力</span><strong id="progressLabel">0/3</strong></div>
-      </div>
+      <!-- 巨大なHUDカード群を完全に削除し、道場シーン内へ統合（引き算の美学） -->
 
       <div class="dojo-scene" id="dojoScene">
         <div class="dojo-moon" aria-hidden="true"></div>
@@ -79,6 +74,11 @@
           <span class="life-talisman active" data-index="0">札</span>
           <span class="life-talisman active" data-index="1">札</span>
           <span class="life-talisman active" data-index="2">札</span>
+        </div>
+        <!-- 道場内統合ミニHUD (引き算の美学) -->
+        <div class="dojo-hud" aria-label="修行状況">
+          <div class="dojo-hud-item"><span class="label">稽古</span><strong id="lessonLabel">1</strong></div>
+          <div class="dojo-hud-item"><span class="label">型</span><strong id="progressLabel">0/2</strong></div>
         </div>
         <div class="dojo-floor" aria-hidden="true"></div>
         <div class="status-text" id="statusText" aria-live="polite">師範の型を見る</div>

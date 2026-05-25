@@ -74,7 +74,6 @@ const elements = {
   bestLesson: document.getElementById('bestLesson'),
   currentStreak: document.getElementById('currentStreak'),
   lessonLabel: document.getElementById('lessonLabel'),
-  lengthLabel: document.getElementById('lengthLabel'),
   progressLabel: document.getElementById('progressLabel'),
   statusText: document.getElementById('statusText'),
   master: document.getElementById('master'),
@@ -267,7 +266,6 @@ function updateHud() {
   elements.bestLesson.textContent = state.bestLesson;
   elements.currentStreak.textContent = state.streak;
   elements.lessonLabel.textContent = state.lesson;
-  elements.lengthLabel.textContent = state.sequence.length;
   elements.progressLabel.textContent = `${state.inputIndex}/${state.sequence.length}`;
 }
 
