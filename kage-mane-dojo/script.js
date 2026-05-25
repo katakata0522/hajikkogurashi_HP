@@ -7,16 +7,41 @@ const DIRECTION_LABEL = {
   left: '左',
 };
 
-const CONFIG = {
-  baseLength: 3,
-  minShowMs: 360,
-  minGapMs: 120,
-  startShowMs: 720,
-  startGapMs: 260,
+// 難易度別のゲーム設計パラメータ
+const DIFFICULTY_CONFIG = {
+  easy: {
+    maxLives: 5,
+    baseLength: 2,
+    startShowMs: 850,
+    startGapMs: 300,
+    minShowMs: 450,
+    minGapMs: 150,
+    maxLessonPressure: 9, // LESSON 10で最速
+  },
+  normal: {
+    maxLives: 3,
+    baseLength: 3,
+    startShowMs: 720,
+    startGapMs: 260,
+    minShowMs: 360,
+    minGapMs: 120,
+    maxLessonPressure: 13, // LESSON 14で最速
+  },
+  hard: {
+    maxLives: 1,
+    baseLength: 4,
+    startShowMs: 500,
+    startGapMs: 180,
+    minShowMs: 240,
+    minGapMs: 80,
+    maxLessonPressure: 24, // LESSON 25で最速
+  }
 };
 
 const STORAGE_KEY = 'kage-mane-dojo-record';
 const MUTE_KEY = 'kage-mane-dojo-mute';
+const USERNAME_KEY = 'kage-mane-dojo-username';
+const DIFF_KEY = 'kage-mane-dojo-difficulty';
 
 const state = {
   mode: 'title',
@@ -26,8 +51,17 @@ const state = {
   inputIndex: 0,
   bestLesson: 0,
   timers: [],
-  isMuted: false, // ミュート状態管理
-  lives: 3,       // 身代わり木札 (残機ライフ)
+  isMuted: false,
+  lives: 3,
+  maxLives: 3,
+  difficulty: 'normal',
+  username: '名無しの修行者',
+  
+  // 果たし状（挑戦）モード用の状態
+  isChallengeMode: false,
+  seed: 0,
+  originalSeed: 0,
+  prng: null,
 };
 
 const elements = {
@@ -55,35 +89,158 @@ const elements = {
   toast: document.getElementById('toast'),
   muteButton: document.getElementById('muteButton'),
   muteIcon: document.getElementById('muteIcon'),
-  certDate: document.getElementById('certDate'), // 認定証の日付表示用
+  certDate: document.getElementById('certDate'),
+  certUser: document.getElementById('certUser'),
+  usernameInput: document.getElementById('usernameInput'),
+  difficultySelect: document.getElementById('difficultySelect'),
+  dojoLives: document.getElementById('dojoLives'),
+  
+  // 果たし状用の新規要素
+  challengeBanner: document.getElementById('challengeBanner'),
+  certChallengeDesc: document.getElementById('certChallengeDesc'),
 };
+
+// 32bit線形合同法 (LCG) による超軽量・堅牢な疑似乱数生成器 (PRNG)
+function createPrng(seed) {
+  let s = seed >>> 0;
+  return function() {
+    s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+    return s / 4294967296;
+  };
+}
+
+// 果たし状（挑戦状）URLの安全なパースと復元
+function parseChallengeUrl() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const ch = params.get('ch');
+    if (!ch) return;
+
+    // 形式: [シード値]-[難易度] (例: 87532-hard)
+    const parts = ch.split('-');
+    const parsedSeed = Number.parseInt(parts[0], 10);
+    const parsedDiff = parts[1];
+
+    if (Number.isFinite(parsedSeed) && parsedSeed > 0 && DIFFICULTY_CONFIG[parsedDiff]) {
+      state.isChallengeMode = true;
+      state.seed = parsedSeed;
+      state.originalSeed = parsedSeed;
+      state.difficulty = parsedDiff;
+
+      // UIの雅なアップデート
+      if (elements.challengeBanner) {
+        elements.challengeBanner.classList.add('active');
+        const diffJp = { easy: '初級', normal: '中級', hard: '上級' }[parsedDiff] || '中級';
+        elements.challengeBanner.innerHTML = `<span>✉ 果たし状（${diffJp}・其の${parsedSeed}）が届いています</span>`;
+      }
+      if (elements.startButton) {
+        elements.startButton.textContent = '果たし状を受ける';
+      }
+      updateDifficultyUi();
+    }
+  } catch (error) {
+    // パースに失敗した場合は通常プレイ
+    state.isChallengeMode = false;
+  }
+}
+
+// 門下生お名前のサニタイズ（セキュリティ・XSS対策の徹底）
+function sanitizeUsername(input) {
+  if (!input) return '名無しの修行者';
+  
+  // 改行、タブ、および不要なスペースを除去
+  let name = input.replace(/[\r\n\t]/g, '').trim();
+  
+  if (name.length === 0) {
+    return '名無しの修行者';
+  }
+  
+  // 最大8文字に強制制限
+  if (name.length > 8) {
+    name = name.slice(0, 8);
+  }
+  
+  return name;
+}
+
+// 身代わり木札（ライフ）UIの動的生成
+function setupLivesUi() {
+  if (!elements.dojoLives) return;
+  
+  const cfg = DIFFICULTY_CONFIG[state.difficulty] || DIFFICULTY_CONFIG.normal;
+  state.maxLives = cfg.maxLives;
+  state.lives = state.maxLives;
+  
+  // 木札を動的にクリアしてから新規生成
+  elements.dojoLives.innerHTML = '';
+  for (let i = 0; i < state.maxLives; i += 1) {
+    const talisman = document.createElement('span');
+    talisman.className = 'life-talisman active';
+    talisman.dataset.index = i;
+    talisman.textContent = '札';
+    elements.dojoLives.appendChild(talisman);
+  }
+}
+
+// 難易度選択ボタンUIの同期
+function updateDifficultyUi() {
+  if (!elements.difficultySelect) return;
+  const buttons = elements.difficultySelect.querySelectorAll('.diff-btn');
+  buttons.forEach((btn) => {
+    const isCurrent = btn.dataset.diff === state.difficulty;
+    btn.classList.toggle('active', isCurrent);
+  });
+}
 
 function loadRecord() {
   try {
     const value = Number.parseInt(localStorage.getItem(STORAGE_KEY), 10);
     state.bestLesson = Number.isFinite(value) && value > 0 ? value : 0;
     
-    // ミュート状態のロード
     state.isMuted = localStorage.getItem(MUTE_KEY) === 'true';
     updateMuteUi();
+
+    // お名前のロード
+    const savedName = localStorage.getItem(USERNAME_KEY);
+    if (savedName) {
+      state.username = sanitizeUsername(savedName);
+    }
+    if (elements.usernameInput) {
+      elements.usernameInput.value = state.username;
+    }
+
+    // 難易度のロード
+    const savedDiff = localStorage.getItem(DIFF_KEY);
+    if (savedDiff && DIFFICULTY_CONFIG[savedDiff]) {
+      state.difficulty = savedDiff;
+    }
+    updateDifficultyUi();
   } catch (error) {
     state.bestLesson = 0;
     state.isMuted = false;
+    state.username = '名無しの修行者';
+    state.difficulty = 'normal';
   }
+
+  // URLの果たし状パラメータを最後に適用（ローカル保存値より優先）
+  parseChallengeUrl();
 }
 
 function saveRecord() {
   try {
     localStorage.setItem(STORAGE_KEY, String(state.bestLesson));
     localStorage.setItem(MUTE_KEY, String(state.isMuted));
+    localStorage.setItem(USERNAME_KEY, state.username);
+    localStorage.setItem(DIFF_KEY, state.difficulty);
   } catch (error) {
-    // 記録保存に失敗してもゲームは続ける。
+    // 保存失敗でもゲームは続行
   }
 }
 
 function updateMuteUi() {
   if (elements.muteIcon) {
-    elements.muteIcon.textContent = state.isMuted ? '🔕' : '🔔';
+    // ベルマークからスピーカーマーク (🔊/🔇) に変更
+    elements.muteIcon.textContent = state.isMuted ? '🔇' : '🔊';
   }
   if (elements.muteButton) {
     elements.muteButton.classList.toggle('muted', state.isMuted);
@@ -95,7 +252,6 @@ function toggleMute() {
   state.isMuted = !state.isMuted;
   saveRecord();
   updateMuteUi();
-  // ミュート解除時はAudioContextをアクティブ化
   if (!state.isMuted) {
     initAudio();
   }
@@ -130,10 +286,15 @@ function generateSequence(length) {
   const sequence = [];
   for (let i = 0; i < length; i += 1) {
     const previous = sequence[i - 1];
-    let next = DIRECTIONS[Math.floor(Math.random() * DIRECTIONS.length)];
+    
+    // 疑似乱数生成器があればそれを使用、なければ標準の乱数
+    const rand = state.prng ? state.prng() : Math.random();
+    let next = DIRECTIONS[Math.floor(rand * DIRECTIONS.length)];
+    
     if (previous && sequence[i - 2] === previous) {
       const candidates = DIRECTIONS.filter((direction) => direction !== previous);
-      next = candidates[Math.floor(Math.random() * candidates.length)];
+      const randCand = state.prng ? state.prng() : Math.random();
+      next = candidates[Math.floor(randCand * candidates.length)];
     }
     sequence.push(next);
   }
@@ -141,11 +302,20 @@ function generateSequence(length) {
 }
 
 function getTiming() {
-  const pressure = Math.min(state.lesson - 1, 14);
-  return {
-    showMs: Math.max(CONFIG.minShowMs, CONFIG.startShowMs - pressure * 24),
-    gapMs: Math.max(CONFIG.minGapMs, CONFIG.startGapMs - pressure * 8),
-  };
+  const cfg = DIFFICULTY_CONFIG[state.difficulty] || DIFFICULTY_CONFIG.normal;
+  const pressure = Math.min(state.lesson - 1, cfg.maxLessonPressure);
+  
+  // 難易度に応じたテンポ加速を線形で精密計算
+  const showMs = Math.max(
+    cfg.minShowMs,
+    cfg.startShowMs - pressure * ((cfg.startShowMs - cfg.minShowMs) / cfg.maxLessonPressure)
+  );
+  const gapMs = Math.max(
+    cfg.minGapMs,
+    cfg.startGapMs - pressure * ((cfg.startGapMs - cfg.minGapMs) / cfg.maxLessonPressure)
+  );
+  
+  return { showMs, gapMs };
 }
 
 function clearMoveClasses(character) {
@@ -161,7 +331,6 @@ function flashDirection(actor, direction) {
   elements.directionFlash.classList.add('show');
   button?.classList.add('flash');
 
-  // 拍子木の音 (カァン！) を鳴らす
   playHyoshigi();
 
   window.setTimeout(() => {
@@ -207,16 +376,40 @@ function startLesson() {
   clearTimers();
   state.mode = 'watching';
   state.inputIndex = 0;
-  state.sequence = generateSequence(CONFIG.baseLength + state.lesson - 1);
+  
+  // シード値を「元シード + レッスン数」で補正初期化し、常に一意かつ再現可能な譜面を生成
+  const lessonSeed = state.originalSeed + state.lesson;
+  state.prng = createPrng(lessonSeed);
+  
+  const cfg = DIFFICULTY_CONFIG[state.difficulty] || DIFFICULTY_CONFIG.normal;
+  state.sequence = generateSequence(cfg.baseLength + state.lesson - 1);
+  
   showScreen('play');
-  updateLivesUi(); // 木札UIの初期化・同期
+  updateLivesUi();
   showSequence();
 }
 
 function startGame() {
+  // お名前の確定とサニタイズ（安全な値でのロード）
+  if (elements.usernameInput) {
+    state.username = sanitizeUsername(elements.usernameInput.value);
+    elements.usernameInput.value = state.username;
+  }
+  
+  // 挑戦モードでなければ新しいランダムシード（5〜6桁の正の整数）を生成してプレイ
+  if (!state.isChallengeMode) {
+    state.seed = Math.floor(Math.random() * 900000) + 100000;
+    state.originalSeed = state.seed;
+  } else {
+    // 挑戦モードなら、ロードされたシードを最初からやり直すためにリセット
+    state.seed = state.originalSeed;
+  }
+
+  setupLivesUi(); // 難易度に応じたライフ最大数とUIの同期生成
+  saveRecord();
+
   state.lesson = 1;
   state.streak = 0;
-  state.lives = 3;  // 残機をリセット
   startLesson();
 }
 
@@ -229,7 +422,6 @@ function completeLesson() {
   setInputEnabled(false);
   updateHud();
 
-  // レッスンクリア時に太鼓 (ドン！) を鳴らす
   playTaiko();
 
   state.timers.push(window.setTimeout(startLesson, 760));
@@ -252,16 +444,31 @@ function failLesson() {
   const reached = state.lesson - 1;
   const [rank, comment] = getRank(reached);
   
-  // 認定証の各ラベルに値をセット
   elements.resultLesson.textContent = reached;
   elements.rankText.textContent = rank;
+  
+  if (elements.certUser) {
+    // 貴殿のお名前を textContent を使って安全に挿入（XSS防止）
+    elements.certUser.textContent = state.username;
+  }
+  
+  // 果たし状の詳細を免状に動的に記載
+  if (elements.certChallengeDesc) {
+    if (state.isChallengeMode) {
+      const diffJp = { easy: '初級', normal: '中級', hard: '上級' }[state.difficulty] || '中級';
+      elements.certChallengeDesc.textContent = `※果たし状 其の${state.originalSeed}（${diffJp}）より挑戦`;
+      elements.certChallengeDesc.style.display = 'block';
+    } else {
+      elements.certChallengeDesc.style.display = 'none';
+    }
+  }
+  
   if (elements.certDate) {
-    elements.certDate.textContent = getJapaneseDateString(); // 動的な和暦免状日付
+    elements.certDate.textContent = getJapaneseDateString();
   }
 
   state.bestLesson = Math.max(state.bestLesson, reached);
 
-  // お手つきの瞬間に鐘はすでに鳴らしているため、ここでは重複防止で呼出を削除
   saveRecord();
   updateHud();
   showScreen('result');
@@ -350,7 +557,20 @@ function handleDirection(direction) {
 }
 
 async function shareResult() {
-  const text = `影まね道場で${elements.resultLesson.textContent}段まで到達！ 称号「${elements.rankText.textContent}」\nhttps://hajikkoroom.xsrv.jp/kage-mane-dojo/`;
+  const reached = elements.resultLesson.textContent;
+  const rank = elements.rankText.textContent;
+  const diffJp = { easy: '初級', normal: '中級', hard: '上級' }[state.difficulty] || '中級';
+  
+  // 果たし状URLの生成 (ドメインやパスを自動取得して完全なURLにする)
+  const challengeUrl = `${window.location.origin}${window.location.pathname}?ch=${state.originalSeed}-${state.difficulty}`;
+  
+  let text = '';
+  if (state.isChallengeMode) {
+    text = `影まね道場にて其の${state.originalSeed}の果たし状（${diffJp}）に挑戦し、${reached}段（称号「${rank}」）まで到達！ 我の背中を追ってみよ！\n${challengeUrl}`;
+  } else {
+    text = `影まね道場（${diffJp}）で其の${state.originalSeed}の果たし状を生成！${reached}段（称号「${rank}」）まで到達した！ 我の型を越えられるか？\n${challengeUrl}`;
+  }
+
   try {
     if (navigator.share) {
       await navigator.share({ title: '影まね道場', text });
@@ -372,6 +592,36 @@ function bindEvents() {
 
   if (elements.muteButton) {
     elements.muteButton.addEventListener('click', toggleMute);
+  }
+
+  // 難易度選択ボタンのバインディング
+  if (elements.difficultySelect) {
+    elements.difficultySelect.addEventListener('click', (event) => {
+      const btn = event.target.closest('.diff-btn');
+      if (!btn) return;
+      const diff = btn.dataset.diff;
+      if (DIFFICULTY_CONFIG[diff]) {
+        state.difficulty = diff;
+        updateDifficultyUi();
+        saveRecord();
+      }
+    });
+  }
+
+  // 門下生お名前入力のリアルタイム/フォーカスアウト時セーブ
+  if (elements.usernameInput) {
+    elements.usernameInput.addEventListener('change', () => {
+      state.username = sanitizeUsername(elements.usernameInput.value);
+      elements.usernameInput.value = state.username;
+      saveRecord();
+    });
+    
+    // 入力中の制限
+    elements.usernameInput.addEventListener('input', () => {
+      if (elements.usernameInput.value.length > 8) {
+        elements.usernameInput.value = elements.usernameInput.value.slice(0, 8);
+      }
+    });
   }
 
   elements.inputPad.addEventListener('click', (event) => {

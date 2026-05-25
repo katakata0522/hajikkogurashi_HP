@@ -589,13 +589,13 @@ h1 {
   bottom: -4px;
   transform: translateX(-50%);
   text-align: center;
-  border: 1px solid rgba(179, 143, 54, 0.4);
+  border: 1px solid var(--gold);
   border-radius: 4px;
   padding: 3px 12px;
-  background: rgba(13, 12, 10, 0.9);
+  background: rgba(13, 12, 10, 0.95);
   font-size: 0.72rem;
   font-weight: 700;
-  color: var(--paper-dark);
+  color: var(--gold-bright); /* 金色にして暗闇での視認性をMAXに */
   letter-spacing: 0.1em;
   white-space: nowrap;
   box-shadow: 0 4px 8px rgba(0,0,0,0.4);
@@ -614,8 +614,105 @@ h1 {
 .head, .torso, .arm {
   position: absolute;
   display: block;
-  background: var(--ink); /* すべて一連の墨色で塗る */
-  transition: transform 250ms ease;
+  background: var(--ink); /* 水墨の黒 */
+  transition: 
+    transform 250ms ease,
+    box-shadow 180ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* --------------------------------------------------
+   満月からの逆光ゴールド・エッジライト（輪郭発光）エフェクト
+   師範（右・月は左側）と弟子（左・月は右側）で光の方向を逆に当て分ける高度な光学設計
+   -------------------------------------------------- */
+
+/* 師範のエッジライト（左側・左上に黄金光沢） */
+.master .head {
+  box-shadow: 
+    -1.5px -1.5px 5px rgba(229, 191, 88, 0.8),
+    -3px -3px 12px rgba(179, 143, 54, 0.55),
+    inset 1px 1px 1px rgba(255, 255, 255, 0.12);
+}
+.master .torso {
+  box-shadow: 
+    -2px -2px 6px rgba(229, 191, 88, 0.75),
+    -4px -4px 14px rgba(179, 143, 54, 0.55),
+    inset 1px 1px 1px rgba(255, 255, 255, 0.12);
+}
+.master .arm {
+  box-shadow: 
+    -1px -1px 4px rgba(229, 191, 88, 0.75),
+    -2px -2px 8px rgba(179, 143, 54, 0.5),
+    inset 1px 0.5px 1px rgba(255, 255, 255, 0.12);
+}
+
+/* 弟子のエッジライト（右側・右上に黄金光沢） */
+.student .head {
+  box-shadow: 
+    1.5px -1.5px 5px rgba(229, 191, 88, 0.8),
+    3px -3px 12px rgba(179, 143, 54, 0.55),
+    inset -1px 1px 1px rgba(255, 255, 255, 0.12);
+}
+.student .torso {
+  box-shadow: 
+    2px -2px 6px rgba(229, 191, 88, 0.75),
+    4px -4px 14px rgba(179, 143, 54, 0.55),
+    inset -1px 1px 1px rgba(255, 255, 255, 0.12);
+}
+.student .arm {
+  box-shadow: 
+    1px -1px 4px rgba(229, 191, 88, 0.75),
+    2px -2px 8px rgba(179, 143, 54, 0.5),
+    inset -1px 0.5px 1px rgba(255, 255, 255, 0.12);
+}
+
+/* --------------------------------------------------
+   キャラクター動作時（.active）の白銀・黄金瞬時フラッシュ発光
+   -------------------------------------------------- */
+
+/* 師範の動いた瞬間 */
+.master.active .head {
+  box-shadow: 
+    -2px -2px 10px var(--gold-bright),
+    -4px -4px 18px rgba(229, 191, 88, 0.9),
+    0 0 6px #fff,
+    inset 1px 1px 2px rgba(255, 255, 255, 0.3);
+}
+.master.active .torso {
+  box-shadow: 
+    -3px -3px 12px var(--gold-bright),
+    -5px -5px 22px rgba(229, 191, 88, 0.9),
+    0 0 8px #fff,
+    inset 1px 1px 2px rgba(255, 255, 255, 0.3);
+}
+.master.active .arm {
+  box-shadow: 
+    -1.5px -1.5px 8px var(--gold-bright),
+    -3px -3px 14px rgba(229, 191, 88, 0.8),
+    0 0 4px #fff,
+    inset 1px 0.5px 2px rgba(255, 255, 255, 0.3);
+}
+
+/* 弟子の動いた瞬間 */
+.student.active .head {
+  box-shadow: 
+    2px -2px 10px var(--gold-bright),
+    4px -4px 18px rgba(229, 191, 88, 0.9),
+    0 0 6px #fff,
+    inset -1px 1px 2px rgba(255, 255, 255, 0.3);
+}
+.student.active .torso {
+  box-shadow: 
+    3px -3px 12px var(--gold-bright),
+    5px -5px 22px rgba(229, 191, 88, 0.9),
+    0 0 8px #fff,
+    inset -1px 1px 2px rgba(255, 255, 255, 0.3);
+}
+.student.active .arm {
+  box-shadow: 
+    1.5px -1.5px 8px var(--gold-bright),
+    3px -3px 14px rgba(229, 191, 88, 0.8),
+    0 0 4px #fff,
+    inset -1px 0.5px 2px rgba(255, 255, 255, 0.3);
 }
 
 /* 筆で突いたような有機的な頭部 */
@@ -625,7 +722,6 @@ h1 {
   width: 28px;
   height: 28px;
   border-radius: 45% 55% 48% 52% / 50% 48% 52% 50%; /* 少し歪ませる */
-  box-shadow: inset -3px -2px 0 rgba(255,255,255,0.06);
 }
 
 /* 作務衣を羽織って構えたような有機的な胴体 */
@@ -1082,6 +1178,90 @@ h1 {
 }
 
 /* ==========================================
+   門下生お名前入力 & 難易度選択のスタイル
+   ========================================== */
+.name-input-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin: 0 auto 18px;
+  max-width: 250px;
+  z-index: 5;
+  position: relative;
+}
+
+.name-label {
+  font-size: 0.72rem;
+  color: var(--paper-dark);
+  opacity: 0.88;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+}
+
+.name-input {
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid rgba(179, 143, 54, 0.35);
+  border-radius: 4px;
+  background: rgba(20, 19, 17, 0.68);
+  color: var(--paper);
+  text-align: center;
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  transition: all 250ms ease;
+  outline: none;
+  backdrop-filter: blur(4px);
+  padding: 4px 12px;
+}
+
+.name-input:focus {
+  border-color: var(--gold-bright);
+  box-shadow: 0 0 14px rgba(229,191,88,0.22);
+  background: rgba(13, 12, 10, 0.85);
+}
+
+.difficulty-select {
+  display: inline-flex;
+  justify-content: center;
+  gap: 4px;
+  padding: 3px;
+  border: 1px solid rgba(179, 143, 54, 0.28);
+  border-radius: 6px;
+  background: rgba(15, 14, 12, 0.45);
+  backdrop-filter: blur(4px);
+  margin: 0 auto 28px;
+  z-index: 5;
+  position: relative;
+}
+
+.diff-btn {
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 7px 18px;
+  font-family: var(--font-serif);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--paper-dark);
+  background: transparent;
+  cursor: pointer;
+  transition: all 200ms ease;
+  letter-spacing: 0.08em;
+}
+
+.diff-btn:hover {
+  color: var(--paper);
+}
+
+.diff-btn.active {
+  background: linear-gradient(135deg, var(--red-bright), var(--red));
+  color: var(--paper);
+  box-shadow: 0 2px 8px rgba(148, 43, 36, 0.35);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* ==========================================
    携帯電話・タブレット対応
    ========================================== */
 @media (max-width: 620px) {
@@ -1136,4 +1316,46 @@ h1 {
     right: -32px;
     bottom: 2px;
   }
+}
+
+/* ==========================================
+   挑戦（果たし状）モード用の追加スタイル
+   ========================================== */
+.challenge-banner {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: min(290px, 80vw);
+  margin: 0 auto 12px;
+  padding: 6px 16px;
+  background: linear-gradient(90deg, rgba(148, 43, 36, 0.9), rgba(194, 59, 50, 0.9));
+  border: 1px solid var(--gold);
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(148, 43, 36, 0.4), 0 0 8px rgba(179, 143, 54, 0.2);
+  color: var(--paper);
+  font-family: var(--font-brush);
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  z-index: 10;
+  position: relative;
+  animation: challenge-pulse 2s ease-in-out infinite alternate;
+}
+
+.challenge-banner.active {
+  display: inline-flex;
+}
+
+@keyframes challenge-pulse {
+  0% { transform: scale(0.98); box-shadow: 0 4px 10px rgba(148, 43, 36, 0.3); }
+  100% { transform: scale(1.02); box-shadow: 0 6px 18px rgba(148, 43, 36, 0.5), 0 0 12px rgba(179, 143, 54, 0.4); }
+}
+
+.cert-challenge-desc {
+  font-size: 0.8rem;
+  color: var(--red);
+  font-weight: 700;
+  margin: 0 0 10px 0;
+  letter-spacing: 0.06em;
+  border-left: 2px solid var(--red);
+  padding-left: 8px;
 }

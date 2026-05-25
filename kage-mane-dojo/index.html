@@ -19,7 +19,7 @@
       <a class="back-link" href="../minigames.html">ミニゲーム広場</a>
       <div class="header-right">
         <button class="mute-button" id="muteButton" type="button" aria-label="消音切り替え">
-          <span class="mute-icon" id="muteIcon">🔔</span>
+          <span class="mute-icon" id="muteIcon">🔊</span>
         </button>
         <div class="record-strip" aria-label="記録">
           <span>BEST <strong id="bestLesson">0</strong></span>
@@ -30,10 +30,30 @@
 
     <section class="screen title-screen active" id="titleScreen" aria-label="タイトル画面">
       <div class="moon" aria-hidden="true"></div>
+      
+      <!-- 果たし状バナー (挑戦モード時に動的に表示) -->
+      <div class="challenge-banner" id="challengeBanner">
+        <span>✉ 果たし状が届いています</span>
+      </div>
+
       <div class="title-wrap">
         <h1>影まね<br>道場<span class="title-seal" aria-hidden="true">影</span></h1>
       </div>
       <p class="title-desc">師範の型を覚え、弟子として同じ順に打ち返せ。</p>
+      
+      <!-- 門下生お名前入力 (セキュリティ・堅牢性を意識した文字数制限つき) -->
+      <div class="name-input-group">
+        <label for="usernameInput" class="name-label">門下生のお名前</label>
+        <input type="text" id="usernameInput" class="name-input" placeholder="名無しの修行者" maxlength="8" autocomplete="off">
+      </div>
+
+      <!-- 難易度選択 (初級・中級・上級) -->
+      <div class="difficulty-select" id="difficultySelect">
+        <button type="button" class="diff-btn" data-diff="easy">初級</button>
+        <button type="button" class="diff-btn active" data-diff="normal">中級</button>
+        <button type="button" class="diff-btn" data-diff="hard">上級</button>
+      </div>
+
       <button class="primary-button" id="startButton" type="button">稽古を始める</button>
       <div class="howto">
         <span>師範の動きが終わったら入力</span>
@@ -85,13 +105,14 @@
       <div class="cert-panel">
         <div class="cert-header">段位認定証</div>
         <div class="cert-body">
-          <p class="cert-user">貴殿</p>
+          <p class="cert-user" id="certUser">貴殿</p>
           <p class="cert-text">
             右は影まね道場における日頃の精進を認め<br>
             ここに極意<strong class="cert-rank-name" id="rankText">見習い</strong>の段位
             <strong class="cert-score" id="resultLesson">0</strong>段を授与し<br>
             その武芸を永久に認定いたします
           </p>
+          <p class="cert-challenge-desc" id="certChallengeDesc"></p>
           <p class="cert-date" id="certDate">令和八年 五月 二十五日</p>
           <p class="cert-author">はじっこぐらし影まね道場 師範</p>
           <div class="cert-seal" aria-hidden="true">はじっこ<br>道場印</div>
