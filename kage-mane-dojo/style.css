@@ -621,6 +621,60 @@ h1 {
 }
 
 /* --------------------------------------------------
+   師範（master）特有の差別化シルエット：お団子髪（髪結い）と仙人髭
+   -------------------------------------------------- */
+
+/* 頭部のお団子髪 (髪結い) */
+.master .head::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 10px;
+  background: var(--ink);
+  border-radius: 50%;
+  box-shadow: 
+    -1px -1px 3px rgba(229, 191, 88, 0.7),
+    inset 0.5px 0.5px 0.5px rgba(255, 255, 255, 0.15);
+  transition: box-shadow 180ms ease;
+}
+
+/* 仙人の長い顎髭（あごひげ） */
+.master .head::after {
+  content: "";
+  position: absolute;
+  bottom: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 20px;
+  background: var(--ink);
+  /* 筆先のように下に向けて細くなる水墨の髭 */
+  border-radius: 0 0 50% 50% / 0 0 100% 100%;
+  box-shadow: 
+    -1.5px 1px 4px rgba(229, 191, 88, 0.75),
+    inset 0.5px 0.5px 0.5px rgba(255, 255, 255, 0.12);
+  transform-origin: top center;
+  transition: box-shadow 180ms ease;
+}
+
+/* 師範が動いた瞬間のお団子髪・髭の追加発光 */
+.master.active .head::before {
+  box-shadow: 
+    -1.5px -1.5px 6px var(--gold-bright),
+    0 0 3px #fff,
+    inset 0.5px 0.5px 1px rgba(255, 255, 255, 0.35);
+}
+.master.active .head::after {
+  box-shadow: 
+    -2px 1.5px 8px var(--gold-bright),
+    0 0 4px #fff,
+    inset 0.5px 0.5px 1px rgba(255, 255, 255, 0.35);
+}
+
+/* --------------------------------------------------
    満月からの逆光ゴールド・エッジライト（輪郭発光）エフェクト
    師範（右・月は左側）と弟子（左・月は右側）で光の方向を逆に当て分ける高度な光学設計
    -------------------------------------------------- */
