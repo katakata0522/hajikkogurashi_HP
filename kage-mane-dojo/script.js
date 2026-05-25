@@ -27,6 +27,7 @@ const state = {
   bestLesson: 0,
   timers: [],
   isMuted: false, // ミュート状態管理
+  lives: 3,       // 身代わり木札 (残機ライフ)
 };
 
 const elements = {
@@ -54,6 +55,7 @@ const elements = {
   toast: document.getElementById('toast'),
   muteButton: document.getElementById('muteButton'),
   muteIcon: document.getElementById('muteIcon'),
+  certDate: document.getElementById('certDate'), // 認定証の日付表示用
 };
 
 function loadRecord() {
@@ -194,18 +196,27 @@ function showSequence() {
   }, elapsed + 100));
 }
 
+function updateLivesUi() {
+  const talismans = document.querySelectorAll('.life-talisman');
+  talismans.forEach((talisman, index) => {
+    talisman.classList.toggle('broken', index >= state.lives);
+  });
+}
+
 function startLesson() {
   clearTimers();
   state.mode = 'watching';
   state.inputIndex = 0;
   state.sequence = generateSequence(CONFIG.baseLength + state.lesson - 1);
   showScreen('play');
+  updateLivesUi(); // 木札UIの初期化・同期
   showSequence();
 }
 
 function startGame() {
   state.lesson = 1;
   state.streak = 0;
+  state.lives = 3;  // 残機をリセット
   startLesson();
 }
 
@@ -240,10 +251,14 @@ function failLesson() {
   setInputEnabled(false);
   const reached = state.lesson - 1;
   const [rank, comment] = getRank(reached);
-  elements.resultTitle.textContent = reached > 0 ? '稽古終了' : 'お手つき';
+  
+  // 認定証の各ラベルに値をセット
   elements.resultLesson.textContent = reached;
   elements.rankText.textContent = rank;
-  elements.resultComment.textContent = comment;
+  if (elements.certDate) {
+    elements.certDate.textContent = getJapaneseDateString(); // 動的な和暦免状日付
+  }
+
   state.bestLesson = Math.max(state.bestLesson, reached);
 
   // お手つきの瞬間に鐘はすでに鳴らしているため、ここでは重複防止で呼出を削除
@@ -268,31 +283,56 @@ function handleDirection(direction) {
   const expected = state.sequence[state.inputIndex];
   
   if (direction !== expected) {
-    // 答え合わせ演出の開始：入力を即座にロック
+    // お手つきの演出開始：入力を即座にロック
     state.mode = 'waiting';
     clearTimers();
     setInputEnabled(false);
     
-    // 1. 間違えた方向ボタンを朱赤にして震えさせる
+    // 1. ライフ（残機）を減少
+    state.lives -= 1;
+    updateLivesUi();
+    
+    // 2. 間違えた方向ボタンを朱赤にして震えさせる
     const pressedButton = elements.dirButtons.find((item) => item.dataset.direction === direction);
     pressedButton?.classList.add('error');
     
-    // 2. 正解だった方向札をゴールドで強調表示する
+    // 3. 正解だった方向札をゴールドで強調表示する
     elements.directionFlash.textContent = DIRECTION_LABEL[expected];
     elements.directionFlash.classList.add('correct-hint');
     
-    // 3. 警告の2連続バイブレーション
-    triggerVibration([50, 40, 50]);
-    
-    // 4. お手つきの瞬間に鐘「ゴーン...」を響かせる
-    playKane();
-    
-    // 5. 0.45秒後にリザルトへ安全に遷移
-    window.setTimeout(() => {
-      pressedButton?.classList.remove('error');
-      elements.directionFlash.classList.remove('correct-hint');
-      failLesson();
-    }, 450);
+    if (state.lives > 0) {
+      // --- まだ残機（ライフ）がある場合 ---
+      elements.statusText.textContent = '喝！ 型を見直しましょう';
+      
+      // 木札破壊音 (バキッ！) と 2回バイブレーション
+      playWoodBreak();
+      triggerVibration([60, 40, 60]);
+      
+      // 0.65秒後に答え合わせ演出を解除し、もう一度お手本を最初から再生！(修行やり直し)
+      window.setTimeout(() => {
+        pressedButton?.classList.remove('error');
+        elements.directionFlash.classList.remove('correct-hint');
+        
+        // 手数をリセットしてお手本を再スタート
+        state.inputIndex = 0;
+        showSequence();
+      }, 650);
+      
+    } else {
+      // --- 残機（ライフ）が尽きた場合（ゲームオーバー） ---
+      elements.statusText.textContent = 'そこまで！';
+      
+      // 最後の警告バイブレーションと、お寺の鐘「ゴーン...」を響かせる
+      triggerVibration([80, 50, 80]);
+      playKane();
+      
+      // 0.65秒後に段位認定証画面へ遷移
+      window.setTimeout(() => {
+        pressedButton?.classList.remove('error');
+        elements.directionFlash.classList.remove('correct-hint');
+        failLesson();
+      }, 650);
+    }
     return;
   }
 
@@ -495,4 +535,61 @@ function playKane() {
   } catch (e) {
     // エラー回避
   }
+}
+
+// 木札が折れる音 (バキッ！) - 三角波と鋸歯状波の高速周波数降下ブレンドで木管が破裂するような音を合成
+function playWoodBreak() {
+  if (state.isMuted) return;
+  try {
+    initAudio();
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+    const osc1 = audioCtx.createOscillator();
+    const osc2 = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    
+    osc1.type = 'triangle';
+    osc1.frequency.setValueAtTime(160, now);
+    osc1.frequency.exponentialRampToValueAtTime(10, now + 0.12);
+    
+    osc2.type = 'sawtooth';
+    osc2.frequency.setValueAtTime(80, now);
+    osc2.frequency.exponentialRampToValueAtTime(5, now + 0.08); // 鋸歯状波の倍音で割れ感を表現
+    
+    gainNode.gain.setValueAtTime(0.001, now);
+    gainNode.gain.linearRampToValueAtTime(0.38, now + 0.003); // 瞬間破裂アタック
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.14);
+    
+    osc1.connect(gainNode);
+    osc2.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    
+    osc1.start();
+    osc2.start();
+    osc1.stop(now + 0.15);
+    osc2.stop(now + 0.15);
+    
+    window.setTimeout(() => {
+      osc1.disconnect();
+      osc2.disconnect();
+      gainNode.disconnect();
+    }, 250);
+  } catch (e) {}
+}
+
+// 和暦漢字日付の動的生成ヘルパー (例: 令和八年 五月 二十五日)
+function getJapaneseDateString() {
+  const now = new Date();
+  const reiwaYear = now.getFullYear() - 2018; // 2018年引きで令和に変換
+  const kanjiNumbers = ['〇', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十', '二十一', '二十二', '二十三', '二十四', '二十五', '二十六', '二十七', '二十八', '二十九', '三十', '三十一'];
+  
+  let yearStr;
+  if (reiwaYear === 1) yearStr = '元';
+  else if (reiwaYear <= 31) yearStr = kanjiNumbers[reiwaYear];
+  else yearStr = String(reiwaYear);
+  
+  const monthStr = kanjiNumbers[now.getMonth() + 1];
+  const dayStr = kanjiNumbers[now.getDate()];
+  
+  return `令和${yearStr}年 ${monthStr}月 ${dayStr}日`;
 }

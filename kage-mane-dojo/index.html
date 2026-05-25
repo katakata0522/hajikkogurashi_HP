@@ -51,6 +51,12 @@
       <div class="dojo-scene" id="dojoScene">
         <div class="dojo-moon" aria-hidden="true"></div>
         <div class="dojo-bamboo" aria-hidden="true"></div>
+        <!-- 吊るされた身代わり木札 (ライフ残機表示) -->
+        <div class="dojo-lives" id="dojoLives" aria-label="身代わり木札（残機）">
+          <span class="life-talisman active" data-index="0">札</span>
+          <span class="life-talisman active" data-index="1">札</span>
+          <span class="life-talisman active" data-index="2">札</span>
+        </div>
         <div class="dojo-floor" aria-hidden="true"></div>
         <div class="status-text" id="statusText" aria-live="polite">師範の型を見る</div>
 
@@ -76,14 +82,23 @@
     </section>
 
     <section class="screen result-screen" id="resultScreen" aria-label="結果画面">
-      <div class="result-panel">
-        <p class="result-title" id="resultTitle">稽古終了</p>
-        <div class="result-score"><span id="resultLesson">0</span><small>段</small></div>
-        <p class="rank-text" id="rankText">見習い</p>
-        <p class="result-comment" id="resultComment">もう一度、型を見直しましょう。</p>
+      <div class="cert-panel">
+        <div class="cert-header">段位認定証</div>
+        <div class="cert-body">
+          <p class="cert-user">貴殿</p>
+          <p class="cert-text">
+            右は影まね道場における日頃の精進を認め<br>
+            ここに極意<strong class="cert-rank-name" id="rankText">見習い</strong>の段位
+            <strong class="cert-score" id="resultLesson">0</strong>段を授与し<br>
+            その武芸を永久に認定いたします
+          </p>
+          <p class="cert-date" id="certDate">令和八年 五月 二十五日</p>
+          <p class="cert-author">はじっこぐらし影まね道場 師範</p>
+          <div class="cert-seal" aria-hidden="true">はじっこ<br>道場印</div>
+        </div>
         <div class="result-actions">
           <button class="primary-button" id="retryButton" type="button">もう一度</button>
-          <button class="secondary-button" id="shareButton" type="button">結果を共有</button>
+          <button class="secondary-button" id="shareButton" type="button">認定証を共有</button>
         </div>
       </div>
     </section>

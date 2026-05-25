@@ -881,6 +881,179 @@ h1 {
 }
 
 /* ==========================================
+   身代わり木札 (お札ライフシステム)
+   ========================================== */
+.dojo-lives {
+  position: absolute;
+  top: 16px;
+  left: 18px;
+  z-index: 10;
+  display: flex;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.life-talisman {
+  position: relative;
+  width: 22px;
+  height: 44px;
+  background: linear-gradient(180deg, #faf7f0, #e6dfd3);
+  border: 1px solid var(--gold);
+  border-radius: 2px;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-brush);
+  font-size: 0.85rem;
+  font-weight: 900;
+  color: var(--red);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  transition: all 400ms cubic-bezier(0.25, 1, 0.5, 1);
+  transform-origin: top center;
+}
+
+/* 木札の吊り下げ紐 */
+.life-talisman::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 6px;
+  background: var(--gold);
+}
+
+/* ライフが割れた時のヒラリと力尽きたアニメーション */
+.life-talisman.broken {
+  opacity: 0.12;
+  transform: translateY(18px) rotate(22deg) scale(0.9);
+  filter: grayscale(1);
+  box-shadow: none;
+}
+
+/* ==========================================
+   段位認定証 (極上和風賞状リザルト)
+   ========================================== */
+.cert-panel {
+  width: 100%;
+  max-width: 520px;
+  border: 8px double var(--gold);
+  border-radius: 4px;
+  padding: 36px clamp(16px, 5vw, 36px);
+  background: #faf6ee; /* 高級和紙の白 */
+  color: #1c1b18;      /* 墨汁の黒 */
+  box-shadow: 
+    0 24px 60px rgba(0,0,0,0.8),
+    inset 0 0 40px rgba(179,143,54,0.12);
+  position: relative;
+  text-align: center;
+}
+
+/* 賞状の内側の金箔の飾り角飾り */
+.cert-panel::before {
+  content: "";
+  position: absolute;
+  top: 4px; left: 4px; right: 4px; bottom: 4px;
+  border: 1px dashed rgba(179,143,54,0.4);
+  pointer-events: none;
+}
+
+.cert-header {
+  font-family: var(--font-brush);
+  font-size: 1.95rem;
+  color: var(--ink);
+  letter-spacing: 0.25em;
+  margin-bottom: 24px;
+  border-bottom: 2px solid var(--red);
+  padding-bottom: 8px;
+  display: inline-block;
+  font-weight: 500;
+}
+
+.cert-body {
+  position: relative;
+  text-align: left;
+  line-height: 1.9;
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  padding: 0 12px;
+}
+
+.cert-user {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  letter-spacing: 0.1em;
+}
+
+.cert-user::after {
+  content: " 殿";
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.cert-text {
+  margin: 0 0 24px 0;
+  letter-spacing: 0.08em;
+}
+
+.cert-rank-name {
+  font-family: var(--font-brush);
+  font-size: 1.4rem;
+  color: var(--red-bright);
+  font-weight: 500;
+  margin: 0 4px;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.1);
+}
+
+.cert-score {
+  font-family: var(--font-brush);
+  font-size: 2.2rem;
+  color: var(--gold);
+  font-weight: 900;
+  margin: 0 4px 0 8px;
+  line-height: 1;
+  vertical-align: -2px;
+}
+
+.cert-date {
+  font-size: 0.85rem;
+  color: #555;
+  margin: 0 0 8px 0;
+  letter-spacing: 0.08em;
+}
+
+.cert-author {
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: 0.06em;
+}
+
+/* 賞状の右下に重なって押される朱色のはじっこ道場印 */
+.cert-seal {
+  position: absolute;
+  right: 28px;
+  bottom: -10px;
+  width: 58px;
+  height: 58px;
+  border: 2.5px solid var(--red);
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  color: var(--red);
+  font-family: var(--font-brush);
+  font-size: 0.72rem;
+  font-weight: 900;
+  line-height: 1.2;
+  text-align: center;
+  transform: rotate(-6deg);
+  opacity: 0.82;
+  background: rgba(250, 246, 238, 0.4);
+  box-shadow: inset 0 0 0 1px rgba(148,43,36,0.15);
+  pointer-events: none;
+}
+
+/* ==========================================
    雅なお手つき・答え合わせ演出の追加
    ========================================== */
 @keyframes btn-shake {
@@ -939,6 +1112,21 @@ h1 {
   .input-pad { max-width: 320px; gap: 8px; }
   .dir-button { min-height: 52px; font-size: 1.2rem; }
   .result-actions { grid-template-columns: 1fr; }
+  
+  /* スマホ用認定証・残機木札の調整 */
+  .dojo-lives { top: 12px; left: 12px; gap: 6px; }
+  .life-talisman { width: 18px; height: 36px; font-size: 0.72rem; }
+  .life-talisman::before { height: 4px; top: -4px; }
+  
+  .cert-panel { padding: 22px 14px; border-width: 5px; }
+  .cert-header { font-size: 1.45rem; margin-bottom: 12px; padding-bottom: 4px; }
+  .cert-body { font-size: 0.8rem; line-height: 1.7; padding: 0; }
+  .cert-user { font-size: 0.92rem; margin-bottom: 8px; }
+  .cert-user::after { font-size: 0.8rem; }
+  .cert-text { margin-bottom: 14px; }
+  .cert-rank-name { font-size: 1.1rem; }
+  .cert-score { font-size: 1.5rem; }
+  .cert-seal { width: 44px; height: 44px; font-size: 0.55rem; right: 6px; bottom: -12px; border-width: 2px; }
   
   .title-wrap { margin-top: 2svh; margin-bottom: 16px; }
   .title-seal {
