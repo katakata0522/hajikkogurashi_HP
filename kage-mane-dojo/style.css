@@ -1,372 +1,694 @@
 :root {
-  --ink: #21170f;
-  --paper: #f7e7c4;
-  --paper-soft: #d9bd7d;
-  --gold: #e0b756;
-  --red: #b94130;
-  --night: #111820;
-  --shadow: rgba(0, 0, 0, 0.36);
+  --ink: #1a1916;          /* 深みのある水墨の黒 */
+  --ink-light: #3d3a33;    /* 薄墨色 */
+  --ink-fade: rgba(26, 25, 22, 0.85);
+  --paper: #fcf9f2;         /* 温かみのある和紙の白 */
+  --paper-dark: #ebdcb9;   /* 陰影のある和紙 */
+  --gold: #b38f36;         /* 格式高い金箔のゴールド */
+  --gold-bright: #e5bf58;  /* 満月の黄金 */
+  --red: #942b24;          /* 落款・朱肉の赤 */
+  --red-bright: #c23b32;   /* 鮮やかな朱赤 */
+  --shadow: rgba(13, 12, 10, 0.5);
+  
+  /* フォント指定：確実に和風明朝体や筆文字にフォールバックされるよう厳密に定義 */
+  --font-serif: 'Shippori Mincho', 'Yu Mincho', 'Hiragino Mincho ProN', 'MS PMincho', serif;
+  --font-brush: 'Yuji Syuku', 'Shippori Mincho', 'Yu Mincho', 'Hiragino Mincho ProN', 'MS PMincho', serif;
 }
 
-* { box-sizing: border-box; }
+* { 
+  box-sizing: border-box; 
+  -webkit-tap-highlight-color: transparent;
+}
 
 html, body {
   margin: 0;
   width: 100%;
   min-height: 100%;
-  background: #080a0d;
-  color: var(--paper);
-  font-family: "Yu Gothic", "Hiragino Sans", system-ui, sans-serif;
+  background: #0f0e0c;
+  color: var(--ink);
+  font-family: var(--font-serif);
   touch-action: manipulation;
+  overflow-x: hidden;
 }
 
 button {
   font: inherit;
   color: inherit;
+  border: none;
+  outline: none;
+  background: none;
 }
 
+/* ==========================================
+   背景装飾：和紙テクスチャ
+   ========================================== */
+.paper-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.04;
+  background: 
+    radial-gradient(circle at 50% 50%, #000 1px, transparent 1px) 0 0 / 6px 6px,
+    repeating-linear-gradient(45deg, rgba(0,0,0,0.15) 0 2px, transparent 2px 12px);
+  mix-blend-mode: multiply;
+}
+
+/* ==========================================
+   ゲーム全体のシェル
+   ========================================== */
 .game-shell {
   position: relative;
   width: 100%;
   min-height: 100svh;
-  overflow: hidden;
-  background:
-    linear-gradient(180deg, rgba(20, 28, 34, 0.96), rgba(42, 22, 16, 0.96)),
-    repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 34px);
+  display: flex;
+  flex-direction: column;
+  background: 
+    linear-gradient(180deg, #161512 0%, #0d0c0a 100%),
+    radial-gradient(circle at 50% 20%, rgba(179,143,54,0.08) 0%, transparent 60%);
+  color: var(--paper);
 }
 
+/* ==========================================
+   ヘッダー（ミニゲーム広場へのリンク・記録）
+   ========================================== */
 .game-header {
-  position: fixed;
-  z-index: 10;
+  position: absolute;
+  z-index: 100;
   top: 0;
   left: 0;
   width: 100%;
-  min-height: 54px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 12px clamp(14px, 3vw, 28px);
-  background: linear-gradient(180deg, rgba(7, 9, 12, 0.82), rgba(7, 9, 12, 0));
+  padding: 18px clamp(16px, 4vw, 36px);
 }
 
 .back-link {
-  color: var(--paper);
+  color: var(--paper-dark);
   text-decoration: none;
-  font-size: 0.84rem;
+  font-size: 0.76rem;
+  font-weight: 500;
   letter-spacing: 0.08em;
-  border: 1px solid rgba(224, 183, 86, 0.45);
-  border-radius: 6px;
-  padding: 7px 10px;
-  background: rgba(0, 0, 0, 0.22);
+  border-bottom: 1px solid rgba(179, 143, 54, 0.45);
+  padding: 2px 0 4px;
+  transition: all 250ms ease;
+}
+
+.back-link:hover {
+  color: var(--gold-bright);
+  border-color: var(--gold-bright);
+  text-shadow: 0 0 8px rgba(229,191,88,0.3);
 }
 
 .record-strip {
   display: flex;
   gap: 8px;
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
 }
 
 .record-strip span {
-  min-width: 82px;
-  text-align: center;
-  padding: 7px 10px;
-  border: 1px solid rgba(224, 183, 86, 0.35);
-  border-radius: 6px;
-  background: rgba(0, 0, 0, 0.2);
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border: 1px solid rgba(179, 143, 54, 0.15);
+  border-radius: 20px;
+  background: rgba(15, 14, 12, 0.45);
+  backdrop-filter: blur(4px);
+  color: var(--paper-dark);
 }
 
 .record-strip strong {
   margin-left: 5px;
-  color: #ffe49a;
+  color: var(--gold-bright);
+  font-family: var(--font-brush);
+  font-size: 0.9rem;
 }
 
+/* ==========================================
+   スクリーン制御
+   ========================================== */
 .screen {
   display: none;
   min-height: 100svh;
-  padding: 74px clamp(16px, 4vw, 48px) 24px;
+  padding: 86px clamp(16px, 4vw, 48px) 32px;
+  box-sizing: border-box;
 }
 
 .screen.active {
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
+/* ==========================================
+   タイトル画面
+   ========================================== */
 .title-screen {
+  position: relative;
   text-align: center;
+  overflow: hidden;
+  width: 100%;
 }
 
-.moon {
+.title-screen .moon {
   position: absolute;
-  top: 12svh;
+  top: 8svh;
   left: 50%;
-  width: min(160px, 34vw);
+  width: min(320px, 64vw);
   aspect-ratio: 1;
   border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, #fff2bd, #c5964c 68%, rgba(197, 150, 76, 0) 70%);
+  background: radial-gradient(circle at 35% 35%, #fffdf0 0%, var(--gold-bright) 45%, var(--gold) 85%, rgba(179,143,54,0.05) 100%);
   transform: translateX(-50%);
-  opacity: 0.72;
+  opacity: 0.32; /* 満月の主張を抑えて幻想的に */
+  filter: blur(2px) drop-shadow(0 0 32px rgba(229,191,88,0.25));
+  pointer-events: none;
+  animation: moon-pulse 8s ease-in-out infinite alternate;
 }
 
-.title-mark {
+/* たなびく薄墨の雲 */
+.title-screen::before {
+  content: "";
+  position: absolute;
+  top: 22svh;
+  left: 50%;
+  width: min(440px, 85vw);
+  height: 54px;
+  background: radial-gradient(ellipse at center, rgba(38, 36, 31, 0.42) 0%, transparent 75%);
+  transform: translateX(-50%) rotate(-4deg);
+  pointer-events: none;
+  z-index: 1;
+  filter: blur(5px);
+}
+
+@keyframes moon-pulse {
+  0% { transform: translateX(-50%) scale(0.98); opacity: 0.28; }
+  100% { transform: translateX(-50%) scale(1.02); opacity: 0.38; }
+}
+
+.title-wrap {
   position: relative;
-  margin: 0 auto 10px;
-  width: 74px;
-  height: 74px;
-  display: grid;
-  place-items: center;
-  color: var(--ink);
-  background: var(--gold);
-  border-radius: 50%;
-  box-shadow: 0 12px 32px var(--shadow);
-  font-weight: 900;
-  font-size: 2rem;
+  z-index: 5;
+  margin-top: 4svh;
+  margin-bottom: 24px;
+  display: inline-block;
 }
 
 h1 {
   position: relative;
   margin: 0;
-  font-size: clamp(3.6rem, 12vw, 8rem);
-  line-height: 0.9;
-  letter-spacing: 0;
-  text-shadow: 0 5px 0 #5d1f18, 0 18px 35px rgba(0,0,0,0.45);
+  font-family: var(--font-brush);
+  font-size: clamp(3.8rem, 11vw, 5.6rem);
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: 0.12em; /* 字間を空けて気品を出す */
+  
+  /* 美しい金箔かすれグラデーション */
+  background: linear-gradient(135deg, var(--paper) 0%, var(--paper-dark) 45%, var(--gold-bright) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: var(--paper); /* フォールバック */
+  
+  text-shadow: 
+    2px 2px 4px rgba(13, 12, 10, 0.8),
+    0 12px 24px rgba(0, 0, 0, 0.6);
+  display: inline-block;
 }
 
-.title-screen p {
-  position: relative;
-  margin: 24px auto 22px;
-  max-width: 36rem;
-  line-height: 1.8;
-  font-weight: 700;
-}
-
-.primary-button,
-.secondary-button {
-  min-height: 48px;
-  border: 1px solid rgba(255, 228, 154, 0.7);
-  border-radius: 7px;
-  padding: 12px 22px;
-  cursor: pointer;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  box-shadow: 0 8px 0 rgba(70, 28, 18, 0.8);
-}
-
-.primary-button {
-  color: var(--ink);
-  background: linear-gradient(180deg, #ffe49a, #d69b38);
-}
-
-.secondary-button {
+/* h1の右下にそっと押される朱色の落款印 */
+.title-seal {
+  position: absolute;
+  bottom: 8px;
+  right: -42px; /* タイトルの右端に配置 */
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
   color: var(--paper);
-  background: rgba(0,0,0,0.24);
+  background: var(--red);
+  border-radius: 4px 6px 3px 5px; /* 少し歪んだ印鑑形状 */
+  box-shadow: 
+    2px 2px 6px rgba(0,0,0,0.6),
+    inset -2px -2px 0 rgba(0,0,0,0.25);
+  font-family: var(--font-brush);
+  font-size: 1.1rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0;
+  transform: rotate(6deg) scale(0.95);
+  border: 1px dashed rgba(255,255,255,0.15);
+  -webkit-text-fill-color: var(--paper); /* h1のグラデーションテキストカラーを上書きリセット */
+  pointer-events: none;
+}
+
+.title-desc {
+  position: relative;
+  z-index: 5;
+  margin: 0 auto 36px;
+  max-width: 32rem;
+  line-height: 2;
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--paper-dark);
+  letter-spacing: 0.15em; /* 優雅な字間 */
+  text-shadow: 0 2px 8px rgba(0,0,0,0.9);
+}
+
+/* ==========================================
+   和風プレミアムボタン
+   ========================================== */
+.primary-button {
+  position: relative;
+  min-height: 52px;
+  min-width: 200px;
+  background: linear-gradient(135deg, var(--red-bright), var(--red));
+  color: var(--paper);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  padding: 14px 36px;
+  cursor: pointer;
+  font-family: var(--font-serif);
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: 0.15em;
+  box-shadow: 
+    0 6px 18px rgba(148, 43, 36, 0.35),
+    0 2px 4px rgba(0,0,0,0.5);
+  transition: all 250ms cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+/* ボタン押下・ホバー時の和風演出 */
+.primary-button::after {
+  content: "";
+  position: absolute;
+  top: 0; left: -50%;
+  width: 200%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+  transform: skewX(-25deg);
+  transition: 0.75s;
+}
+
+.primary-button:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #b03830, var(--red));
+  box-shadow: 
+    0 8px 24px rgba(148, 43, 36, 0.5),
+    0 4px 8px rgba(0,0,0,0.4);
+}
+
+.primary-button:hover::after {
+  left: 120%;
+}
+
+.primary-button:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 8px rgba(148, 43, 36, 0.4);
+}
+
+.secondary-button {
+  min-height: 52px;
+  min-width: 160px;
+  background: rgba(26, 25, 22, 0.65);
+  color: var(--paper-dark);
+  border: 1px solid rgba(179, 143, 54, 0.35);
+  border-radius: 4px;
+  padding: 14px 28px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.1em;
+  backdrop-filter: blur(4px);
+  transition: all 250ms ease;
+}
+
+.secondary-button:hover {
+  color: var(--paper);
+  border-color: var(--gold);
+  background: var(--ink);
+  box-shadow: 0 4px 12px rgba(179, 143, 54, 0.15);
 }
 
 .howto {
   display: flex;
-  flex-wrap: wrap;
   justify-content: center;
-  gap: 8px;
-  margin-top: 22px;
-  font-size: 0.78rem;
+  align-items: center;
+  gap: 20px;
+  margin-top: 36px;
+  font-size: 0.76rem;
+  color: var(--paper-dark);
+  opacity: 0.72;
+  letter-spacing: 0.08em;
 }
 
 .howto span {
-  border: 1px solid rgba(224,183,86,0.32);
-  border-radius: 6px;
-  padding: 6px 9px;
-  background: rgba(0,0,0,0.2);
+  position: relative;
 }
 
+.howto span:not(:last-child)::after {
+  content: "•";
+  position: absolute;
+  right: -12px;
+  color: var(--gold);
+  opacity: 0.55;
+}
+
+/* ==========================================
+   プレイ画面 (稽古)
+   ========================================== */
 .play-screen {
-  align-content: center;
-  gap: 14px;
+  gap: 18px;
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
 }
 
 .hud {
-  width: min(760px, 100%);
+  width: 100%;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  gap: 10px;
 }
 
 .hud div {
   min-height: 58px;
-  display: grid;
-  place-items: center;
-  border: 1px solid rgba(224, 183, 86, 0.38);
-  border-radius: 7px;
-  background: rgba(0, 0, 0, 0.24);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(179, 143, 54, 0.25);
+  border-radius: 6px;
+  background: rgba(20, 19, 17, 0.7);
+  backdrop-filter: blur(4px);
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
 }
 
 .hud span {
-  font-size: 0.68rem;
-  letter-spacing: 0.14em;
-  color: var(--paper-soft);
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  color: var(--paper-dark);
+  opacity: 0.7;
+  margin-bottom: 2px;
 }
 
 .hud strong {
-  font-size: 1.35rem;
+  font-family: var(--font-brush);
+  font-size: 1.3rem;
+  color: var(--gold-bright);
+  font-weight: 500;
 }
 
+/* ==========================================
+   道場シーン (水墨画の世界)
+   ========================================== */
 .dojo-scene {
   position: relative;
-  width: min(760px, 100%);
+  width: 100%;
   aspect-ratio: 16 / 10;
-  min-height: 310px;
+  min-height: 320px;
   overflow: hidden;
-  border: 2px solid rgba(224,183,86,0.62);
-  border-radius: 8px;
-  background:
-    linear-gradient(180deg, rgba(255,229,157,0.08), transparent 42%),
-    repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0 2px, transparent 2px 9px),
-    linear-gradient(180deg, #1c1711 0%, #120f0c 58%, #2d1c12 58%, #16100c 100%);
-  box-shadow: inset 0 0 0 8px rgba(0,0,0,0.28), 0 18px 60px rgba(0,0,0,0.4);
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  background: 
+    linear-gradient(180deg, #181714 0%, #0d0c0a 60%, #161512 60%, #090908 100%);
+  box-shadow: 
+    inset 0 0 40px rgba(0,0,0,0.8),
+    0 16px 40px var(--shadow);
 }
 
+/* 道場の満月 */
+.dojo-moon {
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fffdf2 0%, var(--gold-bright) 60%, rgba(179,143,54,0) 80%);
+  opacity: 0.35;
+  filter: blur(1px);
+  pointer-events: none;
+}
+
+/* 水墨画風の竹林 (CSSグラデーションのみで構築) */
+.dojo-bamboo {
+  position: absolute;
+  bottom: 40%;
+  left: 0;
+  width: 100%;
+  height: 50%;
+  opacity: 0.15;
+  pointer-events: none;
+  background: 
+    /* 遠景の薄い竹 */
+    linear-gradient(90deg, transparent 8%, rgba(235, 220, 185, 0.4) 8.5%, rgba(235, 220, 185, 0.4) 9.5%, transparent 10%,
+                           transparent 35%, rgba(235, 220, 185, 0.4) 35.5%, rgba(235, 220, 185, 0.4) 36.5%, transparent 37%,
+                           transparent 75%, rgba(235, 220, 185, 0.4) 75.5%, rgba(235, 220, 185, 0.4) 77%, transparent 77.5%),
+    /* 中景の少し濃い竹 */
+    linear-gradient(90deg, transparent 20%, rgba(0,0,0,0.8) 20.6%, rgba(0,0,0,0.8) 22%, transparent 22.6%,
+                           transparent 55%, rgba(0,0,0,0.8) 55.6%, rgba(0,0,0,0.8) 57%, transparent 57.6%,
+                           transparent 85%, rgba(0,0,0,0.8) 85.6%, rgba(0,0,0,0.8) 87.2%, transparent 87.8%);
+  mask-image: linear-gradient(0deg, transparent, #fff 30%);
+  -webkit-mask-image: linear-gradient(0deg, transparent, #fff 30%);
+}
+
+/* 漆調の黒い床 */
 .dojo-floor {
   position: absolute;
   left: 0;
   bottom: 0;
   width: 100%;
-  height: 42%;
-  background:
-    repeating-linear-gradient(90deg, rgba(255,228,154,0.08) 0 2px, transparent 2px 86px),
-    linear-gradient(180deg, rgba(185,65,48,0.28), rgba(0,0,0,0.35));
-  transform: skewY(-4deg);
-  transform-origin: left bottom;
+  height: 40%;
+  background: 
+    /* 満月の光が床に反射するうっすらした黄金のハイライト */
+    linear-gradient(180deg, rgba(229,191,88,0.12) 0%, transparent 60%),
+    linear-gradient(180deg, #1b1916 0%, #0d0c0a 100%);
+  border-top: 2px solid var(--gold); /* 床と背景の金色の境界線 */
+  box-shadow: inset 0 10px 20px rgba(0,0,0,0.6);
+}
+
+/* 散り行く紅葉/桜の風流な演出 */
+.dojo-scene::before,
+.dojo-scene::after {
+  content: "";
+  position: absolute;
+  top: -10%;
+  width: 5px;
+  height: 8px;
+  background: var(--red);
+  border-radius: 50% 0 50% 50%;
+  opacity: 0;
+  pointer-events: none;
+  animation: leaf-fall 9s linear infinite;
+}
+
+.dojo-scene::before {
+  left: 15%;
+  animation-delay: 0s;
+  animation-duration: 10s;
+}
+
+.dojo-scene::after {
+  left: 80%;
+  animation-delay: 4.5s;
+  animation-duration: 8s;
+  background: var(--gold); /* 金色の葉もブレンド */
+}
+
+@keyframes leaf-fall {
+  0% { transform: translateY(0) rotate(0deg) translateX(0); opacity: 0; }
+  10% { opacity: 0.5; }
+  90% { opacity: 0.5; }
+  100% { transform: translateY(340px) rotate(540deg) translateX(50px); opacity: 0; }
 }
 
 .status-text {
   position: absolute;
-  top: 18px;
+  top: 16px;
   left: 50%;
   width: min(520px, calc(100% - 32px));
   transform: translateX(-50%);
   text-align: center;
-  color: #ffe49a;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  text-shadow: 0 2px 12px rgba(0,0,0,0.7);
+  color: var(--paper);
+  font-family: var(--font-brush);
+  font-size: 1.15rem;
+  letter-spacing: 0.1em;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.9);
+  z-index: 10;
 }
 
+/* ==========================================
+   キャラクター表現（水墨画の武術家シルエット）
+   ========================================== */
 .character {
   position: absolute;
-  width: 118px;
-  height: 178px;
-  transition: transform 150ms ease, filter 150ms ease;
+  width: 100px;
+  height: 160px;
+  /* 滑らかなイージング（慣性）アニメーション */
+  transition: 
+    transform 320ms cubic-bezier(0.25, 1, 0.5, 1), 
+    filter 200ms ease;
+  z-index: 5;
 }
 
 .master {
-  top: 28%;
-  right: 22%;
+  top: 26%;
+  right: 20%;
 }
 
 .student {
-  bottom: 10%;
+  bottom: 8%;
   left: 20%;
 }
 
-.character.active {
-  filter: drop-shadow(0 0 18px rgba(255, 228, 154, 0.75));
-}
-
-.character.move-up { transform: translateY(-18px); }
-.character.move-right { transform: translateX(18px); }
-.character.move-down { transform: translateY(18px); }
-.character.move-left { transform: translateX(-18px); }
+/* アクション時の移動変化 */
+.character.move-up { transform: translateY(-24px) scaleY(1.08); }
+.character.move-right { transform: translateX(24px) scaleX(1.08); }
+.character.move-down { transform: translateY(18px) scaleY(0.92); }
+.character.move-left { transform: translateX(-24px) scaleX(1.08) scaleX(-1); } /* 左移動時は反転 */
 
 .nameplate {
   position: absolute;
   left: 50%;
-  bottom: -2px;
-  min-width: 92px;
+  bottom: -4px;
   transform: translateX(-50%);
   text-align: center;
-  border: 1px solid rgba(224,183,86,0.42);
-  border-radius: 6px;
-  padding: 4px 8px;
-  background: rgba(0,0,0,0.45);
-  font-size: 0.78rem;
-  font-weight: 800;
+  border: 1px solid rgba(179, 143, 54, 0.4);
+  border-radius: 4px;
+  padding: 3px 12px;
+  background: rgba(13, 12, 10, 0.9);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--paper-dark);
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.4);
 }
 
+/* 墨絵シルエットの構築 */
 .body {
   position: absolute;
   left: 50%;
-  bottom: 28px;
-  width: 82px;
-  height: 132px;
+  bottom: 24px;
+  width: 70px;
+  height: 120px;
   transform: translateX(-50%);
 }
 
-.head,
-.torso,
-.arm {
+.head, .torso, .arm {
   position: absolute;
   display: block;
+  background: var(--ink); /* すべて一連の墨色で塗る */
+  transition: transform 250ms ease;
 }
 
+/* 筆で突いたような有機的な頭部 */
 .head {
-  left: 24px;
-  top: 0;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: #edd6b5;
-  box-shadow: inset -7px -4px 0 rgba(75,45,30,0.18);
+  left: 20px;
+  top: 2px;
+  width: 28px;
+  height: 28px;
+  border-radius: 45% 55% 48% 52% / 50% 48% 52% 50%; /* 少し歪ませる */
+  box-shadow: inset -3px -2px 0 rgba(255,255,255,0.06);
 }
 
+/* 作務衣を羽織って構えたような有機的な胴体 */
 .torso {
-  left: 18px;
-  top: 33px;
-  width: 46px;
-  height: 70px;
-  border-radius: 20px 20px 10px 10px;
-  background: linear-gradient(180deg, #88402f, #2c1814);
+  left: 12px;
+  top: 27px;
+  width: 44px;
+  height: 68px;
+  border-radius: 50% 40% 25% 35% / 45% 45% 20% 20%; /* 筆跡の強弱 */
 }
 
-.master .torso {
-  background: linear-gradient(180deg, #6d6251, #241f19);
-}
-
+/* 刀を構えたような鋭い筆さばきの腕 */
 .arm {
-  top: 48px;
-  width: 46px;
+  top: 40px;
+  width: 40px;
   height: 10px;
   border-radius: 999px;
-  background: #e0b756;
   transform-origin: 4px 50%;
 }
 
 .arm.left {
-  left: 6px;
-  transform: rotate(28deg);
+  left: 0;
+  transform: rotate(35deg);
+  border-radius: 50% 0 0 50% / 50% 0 0 50%;
 }
 
 .arm.right {
-  right: 6px;
-  transform: rotate(152deg);
+  right: 0;
+  transform: rotate(145deg);
+  border-radius: 0 50% 50% 0 / 0 50% 50% 0;
 }
 
+/* ==========================================
+   墨スプラッシュ演出 (型入力・お手本再生時)
+   ========================================== */
+.character::before {
+  content: "";
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  width: 150px;
+  height: 150px;
+  transform: translate(-50%, -50%) scale(0);
+  background: radial-gradient(circle, rgba(179,143,54,0.15) 0%, rgba(26,25,22,0.65) 45%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0;
+  /* 消滅アニメーション：300msかけてゆっくりフェードアウト */
+  transition: transform 300ms cubic-bezier(0.25, 1, 0.5, 1), opacity 300ms ease;
+}
+
+/* 活性化時に墨のしぶきが弾ける */
+.character.active::before {
+  transform: translate(-50%, -50%) scale(1.35);
+  opacity: 1;
+  /* 出現アニメーション：120msで瞬時に拡大 */
+  transition: transform 120ms cubic-bezier(0.1, 0.8, 0.2, 1), opacity 100ms ease;
+}
+
+/* 師範が動いたときの後光 */
+.master.active::before {
+  background: radial-gradient(circle, rgba(229,191,88,0.2) 0%, rgba(26,25,22,0.7) 50%, transparent 72%);
+}
+
+/* ==========================================
+   中央の方向表示フラッシュ
+   ========================================== */
 .direction-flash {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 88px;
-  height: 88px;
+  width: 80px;
+  height: 80px;
   display: grid;
   place-items: center;
-  transform: translate(-50%, -50%) scale(0.8);
+  transform: translate(-50%, -50%) scale(0.7);
   opacity: 0;
-  border: 2px solid rgba(255,228,154,0.8);
+  border: 1px solid var(--gold);
   border-radius: 50%;
-  background: rgba(0,0,0,0.34);
-  color: #ffe49a;
-  font-size: 2.2rem;
-  font-weight: 900;
-  transition: opacity 120ms ease, transform 120ms ease;
+  background: var(--ink-fade);
+  color: var(--gold-bright);
+  font-family: var(--font-brush);
+  font-size: 2rem;
+  font-weight: 500;
+  transition: opacity 120ms ease, transform 120ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  pointer-events: none;
+  z-index: 8;
+  box-shadow: 
+    0 4px 15px rgba(0,0,0,0.6),
+    inset 0 0 10px rgba(179,143,54,0.3);
 }
 
 .direction-flash.show {
@@ -374,34 +696,59 @@ h1 {
   transform: translate(-50%, -50%) scale(1);
 }
 
+/* ==========================================
+   入力パッド (和風ガラスモルフィズム)
+   ========================================== */
 .input-pad {
-  width: min(420px, 100%);
+  width: 100%;
+  max-width: 380px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-areas:
     ". up ."
     "left down right";
-  gap: 8px;
+  gap: 12px;
 }
 
 .dir-button {
-  min-height: 62px;
-  border: 1px solid rgba(224, 183, 86, 0.54);
-  border-radius: 7px;
-  background: linear-gradient(180deg, rgba(255,228,154,0.18), rgba(0,0,0,0.26));
-  box-shadow: 0 5px 0 rgba(0,0,0,0.35);
-  font-weight: 900;
+  min-height: 60px;
+  border: 1px solid rgba(179, 143, 54, 0.4);
+  border-radius: 6px;
+  background: rgba(26, 25, 22, 0.6);
+  box-shadow: 
+    0 4px 8px rgba(0, 0, 0, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.05);
+  font-family: var(--font-brush);
+  font-size: 1.35rem;
+  color: var(--paper-dark);
   cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: all 180ms ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dir-button:hover:not(:disabled) {
+  border-color: var(--gold);
+  background: rgba(38, 36, 31, 0.8);
+  color: var(--paper);
 }
 
 .dir-button:disabled {
-  opacity: 0.45;
+  opacity: 0.35;
   cursor: default;
 }
 
+/* タップされた瞬間 (落款スタンプが押されたような朱赤の発光) */
 .dir-button.flash {
-  background: linear-gradient(180deg, #ffe49a, #c9812e);
-  color: var(--ink);
+  background: linear-gradient(135deg, var(--red-bright), var(--red));
+  border-color: rgba(255,255,255,0.2);
+  color: var(--paper);
+  box-shadow: 
+    0 0 15px rgba(148, 43, 36, 0.6),
+    0 2px 4px rgba(0,0,0,0.5);
+  transform: scale(0.95);
 }
 
 .dir-button.up { grid-area: up; }
@@ -409,64 +756,95 @@ h1 {
 .dir-button.down { grid-area: down; }
 .dir-button.left { grid-area: left; }
 
+/* ==========================================
+   結果画面 (雅な漆塗りの額縁パネル)
+   ========================================== */
 .result-panel {
-  width: min(520px, 100%);
+  width: 100%;
+  max-width: 480px;
   text-align: center;
-  border: 2px solid rgba(224,183,86,0.58);
-  border-radius: 8px;
-  padding: 28px 20px;
-  background: rgba(14, 11, 8, 0.86);
-  box-shadow: 0 22px 70px rgba(0,0,0,0.48);
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  padding: 36px 24px;
+  background: rgba(18, 17, 15, 0.94);
+  backdrop-filter: blur(10px);
+  box-shadow: 
+    0 24px 60px rgba(0,0,0,0.7),
+    inset 0 0 30px rgba(179,143,54,0.15);
 }
 
 .result-title {
   margin: 0;
-  color: #ffe49a;
-  font-weight: 900;
-  letter-spacing: 0.12em;
+  color: var(--gold-bright);
+  font-family: var(--font-brush);
+  font-size: 1.45rem;
+  letter-spacing: 0.15em;
+  font-weight: 500;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
 
 .result-score {
-  margin: 10px 0 2px;
-  font-size: clamp(4rem, 18vw, 7rem);
-  font-weight: 900;
+  margin: 16px 0 6px;
+  font-family: var(--font-brush);
+  font-size: clamp(4.5rem, 16vw, 6.5rem);
+  font-weight: 500;
   line-height: 1;
+  color: var(--paper);
+  text-shadow: 2px 2px 0 var(--red);
 }
 
 .result-score small {
-  margin-left: 8px;
-  font-size: 1.1rem;
+  margin-left: 6px;
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  color: var(--paper-dark);
+  text-shadow: none;
 }
 
 .rank-text {
-  margin: 6px 0 12px;
-  font-size: 1.45rem;
-  font-weight: 900;
+  margin: 0px 0 18px;
+  font-family: var(--font-brush);
+  font-size: 1.55rem;
+  color: var(--gold-bright);
+  font-weight: 500;
 }
 
 .result-comment {
-  min-height: 3.2em;
-  line-height: 1.7;
+  min-height: 3.5em;
+  line-height: 1.8;
+  font-size: 0.92rem;
+  color: var(--paper-dark);
+  border-top: 1px dashed rgba(235,220,185,0.15);
+  padding-top: 18px;
+  margin-bottom: 24px;
 }
 
 .result-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 12px;
 }
 
+/* ==========================================
+   トースト通知 (落款調)
+   ========================================== */
 .toast {
   position: fixed;
   left: 50%;
-  bottom: 18px;
-  z-index: 20;
+  bottom: 24px;
+  z-index: 1000;
   transform: translate(-50%, 120%);
-  border: 1px solid rgba(224,183,86,0.5);
-  border-radius: 6px;
-  padding: 10px 14px;
-  background: rgba(0,0,0,0.82);
+  border: 1px solid var(--red);
+  border-radius: 4px;
+  padding: 10px 20px;
+  background: var(--ink-fade);
+  color: var(--paper);
+  font-size: 0.85rem;
+  font-weight: 700;
   opacity: 0;
-  transition: transform 180ms ease, opacity 180ms ease;
+  backdrop-filter: blur(4px);
+  transition: transform 250ms cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 200ms ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
 }
 
 .toast.show {
@@ -474,14 +852,43 @@ h1 {
   opacity: 1;
 }
 
+/* ==========================================
+   携帯電話・タブレット対応
+   ========================================== */
 @media (max-width: 620px) {
-  .screen { padding: 68px 12px 14px; }
-  .record-strip span { min-width: 62px; padding: 6px 7px; }
-  .dojo-scene { min-height: 360px; aspect-ratio: auto; }
-  .master { right: 8%; top: 28%; }
-  .student { left: 8%; bottom: 12%; }
-  .character { width: 104px; height: 158px; }
-  .input-pad { max-width: 330px; }
-  .dir-button { min-height: 56px; }
+  .screen { padding: 74px 12px 20px; }
+  
+  h1 { font-size: clamp(3rem, 12vw, 4.2rem); }
+  
+  .game-header { padding: 12px 16px; }
+  .back-link { padding: 5px 10px; font-size: 0.75rem; }
+  .record-strip span { padding: 5px 8px; font-size: 0.7rem; }
+  
+  .dojo-scene { 
+    min-height: 300px; 
+    aspect-ratio: auto; 
+    height: 48svh;
+  }
+  
+  .master { right: 10%; top: 22%; }
+  .student { left: 10%; bottom: 12%; }
+  
+  .character { width: 90px; height: 140px; }
+  .body { width: 62px; height: 106px; bottom: 20px; }
+  .head { width: 24px; height: 24px; left: 19px; }
+  .torso { width: 38px; height: 60px; left: 12px; top: 24px; }
+  .arm { width: 34px; height: 9px; top: 36px; }
+  
+  .input-pad { max-width: 320px; gap: 8px; }
+  .dir-button { min-height: 52px; font-size: 1.2rem; }
   .result-actions { grid-template-columns: 1fr; }
+  
+  .title-wrap { margin-top: 2svh; margin-bottom: 16px; }
+  .title-seal {
+    width: 24px;
+    height: 24px;
+    font-size: 0.85rem;
+    right: -32px;
+    bottom: 2px;
+  }
 }

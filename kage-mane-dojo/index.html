@@ -7,9 +7,13 @@
   <meta name="description" content="師範の型を覚えて同じ順番で入力する、記憶と集中のミニゲーム。">
   <meta name="robots" content="index,follow">
   <link rel="canonical" href="https://hajikkoroom.xsrv.jp/kage-mane-dojo/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700;800&family=Yuji+Syuku&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
+  <div class="paper-overlay" aria-hidden="true"></div>
   <main class="game-shell" id="gameShell">
     <header class="game-header">
       <a class="back-link" href="../minigames.html">ミニゲーム広場</a>
@@ -21,9 +25,10 @@
 
     <section class="screen title-screen active" id="titleScreen" aria-label="タイトル画面">
       <div class="moon" aria-hidden="true"></div>
-      <div class="title-mark">影</div>
-      <h1>影まね<br>道場</h1>
-      <p>師範の型を覚え、弟子として同じ順に打ち返せ。</p>
+      <div class="title-wrap">
+        <h1>影まね<br>道場<span class="title-seal" aria-hidden="true">影</span></h1>
+      </div>
+      <p class="title-desc">師範の型を覚え、弟子として同じ順に打ち返せ。</p>
       <button class="primary-button" id="startButton" type="button">稽古を始める</button>
       <div class="howto">
         <span>師範の動きが終わったら入力</span>
@@ -39,6 +44,8 @@
       </div>
 
       <div class="dojo-scene" id="dojoScene">
+        <div class="dojo-moon" aria-hidden="true"></div>
+        <div class="dojo-bamboo" aria-hidden="true"></div>
         <div class="dojo-floor" aria-hidden="true"></div>
         <div class="status-text" id="statusText" aria-live="polite">師範の型を見る</div>
 
