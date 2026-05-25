@@ -732,6 +732,19 @@ body {
     flex-shrink: 0;
 }
 
+#editor-controls {
+    height: 66px;
+    border-top: 1.5px solid var(--border-color);
+    background: rgba(5, 5, 8, 0.72);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10px;
+    gap: 7px;
+    z-index: 10;
+    flex-shrink: 0;
+}
+
 .control-btn {
     background: transparent;
     border: 1px solid rgba(255, 255, 255, 0.18);
@@ -1306,8 +1319,11 @@ body {
 /* Desktop Responsive Layout (Activated on landscape screens width >= 1150px) */
 @media (min-width: 1150px) and (min-aspect-ratio: 1.1) {
     #app-layout {
-        gap: 32px;
-        padding: 0 40px;
+        --desktop-sidebar-width: clamp(225px, 18vw, 310px);
+        --desktop-layout-gap: clamp(14px, 1.7vw, 32px);
+        --desktop-layout-padding: clamp(14px, 2.1vw, 40px);
+        gap: var(--desktop-layout-gap);
+        padding: 0 var(--desktop-layout-padding);
         /* Stylized abstract glowing grid lines in background for deep space aura */
         background-image: 
             radial-gradient(at 0% 0%, rgba(0, 243, 255, 0.05) 0px, transparent 50%),
@@ -1320,12 +1336,17 @@ body {
     #game-container {
         /* Slightly adjust shadow blur and container scaling on PC */
         box-shadow: 0 30px 80px rgba(0, 0, 0, 0.95), 0 0 40px rgba(0, 243, 255, 0.04);
+        width: min(
+            var(--logical-width),
+            calc(100vh * 3 / 4),
+            calc(100vw - (var(--desktop-sidebar-width) * 2) - (var(--desktop-layout-gap) * 2) - (var(--desktop-layout-padding) * 2))
+        );
     }
 
     .pc-only-sidebar {
         display: flex !important;
         flex-direction: column;
-        width: 310px;
+        width: var(--desktop-sidebar-width);
         height: min(92vh, 1200px);
         background: var(--bg-surface);
         border: 1.5px solid var(--border-color);
@@ -1877,3 +1898,71 @@ body {
     transform: scale(1.2);
 }
 
+/* Compact editor arrangement for zoomed or short desktop workspaces. */
+@media (min-width: 1150px) and (min-aspect-ratio: 1.1) and (max-height: 700px) {
+    #app-layout.editing-mode .pc-only-sidebar {
+        height: calc(100vh - 24px);
+        padding: 12px 14px;
+    }
+
+    #app-layout.editing-mode #editor-controls {
+        height: 88px;
+        display: grid !important;
+        grid-template-areas:
+            "tools tools tools"
+            "back clear test";
+        grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
+        padding: 5px 8px;
+        gap: 5px 8px;
+    }
+
+    #editor-back-btn {
+        grid-area: back;
+    }
+
+    #editor-controls .editor-tool-group {
+        grid-area: tools;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 4px;
+        width: 100%;
+        padding: 3px;
+    }
+
+    #editor-controls .tool-btn {
+        min-width: 0;
+        padding: 6px 5px;
+    }
+
+    #editor-clear-btn {
+        grid-area: clear;
+    }
+
+    #editor-test-btn {
+        grid-area: test;
+    }
+
+    #editor-controls #editor-clear-btn,
+    #editor-controls #editor-test-btn {
+        min-width: 0 !important;
+        width: 100% !important;
+        padding-right: 7px !important;
+        padding-left: 7px !important;
+    }
+
+    #editor-sidebar-right .sidebar-header {
+        padding-bottom: 9px;
+        margin-bottom: 10px;
+    }
+
+    #editor-sidebar-right .sidebar-section {
+        padding: 9px 11px;
+        margin-bottom: 7px;
+        gap: 5px;
+    }
+
+    #editor-sidebar-right .property-group {
+        margin-bottom: 7px;
+        padding: 8px;
+    }
+}
