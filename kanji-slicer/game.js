@@ -844,6 +844,12 @@ btnPause.addEventListener('click', (e) => {
     e.stopPropagation(); // Prevent canvas drop trigger if clicked fast
     if (isGameOver) return;
     isPaused = true;
+    
+    // Reset active dragging/slicing input states to avoid sticky previews on resume
+    isDraggingPreview = false;
+    isSlicing = false;
+    slashTrail = [];
+    
     populateDictionary();
     pauseModal.classList.remove('hidden');
 });
