@@ -19,7 +19,8 @@ assert.match(html, /id="mode-indicator"/, 'mode indicator should exist');
 assert.match(html, /id="select-btn"/, 'stage select button in overlay should exist');
 assert.match(html, /id="best-banner"/, 'best rank banner should exist');
 assert.match(html, /id="stat-best"/, 'best rank stat display should exist');
-assert.match(html, /href="style\.css\?v=20260525-layout-fix"/, 'editor layout stylesheet should be cache-busted');
+assert.match(html, /href="style\.css\?v=20260525-editor-fix"/, 'editor stylesheet should be cache-busted');
+assert.match(html, /src="script\.js\?v=20260525-editor-fix"/, 'editor script should be cache-busted');
 
 // ---- JavaScript Syntax ----
 assert.doesNotThrow(() => new vm.Script(script), 'script must be valid JS');

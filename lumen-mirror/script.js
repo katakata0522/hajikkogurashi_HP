@@ -1085,8 +1085,14 @@ class GameController {
     }
 
     _populateInfoPanel() {
-        const tmpl = STAGE_TEMPLATES[this.currentStageIdx];
-        document.getElementById('info-stg-num').textContent = `STG_0${this.currentStageIdx + 1}`;
+        const isCustomStage = this.currentStageIdx === -1;
+        const tmpl = isCustomStage ? {
+            name: 'CUSTOM_STG',
+            objective: '——',
+            story: '——',
+            gimmickList: []
+        } : STAGE_TEMPLATES[this.currentStageIdx];
+        document.getElementById('info-stg-num').textContent = isCustomStage ? 'CUSTOM_STG' : `STG_0${this.currentStageIdx + 1}`;
         document.getElementById('info-stg-name').textContent = tmpl.name;
         document.getElementById('info-objective').textContent = tmpl.objective || '——';
         document.getElementById('info-story').textContent = tmpl.story || '——';
@@ -1277,6 +1283,12 @@ class GameController {
         this.mirrors = [];
         this.maxInkForStage = tmpl.inkCapacity || 500;
         this.inkLeft = this.maxInkForStage;
+        if (isCustom) {
+            const inkInput = document.getElementById('prop-ink');
+            const inkValue = document.getElementById('prop-ink-val');
+            if (inkInput) inkInput.value = this.maxInkForStage;
+            if (inkValue) inkValue.textContent = this.maxInkForStage;
+        }
         this.hasHitPrism = false;
         this.hoveredMirrorIdx = -1;
         this.chainFlashQueue = [];
@@ -1551,7 +1563,7 @@ class GameController {
     }
 
     emitPhoton() {
-        if (this.state !== STATE.PLAYING) return;
+        if (this.state !== STATE.PLAYING && this.state !== STATE.EDIT_PLAYING) return;
         this.state = STATE.EMITTING;
         this.updateHUD();
         this.calculateLaserPath();
@@ -2700,8 +2712,8 @@ class GameController {
 
     serializeStage() {
         return {
-            v: 2,
-            ink: this.maxInkForStage,
+            v: 3,
+            inkCapacity: this.maxInkForStage,
             emitter: {
                 x: Math.round(this.emitter.x),
                 y: Math.round(this.emitter.y),
@@ -2711,7 +2723,7 @@ class GameController {
                 x: Math.round(this.prism.x),
                 y: Math.round(this.prism.y),
                 radius: Math.round(this.prism.radius),
-                color: this.prism.targetColor
+                targetColor: this.prism.targetColor
             },
             blackholes: this.blackholes.map(b => ({
                 x: Math.round(b.x),
@@ -2744,15 +2756,74 @@ class GameController {
         };
     }
 
+    normalizeCustomStageData(data) {
+        if (!data || typeof data !== 'object' || !data.emitter || !data.prism) return null;
+        if (data.v != null && data.v !== 2 && data.v !== 3) return null;
+
+        const validNumber = (value, min, max) => Number.isFinite(value) && value >= min && value <= max;
+        const validPoint = (point) => point
+            && validNumber(point.x, 0, CONFIG.WIDTH)
+            && validNumber(point.y, 0, CONFIG.HEIGHT);
+        const validColor = (color) => color === null || ['#00f3ff', '#ff003c', '#00ff3c'].includes(color);
+        const arrays = ['blackholes', 'portals', 'blocks', 'colorFilters'];
+        if (arrays.some(key => data[key] != null && !Array.isArray(data[key]))) return null;
+
+        const inkCapacity = data.inkCapacity ?? data.ink;
+        const targetColor = data.prism.targetColor ?? data.prism.color ?? null;
+        if (!validNumber(inkCapacity, 150, 1500)
+            || !validPoint(data.emitter)
+            || !Number.isFinite(data.emitter.angle)
+            || !validPoint(data.prism)
+            || !validNumber(data.prism.radius, 1, 100)
+            || !validColor(targetColor)) {
+            return null;
+        }
+
+        const blackholes = data.blackholes || [];
+        const portals = data.portals || [];
+        const blocks = data.blocks || [];
+        const colorFilters = data.colorFilters || [];
+        if (!blackholes.every(item => validPoint(item)
+            && validNumber(item.mass, 1, 500)
+            && validNumber(item.radius, 1, 500))) return null;
+        if (!portals.every(item => validNumber(item.inX, 0, CONFIG.WIDTH)
+            && validNumber(item.inY, 0, CONFIG.HEIGHT)
+            && validNumber(item.outX, 0, CONFIG.WIDTH)
+            && validNumber(item.outY, 0, CONFIG.HEIGHT))) return null;
+        if (!blocks.every(item => validPoint(item)
+            && validNumber(item.radius, 1, 100)
+            && (item.moveOptions == null || (
+                validNumber(item.moveOptions.targetX, 0, CONFIG.WIDTH)
+                && validNumber(item.moveOptions.targetY, 0, CONFIG.HEIGHT)
+                && validNumber(item.moveOptions.speed, 20, 220)
+            )))) return null;
+        if (!colorFilters.every(item => validPoint(item)
+            && validNumber(item.radius, 1, 100)
+            && validColor(item.color))) return null;
+
+        // 旧共有コードを現行スキーマへ変換し、内部状態は一形式で扱う。
+        return {
+            v: 3,
+            inkCapacity,
+            emitter: { ...data.emitter },
+            prism: { x: data.prism.x, y: data.prism.y, radius: data.prism.radius, targetColor },
+            blackholes: blackholes.map(item => ({ ...item })),
+            portals: portals.map(item => ({ ...item })),
+            blocks: blocks.map(item => ({
+                ...item,
+                moveOptions: item.moveOptions ? { ...item.moveOptions } : null
+            })),
+            colorFilters: colorFilters.map(item => ({ ...item }))
+        };
+    }
+
     deserializeStage(code) {
         if (!code.startsWith('LMN-')) return null;
         const base64 = code.substring(4).trim();
         try {
             const json = decodeURIComponent(escape(atob(base64)));
             const data = JSON.parse(json);
-            if (data && data.emitter && data.prism) {
-                return data;
-            }
+            return this.normalizeCustomStageData(data);
         } catch (e) {
             console.error("Failed to decode stage code", e);
         }

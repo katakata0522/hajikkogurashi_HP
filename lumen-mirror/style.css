@@ -1798,16 +1798,146 @@ body {
     display: flex !important;
 }
 
-/* Mobile responsive safeguards for stage editor components */
+/* 狭幅でも編集機能を残し、キャンバスと操作パネルを並べ替える。 */
 @media (max-width: 1149px) {
+    #app-layout.editing-mode {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: minmax(320px, 1fr) 108px minmax(150px, 24vh);
+        align-items: stretch;
+        justify-content: stretch;
+        gap: 8px;
+        padding: 8px;
+    }
+
+    #app-layout.editing-mode #game-container {
+        grid-column: 1;
+        grid-row: 1;
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+    }
+
     #app-layout.editing-mode #editor-sidebar-left {
-        display: none !important; /* Hide left palette on medium screen sizes */
+        display: flex !important;
+        grid-column: 1;
+        grid-row: 2;
+    }
+
+    #app-layout.editing-mode #editor-sidebar-right {
+        display: flex !important;
+        grid-column: 1;
+        grid-row: 3;
+        overflow-y: auto;
+    }
+
+    #app-layout.editing-mode #editor-sidebar-left,
+    #app-layout.editing-mode #editor-sidebar-right {
+        flex-direction: column;
+        width: 100%;
+        height: auto;
+        min-width: 0;
+        min-height: 0;
+        padding: 8px;
+        background: var(--bg-surface);
+        border: 1.5px solid var(--border-color);
+        border-radius: 10px;
+    }
+
+    #app-layout.editing-mode #editor-sidebar-left .sidebar-header,
+    #app-layout.editing-mode #editor-sidebar-right .sidebar-header {
+        display: none;
+    }
+
+    #app-layout.editing-mode #editor-sidebar-left .sidebar-section {
+        margin: 0;
+        padding: 5px 7px;
+    }
+
+    #app-layout.editing-mode #editor-sidebar-left .section-label {
+        display: none;
+    }
+
+    #app-layout.editing-mode #editor-sidebar-left .editor-palette {
+        display: flex;
+        gap: 7px;
+        margin-top: 0;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding-bottom: 2px;
+    }
+
+    #app-layout.editing-mode #editor-sidebar-left .palette-item {
+        flex: 0 0 88px;
+        padding: 7px 4px;
+    }
+
+    #app-layout.editing-mode #editor-sidebar-right .sidebar-section {
+        margin-bottom: 7px;
+        padding: 8px 10px;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1149px) and (min-aspect-ratio: 1.1) {
+    #app-layout.editing-mode {
+        grid-template-columns: minmax(0, 1fr) 270px;
+        grid-template-rows: minmax(0, 1fr) 120px;
+    }
+
+    #app-layout.editing-mode #game-container {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    #app-layout.editing-mode #editor-sidebar-left {
+        grid-column: 1;
+        grid-row: 2;
+    }
+
+    #app-layout.editing-mode #editor-sidebar-right {
+        grid-column: 2;
+        grid-row: 1 / span 2;
+        height: 100%;
     }
 }
 
 @media (max-width: 767px) {
-    #app-layout.editing-mode #editor-sidebar-right {
-        display: none !important; /* Hide right sidebar on mobile */
+    #app-layout.editing-mode #editor-controls {
+        height: 86px;
+        display: grid !important;
+        grid-template-areas:
+            "tools tools tools"
+            "back clear test";
+        grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
+        padding: 5px 7px;
+        gap: 5px;
+    }
+
+    #app-layout.editing-mode #editor-controls .editor-tool-group {
+        grid-area: tools;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        width: 100%;
+    }
+
+    #app-layout.editing-mode #editor-back-btn {
+        grid-area: back;
+    }
+
+    #app-layout.editing-mode #editor-clear-btn {
+        grid-area: clear;
+    }
+
+    #app-layout.editing-mode #editor-test-btn {
+        grid-area: test;
+    }
+
+    #app-layout.editing-mode #editor-controls #editor-clear-btn,
+    #app-layout.editing-mode #editor-controls #editor-test-btn {
+        min-width: 0 !important;
+        width: 100% !important;
+        padding-right: 5px !important;
+        padding-left: 5px !important;
     }
 }
 

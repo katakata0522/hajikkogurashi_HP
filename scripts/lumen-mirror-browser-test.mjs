@@ -32,6 +32,10 @@ const server = createServer(serveFile);
 await new Promise((resolveListen) => server.listen(0, '127.0.0.1', resolveListen));
 const { port } = server.address();
 
+function codeFor(data) {
+  return `LMN-${Buffer.from(JSON.stringify(data), 'utf8').toString('base64')}`;
+}
+
 try {
   const browser = await chromium.launch({
     headless: true,
@@ -92,6 +96,125 @@ try {
     if (desktopBoundary.rightOutside > 0 || desktopBoundary.footerOverflow > 0) {
       throw new Error(`desktop breakpoint clips the editor: ${JSON.stringify(desktopBoundary)}`);
     }
+
+    const failures = [];
+    async function runEditorScenario(name, viewport, scenario) {
+      const scenarioPage = await browser.newPage({ viewport });
+      const scenarioErrors = [];
+      scenarioPage.on('pageerror', (error) => scenarioErrors.push(error.message));
+      try {
+        await scenarioPage.goto(`http://127.0.0.1:${port}/lumen-mirror/`, { waitUntil: 'networkidle' });
+        await scenarioPage.click('#editor-btn');
+        await scenario(scenarioPage, failures);
+        if (scenarioErrors.length) failures.push(`${name}: page errors: ${scenarioErrors.join(' | ')}`);
+      } finally {
+        await scenarioPage.close();
+      }
+    }
+
+    await runEditorScenario('custom info', { width: 1280, height: 720 }, async (scenarioPage) => {
+      await scenarioPage.click('#info-chip');
+      if (!(await scenarioPage.locator('#info-panel').isVisible())) failures.push('custom info: INFO panel remains hidden');
+    });
+
+    await runEditorScenario('custom test settings', { width: 1280, height: 720 }, async (scenarioPage) => {
+      const canvasBox = await scenarioPage.locator('#game-canvas').boundingBox();
+      const logicalPoint = (x, y) => ({
+        x: canvasBox.x + (canvasBox.width * x / 600),
+        y: canvasBox.y + (canvasBox.height * y / 800),
+      });
+      const prism = logicalPoint(520, 650);
+      await scenarioPage.mouse.click(prism.x, prism.y);
+      await scenarioPage.click('.color-picker-btn[data-color="#ff003c"]');
+      await scenarioPage.locator('#prop-ink').fill('1000');
+      await scenarioPage.click('#editor-test-btn');
+      const from = logicalPoint(50, 400);
+      const to = logicalPoint(530, 400);
+      await scenarioPage.mouse.move(from.x, from.y);
+      await scenarioPage.mouse.down();
+      await scenarioPage.mouse.move(to.x, to.y);
+      await scenarioPage.mouse.up();
+      const stability = await scenarioPage.locator('#stability-value').innerText();
+      if (stability !== '52.0%') failures.push(`custom test settings: expected 52.0% ink, got ${stability}`);
+      await scenarioPage.click('#editor-back-btn');
+      await scenarioPage.mouse.click(prism.x, prism.y);
+      const returnedColor = await scenarioPage.locator('.color-picker-btn.active').getAttribute('data-color');
+      if (returnedColor !== '#ff003c') failures.push(`custom test settings: prism color returned as ${returnedColor}`);
+    });
+
+    await runEditorScenario('custom emit', { width: 1280, height: 720 }, async (scenarioPage) => {
+      await scenarioPage.click('#editor-test-btn');
+      await scenarioPage.click('#editor-test-btn');
+      if (!(await scenarioPage.locator('#editor-test-btn').isDisabled())) {
+        failures.push('custom emit: EMIT does not enter emitting state');
+      }
+    });
+
+    await runEditorScenario('invalid import', { width: 1280, height: 720 }, async (scenarioPage) => {
+      const invalidCode = codeFor({
+        v: 2,
+        ink: 500,
+        emitter: { x: 80, y: 150, angle: 0 },
+        prism: { x: 520, y: 650, radius: 20, color: null },
+        blocks: 'not-an-array',
+      });
+      await scenarioPage.click('#editor-import-btn');
+      await scenarioPage.locator('#modal-textarea').fill(invalidCode);
+      await scenarioPage.click('#modal-action-btn');
+      if (!(await scenarioPage.locator('#modal-error').isVisible())) {
+        failures.push('invalid import: malformed stage code is not rejected in the modal');
+      }
+    });
+
+    await runEditorScenario('legacy import', { width: 1280, height: 720 }, async (scenarioPage) => {
+      const legacyCode = codeFor({
+        v: 2,
+        ink: 1000,
+        emitter: { x: 80, y: 150, angle: 0 },
+        prism: { x: 520, y: 650, radius: 20, color: '#ff003c' },
+        blackholes: [], portals: [], blocks: [], colorFilters: [],
+      });
+      await scenarioPage.click('#editor-import-btn');
+      await scenarioPage.locator('#modal-textarea').fill(legacyCode);
+      await scenarioPage.click('#modal-action-btn');
+      const canvasBox = await scenarioPage.locator('#game-canvas').boundingBox();
+      await scenarioPage.mouse.click(
+        canvasBox.x + (canvasBox.width * 520 / 600),
+        canvasBox.y + (canvasBox.height * 650 / 800),
+      );
+      const settings = await scenarioPage.evaluate(() => ({
+        ink: document.querySelector('#prop-ink-val').textContent,
+        color: document.querySelector('.color-picker-btn.active')?.dataset.color,
+      }));
+      if (settings.ink !== '1000' || settings.color !== '#ff003c') {
+        failures.push(`legacy import: settings were not preserved: ${JSON.stringify(settings)}`);
+      }
+    });
+
+    for (const viewport of [
+      { name: 'tablet', width: 1024, height: 768 },
+      { name: 'phone', width: 390, height: 844 },
+    ]) {
+      await runEditorScenario(`${viewport.name} editor`, viewport, async (scenarioPage) => {
+        const visibility = await scenarioPage.evaluate(() => {
+          const visible = (selector) => {
+            const element = document.querySelector(selector);
+            const rect = element.getBoundingClientRect();
+            return getComputedStyle(element).display !== 'none' && rect.width > 0 && rect.height > 0;
+          };
+          return {
+            palette: visible('#editor-sidebar-left'),
+            inspector: visible('#editor-sidebar-right'),
+            importButton: visible('#editor-import-btn'),
+          };
+        });
+        if (!visibility.palette || !visibility.inspector || !visibility.importButton) {
+          failures.push(`${viewport.name} editor: editing controls are unavailable: ${JSON.stringify(visibility)}`);
+        }
+      });
+    }
+
+    if (failures.length) throw new Error(`editor regression failures:\n- ${failures.join('\n- ')}`);
   } finally {
     await browser.close();
   }
