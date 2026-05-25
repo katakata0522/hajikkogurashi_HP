@@ -132,6 +132,36 @@ try {
       }
     });
 
+    await runEditorScenario('accessible editor dialogs', { width: 1280, height: 720 }, async (scenarioPage) => {
+      const semantics = await scenarioPage.evaluate(() => ({
+        paletteButtons: [...document.querySelectorAll('.palette-item')].every((item) => item.tagName === 'BUTTON'),
+        canvasLabel: document.querySelector('#game-canvas')?.getAttribute('aria-label'),
+        infoRole: document.querySelector('#info-panel')?.getAttribute('role'),
+        modalRole: document.querySelector('#editor-modal')?.getAttribute('role'),
+        toastLive: document.querySelector('#toast-container')?.getAttribute('aria-live'),
+      }));
+      if (!semantics.paletteButtons || !semantics.canvasLabel || semantics.infoRole !== 'dialog'
+        || semantics.modalRole !== 'dialog' || semantics.toastLive !== 'polite') {
+        failures.push(`accessible editor dialogs: missing semantics: ${JSON.stringify(semantics)}`);
+      }
+
+      await scenarioPage.click('#info-chip');
+      await scenarioPage.keyboard.press('Escape');
+      if (await scenarioPage.locator('#info-panel').isVisible()) {
+        failures.push('accessible editor dialogs: Escape does not close INFO');
+      }
+
+      await scenarioPage.click('#editor-import-btn');
+      const modalFocus = await scenarioPage.evaluate(() => document.activeElement?.id);
+      if (modalFocus !== 'modal-textarea') {
+        failures.push(`accessible editor dialogs: import focus starts on ${modalFocus}`);
+      }
+      await scenarioPage.keyboard.press('Escape');
+      if (await scenarioPage.locator('#editor-modal').isVisible()) {
+        failures.push('accessible editor dialogs: Escape does not close the modal');
+      }
+    });
+
     await runEditorScenario('custom test settings', { width: 1280, height: 720 }, async (scenarioPage) => {
       const canvasBox = await scenarioPage.locator('#game-canvas').boundingBox();
       const logicalPoint = (x, y) => ({
@@ -206,6 +236,79 @@ try {
       }
     });
 
+    await runEditorScenario('creator safety controls', { width: 1280, height: 720 }, async (scenarioPage) => {
+      if (await scenarioPage.locator('#editor-undo-btn').count() === 0
+        || await scenarioPage.locator('#editor-stage-preview').count() === 0) {
+        failures.push('creator safety controls: undo and preview controls are unavailable');
+        return;
+      }
+      await scenarioPage.click('.palette-item[data-type="block"]');
+      const canvasBox = await scenarioPage.locator('#game-canvas').boundingBox();
+      await scenarioPage.mouse.click(canvasBox.x + canvasBox.width * 0.5, canvasBox.y + canvasBox.height * 0.45);
+      let preview = await scenarioPage.locator('#editor-stage-preview').innerText();
+      if (!preview.includes('BLOCK 1')) failures.push(`creator safety controls: placement is not summarized: ${preview}`);
+      await scenarioPage.click('#editor-clear-btn');
+      if (!(await scenarioPage.locator('#editor-modal').isVisible())) {
+        failures.push('creator safety controls: CLEAR_ALL has no confirmation');
+        return;
+      }
+      await scenarioPage.click('#modal-action-btn');
+      preview = await scenarioPage.locator('#editor-stage-preview').innerText();
+      if (!preview.includes('BLOCK 0')) failures.push(`creator safety controls: clear did not update preview: ${preview}`);
+      await scenarioPage.click('#editor-undo-btn');
+      preview = await scenarioPage.locator('#editor-stage-preview').innerText();
+      if (!preview.includes('BLOCK 1')) failures.push(`creator safety controls: undo did not restore placement: ${preview}`);
+      await scenarioPage.click('#editor-redo-btn');
+      preview = await scenarioPage.locator('#editor-stage-preview').innerText();
+      if (!preview.includes('BLOCK 0')) failures.push(`creator safety controls: redo did not reapply clear: ${preview}`);
+    });
+
+    await runEditorScenario('draft restore and named share', { width: 1280, height: 720 }, async (scenarioPage) => {
+      if (await scenarioPage.locator('#prop-title').count() === 0
+        || await scenarioPage.locator('#editor-share-status').count() === 0) {
+        failures.push('draft restore and named share: title or workflow status is unavailable');
+        return;
+      }
+      await scenarioPage.locator('#prop-title').fill('NEON_ROUTE');
+      await scenarioPage.locator('#prop-title').blur();
+      await scenarioPage.reload({ waitUntil: 'networkidle' });
+      await scenarioPage.click('#editor-btn');
+      const restoredTitle = await scenarioPage.locator('#prop-title').inputValue();
+      if (restoredTitle !== 'NEON_ROUTE') failures.push(`draft restore and named share: draft title restored as ${restoredTitle}`);
+
+      const alignedCode = codeFor({
+        v: 4,
+        title: 'NEON_ROUTE',
+        inkCapacity: 500,
+        emitter: { x: 80, y: 150, angle: 0 },
+        prism: { x: 520, y: 150, radius: 20, targetColor: null },
+        blackholes: [], portals: [], blocks: [], colorFilters: [],
+      });
+      await scenarioPage.click('#editor-import-btn');
+      await scenarioPage.locator('#modal-textarea').fill(alignedCode);
+      await scenarioPage.click('#modal-action-btn');
+      const statusBefore = await scenarioPage.locator('#editor-share-status').innerText();
+      if (!statusBefore.includes('TEST_REQUIRED')) failures.push(`draft restore and named share: initial status is ${statusBefore}`);
+      await scenarioPage.click('#editor-test-btn');
+      await scenarioPage.click('#editor-test-btn');
+      await scenarioPage.waitForSelector('#overlay:not(.hidden)');
+      await scenarioPage.click('#next-btn');
+      const statusAfter = await scenarioPage.locator('#editor-share-status').innerText();
+      if (!statusAfter.includes('READY_TO_SHARE')) failures.push(`draft restore and named share: cleared status is ${statusAfter}`);
+      await scenarioPage.click('#editor-export-btn');
+      const shareText = await scenarioPage.locator('#modal-textarea').inputValue();
+      if (!shareText.includes('NEON_ROUTE') || !shareText.includes('LMN-')) {
+        failures.push(`draft restore and named share: export lacks readable share detail: ${shareText}`);
+      }
+      await scenarioPage.click('#modal-cancel-btn');
+      await scenarioPage.locator('#prop-title').fill('NEON_ROUTE_2');
+      await scenarioPage.locator('#prop-title').blur();
+      const invalidatedStatus = await scenarioPage.locator('#editor-share-status').innerText();
+      if (!invalidatedStatus.includes('TEST_REQUIRED') || !(await scenarioPage.locator('#editor-export-btn').isDisabled())) {
+        failures.push(`draft restore and named share: edits do not invalidate clear verification: ${invalidatedStatus}`);
+      }
+    });
+
     for (const viewport of [
       { name: 'tablet', width: 1024, height: 768 },
       { name: 'phone', width: 390, height: 844 },
@@ -225,6 +328,20 @@ try {
         });
         if (!visibility.palette || !visibility.inspector || !visibility.importButton) {
           failures.push(`${viewport.name} editor: editing controls are unavailable: ${JSON.stringify(visibility)}`);
+        }
+        if (viewport.name === 'phone') {
+          await scenarioPage.click('#info-chip');
+          const infoScroll = await scenarioPage.evaluate(() => {
+            const panel = document.querySelector('#info-panel');
+            const style = getComputedStyle(panel);
+            return {
+              needsScroll: panel.scrollHeight > panel.clientHeight,
+              touchAction: style.touchAction,
+            };
+          });
+          if (infoScroll.needsScroll && infoScroll.touchAction === 'none') {
+            failures.push(`phone editor: INFO cannot be touch-scrolled: ${JSON.stringify(infoScroll)}`);
+          }
         }
       });
     }

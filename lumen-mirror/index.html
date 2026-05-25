@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&family=Noto+Sans+JP:wght@200;300;400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260525-info-guide-fix">
+    <link rel="stylesheet" href="style.css?v=20260525-creator-ux-fix">
 </head>
 <body>
     <div id="app-layout">
@@ -44,34 +44,34 @@
             <div class="sidebar-section">
                 <div class="section-label">◈ ギミックを配置</div>
                 <div class="editor-palette">
-                    <div class="palette-item active" data-type="emitter">
+                    <button type="button" class="palette-item active" data-type="emitter" aria-pressed="true">
                         <div class="gimmick-visual-mini" style="border-color:#00f3ff; background:#000;"></div>
                         <span>EMITTER<br>(発射台)</span>
-                    </div>
-                    <div class="palette-item" data-type="prism">
+                    </button>
+                    <button type="button" class="palette-item" data-type="prism" aria-pressed="false">
                         <div class="gimmick-visual-mini" style="border-color:#ff007f; background:rgba(255, 0, 127, 0.1);"></div>
                         <span>PRISM<br>(結晶ゴール)</span>
-                    </div>
-                    <div class="palette-item" data-type="blackhole">
+                    </button>
+                    <button type="button" class="palette-item" data-type="blackhole" aria-pressed="false">
                         <div class="gimmick-visual-mini blackhole"></div>
                         <span>BLACKHOLE<br>(ブラックホール)</span>
-                    </div>
-                    <div class="palette-item" data-type="portal">
+                    </button>
+                    <button type="button" class="palette-item" data-type="portal" aria-pressed="false">
                         <div class="gimmick-visual-mini wormhole" style="border-color:#00bfff; background:rgba(0,191,255,0.1);"></div>
                         <span>PORTAL<br>(ポータル)</span>
-                    </div>
-                    <div class="palette-item" data-type="block">
+                    </button>
+                    <button type="button" class="palette-item" data-type="block" aria-pressed="false">
                         <div class="gimmick-visual-mini block"></div>
                         <span>BLOCK<br>(遮光ブロック)</span>
-                    </div>
-                    <div class="palette-item" data-type="patrol">
+                    </button>
+                    <button type="button" class="palette-item" data-type="patrol" aria-pressed="false">
                         <div class="gimmick-visual-mini patrol"></div>
                         <span>PATROL<br>(巡回ブロック)</span>
-                    </div>
-                    <div class="palette-item" data-type="colorfilter">
+                    </button>
+                    <button type="button" class="palette-item" data-type="colorfilter" aria-pressed="false">
                         <div class="gimmick-visual-mini colorfilter"></div>
                         <span>FILTER<br>(カラーフィルター)</span>
-                    </div>
+                    </button>
                 </div>
             </div>
         </aside>
@@ -110,17 +110,17 @@
             <!-- VIEWPORT / CANVAS -->
             <div id="viewport">
                 <div class="grid-overlay"></div>
-                <canvas id="game-canvas"></canvas>
+                <canvas id="game-canvas" tabindex="0" aria-label="ステージ編集キャンバス。選択したギミックを配置し、光の経路を調整します。"></canvas>
 
                 <!-- ========== INFO PANEL ========== -->
-                <div id="info-panel" class="hidden">
+                <div id="info-panel" class="hidden" role="dialog" aria-modal="true" aria-labelledby="info-stg-name" tabindex="-1">
                     <div class="info-panel-inner">
                         <div class="info-panel-header">
                             <div>
                                 <span id="info-stg-num" class="info-stg-num">STG_01</span>
                                 <h2 id="info-stg-name" class="info-stg-name">REFLECTION</h2>
                             </div>
-                            <button id="info-close" class="info-close-btn">✕</button>
+                            <button type="button" id="info-close" class="info-close-btn" aria-label="情報を閉じる">✕</button>
                         </div>
 
                         <div id="info-editor-guide" class="info-section editor-guide hidden">
@@ -259,13 +259,13 @@
                 </button>
 
                 <div class="editor-tool-group">
-                    <button id="tool-select" class="tool-btn active" title="オブジェクトの移動・選択">
+                    <button id="tool-select" class="tool-btn active" aria-pressed="true" title="オブジェクトの移動・選択">
                         <span>SELECT</span>
                     </button>
-                    <button id="tool-place" class="tool-btn" title="ギミックパレットから選んで配置">
+                    <button id="tool-place" class="tool-btn" aria-pressed="false" title="ギミックパレットから選んで配置">
                         <span>PLACE</span>
                     </button>
-                    <button id="tool-erase" class="tool-btn" title="ギミックをタップして削除">
+                    <button id="tool-erase" class="tool-btn" aria-pressed="false" title="ギミックをタップして削除">
                         <span>ERASE</span>
                     </button>
                 </div>
@@ -315,7 +315,7 @@
                     
                     <!-- 放射角度 (Emitter用) -->
                     <div id="prop-angle-group" class="property-group hidden" style="margin-top:10px;">
-                        <label style="font-size:11px; color:rgba(255,255,255,0.5);">放射角度: <span id="prop-angle-val" style="color:#ffffff;">0</span>°</label>
+                        <label for="prop-angle" style="font-size:11px; color:rgba(255,255,255,0.5);">放射角度: <span id="prop-angle-val" style="color:#ffffff;">0</span>°</label>
                         <input type="range" id="prop-angle" min="0" max="360" value="0" style="width:100%; margin-top:4px;">
                     </div>
                     
@@ -323,15 +323,15 @@
                     <div id="prop-color-group" class="property-group hidden" style="margin-top:10px;">
                         <label style="font-size:11px; color:rgba(255,255,255,0.5); display:block; margin-bottom:6px;">目標カラー:</label>
                         <div class="color-picker-buttons" style="display:flex; gap:8px;">
-                            <button class="color-picker-btn active" data-color="#00f3ff" style="background:#00f3ff; width:24px; height:24px; border:2px solid #ffffff; border-radius:4px; cursor:pointer;"></button>
-                            <button class="color-picker-btn" data-color="#ff003c" style="background:#ff003c; width:24px; height:24px; border:2px solid transparent; border-radius:4px; cursor:pointer;"></button>
-                            <button class="color-picker-btn" data-color="#00ff3c" style="background:#00ff3c; width:24px; height:24px; border:2px solid transparent; border-radius:4px; cursor:pointer;"></button>
+                            <button type="button" class="color-picker-btn active" data-color="#00f3ff" aria-label="目標カラー: シアン" aria-pressed="true" style="background:#00f3ff; width:24px; height:24px; border:2px solid #ffffff; border-radius:4px; cursor:pointer;"></button>
+                            <button type="button" class="color-picker-btn" data-color="#ff003c" aria-label="目標カラー: 赤" aria-pressed="false" style="background:#ff003c; width:24px; height:24px; border:2px solid transparent; border-radius:4px; cursor:pointer;"></button>
+                            <button type="button" class="color-picker-btn" data-color="#00ff3c" aria-label="目標カラー: 緑" aria-pressed="false" style="background:#00ff3c; width:24px; height:24px; border:2px solid transparent; border-radius:4px; cursor:pointer;"></button>
                         </div>
                     </div>
 
                     <!-- 往復速度 (Patrol用) -->
                     <div id="prop-speed-group" class="property-group hidden" style="margin-top:8px;">
-                        <label style="font-size:11px; color:rgba(255,255,255,0.5);">巡回速度: <span id="prop-speed-val" style="color:#ffffff;">70</span>px/s</label>
+                        <label for="prop-speed" style="font-size:11px; color:rgba(255,255,255,0.5);">巡回速度: <span id="prop-speed-val" style="color:#ffffff;">70</span>px/s</label>
                         <input type="range" id="prop-speed" min="20" max="220" value="70" style="width:100%; margin-top:4px;">
                         <div style="font-size:8.5px; color:#ffaa00; margin-top:4px; line-height:1.2; letter-spacing:-0.02em;">※オブジェクト選択中、Shift+クリックまたはドラッグで巡回ターゲットを設定・移動できます。</div>
                     </div>
@@ -343,29 +343,45 @@
             <!-- ステージ設定 -->
             <div class="sidebar-section" style="margin-top:12px;">
                 <div class="section-label">◈ ステージ構成設定</div>
+                <div class="property-group stage-title-group">
+                    <label for="prop-title">ステージ名</label>
+                    <input type="text" id="prop-title" maxlength="24" value="MY_STAGE" placeholder="MY_STAGE" autocomplete="off">
+                </div>
                 <div class="property-group">
-                    <label style="font-size:11px; color:rgba(255,255,255,0.5);">インク容量 (鏡の長さ): <span id="prop-ink-val" style="color:#ffffff;">500</span>px</label>
+                    <label for="prop-ink" style="font-size:11px; color:rgba(255,255,255,0.5);">インク容量 (鏡の長さ): <span id="prop-ink-val" style="color:#ffffff;">500</span>px</label>
                     <input type="range" id="prop-ink" min="150" max="1500" step="50" value="500" style="width:100%; margin-top:4px;">
+                </div>
+                <div class="editor-history-actions" aria-label="編集履歴">
+                    <button type="button" id="editor-undo-btn" class="flat-btn" disabled>UNDO</button>
+                    <button type="button" id="editor-redo-btn" class="flat-btn" disabled>REDO</button>
+                    <span id="draft-status" class="draft-status">自動保存</span>
                 </div>
             </div>
 
             <!-- 共有エリア -->
             <div class="sidebar-section" style="margin-top:12px;">
                 <div class="section-label">◈ 調律コードの共有</div>
+                <div id="editor-stage-preview" class="editor-stage-preview" aria-live="polite">
+                    <strong id="preview-title">MY_STAGE</strong>
+                    <span id="preview-summary">BLOCK 0 / PORTAL 0 / FILTER 0</span>
+                </div>
                 <button id="editor-import-btn" class="flat-btn" style="width:100%; margin-bottom:6px; font-size:11px;">コードをインポート</button>
                 <button id="editor-export-btn" class="glow-btn" style="width:100%; font-size:11px;" disabled>コードをエクスポート</button>
-                <div id="export-warning" style="font-size:8.5px; color:#ff007f; margin-top:4px; text-align:center; line-height:1.2; letter-spacing:-0.02em;">⚠ 自作ステージを自分で一度クリア検証（調律確認）するとエクスポートできます。</div>
+                <div id="editor-share-status" class="editor-share-status pending" aria-live="polite">
+                    <strong>TEST_REQUIRED</strong>
+                    <span id="export-warning">テストクリアで共有コードが解放されます</span>
+                </div>
             </div>
         </aside>
     </div>
 
     <!-- インポート/エクスポート用モーダル -->
-    <div id="editor-modal" class="hidden">
+    <div id="editor-modal" class="hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1">
         <div class="modal-backdrop"></div>
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="modal-title">STAGE_CODE_SHARE</h3>
-                <button id="modal-close" class="info-close-btn">✕</button>
+                <button type="button" id="modal-close" class="info-close-btn" aria-label="ダイアログを閉じる">✕</button>
             </div>
             <div class="modal-body">
                 <p id="modal-desc" class="sidebar-text">調律コードを入力（貼り付け）するか、生成されたコードをコピーしてください。</p>
@@ -379,7 +395,7 @@
         </div>
     </div>
 
-    <div id="toast-container"></div>
-    <script src="script.js?v=20260525-info-guide-fix"></script>
+    <div id="toast-container" role="status" aria-live="polite" aria-atomic="true"></div>
+    <script src="script.js?v=20260525-creator-ux-fix"></script>
 </body>
 </html>

@@ -45,7 +45,6 @@
     padding: 0;
     user-select: none;
     -webkit-user-select: none;
-    touch-action: none;
 }
 
 body {
@@ -274,6 +273,7 @@ body {
     height: 100%;
     z-index: 2;
     cursor: crosshair;
+    touch-action: none;
 }
 
 /* Precision Grid Overlay */
@@ -906,6 +906,8 @@ body {
     transform: translateX(0);
     scrollbar-width: thin;
     scrollbar-color: rgba(0, 243, 255, 0.25) transparent;
+    touch-action: pan-y;
+    overscroll-behavior: contain;
 }
 
 #info-panel.hidden {
@@ -1639,6 +1641,8 @@ body {
     cursor: pointer;
     transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     text-align: center;
+    color: inherit;
+    font: inherit;
 }
 
 .palette-item span {
@@ -1717,6 +1721,114 @@ body {
 
 .color-picker-btn.active {
     box-shadow: 0 0 8px #ffffff;
+}
+
+.palette-item:focus-visible,
+.tool-btn:focus-visible,
+.color-picker-btn:focus-visible,
+.info-close-btn:focus-visible,
+.flat-btn:focus-visible,
+.control-btn:focus-visible,
+.glow-btn:focus-visible,
+#prop-title:focus-visible,
+#modal-textarea:focus-visible,
+#game-canvas:focus-visible {
+    outline: 2px solid var(--color-photon);
+    outline-offset: 2px;
+}
+
+.stage-title-group input[type="text"] {
+    width: 100%;
+    margin-top: 7px;
+    padding: 7px 8px;
+    background: #030308;
+    border: 1px solid rgba(0, 243, 255, 0.2);
+    border-radius: 4px;
+    color: #ffffff;
+    font-family: 'Inter', 'Noto Sans JP', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    user-select: text;
+    -webkit-user-select: text;
+    touch-action: manipulation;
+}
+
+.editor-history-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    align-items: center;
+    gap: 6px;
+}
+
+.editor-history-actions .flat-btn {
+    padding: 7px 6px;
+    font-size: 10px;
+}
+
+.draft-status {
+    color: rgba(0, 243, 255, 0.72);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+}
+
+.editor-stage-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px 9px;
+    margin-bottom: 8px;
+    border: 1px solid rgba(0, 243, 255, 0.12);
+    border-radius: 5px;
+    background: rgba(0, 243, 255, 0.035);
+}
+
+.editor-stage-preview strong {
+    color: #ffffff;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+}
+
+.editor-stage-preview span {
+    color: rgba(208, 216, 232, 0.8);
+    font-size: 9px;
+    letter-spacing: 0.04em;
+}
+
+.editor-share-status {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px 9px;
+    margin-top: 8px;
+    border: 1px solid rgba(255, 0, 127, 0.25);
+    border-radius: 5px;
+    background: rgba(255, 0, 127, 0.04);
+    line-height: 1.4;
+}
+
+.editor-share-status strong {
+    color: #ff4b9d;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+}
+
+.editor-share-status span {
+    color: rgba(235, 196, 219, 0.9);
+    font-size: 10px;
+}
+
+.editor-share-status.ready {
+    border-color: rgba(0, 243, 255, 0.32);
+    background: rgba(0, 243, 255, 0.05);
+}
+
+.editor-share-status.ready strong {
+    color: var(--color-photon);
+}
+
+.editor-share-status.ready span {
+    color: rgba(205, 246, 252, 0.92);
 }
 
 /* Editor Tools */
@@ -1892,6 +2004,8 @@ body {
         grid-column: 1;
         grid-row: 3;
         overflow-y: auto;
+        touch-action: pan-y;
+        overscroll-behavior: contain;
     }
 
     #app-layout.editing-mode #editor-sidebar-left,
@@ -1939,6 +2053,12 @@ body {
         margin-bottom: 7px;
         padding: 8px 10px;
     }
+}
+
+#modal-textarea {
+    user-select: text;
+    -webkit-user-select: text;
+    touch-action: pan-y;
 }
 
 @media (min-width: 768px) and (max-width: 1149px) and (min-aspect-ratio: 1.1) {
@@ -2172,5 +2292,20 @@ body {
 
     #editor-sidebar-right .property-group label span {
         flex-shrink: 0;
+    }
+
+    #editor-sidebar-right .stage-title-group,
+    #editor-sidebar-right .editor-stage-preview {
+        display: none;
+    }
+
+    #editor-sidebar-right .editor-share-status {
+        padding: 5px 7px;
+        margin-top: 5px;
+    }
+
+    #editor-sidebar-right .editor-share-status span,
+    #editor-sidebar-right .draft-status {
+        display: none;
     }
 }
