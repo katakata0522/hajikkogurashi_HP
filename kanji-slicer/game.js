@@ -142,6 +142,18 @@ class SoundSynth {
         this.lastPlayTimes = {};
     }
 
+    suspend() {
+        if (this.ctx && this.ctx.state === 'running') {
+            this.ctx.suspend();
+        }
+    }
+
+    resume() {
+        if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume();
+        }
+    }
+
     init() {
         if (this.ctx) return;
         const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -385,6 +397,14 @@ TIER1_KANJI.forEach(k => {
 });
 localStorage.setItem('kanjislicer_discovered', JSON.stringify(discoveredKanji));
 
+let hasUnsavedDiscoveries = false;
+
+function saveDiscoveredKanji() {
+    if (!hasUnsavedDiscoveries) return;
+    localStorage.setItem('kanjislicer_discovered', JSON.stringify(discoveredKanji));
+    hasUnsavedDiscoveries = false;
+}
+
 let score = 0;
 let bestScore = 0;
 let currentMission = '林';
@@ -547,7 +567,7 @@ function checkMerge(c1, c2) {
         // Track discovered encyclopedia
         if (!discoveredKanji.includes(newKanji)) {
             discoveredKanji.push(newKanji);
-            localStorage.setItem('kanjislicer_discovered', JSON.stringify(discoveredKanji));
+            hasUnsavedDiscoveries = true;
             spawnFloatingText(midX, midY - 35, '新漢字解放！', '#eb5e28');
         }
         
@@ -850,19 +870,24 @@ btnPause.addEventListener('click', (e) => {
     isSlicing = false;
     slashTrail = [];
     
-    populateDictionary();
+    soundSynth.suspend();
+    saveDiscoveredKanji();
+    updateDictionaryUI();
+    
     pauseModal.classList.remove('hidden');
 });
 
 // Resume button click
 btnResume.addEventListener('click', () => {
     isPaused = false;
+    soundSynth.resume();
     pauseModal.classList.add('hidden');
 });
 
 // Restart button from pause menu
 btnPauseRestart.addEventListener('click', () => {
     isPaused = false;
+    soundSynth.resume();
     pauseModal.classList.add('hidden');
     restartGame();
 });
@@ -882,61 +907,73 @@ function hexToRgb(hex) {
     return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '255, 255, 255';
 }
 
-// Dynamically generate Pause Menu Dictionary Grid
-function populateDictionary() {
+// Initialize Dictionary skeleton once to avoid heavy garbage collection (GC) load
+let isDictInitialized = false;
+function initDictionarySkeleton() {
+    if (isDictInitialized) return;
     dictGrid.innerHTML = '';
     
-    // Show compound Kanji (Tier 2 and Tier 3)
     const targetKanji = [...TIER2_KANJI, '森'];
-    
     targetKanji.forEach(k => {
+        const card = document.createElement('div');
+        card.className = 'recipe-card locked';
+        card.setAttribute('data-kanji', k);
+        
+        const kanjiEl = document.createElement('div');
+        kanjiEl.className = 'dict-kanji';
+        kanjiEl.textContent = '?';
+        
+        const readingEl = document.createElement('div');
+        readingEl.className = 'dict-reading';
+        readingEl.textContent = '???';
+        
+        const formulaEl = document.createElement('div');
+        formulaEl.className = 'dict-formula';
+        formulaEl.textContent = getFormulaText(k);
+        
+        card.appendChild(kanjiEl);
+        card.appendChild(readingEl);
+        card.appendChild(formulaEl);
+        dictGrid.appendChild(card);
+    });
+    isDictInitialized = true;
+}
+
+// Efficiently update dictionary card attributes instead of destroying and recreating DOM nodes
+function updateDictionaryUI() {
+    initDictionarySkeleton();
+    
+    const cards = dictGrid.querySelectorAll('.recipe-card');
+    cards.forEach(card => {
+        const k = card.getAttribute('data-kanji');
         const data = KANJI_DATA[k];
         if (!data) return;
         
         const isUnlocked = discoveredKanji.includes(k);
-        const card = document.createElement('div');
-        card.className = `recipe-card ${isUnlocked ? 'unlocked' : 'locked'}`;
+        const kanjiEl = card.querySelector('.dict-kanji');
+        const readingEl = card.querySelector('.dict-reading');
         
         if (isUnlocked) {
+            card.className = 'recipe-card unlocked';
             card.style.borderColor = data.color;
             card.style.boxShadow = `inset 0 0 10px rgba(${hexToRgb(data.color)}, 0.15)`;
             
-            const kanjiEl = document.createElement('div');
-            kanjiEl.className = 'dict-kanji';
             kanjiEl.textContent = k;
             kanjiEl.style.color = data.color;
             kanjiEl.style.textShadow = `0 0 8px ${data.glow}`;
             
-            const readingEl = document.createElement('div');
-            readingEl.className = 'dict-reading';
             readingEl.textContent = `読み: ${data.read}`;
-            
-            const formulaEl = document.createElement('div');
-            formulaEl.className = 'dict-formula';
-            formulaEl.textContent = getFormulaText(k);
-            
-            card.appendChild(kanjiEl);
-            card.appendChild(readingEl);
-            card.appendChild(formulaEl);
         } else {
-            const kanjiEl = document.createElement('div');
-            kanjiEl.className = 'dict-kanji';
+            card.className = 'recipe-card locked';
+            card.style.borderColor = '';
+            card.style.boxShadow = '';
+            
             kanjiEl.textContent = '?';
+            kanjiEl.style.color = '';
+            kanjiEl.style.textShadow = '';
             
-            const readingEl = document.createElement('div');
-            readingEl.className = 'dict-reading';
             readingEl.textContent = '???';
-            
-            const formulaEl = document.createElement('div');
-            formulaEl.className = 'dict-formula';
-            formulaEl.textContent = getFormulaText(k);
-            
-            card.appendChild(kanjiEl);
-            card.appendChild(readingEl);
-            card.appendChild(formulaEl);
         }
-        
-        dictGrid.appendChild(card);
     });
 }
 
@@ -1091,6 +1128,7 @@ function checkGameOver() {
 
 function triggerGameOver() {
     isGameOver = true;
+    saveDiscoveredKanji(); // Ensure discoveries are saved to localStorage on game over
     soundSynth.play('gameover');
     finalScoreEl.textContent = score;
     gameoverModal.classList.remove('hidden');
