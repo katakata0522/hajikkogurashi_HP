@@ -305,10 +305,13 @@ bindEvents();
 let audioCtx = null;
 
 function initAudio() {
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextClass) return; // Web Audio API 非対応の環境では安全に無視 (クラッシュ防止)
+
   if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    audioCtx = new AudioContextClass();
   }
-  if (audioCtx.state === 'suspended') {
+  if (audioCtx && audioCtx.state === 'suspended') {
     audioCtx.resume();
   }
 }
@@ -317,6 +320,7 @@ function initAudio() {
 function playHyoshigi() {
   try {
     initAudio();
+    if (!audioCtx) return; // 非対応環境では早期リターンでクラッシュ防止
     const now = audioCtx.currentTime;
     const osc1 = audioCtx.createOscillator();
     const osc2 = audioCtx.createOscillator();
@@ -358,6 +362,7 @@ function playHyoshigi() {
 function playTaiko() {
   try {
     initAudio();
+    if (!audioCtx) return; // 非対応環境では早期リターン
     const now = audioCtx.currentTime;
     const osc = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
@@ -389,6 +394,7 @@ function playTaiko() {
 function playKane() {
   try {
     initAudio();
+    if (!audioCtx) return; // 非対応環境では早期リターン
     const now = audioCtx.currentTime;
     const frequencies = [135, 202, 303, 405]; // 鐘特有 of 不協倍音
     const gainNode = audioCtx.createGain();
