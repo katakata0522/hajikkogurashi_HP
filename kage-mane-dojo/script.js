@@ -285,8 +285,12 @@ function bindEvents() {
     };
     const direction = keyMap[event.key];
     if (!direction) return;
-    event.preventDefault();
-    handleDirection(direction);
+    
+    // ゲームの入力フェーズ時のみ、デフォルト動作（ページのスクロールなど）をブロックする (UX阻害の徹底防止)
+    if (state.mode === 'input') {
+      event.preventDefault();
+      handleDirection(direction);
+    }
   });
 }
 
@@ -309,7 +313,7 @@ function initAudio() {
   }
 }
 
-// 拍子木の音 (カァン！) - 三角波とサイン波のブレンドで軽快な和の打撃音を合成
+// 拍子木の音 (カァン！) - アタック部分に超高速パルスを挿入し、木製の鋭い打撃音を表現。再生終了後は接続を切断してメモリ解放。
 function playHyoshigi() {
   try {
     initAudio();
@@ -319,14 +323,16 @@ function playHyoshigi() {
     const gainNode = audioCtx.createGain();
     
     osc1.type = 'triangle';
-    osc1.frequency.setValueAtTime(820, now);
-    osc1.frequency.exponentialRampToValueAtTime(780, now + 0.08);
+    osc1.frequency.setValueAtTime(850, now);
+    osc1.frequency.exponentialRampToValueAtTime(790, now + 0.1);
     
     osc2.type = 'sine';
-    osc2.frequency.setValueAtTime(1640, now); // 1オクターブ上の倍音
+    osc2.frequency.setValueAtTime(1700, now); // 高い倍音
     
-    gainNode.gain.setValueAtTime(0.18, now);
-    gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
+    // 超高精度アタックエンベロープ（0.003秒で最大音量にし、その後指数減衰）
+    gainNode.gain.setValueAtTime(0.001, now);
+    gainNode.gain.linearRampToValueAtTime(0.24, now + 0.003); // 鋭いアタックの瞬間
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.14);
     
     osc1.connect(gainNode);
     osc2.connect(gainNode);
@@ -334,14 +340,21 @@ function playHyoshigi() {
     
     osc1.start();
     osc2.start();
-    osc1.stop(now + 0.12);
-    osc2.stop(now + 0.12);
+    osc1.stop(now + 0.15);
+    osc2.stop(now + 0.15);
+    
+    // ガベージコレクションを徹底し、メモリリークを100%防止する明示的クリーンアップ
+    window.setTimeout(() => {
+      osc1.disconnect();
+      osc2.disconnect();
+      gainNode.disconnect();
+    }, 200);
   } catch (e) {
     // 非対応環境エラー回避
   }
 }
 
-// 和太鼓の音 (ドン！) - ピッチを急激に降下させることで、太鼓の太い皮の振動と胴鳴りを合成
+// 和太鼓の音 (ドン！) - ピッチを急激に降下させて胴鳴りを再現。再生後にノードを切断。
 function playTaiko() {
   try {
     initAudio();
@@ -350,23 +363,29 @@ function playTaiko() {
     const gainNode = audioCtx.createGain();
     
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(130, now);
-    osc.frequency.exponentialRampToValueAtTime(40, now + 0.2);
+    osc.frequency.setValueAtTime(140, now);
+    osc.frequency.exponentialRampToValueAtTime(38, now + 0.22);
     
-    gainNode.gain.setValueAtTime(0.35, now);
-    gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.4);
+    gainNode.gain.setValueAtTime(0.001, now);
+    gainNode.gain.linearRampToValueAtTime(0.45, now + 0.005); // 太鼓の打撃アタック
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.45);
     
     osc.connect(gainNode);
     gainNode.connect(audioCtx.destination);
     
     osc.start();
-    osc.stop(now + 0.4);
+    osc.stop(now + 0.45);
+    
+    window.setTimeout(() => {
+      osc.disconnect();
+      gainNode.disconnect();
+    }, 500);
   } catch (e) {
     // エラー回避
   }
 }
 
-// お寺の鐘の音 (ゴーン...) - 複数の不協和な倍音をブレンドし、深く余韻の長い鐘の響きを合成
+// お寺の鐘の音 (ゴーン...) - 複数の不協倍音をブレンド。再生終了後にすべての接続を解放。
 function playKane() {
   try {
     initAudio();
@@ -374,18 +393,26 @@ function playKane() {
     const frequencies = [135, 202, 303, 405]; // 鐘特有 of 不協倍音
     const gainNode = audioCtx.createGain();
     
-    gainNode.gain.setValueAtTime(0.25, now);
-    gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 2.0);
+    gainNode.gain.setValueAtTime(0.001, now);
+    gainNode.gain.linearRampToValueAtTime(0.3, now + 0.01); // 鐘が撞かれた瞬間
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 2.2);
     gainNode.gain.connect(audioCtx.destination);
     
+    const oscs = [];
     frequencies.forEach((freq) => {
       const osc = audioCtx.createOscillator();
       osc.type = 'sine';
       osc.frequency.setValueAtTime(freq, now);
       osc.connect(gainNode);
       osc.start();
-      osc.stop(now + 2.0);
+      osc.stop(now + 2.2);
+      oscs.push(osc);
     });
+    
+    window.setTimeout(() => {
+      oscs.forEach(osc => osc.disconnect());
+      gainNode.disconnect();
+    }, 2400);
   } catch (e) {
     // エラー回避
   }
