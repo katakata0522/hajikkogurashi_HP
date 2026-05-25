@@ -88,6 +88,37 @@ button {
   padding: 18px clamp(16px, 4vw, 36px);
 }
 
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mute-button {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(179, 143, 54, 0.25);
+  border-radius: 50%;
+  background: rgba(15, 14, 12, 0.45);
+  backdrop-filter: blur(4px);
+  cursor: pointer;
+  transition: all 200ms cubic-bezier(0.25, 1, 0.5, 1);
+  font-size: 0.92rem;
+  padding: 0;
+}
+
+.mute-button:hover {
+  border-color: var(--gold);
+  background: rgba(26, 25, 22, 0.75);
+  transform: scale(1.08);
+}
+
+.mute-button:active {
+  transform: scale(0.92);
+}
+
 .back-link {
   color: var(--paper-dark);
   text-decoration: none;
@@ -850,6 +881,34 @@ h1 {
 }
 
 /* ==========================================
+   雅なお手つき・答え合わせ演出の追加
+   ========================================== */
+@keyframes btn-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+.dir-button.error {
+  background: linear-gradient(135deg, var(--red-bright), var(--red)) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  color: var(--paper) !important;
+  animation: btn-shake 250ms ease-in-out;
+  box-shadow: 0 0 20px rgba(148, 43, 36, 0.8) !important;
+  transform: scale(0.96);
+}
+
+.direction-flash.correct-hint {
+  opacity: 1 !important;
+  transform: translate(-50%, -50%) scale(1.15) !important;
+  border-color: var(--gold-bright) !important;
+  box-shadow: 
+    0 0 25px var(--gold-bright),
+    inset 0 0 15px rgba(229,191,88,0.5) !important;
+  color: var(--gold-bright) !important;
+}
+
+/* ==========================================
    携帯電話・タブレット対応
    ========================================== */
 @media (max-width: 620px) {
@@ -860,6 +919,7 @@ h1 {
   .game-header { padding: 12px 16px; }
   .back-link { padding: 5px 10px; font-size: 0.75rem; }
   .record-strip span { padding: 5px 8px; font-size: 0.7rem; }
+  .mute-button { width: 30px; height: 30px; font-size: 0.82rem; }
   
   .dojo-scene { 
     min-height: 300px; 

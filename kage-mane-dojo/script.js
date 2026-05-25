@@ -16,6 +16,7 @@ const CONFIG = {
 };
 
 const STORAGE_KEY = 'kage-mane-dojo-record';
+const MUTE_KEY = 'kage-mane-dojo-mute';
 
 const state = {
   mode: 'title',
@@ -25,6 +26,7 @@ const state = {
   inputIndex: 0,
   bestLesson: 0,
   timers: [],
+  isMuted: false, // ミュート状態管理
 };
 
 const elements = {
@@ -50,22 +52,50 @@ const elements = {
   rankText: document.getElementById('rankText'),
   resultComment: document.getElementById('resultComment'),
   toast: document.getElementById('toast'),
+  muteButton: document.getElementById('muteButton'),
+  muteIcon: document.getElementById('muteIcon'),
 };
 
 function loadRecord() {
   try {
     const value = Number.parseInt(localStorage.getItem(STORAGE_KEY), 10);
     state.bestLesson = Number.isFinite(value) && value > 0 ? value : 0;
+    
+    // ミュート状態のロード
+    state.isMuted = localStorage.getItem(MUTE_KEY) === 'true';
+    updateMuteUi();
   } catch (error) {
     state.bestLesson = 0;
+    state.isMuted = false;
   }
 }
 
 function saveRecord() {
   try {
     localStorage.setItem(STORAGE_KEY, String(state.bestLesson));
+    localStorage.setItem(MUTE_KEY, String(state.isMuted));
   } catch (error) {
     // 記録保存に失敗してもゲームは続ける。
+  }
+}
+
+function updateMuteUi() {
+  if (elements.muteIcon) {
+    elements.muteIcon.textContent = state.isMuted ? '🔕' : '🔔';
+  }
+  if (elements.muteButton) {
+    elements.muteButton.classList.toggle('muted', state.isMuted);
+    elements.muteButton.setAttribute('aria-label', state.isMuted ? '音声を有効化' : '消音切り替え');
+  }
+}
+
+function toggleMute() {
+  state.isMuted = !state.isMuted;
+  saveRecord();
+  updateMuteUi();
+  // ミュート解除時はAudioContextをアクティブ化
+  if (!state.isMuted) {
+    initAudio();
   }
 }
 
@@ -216,26 +246,65 @@ function failLesson() {
   elements.resultComment.textContent = comment;
   state.bestLesson = Math.max(state.bestLesson, reached);
 
-  // 失敗時にお寺の鐘 (ゴーン...) を鳴らす
-  playKane();
-
+  // お手つきの瞬間に鐘はすでに鳴らしているため、ここでは重複防止で呼出を削除
   saveRecord();
   updateHud();
   showScreen('result');
 }
 
+// スマホ触覚フィードバック (バイブレーション) 用軽量ヘルパー
+function triggerVibration(pattern) {
+  if (navigator.vibrate) {
+    try {
+      navigator.vibrate(pattern);
+    } catch (e) {
+      // 一部環境のエラー回避
+    }
+  }
+}
+
 function handleDirection(direction) {
   if (state.mode !== 'input') return;
-  flashDirection(elements.student, direction);
   const expected = state.sequence[state.inputIndex];
+  
   if (direction !== expected) {
-    failLesson();
+    // 答え合わせ演出の開始：入力を即座にロック
+    state.mode = 'waiting';
+    clearTimers();
+    setInputEnabled(false);
+    
+    // 1. 間違えた方向ボタンを朱赤にして震えさせる
+    const pressedButton = elements.dirButtons.find((item) => item.dataset.direction === direction);
+    pressedButton?.classList.add('error');
+    
+    // 2. 正解だった方向札をゴールドで強調表示する
+    elements.directionFlash.textContent = DIRECTION_LABEL[expected];
+    elements.directionFlash.classList.add('correct-hint');
+    
+    // 3. 警告の2連続バイブレーション
+    triggerVibration([50, 40, 50]);
+    
+    // 4. お手つきの瞬間に鐘「ゴーン...」を響かせる
+    playKane();
+    
+    // 5. 0.45秒後にリザルトへ安全に遷移
+    window.setTimeout(() => {
+      pressedButton?.classList.remove('error');
+      elements.directionFlash.classList.remove('correct-hint');
+      failLesson();
+    }, 450);
     return;
   }
 
+  // 正解した時の演出
+  flashDirection(elements.student, direction);
+  triggerVibration(15); // コクッとしたタップ触覚フィードバック
+  
   state.inputIndex += 1;
   updateHud();
   if (state.inputIndex >= state.sequence.length) {
+    // レッスンクリアでバイブレーション (和太鼓「ドン！」とシンクロ)
+    triggerVibration(85);
     completeLesson();
   }
 }
@@ -260,6 +329,10 @@ function bindEvents() {
   elements.startButton.addEventListener('click', startGame);
   elements.retryButton.addEventListener('click', startGame);
   elements.shareButton.addEventListener('click', shareResult);
+
+  if (elements.muteButton) {
+    elements.muteButton.addEventListener('click', toggleMute);
+  }
 
   elements.inputPad.addEventListener('click', (event) => {
     const button = event.target.closest('[data-direction]');
@@ -320,7 +393,7 @@ function initAudio() {
 function playHyoshigi() {
   try {
     initAudio();
-    if (!audioCtx) return; // 非対応環境では早期リターンでクラッシュ防止
+    if (!audioCtx || state.isMuted) return; // 非対応環境または消音状態では早期リターン
     const now = audioCtx.currentTime;
     const osc1 = audioCtx.createOscillator();
     const osc2 = audioCtx.createOscillator();
@@ -362,7 +435,7 @@ function playHyoshigi() {
 function playTaiko() {
   try {
     initAudio();
-    if (!audioCtx) return; // 非対応環境では早期リターン
+    if (!audioCtx || state.isMuted) return; // 消音ガード
     const now = audioCtx.currentTime;
     const osc = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
@@ -394,7 +467,7 @@ function playTaiko() {
 function playKane() {
   try {
     initAudio();
-    if (!audioCtx) return; // 非対応環境では早期リターン
+    if (!audioCtx || state.isMuted) return; // 消音ガード
     const now = audioCtx.currentTime;
     const frequencies = [135, 202, 303, 405]; // 鐘特有 of 不協倍音
     const gainNode = audioCtx.createGain();

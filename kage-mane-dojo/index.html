@@ -17,9 +17,14 @@
   <main class="game-shell" id="gameShell">
     <header class="game-header">
       <a class="back-link" href="../minigames.html">ミニゲーム広場</a>
-      <div class="record-strip" aria-label="記録">
-        <span>BEST <strong id="bestLesson">0</strong></span>
-        <span>STREAK <strong id="currentStreak">0</strong></span>
+      <div class="header-right">
+        <button class="mute-button" id="muteButton" type="button" aria-label="消音切り替え">
+          <span class="mute-icon" id="muteIcon">🔔</span>
+        </button>
+        <div class="record-strip" aria-label="記録">
+          <span>BEST <strong id="bestLesson">0</strong></span>
+          <span>STREAK <strong id="currentStreak">0</strong></span>
+        </div>
       </div>
     </header>
 
