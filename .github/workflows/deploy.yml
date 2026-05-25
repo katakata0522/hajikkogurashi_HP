@@ -50,6 +50,11 @@ jobs:
             -e "ssh -p $XS_PORT -i ~/.ssh/id_rsa" \
             ./ $XS_USER@$XS_HOST:$XS_REMOTE_DIR
 
+          # 漢字スライサーを playpoint-sim.com のサブディレクトリへデプロイする
+          rsync -avz --delete \
+            -e "ssh -p $XS_PORT -i ~/.ssh/id_rsa" \
+            ./kanji-slicer/ $XS_USER@$XS_HOST:/home/hajikkoroom/playpoint-sim.com/public_html/kanji-slicer/
+
       - name: SEO deploy confirmation
         if: success()
         run: |

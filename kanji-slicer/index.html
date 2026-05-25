@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<!-- Version: v1.3.0 -->
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>漢字スライサー・マージ | はじっこぐらし</title>
+    
+    <!-- Google Fonts for premium Japanese typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kaisei+Decol:wght@500;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <!-- Header: Score and Targets -->
+        <header id="game-header">
+            <div class="header-left">
+                <a href="https://hajikkoroom.xsrv.jp/minigames.html" class="btn-back">← 戻る</a>
+                <div class="score-box">
+                    <span class="label">得点</span>
+                    <span id="score">0</span>
+                </div>
+                <div class="best-box">
+                    <span class="label">最高記録</span>
+                    <span id="best-score">0</span>
+                </div>
+            </div>
+            
+            <div class="header-center">
+                <div class="mission-box">
+                    <span class="mission-title">現在のお題</span>
+                    <div id="mission-kanji">炎</div>
+                    <span class="mission-desc">合体させてお題をクリアせよ！</span>
+                </div>
+            </div>
+            
+            <div class="header-right">
+                <div class="next-box">
+                    <span class="label">次の一手</span>
+                    <div id="next-preview">木</div>
+                </div>
+                <button id="btn-sound" class="btn-icon" aria-label="音声を切替">🔊</button>
+            </div>
+        </header>
+
+        <!-- Main Workspace (Canvas & Overlays) -->
+        <main id="game-canvas-wrapper">
+            <canvas id="game-canvas"></canvas>
+            <div id="dead-line-alert">警告：溢れそう！</div>
+        </main>
+
+        <!-- Footer / Instructions -->
+        <footer id="game-footer">
+            <p class="instruction">【操作方法】タップ/クリックで落下位置を指定 | スワイプ/ドラッグで漢字を斬る！</p>
+        </footer>
+    </div>
+
+    <!-- Game Over Modal -->
+    <div id="gameover-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 class="modal-title">満杯（ゲームオーバー）</h2>
+            <p class="final-score-text">最終得点: <span id="final-score">0</span></p>
+            <div class="modal-buttons">
+                <button id="btn-restart" class="btn-primary">もう一度挑む</button>
+                <a href="https://hajikkoroom.xsrv.jp/minigames.html" class="btn-secondary">ミニゲーム広場へ</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
