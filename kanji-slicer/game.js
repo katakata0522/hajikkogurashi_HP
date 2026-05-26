@@ -812,7 +812,11 @@ function handleMove(e) {
 }
 
 function handleEnd(e) {
-    if (isPaused) return;
+    if (isPaused || isGameOver) {
+        isDraggingPreview = false;
+        isSlicing = false;
+        return;
+    }
     if (isDraggingPreview && dropCooldown === 0) {
         // Drop Kanji!
         const r = getRadiusForTier(1);
@@ -852,6 +856,11 @@ window.addEventListener('mouseup', handleEnd);
 canvas.addEventListener('touchstart', handleStart, { passive: true });
 canvas.addEventListener('touchmove', handleMove, { passive: true });
 window.addEventListener('touchend', handleEnd);
+window.addEventListener('blur', () => {
+    isDraggingPreview = false;
+    isSlicing = false;
+    slashTrail = [];
+});
 
 // Sound Button toggle
 btnSound.addEventListener('click', () => {
