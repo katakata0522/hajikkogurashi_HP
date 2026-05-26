@@ -61,11 +61,19 @@ try {
         footerOverflow: controls.scrollWidth - controls.clientWidth,
         testPlayOutside: Math.max(0, Math.ceil(testPlayRect.right - controlsRect.right)),
         rightOverflow: rightSidebar.scrollHeight - rightSidebar.clientHeight,
+        rightBottomOutside: Math.max(0, Math.ceil(rightSidebar.getBoundingClientRect().bottom - innerHeight)),
+        rightCanScroll: getComputedStyle(rightSidebar).overflowY === 'auto',
+        paletteClipped: document.querySelector('.palette-item:last-child').getBoundingClientRect().bottom
+          > document.querySelector('#editor-sidebar-left .sidebar-section').getBoundingClientRect().bottom,
+        shareClipped: document.querySelector('#editor-share-status').getBoundingClientRect().bottom
+          > document.querySelector('#editor-share-status').closest('.sidebar-section').getBoundingClientRect().bottom,
       };
     });
 
     if (errors.length) throw new Error(`editor page errors: ${errors.join(' | ')}`);
-    if (layout.footerOverflow > 0 || layout.testPlayOutside > 0 || layout.rightOverflow > 0) {
+    if (layout.footerOverflow > 0 || layout.testPlayOutside > 0 || layout.rightBottomOutside > 0
+      || layout.paletteClipped || layout.shareClipped
+      || (layout.rightOverflow > 0 && !layout.rightCanScroll)) {
       throw new Error(`editor controls or inspector are clipped: ${JSON.stringify(layout)}`);
     }
 
@@ -80,11 +88,16 @@ try {
       const inkLabel = document.querySelector('#prop-ink').closest('.property-group').querySelector('label');
       return {
         overflow: rightSidebar.scrollHeight - rightSidebar.clientHeight,
+        bottomOutside: Math.max(0, Math.ceil(rightSidebar.getBoundingClientRect().bottom - innerHeight)),
+        titleDisplayed: getComputedStyle(document.querySelector('.stage-title-group')).display !== 'none',
+        previewDisplayed: getComputedStyle(document.querySelector('#editor-stage-preview')).display !== 'none',
         inkLabelHeight: Math.ceil(inkLabel.getBoundingClientRect().height),
         inkLabelOverflow: Math.max(0, Math.ceil(inkLabel.scrollWidth - inkLabel.clientWidth)),
       };
     });
-    if (selectedInspectorLayout.overflow > 0 || selectedInspectorLayout.inkLabelHeight > 20 || selectedInspectorLayout.inkLabelOverflow > 0) {
+    if (selectedInspectorLayout.bottomOutside > 0 || !selectedInspectorLayout.titleDisplayed
+      || !selectedInspectorLayout.previewDisplayed || selectedInspectorLayout.inkLabelHeight > 20
+      || selectedInspectorLayout.inkLabelOverflow > 0) {
       throw new Error(`selected inspector is clipped or wraps in a short workspace: ${JSON.stringify(selectedInspectorLayout)}`);
     }
 
@@ -155,6 +168,16 @@ try {
       const modalFocus = await scenarioPage.evaluate(() => document.activeElement?.id);
       if (modalFocus !== 'modal-textarea') {
         failures.push(`accessible editor dialogs: import focus starts on ${modalFocus}`);
+      }
+      await scenarioPage.keyboard.press('Tab');
+      await scenarioPage.keyboard.press('Tab');
+      await scenarioPage.keyboard.press('Tab');
+      const trappedFocus = await scenarioPage.evaluate(() => ({
+        id: document.activeElement?.id,
+        inModal: Boolean(document.activeElement?.closest('#editor-modal')),
+      }));
+      if (!trappedFocus.inModal) {
+        failures.push(`accessible editor dialogs: focus escapes modal: ${JSON.stringify(trappedFocus)}`);
       }
       await scenarioPage.keyboard.press('Escape');
       if (await scenarioPage.locator('#editor-modal').isVisible()) {
@@ -247,6 +270,10 @@ try {
       await scenarioPage.mouse.click(canvasBox.x + canvasBox.width * 0.5, canvasBox.y + canvasBox.height * 0.45);
       let preview = await scenarioPage.locator('#editor-stage-preview').innerText();
       if (!preview.includes('BLOCK 1')) failures.push(`creator safety controls: placement is not summarized: ${preview}`);
+      await scenarioPage.click('.palette-item[data-type="blackhole"]');
+      await scenarioPage.mouse.click(canvasBox.x + canvasBox.width * 0.35, canvasBox.y + canvasBox.height * 0.35);
+      preview = await scenarioPage.locator('#editor-stage-preview').innerText();
+      if (!preview.includes('BLACKHOLE 1')) failures.push(`creator safety controls: blackhole is absent from preview: ${preview}`);
       await scenarioPage.click('#editor-clear-btn');
       if (!(await scenarioPage.locator('#editor-modal').isVisible())) {
         failures.push('creator safety controls: CLEAR_ALL has no confirmation');
@@ -254,13 +281,62 @@ try {
       }
       await scenarioPage.click('#modal-action-btn');
       preview = await scenarioPage.locator('#editor-stage-preview').innerText();
-      if (!preview.includes('BLOCK 0')) failures.push(`creator safety controls: clear did not update preview: ${preview}`);
+      if (!preview.includes('BLOCK 0') || !preview.includes('BLACKHOLE 0')) failures.push(`creator safety controls: clear did not update preview: ${preview}`);
       await scenarioPage.click('#editor-undo-btn');
       preview = await scenarioPage.locator('#editor-stage-preview').innerText();
-      if (!preview.includes('BLOCK 1')) failures.push(`creator safety controls: undo did not restore placement: ${preview}`);
+      if (!preview.includes('BLOCK 1') || !preview.includes('BLACKHOLE 1')) failures.push(`creator safety controls: undo did not restore placement: ${preview}`);
       await scenarioPage.click('#editor-redo-btn');
       preview = await scenarioPage.locator('#editor-stage-preview').innerText();
-      if (!preview.includes('BLOCK 0')) failures.push(`creator safety controls: redo did not reapply clear: ${preview}`);
+      if (!preview.includes('BLOCK 0') || !preview.includes('BLACKHOLE 0')) failures.push(`creator safety controls: redo did not reapply clear: ${preview}`);
+    });
+
+    await runEditorScenario('keyboard canvas editing', { width: 1280, height: 720 }, async (scenarioPage) => {
+      await scenarioPage.click('.palette-item[data-type="block"]');
+      await scenarioPage.locator('#game-canvas').focus();
+      await scenarioPage.keyboard.press('Enter');
+      const preview = await scenarioPage.locator('#editor-stage-preview').innerText();
+      if (!preview.includes('BLOCK 1')) failures.push(`keyboard canvas editing: Enter cannot place the selected gimmick: ${preview}`);
+    });
+
+    await runEditorScenario('patrol editing', { width: 1280, height: 720 }, async (scenarioPage) => {
+      const patrolCode = codeFor({
+        v: 4,
+        title: 'PATROL_TEST',
+        inkCapacity: 500,
+        emitter: { x: 80, y: 150, angle: 0 },
+        prism: { x: 520, y: 150, radius: 20, targetColor: null },
+        blackholes: [], portals: [],
+        blocks: [{ x: 260, y: 380, radius: 18, moveOptions: { targetX: 520, targetY: 380, speed: 220 } }],
+        colorFilters: [],
+      });
+      await scenarioPage.click('#editor-import-btn');
+      await scenarioPage.locator('#modal-textarea').fill(patrolCode);
+      await scenarioPage.click('#modal-action-btn');
+      const canvasBox = await scenarioPage.locator('#game-canvas').boundingBox();
+      const point = (x, y) => ({
+        x: canvasBox.x + canvasBox.width * x / 600,
+        y: canvasBox.y + canvasBox.height * y / 800,
+      });
+      await scenarioPage.waitForTimeout(900);
+      const start = point(260, 380);
+      await scenarioPage.mouse.click(start.x, start.y);
+      const selected = await scenarioPage.locator('#prop-type').innerText();
+      if (!selected.includes('PATROL')) failures.push(`patrol editing: patrol moves while placing targets: ${selected}`);
+      const target = point(420, 520);
+      await scenarioPage.keyboard.down('Shift');
+      await scenarioPage.mouse.click(target.x, target.y);
+      await scenarioPage.keyboard.up('Shift');
+      await scenarioPage.click('#editor-test-btn');
+      await scenarioPage.click('#editor-test-btn');
+      await scenarioPage.waitForSelector('#overlay:not(.hidden)');
+      await scenarioPage.click('#next-btn');
+      await scenarioPage.click('#editor-export-btn');
+      const exported = await scenarioPage.locator('#modal-textarea').inputValue();
+      const decoded = JSON.parse(Buffer.from(exported.match(/LMN-[A-Za-z0-9+/=]+/)[0].slice(4), 'base64').toString('utf8'));
+      const patrolTarget = decoded.blocks[0].moveOptions;
+      if (patrolTarget.targetX !== 420 || patrolTarget.targetY !== 520) {
+        failures.push(`patrol editing: Shift+click target was not saved: ${JSON.stringify(patrolTarget)}`);
+      }
     });
 
     await runEditorScenario('draft restore and named share', { width: 1280, height: 720 }, async (scenarioPage) => {

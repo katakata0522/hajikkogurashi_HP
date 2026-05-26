@@ -19,13 +19,14 @@ assert.match(html, /id="mode-indicator"/, 'mode indicator should exist');
 assert.match(html, /id="select-btn"/, 'stage select button in overlay should exist');
 assert.match(html, /id="best-banner"/, 'best rank banner should exist');
 assert.match(html, /id="stat-best"/, 'best rank stat display should exist');
-assert.match(html, /href="style\.css\?v=20260525-creator-ux-fix"/, 'editor stylesheet should be cache-busted');
-assert.match(html, /src="script\.js\?v=20260525-creator-ux-fix"/, 'editor script should be cache-busted');
+assert.match(html, /href="style\.css\?v=20260526-editor-review-fix"/, 'editor stylesheet should be cache-busted');
+assert.match(html, /src="script\.js\?v=20260526-editor-review-fix"/, 'editor script should be cache-busted');
 assert.match(html, /id="editor-undo-btn"/, 'editor should expose undo control');
 assert.match(html, /id="prop-title"/, 'editor should expose a stage title input');
 assert.match(html, /id="editor-share-status"/, 'editor should explain export readiness');
 assert.match(html, /id="info-panel"[^>]*role="dialog"/, 'info panel should identify itself as a dialog');
 assert.match(html, /id="editor-modal"[^>]*role="dialog"/, 'share modal should identify itself as a dialog');
+assert.doesNotMatch(html, /maximum-scale=1\.0|user-scalable=no/, 'mobile users should be allowed to zoom the editor');
 
 // ---- JavaScript Syntax ----
 assert.doesNotThrow(() => new vm.Script(script), 'script must be valid JS');

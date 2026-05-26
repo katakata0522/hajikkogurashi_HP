@@ -2,13 +2,13 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LUMEN_MIRROR - 幾何学と光紡ぎの美学</title>
     <meta name="description" content="指先で虚空に鏡を紡ぎ、光を導く物理反射パズルゲーム。ブラックホールの重力湾曲とワームホールの空間転送を攻略せよ。">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&family=Noto+Sans+JP:wght@200;300;400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260525-creator-ux-fix">
+    <link rel="stylesheet" href="style.css?v=20260526-editor-review-fix">
 </head>
 <body>
     <div id="app-layout">
@@ -110,7 +110,8 @@
             <!-- VIEWPORT / CANVAS -->
             <div id="viewport">
                 <div class="grid-overlay"></div>
-                <canvas id="game-canvas" tabindex="0" aria-label="ステージ編集キャンバス。選択したギミックを配置し、光の経路を調整します。"></canvas>
+                <canvas id="game-canvas" tabindex="0" aria-label="ステージ編集キャンバス。選択したギミックを配置し、光の経路を調整します。" aria-describedby="editor-canvas-help"></canvas>
+                <p id="editor-canvas-help" class="sr-only">キーボード操作では、パレットでギミックを選び、キャンバスに移動してEnterで中央へ配置できます。選択中のギミックは矢印キーで移動できます。</p>
 
                 <!-- ========== INFO PANEL ========== -->
                 <div id="info-panel" class="hidden" role="dialog" aria-modal="true" aria-labelledby="info-stg-name" tabindex="-1">
@@ -333,7 +334,7 @@
                     <div id="prop-speed-group" class="property-group hidden" style="margin-top:8px;">
                         <label for="prop-speed" style="font-size:11px; color:rgba(255,255,255,0.5);">巡回速度: <span id="prop-speed-val" style="color:#ffffff;">70</span>px/s</label>
                         <input type="range" id="prop-speed" min="20" max="220" value="70" style="width:100%; margin-top:4px;">
-                        <div style="font-size:8.5px; color:#ffaa00; margin-top:4px; line-height:1.2; letter-spacing:-0.02em;">※オブジェクト選択中、Shift+クリックまたはドラッグで巡回ターゲットを設定・移動できます。</div>
+                        <div style="font-size:9px; color:#ffaa00; margin-top:4px; line-height:1.35;">※選択中にShift+クリック、またはキャンバス上のTARGETをドラッグして巡回先を設定できます。</div>
                     </div>
                     
                     <button id="prop-delete-btn" class="flat-btn" style="margin-top:12px; color:#ff003c; border-color:#ff003c; width:100%; font-size:11px;">このオブジェクトを消去</button>
@@ -363,7 +364,7 @@
                 <div class="section-label">◈ 調律コードの共有</div>
                 <div id="editor-stage-preview" class="editor-stage-preview" aria-live="polite">
                     <strong id="preview-title">MY_STAGE</strong>
-                    <span id="preview-summary">BLOCK 0 / PORTAL 0 / FILTER 0</span>
+                    <span id="preview-summary">BLACKHOLE 0 / BLOCK 0 / PATROL 0 / PORTAL 0 / FILTER 0</span>
                 </div>
                 <button id="editor-import-btn" class="flat-btn" style="width:100%; margin-bottom:6px; font-size:11px;">コードをインポート</button>
                 <button id="editor-export-btn" class="glow-btn" style="width:100%; font-size:11px;" disabled>コードをエクスポート</button>
@@ -396,6 +397,6 @@
     </div>
 
     <div id="toast-container" role="status" aria-live="polite" aria-atomic="true"></div>
-    <script src="script.js?v=20260525-creator-ux-fix"></script>
+    <script src="script.js?v=20260526-editor-review-fix"></script>
 </body>
 </html>

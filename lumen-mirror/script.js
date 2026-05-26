@@ -968,6 +968,7 @@ class GameController {
         this.editorDraggingPatrolTarget = false;
         this.editorDragOffset = { x: 0, y: 0 };
         this.editorDragChanged = false;
+        this.editorKeyboardCursor = { x: CONFIG.WIDTH / 2, y: CONFIG.HEIGHT / 2 };
         this.editorHistory = [];
         this.editorFuture = [];
         this.editorDraftKey = 'lumen_mirror_editor_draft_v1';
@@ -1219,6 +1220,9 @@ class GameController {
 
         this.canvas.addEventListener('pointerdown', handleDown);
         this.canvas.addEventListener('pointermove', handleMove);
+        this.canvas.addEventListener('keydown', (e) => {
+            if (this.state === STATE.EDITING) this.handleEditorKeyboard(e);
+        });
         window.addEventListener('pointerup', handleUp);
 
         // Button wiring
@@ -1258,6 +1262,13 @@ class GameController {
         document.addEventListener('keydown', (e) => {
             const modal = document.getElementById('editor-modal');
             const infoPanel = document.getElementById('info-panel');
+            const openDialog = !modal.classList.contains('hidden')
+                ? modal
+                : (!infoPanel.classList.contains('hidden') ? infoPanel : null);
+            if (openDialog && e.key === 'Tab') {
+                this._trapDialogFocus(e, openDialog);
+                return;
+            }
             if (e.key === 'Escape') {
                 if (!modal.classList.contains('hidden')) {
                     this._closeEditorModal();
@@ -1268,10 +1279,11 @@ class GameController {
                     return;
                 }
             }
-            if (this.state === STATE.EDITING && (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+            const editsText = ['INPUT', 'TEXTAREA'].includes(e.target.tagName);
+            if (!editsText && this.state === STATE.EDITING && (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
                 e.preventDefault();
                 if (e.shiftKey) this.redoEditorAction(); else this.undoEditorAction();
-            } else if (this.state === STATE.EDITING && (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+            } else if (!editsText && this.state === STATE.EDITING && (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
                 e.preventDefault();
                 this.redoEditorAction();
             }
@@ -1708,7 +1720,11 @@ class GameController {
         if (this.prism) this.prism.update(dt);
         this.particles.update(dt);
         if (this.portals) this.portals.forEach(p => p.update(dt));
-        if (this.blocks) this.blocks.forEach(b => b.update(dt));
+        if (this.blocks) {
+            this.blocks.forEach(b => {
+                if (this.state !== STATE.EDITING || !b.moveOptions) b.update(dt);
+            });
+        }
         if (this.colorFilters) this.colorFilters.forEach(f => f.update(dt));
 
         // Dynamically recalculate laser path if there are moving patrol blocks
@@ -2220,7 +2236,7 @@ class GameController {
         if (previewSummary) {
             const stationaryBlocks = this.blocks.filter(block => !block.moveOptions).length;
             const patrols = this.blocks.length - stationaryBlocks;
-            previewSummary.textContent = `BLOCK ${stationaryBlocks} / PATROL ${patrols} / PORTAL ${this.portals.length} / FILTER ${this.colorFilters.length}`;
+            previewSummary.textContent = `BLACKHOLE ${this.blackholes.length} / BLOCK ${stationaryBlocks} / PATROL ${patrols} / PORTAL ${this.portals.length} / FILTER ${this.colorFilters.length}`;
         }
 
         const status = document.getElementById('editor-share-status');
@@ -2243,14 +2259,38 @@ class GameController {
 
     _openEditorModal(focusTarget = 'modal-textarea') {
         this.lastFocusedElement = document.activeElement;
+        document.getElementById('app-layout').inert = true;
         document.getElementById('editor-modal').classList.remove('hidden');
         document.getElementById(focusTarget).focus();
     }
 
     _closeEditorModal() {
         document.getElementById('editor-modal').classList.add('hidden');
+        document.getElementById('app-layout').inert = false;
         if (this.lastFocusedElement && document.contains(this.lastFocusedElement)) {
             this.lastFocusedElement.focus();
+        }
+    }
+
+    _trapDialogFocus(event, dialog) {
+        const focusable = [...dialog.querySelectorAll('button:not([disabled]), textarea:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])')]
+            .filter(element => element.getClientRects().length);
+        if (!focusable.length) {
+            event.preventDefault();
+            dialog.focus();
+            return;
+        }
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+        } else if (!dialog.contains(document.activeElement)) {
+            event.preventDefault();
+            first.focus();
         }
     }
 
@@ -2615,7 +2655,71 @@ class GameController {
         this.showToast("編集モードに戻りました", false);
     }
 
+    handleEditorKeyboard(event) {
+        if ((event.key === 'Enter' || event.key === ' ') && this.editorTool === 'place') {
+            event.preventDefault();
+            this.placeGimmick(this.editorActiveGimmick, this.editorKeyboardCursor);
+            this.showToast("キャンバス中央に配置しました。矢印キーで位置を調整できます");
+            return;
+        }
+        if ((event.key === 'Delete' || event.key === 'Backspace') && this.editorSelectedObject) {
+            event.preventDefault();
+            this.deleteSelectedObject();
+            return;
+        }
+        const movement = {
+            ArrowLeft: { x: -10, y: 0 },
+            ArrowRight: { x: 10, y: 0 },
+            ArrowUp: { x: 0, y: -10 },
+            ArrowDown: { x: 0, y: 10 }
+        }[event.key];
+        if (!movement || !this.editorSelectedObject) return;
+        event.preventDefault();
+        const step = event.shiftKey ? 1 : 10;
+        this._moveEditorObjectBy(movement.x / 10 * step, movement.y / 10 * step);
+    }
+
+    _moveEditorObjectBy(dx, dy) {
+        const obj = this.editorSelectedObject;
+        if (!obj) return;
+        const clampX = value => Math.max(15, Math.min(CONFIG.WIDTH - 15, value));
+        const clampY = value => Math.max(15, Math.min(CONFIG.HEIGHT - 15, value));
+        if (obj instanceof Wormhole) {
+            obj.inPort.x = clampX(obj.inPort.x + dx);
+            obj.inPort.y = clampY(obj.inPort.y + dy);
+            obj.outPort.x = clampX(obj.outPort.x + dx);
+            obj.outPort.y = clampY(obj.outPort.y + dy);
+        } else if (obj instanceof Block) {
+            obj.startX = clampX(obj.startX + dx);
+            obj.startY = clampY(obj.startY + dy);
+            obj.x = obj.startX;
+            obj.y = obj.startY;
+            if (obj.moveOptions) {
+                obj.moveOptions.targetX = clampX(obj.moveOptions.targetX + dx);
+                obj.moveOptions.targetY = clampY(obj.moveOptions.targetY + dy);
+            }
+        } else {
+            obj.x = clampX(obj.x + dx);
+            obj.y = clampY(obj.y + dy);
+        }
+        this.editorHasCleared = false;
+        this.calculateLaserPath();
+        this.updateInspector();
+        this.updateHUD();
+        this._recordEditorState();
+    }
+
     handleEditorPointerDown(pos, e) {
+        if (e.shiftKey && this.editorSelectedObject instanceof Block && this.editorSelectedObject.moveOptions) {
+            this.editorSelectedObject.moveOptions.targetX = Math.max(15, Math.min(CONFIG.WIDTH - 15, Math.round(pos.x)));
+            this.editorSelectedObject.moveOptions.targetY = Math.max(15, Math.min(CONFIG.HEIGHT - 15, Math.round(pos.y)));
+            this.editorHasCleared = false;
+            this.calculateLaserPath();
+            this.updateInspector();
+            this.updateHUD();
+            this._recordEditorState();
+            return;
+        }
         const hit = this.findObjectAt(pos);
 
         if (this.editorTool === 'erase') {
