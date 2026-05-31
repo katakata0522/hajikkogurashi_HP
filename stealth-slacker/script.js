@@ -409,6 +409,18 @@ class GameController {
             }
         });
 
+        // フォーカス喪失時（別タブ移動や別ウィンドウクリック等）に強制的に仕事状態に戻す
+        window.addEventListener('blur', () => {
+            if (this.gameState === STATE.PLAYING) {
+                this.stopSlacking();
+            }
+        });
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && this.gameState === STATE.PLAYING) {
+                this.stopSlacking();
+            }
+        });
+
         const startBtn = document.getElementById('start-btn');
         const retryBtn = document.getElementById('retry-btn');
         const shareBtn = document.getElementById('share-btn');

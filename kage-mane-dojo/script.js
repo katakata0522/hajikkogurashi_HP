@@ -653,6 +653,14 @@ function bindEvents() {
       handleDirection(direction);
     }
   });
+
+  // フォーカス喪失時にゲームを一時停止する
+  window.addEventListener('blur', pauseGame);
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      pauseGame();
+    }
+  });
 }
 
 loadRecord();
@@ -840,4 +848,59 @@ function getJapaneseDateString() {
   const dayStr = kanjiNumbers[now.getDate()];
   
   return `令和${yearStr}年 ${monthStr}月 ${dayStr}日`;
+}
+
+// ==========================================
+// ⏸ 一時停止（ポーズ）処理システム
+// ==========================================
+function showPauseOverlay() {
+  let overlay = document.getElementById('dojoPauseOverlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'dojoPauseOverlay';
+    overlay.style.position = 'absolute';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.backgroundColor = 'rgba(8, 9, 12, 0.9)';
+    overlay.style.display = 'flex';
+    overlay.style.flexDirection = 'column';
+    overlay.style.justifyContent = 'center';
+    overlay.style.alignItems = 'center';
+    overlay.style.zIndex = '999';
+    overlay.style.color = '#fff';
+    overlay.style.cursor = 'pointer';
+    overlay.innerHTML = `
+      <h2 style="font-family: 'Kaisei Decol', serif; font-size: 2.2em; color: #eb5e28; margin-bottom: 12px; letter-spacing: 0.1em; text-align: center;">修行一時停止</h2>
+      <p style="font-size: 0.9em; color: #a0aec0; letter-spacing: 0.05em; text-align: center;">画面に触れて修行を再開</p>
+    `;
+    overlay.addEventListener('click', resumeFromPause);
+    elements.playScreen.appendChild(overlay);
+  }
+}
+
+function removePauseOverlay() {
+  const overlay = document.getElementById('dojoPauseOverlay');
+  if (overlay) {
+    overlay.remove();
+  }
+}
+
+function pauseGame() {
+  if (state.mode === 'watching' || state.mode === 'input') {
+    clearTimers();
+    state.mode = 'paused';
+    setInputEnabled(false);
+    elements.statusText.textContent = '一時停止中';
+    showPauseOverlay();
+  }
+}
+
+function resumeFromPause() {
+  if (state.mode === 'paused') {
+    removePauseOverlay();
+    // 師範のお手本からやり直す
+    startLesson();
+  }
 }
