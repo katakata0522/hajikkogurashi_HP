@@ -489,6 +489,7 @@ span.image.main img {
 /* サムネイル画像 */
 .game-card .image-link img {
     width: 100%;
+    height: auto !important;
     aspect-ratio: 1 / 1;
     object-fit: cover;
     display: block;
