@@ -20,7 +20,8 @@ foreach ($file in $htmlFiles) {
             $reference.StartsWith('mailto:') -or
             $reference.StartsWith('tel:') -or
             $reference.StartsWith('#') -or
-            $reference.StartsWith('data:')
+            $reference.StartsWith('data:') -or
+            $reference.StartsWith('<?php')
         ) {
             continue
         }

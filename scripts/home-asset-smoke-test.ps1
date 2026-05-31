@@ -1,4 +1,4 @@
-﻿$ErrorActionPreference = 'Stop'
+$ErrorActionPreference = 'Stop'
 
 . (Join-Path $PSScriptRoot 'Test-StaticSite.Helpers.ps1')
 
@@ -21,11 +21,11 @@ if (Test-ContainsLiquidSyntax -Content $rootIndex) {
     $errors.Add('index.html still contains Liquid syntax.')
 }
 
-if (-not ($rootIndex.Contains('assets/css/index.css?v=20260418-2') -and $rootIndex.Contains('assets/js/index.js?v=20260307-4'))) {
-    $errors.Add('index.html does not reference the current home assets.')
+if (-not ($rootIndex.Contains('assets/css/index.css?v=<?php') -and $rootIndex.Contains('assets/js/index.js?v=<?php'))) {
+    $errors.Add('index.html does not reference the PHP cache-busted assets.')
 }
 
-if (-not $rootIndex.Contains('class="tiles"')) {
+if (-not ($rootIndex.Contains('class="tiles"') -or $rootIndex.Contains('class="tiles '))) {
     $errors.Add('index.html is missing the tiles section.')
 }
 
@@ -33,8 +33,8 @@ if (-not ($rootIndex.Contains('aria-label="メニューを開く"') -and $rootIn
     $errors.Add('index.html is missing the menu trigger.')
 }
 
-if (-not ($rootIndex.Contains('<section id="contact">') -and $rootIndex.Contains('お問い合わせ'))) {
-    $errors.Add('index.html is missing the contact section.')
+if (-not ($rootIndex -match 'include\s+[\x27\x22]includes/contact-section\.php[\x27\x22]')) {
+    $errors.Add('index.html is missing the contact section include.')
 }
 
 Write-TestResult -Errors $errors -SuccessMessage 'home asset smoke test: ok'

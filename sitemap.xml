@@ -1,24 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://hajikkoroom.xsrv.jp/</loc>
-    <lastmod>2026-05-31</lastmod>
-    <priority>1.0</priority>
-  </url>
-  <url>
     <loc>https://hajikkoroom.xsrv.jp/aboutus.html</loc>
     <lastmod>2026-05-31</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://hajikkoroom.xsrv.jp/portfolio.html</loc>
+    <loc>https://hajikkoroom.xsrv.jp/coming-soon.html</loc>
     <lastmod>2026-05-31</lastmod>
-    <priority>0.8</priority>
+    <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://hajikkoroom.xsrv.jp/news.html</loc>
+    <loc>https://hajikkoroom.xsrv.jp/</loc>
     <lastmod>2026-05-31</lastmod>
-    <priority>0.7</priority>
+    <priority>1.0</priority>
   </url>
   <url>
     <loc>https://hajikkoroom.xsrv.jp/members.html</loc>
@@ -28,12 +23,17 @@
   <url>
     <loc>https://hajikkoroom.xsrv.jp/minigames.html</loc>
     <lastmod>2026-05-31</lastmod>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://hajikkoroom.xsrv.jp/news.html</loc>
+    <lastmod>2026-05-31</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://hajikkoroom.xsrv.jp/coming-soon.html</loc>
+    <loc>https://hajikkoroom.xsrv.jp/portfolio.html</loc>
     <lastmod>2026-05-31</lastmod>
-    <priority>0.5</priority>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://hajikkoroom.xsrv.jp/privacy-policy.html</loc>
@@ -45,8 +45,21 @@
     <lastmod>2026-05-31</lastmod>
     <priority>0.4</priority>
   </url>
-
-  <!-- HTML5 Mini Games (Self-Hosted on the same domain) -->
+  <url>
+    <loc>https://hajikkoroom.xsrv.jp/blackhole-sweeper/</loc>
+    <lastmod>2026-05-31</lastmod>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://hajikkoroom.xsrv.jp/girigiri-brake/</loc>
+    <lastmod>2026-05-31</lastmod>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://hajikkoroom.xsrv.jp/kage-mane-dojo/</loc>
+    <lastmod>2026-05-31</lastmod>
+    <priority>0.5</priority>
+  </url>
   <url>
     <loc>https://hajikkoroom.xsrv.jp/kanji-slicer/</loc>
     <lastmod>2026-05-31</lastmod>
@@ -58,12 +71,7 @@
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://hajikkoroom.xsrv.jp/blackhole-sweeper/</loc>
-    <lastmod>2026-05-31</lastmod>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://hajikkoroom.xsrv.jp/girigiri-brake/</loc>
+    <loc>https://hajikkoroom.xsrv.jp/mikiri-issen/</loc>
     <lastmod>2026-05-31</lastmod>
     <priority>0.5</priority>
   </url>
@@ -78,17 +86,7 @@
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://hajikkoroom.xsrv.jp/mikiri-issen/</loc>
-    <lastmod>2026-05-31</lastmod>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://hajikkoroom.xsrv.jp/wall-jumper/</loc>
-    <lastmod>2026-05-31</lastmod>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://hajikkoroom.xsrv.jp/kage-mane-dojo/</loc>
     <lastmod>2026-05-31</lastmod>
     <priority>0.5</priority>
   </url>

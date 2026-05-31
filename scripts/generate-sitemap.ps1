@@ -22,24 +22,49 @@ function Get-Priority {
     }
 }
 
+# 1. ルート直下のHTMLファイルを処理
 $htmlFiles = Get-ChildItem -Path $repoRoot -Filter '*.html' -File |
     Where-Object { $excludes -notcontains $_.Name } |
     Sort-Object Name
 
-$entries = foreach ($file in $htmlFiles) {
+$entries = New-Object System.Collections.Generic.List[string]
+
+foreach ($file in $htmlFiles) {
     $loc = if ($file.Name -eq 'index.html') {
         "$baseUrl/"
     } else {
         "$baseUrl/$($file.Name)"
     }
 
-    @"
+    $entries.Add(@"
   <url>
     <loc>$loc</loc>
     <lastmod>$today</lastmod>
     <priority>$(Get-Priority -FileName $file.Name)</priority>
   </url>
-"@
+"@)
+}
+
+# 2. ミニゲーム等のサブディレクトリを処理
+# index.html を含み、システム/アセット系以外の非隠しフォルダを自動検出
+$systemDirs = @('assets', 'includes', 'scripts')
+$subDirs = Get-ChildItem -Path $repoRoot -Directory |
+    Where-Object { 
+        $systemDirs -notcontains $_.Name -and 
+        $_.Name -notmatch '^\.' -and
+        (Test-Path (Join-Path $_.FullName 'index.html'))
+    } |
+    Sort-Object Name
+
+foreach ($dir in $subDirs) {
+    $loc = "$baseUrl/$($dir.Name)/"
+    $entries.Add(@"
+  <url>
+    <loc>$loc</loc>
+    <lastmod>$today</lastmod>
+    <priority>0.5</priority>
+  </url>
+"@)
 }
 
 $sitemap = @(
@@ -51,4 +76,4 @@ $sitemap = @(
 
 $outPath = Join-Path $repoRoot 'sitemap.xml'
 [System.IO.File]::WriteAllText($outPath, $sitemap, [System.Text.UTF8Encoding]::new($false))
-Write-Output "sitemap.xml generated with $($htmlFiles.Count) URLs -> $outPath"
+Write-Output "sitemap.xml generated with $($entries.Count) URLs -> $outPath"
