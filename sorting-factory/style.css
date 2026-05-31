@@ -294,7 +294,7 @@ canvas {
 .action-btn.tertiary { border: 2px solid var(--text-sub); color: var(--text-sub); }
 
 .touch-zone {
-    position: absolute; top: 0; width: 50%; height: 100%; z-index: 15;
+    position: absolute; bottom: 0; width: 50%; height: 60%; z-index: 15;
     pointer-events: auto;
     touch-action: manipulation;
 }

@@ -380,8 +380,52 @@ class GameController {
             }
         });
         
-        this.ui.touchLeft.addEventListener('touchstart', (e) => handleInput(-1, e), {passive: false});
-        this.ui.touchRight.addEventListener('touchstart', (e) => handleInput(1, e), {passive: false});
+        // Touch tracking variables for swipes and safe taps
+        let startX = 0;
+        let startY = 0;
+        let touchActive = false;
+
+        const handleTouchStart = (e) => {
+            if (this.state !== STATE.PLAYING) return;
+            const touch = e.touches[0];
+            startX = touch.clientX;
+            startY = touch.clientY;
+            touchActive = true;
+        };
+
+        const handleTouchMove = (e) => {
+            if (!touchActive || this.state !== STATE.PLAYING) return;
+            const touch = e.touches[0];
+            const diffX = touch.clientX - startX;
+            const diffY = touch.clientY - startY;
+
+            // Detect swipe (horizontal movement > 35px, and horizontal > vertical)
+            if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY)) {
+                e.preventDefault();
+                const dir = diffX < 0 ? -1 : 1;
+                this.processInput(dir);
+                touchActive = false; // Prevent multiple inputs for one swipe
+            }
+        };
+
+        const handleTouchEnd = (e, defaultDir) => {
+            if (!touchActive || this.state !== STATE.PLAYING) return;
+            e.preventDefault();
+            e.stopPropagation();
+            // It was a tap, process the default direction for this touch zone
+            this.processInput(defaultDir);
+            touchActive = false;
+        };
+
+        this.ui.touchLeft.addEventListener('touchstart', handleTouchStart, {passive: true});
+        this.ui.touchRight.addEventListener('touchstart', handleTouchStart, {passive: true});
+
+        this.ui.touchLeft.addEventListener('touchmove', handleTouchMove, {passive: false});
+        this.ui.touchRight.addEventListener('touchmove', handleTouchMove, {passive: false});
+
+        this.ui.touchLeft.addEventListener('touchend', (e) => handleTouchEnd(e, -1), {passive: false});
+        this.ui.touchRight.addEventListener('touchend', (e) => handleTouchEnd(e, 1), {passive: false});
+
         this.ui.touchLeft.addEventListener('mousedown', (e) => handleInput(-1, e));
         this.ui.touchRight.addEventListener('mousedown', (e) => handleInput(1, e));
         this.canvas.addEventListener('pointerdown', (e) => this.handleCanvasPointer(e));
@@ -420,8 +464,15 @@ class GameController {
 
     handleCanvasPointer(e) {
         if (this.state !== STATE.PLAYING) return;
-        e.preventDefault();
+        
         const rect = this.canvas.getBoundingClientRect();
+        
+        // Safety check: ignore inputs in the top 40% (safe zone)
+        if (e.clientY < rect.top + rect.height * 0.4) {
+            return;
+        }
+
+        e.preventDefault();
         const clientX = e.clientX;
         const direction = clientX < rect.left + rect.width / 2 ? -1 : 1;
         this.processInput(direction);
