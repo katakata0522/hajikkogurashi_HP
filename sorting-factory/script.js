@@ -41,6 +41,12 @@ function writeBestScore(score) {
 class AudioManager {
     constructor() {
         this.audioCtx = null;
+        this.isMuted = localStorage.getItem('katakata-minigames-mute') === 'true';
+    }
+
+    setMute(muted) {
+        this.isMuted = muted;
+        localStorage.setItem('katakata-minigames-mute', String(muted));
     }
 
     init() {
@@ -54,7 +60,7 @@ class AudioManager {
     }
 
     _createOscillator(type, freq) {
-        if (!this.audioCtx) return null;
+        if (this.isMuted || !this.audioCtx) return null;
         const osc = this.audioCtx.createOscillator();
         const gain = this.audioCtx.createGain();
         osc.connect(gain);
@@ -65,9 +71,11 @@ class AudioManager {
     }
 
     playError() {
-        if (!this.audioCtx) return;
+        if (this.isMuted || !this.audioCtx) return;
         const now = this.audioCtx.currentTime;
-        const { osc, gain } = this._createOscillator('sawtooth', 150);
+        const audioNode = this._createOscillator('sawtooth', 150);
+        if (!audioNode) return;
+        const { osc, gain } = audioNode;
         osc.frequency.linearRampToValueAtTime(100, now + 0.3);
         gain.gain.setValueAtTime(0.2, now);
         gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
@@ -76,9 +84,11 @@ class AudioManager {
     }
 
     playSiren() {
-        if (!this.audioCtx) return;
+        if (this.isMuted || !this.audioCtx) return;
         const now = this.audioCtx.currentTime;
-        const { osc, gain } = this._createOscillator('square', 600);
+        const audioNode = this._createOscillator('square', 600);
+        if (!audioNode) return;
+        const { osc, gain } = audioNode;
         osc.frequency.setValueAtTime(600, now);
         osc.frequency.setValueAtTime(800, now + 0.2);
         osc.frequency.setValueAtTime(600, now + 0.4);
@@ -90,9 +100,11 @@ class AudioManager {
     }
 
     playSlam() {
-        if (!this.audioCtx) return;
+        if (this.isMuted || !this.audioCtx) return;
         const now = this.audioCtx.currentTime;
-        const { osc, gain } = this._createOscillator('square', 100);
+        const audioNode = this._createOscillator('square', 100);
+        if (!audioNode) return;
+        const { osc, gain } = audioNode;
         osc.frequency.exponentialRampToValueAtTime(10, now + 0.15);
         gain.gain.setValueAtTime(0.3, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
@@ -309,6 +321,11 @@ class GameController {
         this.initCanvas();
         this.bindEvents();
         this.drawBoxes();
+
+        const muteToggle = document.getElementById('sound-mute-toggle');
+        if (muteToggle) {
+            muteToggle.checked = this.audio.isMuted;
+        }
     }
 
     initCanvas() {
@@ -383,9 +400,22 @@ class GameController {
         shareBtn.addEventListener('click', (e) => this.shareResult(e));
         shareBtn.addEventListener('touchstart', (e) => this.shareResult(e));
 
-        const goMenu = (e) => { e.stopPropagation(); window.location.href = '../minigames.html'; };
+        const goMenu = (e) => { e.stopPropagation(); window.location.href = '/minigames.html'; };
         menuBtn.addEventListener('click', goMenu);
         menuBtn.addEventListener('touchstart', goMenu);
+
+        const menuBtnTitle = document.getElementById('menu-btn-title');
+        if (menuBtnTitle) {
+            menuBtnTitle.addEventListener('click', goMenu);
+            menuBtnTitle.addEventListener('touchstart', goMenu);
+        }
+
+        const muteToggle = document.getElementById('sound-mute-toggle');
+        if (muteToggle) {
+            muteToggle.addEventListener('change', (e) => {
+                this.audio.setMute(e.target.checked);
+            });
+        }
     }
 
     handleCanvasPointer(e) {

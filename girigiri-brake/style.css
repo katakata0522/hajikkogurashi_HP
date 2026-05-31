@@ -428,3 +428,52 @@ canvas {
     .status-text { font-size: 1.35rem; }
     .sub-actions { flex-direction: column; }
 }
+
+/* --- Sound Mute UI (Cyber Style) --- */
+.sound-mute-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 1.5rem;
+    pointer-events: auto;
+    width: 100%;
+}
+
+.sound-mute-checkbox {
+    display: none;
+}
+
+.sound-mute-label {
+    font-family: var(--font-number);
+    font-size: 1.1rem;
+    padding: 0.6rem 2rem;
+    border: 2px solid var(--accent-color);
+    color: var(--accent-color);
+    border-radius: 8px;
+    cursor: pointer;
+    background: rgba(0, 0, 0, 0.4);
+    box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: bold;
+    display: inline-block;
+    text-align: center;
+}
+
+.sound-mute-checkbox:checked + .sound-mute-label {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    box-shadow: 0 0 10px rgba(255, 65, 108, 0.2);
+}
+
+.sound-mute-label:hover {
+    background: rgba(0, 242, 254, 0.1);
+    box-shadow: 0 0 15px rgba(0, 242, 254, 0.4);
+}
+
+.sound-mute-checkbox:checked + .sound-mute-label:hover {
+    background: rgba(255, 65, 108, 0.1);
+    box-shadow: 0 0 15px rgba(255, 65, 108, 0.4);
+}

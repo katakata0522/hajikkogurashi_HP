@@ -191,6 +191,7 @@
                         <div class="overlay-btn-row">
                             <button id="next-btn" class="glow-btn">NEXT_STAGE</button>
                             <button id="select-btn" class="control-btn">STAGE_SELECT</button>
+                            <button id="overlay-plaza-btn" class="control-btn">RETURN_TO_PLAZA</button>
                         </div>
                     </div>
                 </div>
@@ -222,9 +223,13 @@
                           <div><span>RESET:</span> ステージをリセット</div>
                         </div>
                     </div>
+                    <div class="sound-mute-container">
+                        <input type="checkbox" id="sound-mute-toggle" class="sound-mute-checkbox">
+                        <label for="sound-mute-toggle" id="sound-mute-label" class="sound-mute-label">SOUND: ON 🔊</label>
+                    </div>
                     <button id="start-btn" class="glow-btn">INITIALIZE_SYSTEM</button>
                     <button id="editor-btn" class="control-btn" style="margin-top: 8px; width: 100%; letter-spacing: 0.15em;">CREATE_AREA (エディタ)</button>
-                    <button id="menu-back-btn" class="flat-btn">RETURN_TO_ARCHIVE</button>
+                    <button id="menu-back-btn" class="flat-btn">RETURN_TO_PLAZA</button>
                 </div>
             </div>
 

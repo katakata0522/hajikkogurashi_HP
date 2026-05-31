@@ -48,6 +48,7 @@ let bestDistance = safeReadBestDistance();
 
 // Audio Context
 let audioCtx;
+let isMuted = localStorage.getItem('katakata-minigames-mute') === 'true';
 function initAudio() {
     try {
         const AudioCtor = window.AudioContext || window.webkitAudioContext;
@@ -64,7 +65,7 @@ function initAudio() {
 }
 
 function playSound(type) {
-    if (!audioCtx) return;
+    if (isMuted || !audioCtx) return;
     const osc = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
     osc.connect(gainNode);
@@ -749,6 +750,10 @@ quitBtn.addEventListener('click', () => {
     uiTitle.style.display = 'block';
     uiInstruction.style.display = 'block';
     startBtn.style.display = 'block';
+    const menuBtnTitle = document.getElementById('menu-btn-title');
+    if (menuBtnTitle) menuBtnTitle.style.display = 'block';
+    const muteContainer = document.getElementById('sound-mute-container');
+    if (muteContainer) muteContainer.style.display = 'block';
     hud.style.display = 'none';
     pauseBtn.style.display = 'none';
     initGame();
@@ -787,6 +792,10 @@ startBtn.addEventListener('click', () => {
     uiTitle.style.display = 'none';
     uiInstruction.style.display = 'none';
     startBtn.style.display = 'none';
+    const menuBtnTitle = document.getElementById('menu-btn-title');
+    if (menuBtnTitle) menuBtnTitle.style.display = 'none';
+    const muteContainer = document.getElementById('sound-mute-container');
+    if (muteContainer) muteContainer.style.display = 'none';
     hud.style.display = 'flex';
     pauseBtn.style.display = 'flex';
     initGame();
@@ -796,5 +805,30 @@ initGame();
 gameState = 'start';
 hud.style.display = 'none';
 pauseBtn.style.display = 'none';
+
+// ミュート状態の初期UI同期とイベント登録
+const muteToggle = document.getElementById('sound-mute-toggle');
+if (muteToggle) {
+    muteToggle.checked = isMuted;
+    muteToggle.addEventListener('change', (e) => {
+        isMuted = e.target.checked;
+        localStorage.setItem('katakata-minigames-mute', String(isMuted));
+    });
+}
+
+// 広場に戻るボタンイベントの登録
+const goMenu = (e) => {
+    e.stopPropagation();
+    window.location.href = '/minigames.html';
+};
+const menuBtnTitle = document.getElementById('menu-btn-title');
+if (menuBtnTitle) {
+    menuBtnTitle.addEventListener('click', goMenu);
+}
+const menuBtnPause = document.getElementById('menu-btn-pause');
+if (menuBtnPause) {
+    menuBtnPause.addEventListener('click', goMenu);
+}
+
 draw();
 requestAnimationFrame(gameLoop);

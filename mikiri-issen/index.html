@@ -1236,6 +1236,7 @@
           <div class="button-row">
             <button class="main-button" type="button" id="startButton">決闘開始</button>
             <button class="sub-button" type="button" id="howtoButton" aria-expanded="false" aria-controls="howtoPanel">あそびかた</button>
+            <a class="sub-button" href="/minigames.html" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">広場へ戻る</a>
           </div>
 
           <div class="title-record" aria-label="記録">
@@ -1320,6 +1321,7 @@
             <button class="sub-button" type="button" id="restartButton">最初から</button>
             <button class="sub-button" type="button" id="shareButton">結果を共有</button>
             <button class="sub-button" type="button" id="backTitleButton">タイトルへ</button>
+            <a class="sub-button" href="/minigames.html" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">広場へ戻る</a>
           </div>
         </div>
       </section>
@@ -1418,12 +1420,19 @@
       function loadRecord() {
         try {
           const raw = localStorage.getItem(STORAGE_KEY);
-          if (!raw) return;
-          const parsed = JSON.parse(raw);
-          if (typeof parsed.bestMs === 'number' || parsed.bestMs === null) game.record.bestMs = parsed.bestMs;
-          if (Number.isInteger(parsed.maxStreak) && parsed.maxStreak >= 0) game.record.maxStreak = parsed.maxStreak;
-          if (Number.isInteger(parsed.totalWins) && parsed.totalWins >= 0) game.record.totalWins = parsed.totalWins;
-          if (typeof parsed.soundEnabled === 'boolean') game.soundEnabled = parsed.soundEnabled;
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (typeof parsed.bestMs === 'number' || parsed.bestMs === null) game.record.bestMs = parsed.bestMs;
+            if (Number.isInteger(parsed.maxStreak) && parsed.maxStreak >= 0) game.record.maxStreak = parsed.maxStreak;
+            if (Number.isInteger(parsed.totalWins) && parsed.totalWins >= 0) game.record.totalWins = parsed.totalWins;
+            if (typeof parsed.soundEnabled === 'boolean') game.soundEnabled = parsed.soundEnabled;
+          }
+          const globalMute = localStorage.getItem('katakata-minigames-mute');
+          if (globalMute !== null) {
+            game.soundEnabled = (globalMute === 'false');
+          } else {
+            localStorage.setItem('katakata-minigames-mute', String(!game.soundEnabled));
+          }
         } catch (error) {
           console.warn('記録の読み込みに失敗しました。', error);
         }
@@ -1438,6 +1447,7 @@
             soundEnabled: game.soundEnabled,
             version: VERSION,
           }));
+          localStorage.setItem('katakata-minigames-mute', String(!game.soundEnabled));
         } catch (error) {
           console.warn('記録の保存に失敗しました。', error);
         }

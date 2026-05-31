@@ -137,7 +137,8 @@ function drawEnsoCircle(ctx, r, color) {
 class SoundSynth {
     constructor() {
         this.ctx = null;
-        this.enabled = true;
+        const globalMute = localStorage.getItem('katakata-minigames-mute') === 'true';
+        this.enabled = !globalMute;
         this.compressor = null;
         this.lastPlayTimes = {};
     }
@@ -174,6 +175,7 @@ class SoundSynth {
 
     toggle() {
         this.enabled = !this.enabled;
+        localStorage.setItem('katakata-minigames-mute', String(!this.enabled));
         return this.enabled;
     }
 
@@ -867,6 +869,10 @@ btnSound.addEventListener('click', () => {
     const isEnabled = soundSynth.toggle();
     btnSound.textContent = isEnabled ? '🔊' : '🔇';
 });
+
+if (btnSound) {
+    btnSound.textContent = soundSynth.enabled ? '🔊' : '🔇';
+}
 
 // Pause button click
 btnPause.addEventListener('click', (e) => {

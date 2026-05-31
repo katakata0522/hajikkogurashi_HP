@@ -39,7 +39,7 @@ const DIFFICULTY_CONFIG = {
 };
 
 const STORAGE_KEY = 'kage-mane-dojo-record';
-const MUTE_KEY = 'kage-mane-dojo-mute';
+const MUTE_KEY = 'katakata-minigames-mute';
 const USERNAME_KEY = 'kage-mane-dojo-username';
 const DIFF_KEY = 'kage-mane-dojo-difficulty';
 
@@ -71,6 +71,8 @@ const elements = {
   startButton: document.getElementById('startButton'),
   retryButton: document.getElementById('retryButton'),
   shareButton: document.getElementById('shareButton'),
+  menuButtonTitle: document.getElementById('menuButtonTitle'),
+  menuButtonResult: document.getElementById('menuButtonResult'),
   bestLesson: document.getElementById('bestLesson'),
   currentStreak: document.getElementById('currentStreak'),
   lessonLabel: document.getElementById('lessonLabel'),
@@ -587,6 +589,17 @@ function bindEvents() {
   elements.startButton.addEventListener('click', startGame);
   elements.retryButton.addEventListener('click', startGame);
   elements.shareButton.addEventListener('click', shareResult);
+
+  if (elements.menuButtonTitle) {
+    elements.menuButtonTitle.addEventListener('click', () => {
+      window.location.href = '/minigames.html';
+    });
+  }
+  if (elements.menuButtonResult) {
+    elements.menuButtonResult.addEventListener('click', () => {
+      window.location.href = '/minigames.html';
+    });
+  }
 
   if (elements.muteButton) {
     elements.muteButton.addEventListener('click', toggleMute);

@@ -15,7 +15,14 @@
         <div id="ui-layer">
             <h1 id="title">WALL JUMPER</h1>
             <p id="instruction">画面をクリックしてジャンプ！<br>壁を蹴ってどこまでも登ろう！<br>トゲに当たるとその場でリトライ！</p>
+            <div class="sound-mute-container" id="sound-mute-container" style="margin-top: 15px; margin-bottom: 15px; text-align: center; width: 100%;">
+                <label class="mute-label" style="cursor: pointer; font-size: 1.1rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+                    <input type="checkbox" id="sound-mute-toggle" style="width: 18px; height: 18px; cursor: pointer;">
+                    <span class="mute-text" style="font-weight: bold; color: #fff; font-family: 'DotGothic16', 'Noto Sans JP', sans-serif;">🔇 消音 (ミュート)</span>
+                </label>
+            </div>
             <button id="start-btn">ゲームスタート</button>
+            <button id="menu-btn-title" class="secondary" style="display: block; margin: 10px auto 0;">広場に戻る</button>
             <div id="hud">
                 <div class="label">HEIGHT</div>
                 <div id="score-display">0m</div>
@@ -28,6 +35,7 @@
                 <h2>PAUSE</h2>
                 <button id="resume-btn">ゲームに戻る</button>
                 <button id="quit-btn" class="secondary">タイトルへ</button>
+                <button id="menu-btn-pause" class="secondary" style="margin-top: 10px;">広場に戻る</button>
             </div>
             
             <div id="milestone-display">50m 突破!!</div>

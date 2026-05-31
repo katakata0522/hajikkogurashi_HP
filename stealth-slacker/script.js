@@ -53,6 +53,12 @@ class AudioManager {
         this.playSoundInterval = null;
         this.isWorking = false;
         this.isSlacking = false;
+        this.isMuted = localStorage.getItem('katakata-minigames-mute') === 'true';
+    }
+
+    setMuted(muted) {
+        this.isMuted = muted;
+        localStorage.setItem('katakata-minigames-mute', String(muted));
     }
 
     init() {
@@ -77,6 +83,7 @@ class AudioManager {
     }
 
     playEffect(type) {
+        if (this.isMuted) return;
         if (!this.audioCtx) return;
         const now = this.audioCtx.currentTime;
 
@@ -425,6 +432,9 @@ class GameController {
         const retryBtn = document.getElementById('retry-btn');
         const shareBtn = document.getElementById('share-btn');
         const menuBtn = document.getElementById('menu-btn');
+        const menuBtnTitle = document.getElementById('menu-btn-title');
+        const muteToggle = document.getElementById('sound-mute-toggle');
+        const muteLabel = document.getElementById('sound-mute-label');
 
         const startWrapper = (e) => { e.stopPropagation(); e.preventDefault(); this.startGame(); };
         startBtn.addEventListener('click', startWrapper);
@@ -435,9 +445,38 @@ class GameController {
         shareBtn.addEventListener('click', (e) => this.shareResult(e));
         shareBtn.addEventListener('touchstart', (e) => this.shareResult(e));
         
-        const goMenu = (e) => { e.stopPropagation(); window.location.href = '../minigames.html'; };
+        const goMenu = (e) => { e.stopPropagation(); window.location.href = '/minigames.html'; };
         menuBtn.addEventListener('click', goMenu);
         menuBtn.addEventListener('touchstart', goMenu);
+
+        if (menuBtnTitle) {
+            menuBtnTitle.addEventListener('click', goMenu);
+            menuBtnTitle.addEventListener('touchstart', goMenu);
+        }
+
+        // ミュート状態の初期反映とバインド
+        if (muteToggle) {
+            muteToggle.checked = this.audio.isMuted;
+            if (muteLabel) {
+                muteLabel.textContent = this.audio.isMuted ? '音 OFF 🔇' : '音 ON 🔊';
+            }
+            muteToggle.addEventListener('change', (e) => {
+                const isMuted = e.target.checked;
+                this.audio.setMuted(isMuted);
+                if (muteLabel) {
+                    muteLabel.textContent = isMuted ? '音 OFF 🔇' : '音 ON 🔊';
+                }
+            });
+            if (muteLabel) {
+                muteLabel.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    muteToggle.checked = !muteToggle.checked;
+                    const isMuted = muteToggle.checked;
+                    this.audio.setMuted(isMuted);
+                    muteLabel.textContent = isMuted ? '音 OFF 🔇' : '音 ON 🔊';
+                });
+            }
+        }
     }
 
     startSlacking() {

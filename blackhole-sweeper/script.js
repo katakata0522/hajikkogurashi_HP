@@ -183,6 +183,12 @@ class AudioManager {
         this.ctx = null;
         this.masterGain = null;
         this.initialized = false;
+        this.isMuted = localStorage.getItem('katakata-minigames-mute') === 'true';
+    }
+
+    setMute(muted) {
+        this.isMuted = muted;
+        localStorage.setItem('katakata-minigames-mute', String(muted));
     }
 
     init() {
@@ -197,7 +203,7 @@ class AudioManager {
     }
 
     playTone(freq, type, duration, vol = 1.0) {
-        if (!this.initialized || !this.ctx) return;
+        if (this.isMuted || !this.initialized || !this.ctx) return;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
         
@@ -222,7 +228,7 @@ class AudioManager {
                 break;
             case 'blackhole':
                 // Suck sound
-                if (!this.initialized) return;
+                if (this.isMuted || !this.initialized) return;
                 const osc = this.ctx.createOscillator();
                 const gain = this.ctx.createGain();
                 osc.type = 'sine';
@@ -592,6 +598,11 @@ class GameController {
         this.initCanvas();
         this.bindEvents();
         this.draw();
+
+        const muteToggle = document.getElementById('sound-mute-toggle');
+        if (muteToggle) {
+            muteToggle.checked = this.audio.isMuted;
+        }
     }
 
     initCanvas() {
@@ -702,7 +713,20 @@ class GameController {
         document.getElementById('start-btn').addEventListener('click', () => this.startGame());
         document.getElementById('retry-btn').addEventListener('click', () => this.startGame());
         document.getElementById('share-btn').addEventListener('click', (e) => this.shareResult(e));
-        document.getElementById('menu-btn').addEventListener('click', () => { window.location.href = '../minigames.html'; });
+        document.getElementById('menu-btn').addEventListener('click', () => { window.location.href = '/minigames.html'; });
+        
+        const menuBtnTitle = document.getElementById('menu-btn-title');
+        if (menuBtnTitle) {
+            menuBtnTitle.addEventListener('click', () => { window.location.href = '/minigames.html'; });
+        }
+
+        const muteToggle = document.getElementById('sound-mute-toggle');
+        if (muteToggle) {
+            muteToggle.addEventListener('change', (e) => {
+                this.audio.setMute(e.target.checked);
+            });
+        }
+
         document.getElementById('trophy-btn').addEventListener('click', () => this.ui.openAchievements(readAchievementStats()));
         document.getElementById('close-modal-btn').addEventListener('click', () => this.ui.closeAchievements());
     }

@@ -38,9 +38,19 @@ class AudioManager {
         this.skidOscillator = null;
         this.skidGain = null;
         this.skidIsRain = false;
+        this.isMuted = localStorage.getItem('katakata-minigames-mute') === 'true';
+    }
+
+    setMuted(muted) {
+        this.isMuted = muted;
+        localStorage.setItem('katakata-minigames-mute', String(muted));
+        if (muted) {
+            this.stopSkid();
+        }
     }
 
     init() {
+        if (this.isMuted) return;
         if (!this.audioCtx) {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
             this.audioCtx = new AudioContext();
@@ -51,6 +61,7 @@ class AudioManager {
     }
 
     _createOscillator(type, freq) {
+        if (this.isMuted) return null;
         if (!this.audioCtx) return null;
         const osc = this.audioCtx.createOscillator();
         const gain = this.audioCtx.createGain();
@@ -62,6 +73,7 @@ class AudioManager {
     }
 
     playStart() {
+        if (this.isMuted) return;
         if (!this.audioCtx) return;
         const now = this.audioCtx.currentTime;
         const { osc, gain } = this._createOscillator('square', 150);
@@ -74,6 +86,7 @@ class AudioManager {
     }
 
     playFall() {
+        if (this.isMuted) return;
         if (!this.audioCtx) return;
         const now = this.audioCtx.currentTime;
         const { osc, gain } = this._createOscillator('triangle', 200);
@@ -85,6 +98,7 @@ class AudioManager {
     }
 
     playSuccess() {
+        if (this.isMuted) return;
         if (!this.audioCtx) return;
         const now = this.audioCtx.currentTime;
         const { osc, gain } = this._createOscillator('sine', 523.25);
@@ -98,6 +112,7 @@ class AudioManager {
     }
 
     playSkidStart(weather) {
+        if (this.isMuted) return;
         if (!this.audioCtx || this.skidOscillator) return;
         const now = this.audioCtx.currentTime;
         const isRain = weather?.name.includes('RAIN');
@@ -449,12 +464,44 @@ class GameController {
         const retryBtn = document.getElementById('retry-btn');
         const shareBtn = document.getElementById('share-btn');
         const menuBtn = document.getElementById('menu-btn');
+        const menuBtnTitle = document.getElementById('menu-btn-title');
+        const muteToggle = document.getElementById('sound-mute-toggle');
+        const muteLabel = document.getElementById('sound-mute-label');
 
         // ボタンのクリックイベントは click イベントのみで制御（モバイル・PC共に高レスポンスで動く）
         startBtn.addEventListener('click', (e) => this.startGame(e));
         retryBtn.addEventListener('click', (e) => this.startGame(e));
         shareBtn.addEventListener('click', (e) => this.shareResult(e));
-        menuBtn.addEventListener('click', (e) => { e.stopPropagation(); window.location.href = '../minigames.html'; });
+        
+        const goMenu = (e) => { e.stopPropagation(); window.location.href = '/minigames.html'; };
+        menuBtn.addEventListener('click', goMenu);
+        if (menuBtnTitle) {
+            menuBtnTitle.addEventListener('click', goMenu);
+        }
+
+        // ミュート状態の初期反映とバインド
+        if (muteToggle) {
+            muteToggle.checked = this.audio.isMuted;
+            if (muteLabel) {
+                muteLabel.textContent = this.audio.isMuted ? '音 OFF 🔇' : '音 ON 🔊';
+            }
+            muteToggle.addEventListener('change', (e) => {
+                const isMuted = e.target.checked;
+                this.audio.setMuted(isMuted);
+                if (muteLabel) {
+                    muteLabel.textContent = isMuted ? '音 OFF 🔇' : '音 ON 🔊';
+                }
+            });
+            if (muteLabel) {
+                muteLabel.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    muteToggle.checked = !muteToggle.checked;
+                    const isMuted = muteToggle.checked;
+                    this.audio.setMuted(isMuted);
+                    muteLabel.textContent = isMuted ? '音 OFF 🔇' : '音 ON 🔊';
+                });
+            }
+        }
     }
 
     startGame(e) {
