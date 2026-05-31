@@ -11,22 +11,42 @@
 	<link rel="canonical" href="https://hajikkoroom.xsrv.jp/terms-of-service.html" />
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-	<meta name="description" content="当サイトの利用規約について" />
+	<meta name="description" content="ゲーム制作サークル「はじっこぐらし」公式サイトおよび提供サービスの利用規約です。当サイトのご利用にあたっての禁止事項、免責事項、著作権の帰属、および皆様が安心してサービスを利用するためのルールを定めています。" />
 	<meta name="robots" content="index,follow" />
 	<meta property="og:locale" content="ja_JP" />
 	<meta property="og:type" content="website" />
 	<meta property="og:site_name" content="はじっこぐらし公式ホームページ" />
 	<meta property="og:title" content="利用規約 | はじっこぐらし公式ホームページ" />
-	<meta property="og:description" content="当サイトの利用規約について" />
+	<meta property="og:description" content="ゲーム制作サークル「はじっこぐらし」公式サイトおよび提供サービスの利用規約です。当サイトのご利用にあたっての禁止事項、免責事項、著作権の帰属、および皆様が安心してサービスを利用するためのルールを定めています。" />
 	<meta property="og:url" content="https://hajikkoroom.xsrv.jp/terms-of-service.html" />
 	<meta property="og:image" content="https://hajikkoroom.xsrv.jp/assets/images/banner.webp" />
 	<meta property="og:image:alt" content="利用規約" />
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta name="twitter:title" content="利用規約 | はじっこぐらし公式ホームページ" />
-	<meta name="twitter:description" content="当サイトの利用規約について" />
+	<meta name="twitter:description" content="ゲーム制作サークル「はじっこぐらし」公式サイトおよび提供サービスの利用規約です。当サイトのご利用にあたっての禁止事項、免責事項、著作権の帰属、および皆様が安心してサービスを利用するためのルールを定めています。" />
 	<meta name="twitter:image" content="https://hajikkoroom.xsrv.jp/assets/images/banner.webp" />
-	<link rel="stylesheet" href="/assets/css/main.css?v=20260307-4" />
-	<link rel="stylesheet" href="/assets/css/custom.css?v=20260418-9" />
+	<link rel="stylesheet" href="/assets/css/main.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/css/main.css'); ?>" />
+	<link rel="stylesheet" href="/assets/css/custom.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/css/custom.css'); ?>" />
+	<script type="application/ld+json">
+	{
+		"@context": "https://schema.org",
+		"@type": "BreadcrumbList",
+		"itemListElement": [
+			{
+				"@type": "ListItem",
+				"position": 1,
+				"name": "ホーム",
+				"item": "https://hajikkoroom.xsrv.jp/"
+			},
+			{
+				"@type": "ListItem",
+				"position": 2,
+				"name": "利用規約",
+				"item": "https://hajikkoroom.xsrv.jp/terms-of-service.html"
+			}
+		]
+	}
+	</script>
 </head>
 
 
@@ -62,6 +82,12 @@
             <!-- One -->
             <section id="one">
                 <div class="inner">
+                    <nav class="breadcrumbs" aria-label="パンくずリスト">
+                        <ol>
+                            <li><a href="/">ホーム</a></li>
+                            <li aria-current="page">利用規約</li>
+                        </ol>
+                    </nav>
                     <header class="major">
                         <h1>利用規約</h1>
                     </header>
@@ -147,7 +173,7 @@
 
 <a href="#" id="scrollToTopBtn" title="ページトップへ戻る">▲</a>
 <!-- Scripts -->
-	<script src="/assets/js/main.js?v=20260417-1"></script>
+	<script src="/assets/js/main.js?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/js/main.js'); ?>"></script>
 	
 
     </div>

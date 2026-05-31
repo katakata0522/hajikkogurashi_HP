@@ -25,8 +25,8 @@
 	<meta name="twitter:title" content="ミニゲーム広場 | はじっこぐらし公式ホームページ" />
 	<meta name="twitter:description" content="はじっこぐらしのミニゲームで遊ぼう！ブラウザで気軽に遊べるミニゲームを公開中。" />
 	<meta name="twitter:image" content="https://hajikkoroom.xsrv.jp/assets/images/banner.webp" />
-	<link rel="stylesheet" href="/assets/css/main.css?v=20260307-4" />
-	<link rel="stylesheet" href="/assets/css/custom.css?v=20260418-9" />
+	<link rel="stylesheet" href="/assets/css/main.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/css/main.css'); ?>" />
+	<link rel="stylesheet" href="/assets/css/custom.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/css/custom.css'); ?>" />
 	<script type="application/ld+json">
 	{
 		"@context": "https://schema.org",
@@ -116,7 +116,7 @@
                         <!-- 漢字スライサー・マージ -->
                         <div class="game-card" style="--game-theme: #eb5e28; --game-theme-alpha: rgba(235, 94, 40, 0.3);">
                             <a href="/kanji-slicer/" class="image-link">
-                                <img src="/assets/images/kanji_slicer_thumbnail.png" alt="漢字スライサー・マージ" width="1024" height="1024" loading="lazy" />
+                                <img src="/assets/images/kanji_slicer_thumbnail.png" alt="漢字スライサー・マージ" width="1024" height="576" loading="lazy" />
                             </a>
                             <div class="game-card-content">
                                 <header class="major game-card-title">
@@ -132,7 +132,7 @@
                         <!-- LUMEN_MIRROR -->
                         <div class="game-card" style="--game-theme: #00f3ff; --game-theme-alpha: rgba(0, 243, 255, 0.3);">
                             <a href="/lumen-mirror/" class="image-link">
-                                <img src="/assets/images/lumen_mirror_thumbnail.png" alt="LUMEN_MIRROR - ルーメン・ミラー" width="1024" height="1024" loading="lazy" />
+                                <img src="/assets/images/lumen_mirror_thumbnail.png" alt="LUMEN_MIRROR - ルーメン・ミラー" width="1024" height="576" loading="lazy" />
                             </a>
                             <div class="game-card-content">
                                 <header class="major game-card-title">
@@ -148,7 +148,7 @@
                         <!-- ブラックホール・スイーパー -->
                         <div class="game-card" style="--game-theme: #00e5ff; --game-theme-alpha: rgba(0, 229, 255, 0.3);">
                             <a href="/blackhole-sweeper/" class="image-link">
-                                <img src="/assets/images/blackhole_sweeper_thumbnail_1779194532152.png" alt="ブラックホール・スイーパー" width="1024" height="1024" loading="lazy" />
+                                <img src="/assets/images/blackhole_sweeper_thumbnail_1779194532152.png" alt="ブラックホール・スイーパー" width="1024" height="576" loading="lazy" />
                             </a>
                             <div class="game-card-content">
                                 <header class="major game-card-title">
@@ -164,7 +164,7 @@
                         <!-- ギリギリ・ブレーキ！ -->
                         <div class="game-card" style="--game-theme: #00f2fe; --game-theme-alpha: rgba(0, 242, 254, 0.3);">
                             <a href="/girigiri-brake/" class="image-link">
-                                <img src="/assets/images/girigiri_brake_thumbnail_1779165077904.png" alt="ギリギリ・ブレーキ！" width="1024" height="1024" loading="lazy" />
+                                <img src="/assets/images/girigiri_brake_thumbnail_1779165077904.png" alt="ギリギリ・ブレーキ！" width="1024" height="576" loading="lazy" />
                             </a>
                             <div class="game-card-content">
                                 <header class="major game-card-title">
@@ -180,7 +180,7 @@
                         <!-- 超絶！仕分け工場 -->
                         <div class="game-card" style="--game-theme: #ffd700; --game-theme-alpha: rgba(255, 215, 0, 0.3);">
                             <a href="/sorting-factory/" class="image-link">
-                                <img src="/assets/images/sorting_factory_thumbnail_1779165097756.png" alt="超絶！仕分け工場" width="1024" height="1024" loading="lazy" />
+                                <img src="/assets/images/sorting_factory_thumbnail_1779165097756.png" alt="超絶！仕分け工場" width="1024" height="576" loading="lazy" />
                             </a>
                             <div class="game-card-content">
                                 <header class="major game-card-title">
@@ -196,7 +196,7 @@
                         <!-- 限界！ステルスサボタージュ -->
                         <div class="game-card" style="--game-theme: #ff3366; --game-theme-alpha: rgba(255, 51, 102, 0.3);">
                             <a href="/stealth-slacker/" class="image-link">
-                                <img src="/assets/images/stealth_slacker_thumbnail_1779165112569.png" alt="限界！ステルスサボタージュ" width="1024" height="1024" loading="lazy" />
+                                <img src="/assets/images/stealth_slacker_thumbnail_1779165112569.png" alt="限界！ステルスサボタージュ" width="1024" height="576" loading="lazy" />
                             </a>
                             <div class="game-card-content">
                                 <header class="major game-card-title">
@@ -212,7 +212,7 @@
                         <!-- みきり一閃 -->
                         <div class="game-card" style="--game-theme: #ffd36a; --game-theme-alpha: rgba(255, 211, 106, 0.3);">
                             <a href="/mikiri-issen/" class="image-link">
-                                <img src="/assets/images/mikiri_issen_thumbnail_1779165128314.png" alt="みきり一閃" width="1024" height="1024" loading="lazy" />
+                                <img src="/assets/images/mikiri_issen_thumbnail_1779165128314.png" alt="みきり一閃" width="1024" height="576" loading="lazy" />
                             </a>
                             <div class="game-card-content">
                                 <header class="major game-card-title">
@@ -228,7 +228,7 @@
                         <!-- ウォールジャンパー -->
                         <div class="game-card" style="--game-theme: #ff6666; --game-theme-alpha: rgba(255, 102, 102, 0.3);">
                             <a href="/wall-jumper/" class="image-link">
-                                <img src="/assets/images/wall_jumper_thumbnail_1779165143429.png" alt="ウォールジャンパー" width="1024" height="1024" loading="lazy" />
+                                <img src="/assets/images/wall_jumper_thumbnail_1779165143429.png" alt="ウォールジャンパー" width="1024" height="576" loading="lazy" />
                             </a>
                             <div class="game-card-content">
                                 <header class="major game-card-title">
@@ -244,7 +244,7 @@
                         <!-- 影まね道場 -->
                         <div class="game-card" style="--game-theme: #e0b756; --game-theme-alpha: rgba(224, 183, 86, 0.3);">
                             <a href="/kage-mane-dojo/" class="image-link">
-                                <img src="/assets/images/kage_mane_dojo_thumbnail.svg" alt="影まね道場" width="1024" height="1024" loading="lazy" />
+                                <img src="/assets/images/kage_mane_dojo_thumbnail.svg" alt="影まね道場" width="1024" height="576" loading="lazy" />
                             </a>
                             <div class="game-card-content">
                                 <header class="major game-card-title">
@@ -277,7 +277,7 @@
 
 <a href="#" id="scrollToTopBtn" title="ページトップへ戻る">▲</a>
 <!-- Scripts -->
-	<script src="/assets/js/main.js?v=20260418-2"></script>
+	<script src="/assets/js/main.js?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/js/main.js'); ?>"></script>
 	
 
     </div>

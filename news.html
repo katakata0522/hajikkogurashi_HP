@@ -25,8 +25,8 @@
 	<meta name="twitter:title" content="お知らせ | はじっこぐらし公式ホームページ" />
 	<meta name="twitter:description" content="「はじっこぐらし」サークルの最新ニュースとお知らせをお届け！ホームページのアップデート情報やイベントへの出展情報、note記事の更新、新規ミニゲームのリリース情報など、私たちの活動の「いま」を随時更新しています。" />
 	<meta name="twitter:image" content="https://hajikkoroom.xsrv.jp/assets/images/pic02.webp" />
-	<link rel="stylesheet" href="/assets/css/main.css?v=20260307-4" />
-	<link rel="stylesheet" href="/assets/css/custom.css?v=20260418-9" />
+	<link rel="stylesheet" href="/assets/css/main.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/css/main.css'); ?>" />
+	<link rel="stylesheet" href="/assets/css/custom.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/css/custom.css'); ?>" />
 	<script type="application/ld+json">
 	{
 		"@context": "https://schema.org",
@@ -95,28 +95,15 @@
                     </div>
                     <h2 id="最新情報">最新情報</h2>
 
+<?php
+include 'includes/news-data.php';
+foreach ($news_items as $item):
+    $safe_id = preg_replace('/[^a-zA-Z0-9]/', '', $item['title']) . preg_replace('/[^0-9]/', '', $item['date']);
+?>
+<h3 id="<?php echo htmlspecialchars($safe_id); ?>"><strong><?php echo htmlspecialchars($item['title']); ?></strong> <?php echo htmlspecialchars($item['date']); ?></h3>
+<p><?php echo $item['content']; ?></p>
 <hr />
-
-<h3 id="ホームページ更新2026年03月31日"><strong>【ホームページ更新！】2026年03月31日</strong></h3>
-<p>作品一覧ページの整理、公開中ページの仮文言の見直し、サイト情報の整備を進めました。<br />
-公開内容は今後も順次更新していきます。</p>
-
-<hr />
-
-<h3 id="note-更新2025年05月09日"><strong>【note 更新！】2025年05月09日</strong></h3>
-<p>「東京ゲームダンジョンに行ってきた」を公開しました！まだ見ぬインディーズゲームを求めて潜入します👀<br />
-<a href="https://note.com/hajikkogurashi01/n/n5c3d29c281e1">note記事へGO!</a></p>
-
-<hr />
-
-<h3 id="サークル活動開始"><strong>サークル活動開始！</strong></h3>
-<p>2024年8月16日より、ゲーム制作サークル「はじっこぐらし」の活動を開始しました！
-応援よろしくお願いします！<br />
-<a href="https://note.com/hajikkogurashi01">はじっこぐらしのnoteページ</a><br />
-<a href="https://x.com/Corner_neighbor">Corner Neighbor のXアカウント</a><br />
-<a href="https://www.youtube.com/@hajikkogurashi">はじっこぐらしのyoutubeアカウント</a></p>
-
-<hr />
+<?php endforeach; ?>
 
                 </div>
             </section>
@@ -137,7 +124,7 @@
 
 <a href="#" id="scrollToTopBtn" title="ページトップへ戻る">▲</a>
 <!-- Scripts -->
-	<script src="/assets/js/main.js?v=20260418-1"></script>
+	<script src="/assets/js/main.js?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/js/main.js'); ?>"></script>
 	
 
     </div>

@@ -25,8 +25,8 @@
 	<meta name="twitter:title" content="メンバー紹介 | はじっこぐらし公式ホームページ" />
 	<meta name="twitter:description" content="インディーゲーム開発に情熱を燃やす「はじっこぐらし」の個性豊かな制作メンバーをご紹介！UE5エンジニア、2D・3Dデザイナー、プランナー、進行管理など、それぞれのスキルや趣味、活動における役割を公開しています。" />
 	<meta name="twitter:image" content="https://hajikkoroom.xsrv.jp/assets/images/pic03.webp" />
-	<link rel="stylesheet" href="/assets/css/main.css?v=20260307-4" />
-	<link rel="stylesheet" href="/assets/css/custom.css?v=20260418-9" />
+	<link rel="stylesheet" href="/assets/css/main.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/css/main.css'); ?>" />
+	<link rel="stylesheet" href="/assets/css/custom.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/css/custom.css'); ?>" />
 	<script type="application/ld+json">
 	{
 		"@context": "https://schema.org",
@@ -47,7 +47,7 @@
 		]
 	}
 	</script>
-	<link rel="stylesheet" href="/assets/css/members.css?v=20260417-1" />
+	<link rel="stylesheet" href="/assets/css/members.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/css/members.css'); ?>" />
 </head>
 
 
@@ -235,7 +235,7 @@
 
 <a href="#" id="scrollToTopBtn" title="ページトップへ戻る">▲</a>
 <!-- Scripts -->
-	<script src="/assets/js/main.js?v=20260418-1"></script>
+	<script src="/assets/js/main.js?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/js/main.js'); ?>"></script>
 	
 
     </div>

@@ -25,8 +25,8 @@
 	<meta name="twitter:title" content="鋭意制作中！ | はじっこぐらし公式ホームページ" />
 	<meta name="twitter:description" content="ただいま新しいインディーゲーム作品の公開に向けて鋭意制作中です！リリース情報や開発状況はサークルのお知らせページおよび公式noteで発信していきますので、ハッピーなコンテンツの公開を楽しみにお待ちください！" />
 	<meta name="twitter:image" content="https://hajikkoroom.xsrv.jp/assets/images/banner.webp" />
-	<link rel="stylesheet" href="/assets/css/main.css?v=20260307-4" />
-	<link rel="stylesheet" href="/assets/css/custom.css?v=20260418-9" />
+	<link rel="stylesheet" href="/assets/css/main.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/css/main.css'); ?>" />
+	<link rel="stylesheet" href="/assets/css/custom.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/css/custom.css'); ?>" />
 	<script type="application/ld+json">
 	{
 		"@context": "https://schema.org",
@@ -135,7 +135,7 @@
 
 <a href="#" id="scrollToTopBtn" title="ページトップへ戻る">▲</a>
 <!-- Scripts -->
-	<script src="/assets/js/main.js?v=20260418-1"></script>
+	<script src="/assets/js/main.js?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/js/main.js'); ?>"></script>
 	
 
     </div>
