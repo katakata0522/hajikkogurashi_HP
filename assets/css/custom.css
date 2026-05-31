@@ -449,3 +449,196 @@ span.image.main img {
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5) !important;
     border-color: rgba(255, 255, 255, 0.3) !important;
 }
+
+/* 22. ミニゲーム広場（minigames.html）専用スタイル */
+.minigames-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2em;
+}
+
+/* ゲームカード本体 */
+.game-card {
+    padding: 0;
+    overflow: hidden;
+    border-radius: 8px;
+    border: 1px solid var(--game-theme-alpha, rgba(255, 255, 255, 0.15)) !important;
+    display: flex;
+    flex-direction: column;
+    background: rgba(0, 0, 0, 0.2) !important;
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), 
+                box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), 
+                border-color 0.3s ease !important;
+}
+
+/* プレミアムな浮遊感とテーマカラーでの発光ホバーエフェクト */
+.game-card:hover {
+    transform: translateY(-6px) !important;
+    border-color: var(--game-theme) !important;
+    box-shadow: 0 12px 28px -10px var(--game-theme), 
+                0 6px 20px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* サムネイル画像リンク */
+.game-card .image-link {
+    display: block;
+    border-bottom: 1px solid var(--game-theme-alpha, rgba(255, 255, 255, 0.1)) !important;
+    text-decoration: none;
+}
+
+/* サムネイル画像 */
+.game-card .image-link img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease !important;
+}
+
+.game-card:hover .image-link img {
+    transform: scale(1.03) !important;
+}
+
+/* コンテンツエリア */
+.game-card-content {
+    padding: 2em;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ゲームタイトル */
+.game-card-title {
+    margin-bottom: 1em !important;
+}
+
+.game-card-title a {
+    text-decoration: none;
+    border-bottom: none !important;
+    transition: color 0.2s ease !important;
+}
+
+.game-card-title a:hover {
+    color: var(--game-theme) !important;
+}
+
+/* 説明文 */
+.game-card-desc {
+    font-size: 0.9em;
+    margin-bottom: 1.5em !important;
+    line-height: 1.6;
+}
+
+/* タグ（ジャンル・対応環境バッジ） */
+.game-badge {
+    color: var(--game-theme) !important;
+    font-size: 0.85em;
+    letter-spacing: 0.1em;
+    border: 1px solid var(--game-theme-alpha) !important;
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.02) !important;
+}
+
+/* 遊ぶボタン */
+.game-card .actions {
+    margin-top: auto;
+    margin-bottom: 0 !important;
+}
+
+/* 23. ページ共通ヘッダータイトル */
+.page-header-container {
+    text-align: center !important;
+    margin-bottom: 2em !important;
+}
+
+.page-header-title {
+    display: inline-block !important;
+    text-align: left !important;
+}
+
+/* 24. トップページ（index.html）活動記録 Noteカード */
+.note-cards-container {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 2em !important;
+}
+
+.note-card {
+    flex: 1 1 300px;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-radius: 8px;
+    overflow: hidden;
+    text-decoration: none;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), 
+                box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), 
+                border-color 0.3s ease !important;
+}
+
+.note-card-thumb {
+    height: 160px;
+    background-position: center !important;
+    background-size: cover !important;
+}
+
+.note-card-body {
+    padding: 20px;
+}
+
+.note-card-title {
+    font-size: 1.2em !important;
+    margin-bottom: 10px !important;
+    color: #ffffff !important;
+    border: none !important;
+}
+
+.note-card-date {
+    font-size: 0.9em;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0 !important;
+}
+
+/* 25. メンバー紹介（members.html）SNSリンク */
+.member-sns-container {
+    margin-left: auto !important;
+}
+
+.member-sns-link {
+    color: #1da1f2 !important;
+    font-size: 1.2em !important;
+    border-bottom: none !important;
+    transition: transform 0.2s ease, opacity 0.2s ease !important;
+    display: inline-block;
+}
+
+.member-sns-link:hover {
+    transform: scale(1.15);
+    opacity: 0.85;
+}
+
+/* 26. 404 エラーページ (404.html) 用スタイル */
+.error-lead {
+    font-size: 1.5em !important;
+    font-weight: bold;
+    margin-bottom: 0.5em !important;
+}
+
+.error-game-box {
+    background-color: rgba(255, 51, 51, 0.05) !important;
+    border: 1px solid rgba(255, 51, 51, 0.2) !important;
+    border-left: 4px solid #ff3333 !important; /* よりインディーゲーム感のある鮮烈な警告枠 */
+    padding: 2em !important;
+    border-radius: 8px !important;
+    margin-bottom: 2em !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.error-game-actions {
+    justify-content: center !important;
+    margin-top: 1.5em !important;
+}

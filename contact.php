@@ -53,7 +53,11 @@ function resolveReturnTo(mixed $value): string
     $allowedPaths = array(
         '/',
         '/aboutus.html',
-        '/portfolio.html'
+        '/portfolio.html',
+        '/members.html',
+        '/news.html',
+        '/minigames.html',
+        '/coming-soon.html'
     );
 
     if (!is_string($value)) {

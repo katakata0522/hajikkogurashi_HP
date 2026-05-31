@@ -27,6 +27,26 @@
 	<meta name="twitter:image" content="https://hajikkoroom.xsrv.jp/assets/images/banner.webp" />
 	<link rel="stylesheet" href="/assets/css/main.css?v=20260307-4" />
 	<link rel="stylesheet" href="/assets/css/custom.css?v=20260418-9" />
+	<script type="application/ld+json">
+	{
+		"@context": "https://schema.org",
+		"@type": "BreadcrumbList",
+		"itemListElement": [
+			{
+				"@type": "ListItem",
+				"position": 1,
+				"name": "ホーム",
+				"item": "https://hajikkoroom.xsrv.jp/"
+			},
+			{
+				"@type": "ListItem",
+				"position": 2,
+				"name": "ミニゲーム広場",
+				"item": "https://hajikkoroom.xsrv.jp/minigames.html"
+			}
+		]
+	}
+	</script>
 </head>
 
 
@@ -58,19 +78,19 @@
 
 
         <!-- Main -->
-        <div id="main" class="alt">
+        <main id="main" class="alt">
             <!-- One -->
             <section id="one">
                 <div class="inner">
                     <nav class="breadcrumbs" aria-label="パンくずリスト">
                         <ol>
                             <li><a href="/">ホーム</a></li>
-                            <li>ミニゲーム広場</li>
+                            <li aria-current="page">ミニゲーム広場</li>
                         </ol>
                     </nav>
 
-                    <div style="text-align: center; margin-bottom: 2em;">
-                        <header class="major" style="display: inline-block; text-align: left;">
+                    <div class="page-header-container">
+                        <header class="major page-header-title">
                             <h1>ミニゲーム広場</h1>
                         </header>
                     </div>
@@ -81,7 +101,7 @@
                             スマホでもパソコンでも、気軽に遊んでいってくださいね！
                         </p>
 
-                        <div class="box" style="border-color: rgba(255, 179, 71, 0.5); background-color: rgba(255, 179, 71, 0.05);">
+                        <div class="notice">
                             <p style="margin: 0;">
                                 <strong style="color: #ffb347;"><i class="icon solid fa-exclamation-triangle"></i> ご注意</strong><br />
                                 一部のゲームはパソコン版のみの対応となっています。<br />
@@ -92,147 +112,147 @@
 
                     <hr class="major" />
 
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2em;">
+                    <div class="minigames-grid">
                         <!-- 漢字スライサー・マージ -->
-                        <div class="box" style="padding: 0; overflow: hidden; border-radius: 8px; border: 1px solid rgba(235, 94, 40, 0.3); display: flex; flex-direction: column; background: rgba(0,0,0,0.2);">
-                            <a href="https://playpoint-sim.com/kanji-slicer/" target="_blank" rel="noopener noreferrer" style="display: block; border-bottom: 1px solid rgba(235, 94, 40, 0.1); text-decoration: none;">
-                                <img src="/assets/images/kanji_slicer_thumbnail.png" alt="漢字スライサー・マージ" style="width: 100%; aspect-ratio: 1/1; object-fit: cover; display: block;" />
+                        <div class="game-card" style="--game-theme: #eb5e28; --game-theme-alpha: rgba(235, 94, 40, 0.3);">
+                            <a href="/kanji-slicer/" class="image-link">
+                                <img src="/assets/images/kanji_slicer_thumbnail.png" alt="漢字スライサー・マージ" width="1024" height="1024" loading="lazy" />
                             </a>
-                            <div style="padding: 2em; flex-grow: 1; display: flex; flex-direction: column;">
-                                <header class="major" style="margin-bottom: 1em;">
-                                    <h3><a href="https://playpoint-sim.com/kanji-slicer/" target="_blank" rel="noopener noreferrer">漢字スライサー・マージ</a></h3>
+                            <div class="game-card-content">
+                                <header class="major game-card-title">
+                                    <h3><a href="/kanji-slicer/">漢字スライサー・マージ</a></h3>
                                 </header>
-                                <p style="font-size: 0.9em; margin-bottom: 1.5em; line-height: 1.6;"><strong style="color: #eb5e28; font-size: 0.85em; letter-spacing: 0.1em; border: 1px solid rgba(235, 94, 40, 0.4); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 8px;">物理スライスアクション / スマホ対応</strong><br>落ちてくる漢字を合体させて、お題をクリアせよ。スワイプで一刀両断すれば、漢字が部首に分裂！爽快パズル。</p>
-                                <ul class="actions" style="margin-top: auto; margin-bottom: 0;">
-                                    <li><a href="https://playpoint-sim.com/kanji-slicer/" class="button next" target="_blank" rel="noopener noreferrer">遊ぶ</a></li>
+                                <p class="game-card-desc"><strong class="game-badge">物理スライスアクション / スマホ対応</strong><br>落ちてくる漢字を合体させて、お題をクリアせよ。スワイプで一刀両断すれば、漢字が部首に分裂！爽快パズル。</p>
+                                <ul class="actions">
+                                    <li><a href="/kanji-slicer/" class="button next">遊ぶ</a></li>
                                 </ul>
                             </div>
                         </div>
 
                         <!-- LUMEN_MIRROR -->
-                        <div class="box" style="padding: 0; overflow: hidden; border-radius: 8px; border: 1px solid rgba(0, 243, 255, 0.3); display: flex; flex-direction: column; background: rgba(0,0,0,0.2);">
-                            <a href="/lumen-mirror/" target="_blank" rel="noopener noreferrer" style="display: block; border-bottom: 1px solid rgba(0, 243, 255, 0.1); text-decoration: none;">
-                                <img src="/assets/images/lumen_mirror_thumbnail.png" alt="LUMEN_MIRROR - ルーメン・ミラー" style="width: 100%; aspect-ratio: 1/1; object-fit: cover; display: block;" />
+                        <div class="game-card" style="--game-theme: #00f3ff; --game-theme-alpha: rgba(0, 243, 255, 0.3);">
+                            <a href="/lumen-mirror/" class="image-link">
+                                <img src="/assets/images/lumen_mirror_thumbnail.png" alt="LUMEN_MIRROR - ルーメン・ミラー" width="1024" height="1024" loading="lazy" />
                             </a>
-                            <div style="padding: 2em; flex-grow: 1; display: flex; flex-direction: column;">
-                                <header class="major" style="margin-bottom: 1em;">
-                                    <h3><a href="/lumen-mirror/" target="_blank" rel="noopener noreferrer">LUMEN_MIRROR</a></h3>
+                            <div class="game-card-content">
+                                <header class="major game-card-title">
+                                    <h3><a href="/lumen-mirror/">LUMEN_MIRROR</a></h3>
                                 </header>
-                                <p style="font-size: 0.9em; margin-bottom: 1.5em; line-height: 1.6;"><strong style="color: #00f3ff; font-size: 0.85em; letter-spacing: 0.1em; border: 1px solid rgba(0, 243, 255,0.4); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 8px;">物理反射パズル / スマホ対応</strong><br>漆黒の虚空に指先で［鏡のライン］を紡ぎ、光をターゲットへと導け。硬派で洗練された幾何学の美学。</p>
-                                <ul class="actions" style="margin-top: auto; margin-bottom: 0;">
-                                    <li><a href="/lumen-mirror/" class="button next" target="_blank" rel="noopener noreferrer">遊ぶ</a></li>
+                                <p class="game-card-desc"><strong class="game-badge">物理反射パズル / スマホ対応</strong><br>漆黒の虚空に指先で［鏡のライン］を紡ぎ、光をターゲットへと導け。硬派で洗練された幾何学の美学。</p>
+                                <ul class="actions">
+                                    <li><a href="/lumen-mirror/" class="button next">遊ぶ</a></li>
                                 </ul>
                             </div>
                         </div>
 
                         <!-- ブラックホール・スイーパー -->
-                        <div class="box" style="padding: 0; overflow: hidden; border-radius: 8px; border: 1px solid rgba(0, 229, 255, 0.3); display: flex; flex-direction: column; background: rgba(0,0,0,0.2);">
-                            <a href="/blackhole-sweeper/" target="_blank" rel="noopener noreferrer" style="display: block; border-bottom: 1px solid rgba(0, 229, 255, 0.1); text-decoration: none;">
-                                <img src="/assets/images/blackhole_sweeper_thumbnail_1779194532152.png" alt="ブラックホール・スイーパー" style="width: 100%; aspect-ratio: 1/1; object-fit: cover; display: block;" />
+                        <div class="game-card" style="--game-theme: #00e5ff; --game-theme-alpha: rgba(0, 229, 255, 0.3);">
+                            <a href="/blackhole-sweeper/" class="image-link">
+                                <img src="/assets/images/blackhole_sweeper_thumbnail_1779194532152.png" alt="ブラックホール・スイーパー" width="1024" height="1024" loading="lazy" />
                             </a>
-                            <div style="padding: 2em; flex-grow: 1; display: flex; flex-direction: column;">
-                                <header class="major" style="margin-bottom: 1em;">
-                                    <h3><a href="/blackhole-sweeper/" target="_blank" rel="noopener noreferrer">ブラックホール・スイーパー</a></h3>
+                            <div class="game-card-content">
+                                <header class="major game-card-title">
+                                    <h3><a href="/blackhole-sweeper/">ブラックホール・スイーパー</a></h3>
                                 </header>
-                                <p style="font-size: 0.9em; margin-bottom: 1.5em; line-height: 1.6;"><strong style="color: #00e5ff; font-size: 0.85em; letter-spacing: 0.1em; border: 1px solid rgba(0, 229, 255,0.4); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 8px;">一筆書きアクション / スマホ対応</strong><br>画面をなぞって「線」を引き、湧き出るバグをぐるっと囲んで一網打尽！欲張りすぎにはご用心。</p>
-                                <ul class="actions" style="margin-top: auto; margin-bottom: 0;">
-                                    <li><a href="/blackhole-sweeper/" class="button next" target="_blank" rel="noopener noreferrer">遊ぶ</a></li>
+                                <p class="game-card-desc"><strong class="game-badge">一筆書きアクション / スマホ対応</strong><br>画面をなぞって「線」を引き、湧き出るバグをぐるっと囲んで一網打尽！欲張りすぎにはご用心。</p>
+                                <ul class="actions">
+                                    <li><a href="/blackhole-sweeper/" class="button next">遊ぶ</a></li>
                                 </ul>
                             </div>
                         </div>
 
                         <!-- ギリギリ・ブレーキ！ -->
-                        <div class="box" style="padding: 0; overflow: hidden; border-radius: 8px; border: 1px solid rgba(0, 242, 254, 0.3); display: flex; flex-direction: column; background: rgba(0,0,0,0.2);">
-                            <a href="/girigiri-brake/" target="_blank" rel="noopener noreferrer" style="display: block; border-bottom: 1px solid rgba(0, 242, 254, 0.1); text-decoration: none;">
-                                <img src="/assets/images/girigiri_brake_thumbnail_1779165077904.png" alt="ギリギリ・ブレーキ！" style="width: 100%; aspect-ratio: 1/1; object-fit: cover; display: block;" />
+                        <div class="game-card" style="--game-theme: #00f2fe; --game-theme-alpha: rgba(0, 242, 254, 0.3);">
+                            <a href="/girigiri-brake/" class="image-link">
+                                <img src="/assets/images/girigiri_brake_thumbnail_1779165077904.png" alt="ギリギリ・ブレーキ！" width="1024" height="1024" loading="lazy" />
                             </a>
-                            <div style="padding: 2em; flex-grow: 1; display: flex; flex-direction: column;">
-                                <header class="major" style="margin-bottom: 1em;">
-                                    <h3><a href="/girigiri-brake/" target="_blank" rel="noopener noreferrer">ギリギリ・ブレーキ！</a></h3>
+                            <div class="game-card-content">
+                                <header class="major game-card-title">
+                                    <h3><a href="/girigiri-brake/">ギリギリ・ブレーキ！</a></h3>
                                 </header>
-                                <p style="font-size: 0.9em; margin-bottom: 1.5em; line-height: 1.6;"><strong style="color: #00f2fe; font-size: 0.85em; letter-spacing: 0.1em; border: 1px solid rgba(0, 242, 254,0.4); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 8px;">チキンレース / スマホ対応</strong><br>猛スピードからの急ブレーキ！崖ギリギリで止まる快感とスリルを味わおう。</p>
-                                <ul class="actions" style="margin-top: auto; margin-bottom: 0;">
-                                    <li><a href="/girigiri-brake/" class="button next" target="_blank" rel="noopener noreferrer">遊ぶ</a></li>
+                                <p class="game-card-desc"><strong class="game-badge">チキンレース / スマホ対応</strong><br>猛スピードからの急ブレーキ！崖ギリギリで止まる快感とスリルを味わおう。</p>
+                                <ul class="actions">
+                                    <li><a href="/girigiri-brake/" class="button next">遊ぶ</a></li>
                                 </ul>
                             </div>
                         </div>
 
                         <!-- 超絶！仕分け工場 -->
-                        <div class="box" style="padding: 0; overflow: hidden; border-radius: 8px; border: 1px solid rgba(255, 215, 0, 0.3); display: flex; flex-direction: column; background: rgba(0,0,0,0.2);">
-                            <a href="/sorting-factory/" target="_blank" rel="noopener noreferrer" style="display: block; border-bottom: 1px solid rgba(255, 215, 0, 0.1); text-decoration: none;">
-                                <img src="/assets/images/sorting_factory_thumbnail_1779165097756.png" alt="超絶！仕分け工場" style="width: 100%; aspect-ratio: 1/1; object-fit: cover; display: block;" />
+                        <div class="game-card" style="--game-theme: #ffd700; --game-theme-alpha: rgba(255, 215, 0, 0.3);">
+                            <a href="/sorting-factory/" class="image-link">
+                                <img src="/assets/images/sorting_factory_thumbnail_1779165097756.png" alt="超絶！仕分け工場" width="1024" height="1024" loading="lazy" />
                             </a>
-                            <div style="padding: 2em; flex-grow: 1; display: flex; flex-direction: column;">
-                                <header class="major" style="margin-bottom: 1em;">
-                                    <h3><a href="/sorting-factory/" target="_blank" rel="noopener noreferrer">超絶！仕分け工場</a></h3>
+                            <div class="game-card-content">
+                                <header class="major game-card-title">
+                                    <h3><a href="/sorting-factory/">超絶！仕分け工場</a></h3>
                                 </header>
-                                <p style="font-size: 0.9em; margin-bottom: 1.5em; line-height: 1.6;"><strong style="color: #ffd700; font-size: 0.85em; letter-spacing: 0.1em; border: 1px solid rgba(255, 215, 0, 0.4); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 8px;">脳トレパニック / スマホ対応</strong><br>迫り来るアイテムを左右に仕分けろ！途中で変わるルールに君の脳はついてこれるか？</p>
-                                <ul class="actions" style="margin-top: auto; margin-bottom: 0;">
-                                    <li><a href="/sorting-factory/" class="button next" target="_blank" rel="noopener noreferrer">遊ぶ</a></li>
+                                <p class="game-card-desc"><strong class="game-badge">脳トレパニック / スマホ対応</strong><br>迫り来るアイテムを左右に仕分けろ！途中で変わるルールに君の脳はついてこれるか？</p>
+                                <ul class="actions">
+                                    <li><a href="/sorting-factory/" class="button next">遊ぶ</a></li>
                                 </ul>
                             </div>
                         </div>
 
                         <!-- 限界！ステルスサボタージュ -->
-                        <div class="box" style="padding: 0; overflow: hidden; border-radius: 8px; border: 1px solid rgba(255, 51, 102, 0.3); display: flex; flex-direction: column; background: rgba(0,0,0,0.2);">
-                            <a href="/stealth-slacker/" target="_blank" rel="noopener noreferrer" style="display: block; border-bottom: 1px solid rgba(255, 51, 102, 0.1); text-decoration: none;">
-                                <img src="/assets/images/stealth_slacker_thumbnail_1779165112569.png" alt="限界！ステルスサボタージュ" style="width: 100%; aspect-ratio: 1/1; object-fit: cover; display: block;" />
+                        <div class="game-card" style="--game-theme: #ff3366; --game-theme-alpha: rgba(255, 51, 102, 0.3);">
+                            <a href="/stealth-slacker/" class="image-link">
+                                <img src="/assets/images/stealth_slacker_thumbnail_1779165112569.png" alt="限界！ステルスサボタージュ" width="1024" height="1024" loading="lazy" />
                             </a>
-                            <div style="padding: 2em; flex-grow: 1; display: flex; flex-direction: column;">
-                                <header class="major" style="margin-bottom: 1em;">
-                                    <h3><a href="/stealth-slacker/" target="_blank" rel="noopener noreferrer">限界！ステルスサボタージュ</a></h3>
+                            <div class="game-card-content">
+                                <header class="major game-card-title">
+                                    <h3><a href="/stealth-slacker/">限界！ステルスサボタージュ</a></h3>
                                 </header>
-                                <p style="font-size: 0.9em; margin-bottom: 1.5em; line-height: 1.6;"><strong style="color: #ff3366; font-size: 0.85em; letter-spacing: 0.1em; border: 1px solid rgba(255, 51, 102, 0.4); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 8px;">バカゲー / スマホ対応</strong><br>画面長押しで全力サボり！上司が振り返る瞬間に指を離して仕事してるフリをしろ！</p>
-                                <ul class="actions" style="margin-top: auto; margin-bottom: 0;">
-                                    <li><a href="/stealth-slacker/" class="button next" target="_blank" rel="noopener noreferrer">遊ぶ</a></li>
+                                <p class="game-card-desc"><strong class="game-badge">バカゲー / スマホ対応</strong><br>画面長押しで全力サボり！上司が振り返る瞬間に指を離して仕事してるフリをしろ！</p>
+                                <ul class="actions">
+                                    <li><a href="/stealth-slacker/" class="button next">遊ぶ</a></li>
                                 </ul>
                             </div>
                         </div>
 
                         <!-- みきり一閃 -->
-                        <div class="box" style="padding: 0; overflow: hidden; border-radius: 8px; border: 1px solid rgba(255, 211, 106, 0.3); display: flex; flex-direction: column; background: rgba(0,0,0,0.2);">
-                            <a href="/mikiri-issen/" target="_blank" rel="noopener noreferrer" style="display: block; border-bottom: 1px solid rgba(255, 211, 106, 0.1); text-decoration: none;">
-                                <img src="/assets/images/mikiri_issen_thumbnail_1779165128314.png" alt="みきり一閃" style="width: 100%; aspect-ratio: 1/1; object-fit: cover; display: block;" />
+                        <div class="game-card" style="--game-theme: #ffd36a; --game-theme-alpha: rgba(255, 211, 106, 0.3);">
+                            <a href="/mikiri-issen/" class="image-link">
+                                <img src="/assets/images/mikiri_issen_thumbnail_1779165128314.png" alt="みきり一閃" width="1024" height="1024" loading="lazy" />
                             </a>
-                            <div style="padding: 2em; flex-grow: 1; display: flex; flex-direction: column;">
-                                <header class="major" style="margin-bottom: 1em;">
-                                    <h3><a href="/mikiri-issen/" target="_blank" rel="noopener noreferrer">みきり一閃</a></h3>
+                            <div class="game-card-content">
+                                <header class="major game-card-title">
+                                    <h3><a href="/mikiri-issen/">みきり一閃</a></h3>
                                 </header>
-                                <p style="font-size: 0.9em; margin-bottom: 1.5em; line-height: 1.6;"><strong style="color: #ffd36a; font-size: 0.85em; letter-spacing: 0.1em; border: 1px solid rgba(255,211,106,0.4); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 8px;">反射神経 / スマホ対応</strong><br>合図の瞬間だけを斬る、純粋な一瞬勝負。襲い来る剣客たちを打ち倒し、限界突破を目指せ！</p>
-                                <ul class="actions" style="margin-top: auto; margin-bottom: 0;">
-                                    <li><a href="/mikiri-issen/" class="button next" target="_blank" rel="noopener noreferrer">遊ぶ</a></li>
+                                <p class="game-card-desc"><strong class="game-badge">反射神経 / スマホ対応</strong><br>合図の瞬間だけを斬る、純粋な一瞬勝負。襲い来る剣客たちを打ち倒し、限界突破を目指せ！</p>
+                                <ul class="actions">
+                                    <li><a href="/mikiri-issen/" class="button next">遊ぶ</a></li>
                                 </ul>
                             </div>
                         </div>
 
                         <!-- ウォールジャンパー -->
-                        <div class="box" style="padding: 0; overflow: hidden; border-radius: 8px; border: 1px solid rgba(255, 51, 51, 0.3); display: flex; flex-direction: column; background: rgba(0,0,0,0.2);">
-                            <a href="/wall-jumper/" target="_blank" rel="noopener noreferrer" style="display: block; border-bottom: 1px solid rgba(212, 212, 255, 0.1); text-decoration: none;">
-                                <img src="/assets/images/wall_jumper_thumbnail_1779165143429.png" alt="ウォールジャンパー" style="width: 100%; aspect-ratio: 1/1; object-fit: cover; display: block;" />
+                        <div class="game-card" style="--game-theme: #ff6666; --game-theme-alpha: rgba(255, 102, 102, 0.3);">
+                            <a href="/wall-jumper/" class="image-link">
+                                <img src="/assets/images/wall_jumper_thumbnail_1779165143429.png" alt="ウォールジャンパー" width="1024" height="1024" loading="lazy" />
                             </a>
-                            <div style="padding: 2em; flex-grow: 1; display: flex; flex-direction: column;">
-                                <header class="major" style="margin-bottom: 1em;">
-                                    <h3><a href="/wall-jumper/" target="_blank" rel="noopener noreferrer">ウォールジャンパー</a></h3>
+                            <div class="game-card-content">
+                                <header class="major game-card-title">
+                                    <h3><a href="/wall-jumper/">ウォールジャンパー</a></h3>
                                 </header>
-                                <p style="font-size: 0.9em; margin-bottom: 1.5em; line-height: 1.6;"><strong style="color: #ff6666; font-size: 0.85em; letter-spacing: 0.1em; border: 1px solid rgba(255,102,102,0.4); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 8px;">激ムズアクション / PC推奨</strong><br>壁を蹴ってひたすら上に登り続ける即死系アクション。赤いアイツを操って自己ベストに挑もう！</p>
-                                <ul class="actions" style="margin-top: auto; margin-bottom: 0;">
-                                    <li><a href="/wall-jumper/" class="button next" target="_blank" rel="noopener noreferrer">遊ぶ</a></li>
+                                <p class="game-card-desc"><strong class="game-badge">激ムズアクション / PC推奨</strong><br>壁を蹴ってひたすら上に登り続ける即死系アクション。赤いアイツを操って自己ベストに挑もう！</p>
+                                <ul class="actions">
+                                    <li><a href="/wall-jumper/" class="button next">遊ぶ</a></li>
                                 </ul>
                             </div>
                         </div>
 
                         <!-- 影まね道場 -->
-                        <div class="box" style="padding: 0; overflow: hidden; border-radius: 8px; border: 1px solid rgba(224, 183, 86, 0.3); display: flex; flex-direction: column; background: rgba(0,0,0,0.2);">
-                            <a href="/kage-mane-dojo/" target="_blank" rel="noopener noreferrer" style="display: block; border-bottom: 1px solid rgba(224, 183, 86, 0.1); text-decoration: none;">
-                                <img src="/assets/images/kage_mane_dojo_thumbnail.svg" alt="影まね道場" style="width: 100%; aspect-ratio: 1/1; object-fit: cover; display: block;" />
+                        <div class="game-card" style="--game-theme: #e0b756; --game-theme-alpha: rgba(224, 183, 86, 0.3);">
+                            <a href="/kage-mane-dojo/" class="image-link">
+                                <img src="/assets/images/kage_mane_dojo_thumbnail.svg" alt="影まね道場" width="1024" height="1024" loading="lazy" />
                             </a>
-                            <div style="padding: 2em; flex-grow: 1; display: flex; flex-direction: column;">
-                                <header class="major" style="margin-bottom: 1em;">
-                                    <h3><a href="/kage-mane-dojo/" target="_blank" rel="noopener noreferrer">影まね道場</a></h3>
+                            <div class="game-card-content">
+                                <header class="major game-card-title">
+                                    <h3><a href="/kage-mane-dojo/">影まね道場</a></h3>
                                 </header>
-                                <p style="font-size: 0.9em; margin-bottom: 1.5em; line-height: 1.6;"><strong style="color: #e0b756; font-size: 0.85em; letter-spacing: 0.1em; border: 1px solid rgba(224,183,86,0.4); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 8px;">記憶アクション / スマホ対応</strong><br>師範が見せる型を覚え、弟子として同じ順番で打ち返せ。集中力と記憶力で段位を伸ばす道場稽古。</p>
-                                <ul class="actions" style="margin-top: auto; margin-bottom: 0;">
-                                    <li><a href="/kage-mane-dojo/" class="button next" target="_blank" rel="noopener noreferrer">遊ぶ</a></li>
+                                <p class="game-card-desc"><strong class="game-badge">記憶アクション / スマホ対応</strong><br>師範が見せる型を覚え、弟子として同じ順番で打ち返せ。集中力と記憶力で段位を伸ばす道場稽古。</p>
+                                <ul class="actions">
+                                    <li><a href="/kage-mane-dojo/" class="button next">遊ぶ</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -240,7 +260,7 @@
 
                 </div>
             </section>
-        </div>
+        </main>
 
 <!-- Footer -->
 	<footer id="footer">

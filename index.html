@@ -28,6 +28,14 @@
 	<link rel="stylesheet" href="/assets/css/main.css?v=20260307-4" />
 	<link rel="stylesheet" href="/assets/css/custom.css?v=20260418-9" />
 	<link rel="stylesheet" href="/assets/css/index.css?v=20260418-2" />
+	<script type="application/ld+json">
+	{
+		"@context": "https://schema.org",
+		"@type": "WebSite",
+		"name": "はじっこぐらし",
+		"url": "https://hajikkoroom.xsrv.jp/"
+	}
+	</script>
 </head>
 
 <body class="is-home">
@@ -78,11 +86,11 @@
 		</section>
 
 		<!-- Main -->
-		<div id="main">
-			<section id="one" class="tiles">
+		<main id="main">
+			<section id="one" class="tiles tiles--home">
 				<article>
 					<span class="image">
-						<img src="assets/images/pic01.webp" alt="私たちについて" />
+						<img src="assets/images/pic01.webp" alt="私たちについて" width="576" height="409" loading="lazy" />
 					</span>
 					<header class="major">
 						<h3><a href="/aboutus.html" class="link">私たちについて</a></h3>
@@ -92,7 +100,7 @@
 
 				<article>
 					<span class="image">
-						<img src="assets/images/pic05.webp" alt="作品一覧" />
+						<img src="assets/images/pic05.webp" alt="作品一覧" width="576" height="409" loading="lazy" />
 					</span>
 					<header class="major">
 						<h3><a href="/portfolio.html" class="link">作品一覧</a></h3>
@@ -102,7 +110,7 @@
 
 				<article>
 					<span class="image">
-						<img src="assets/images/pic03.webp" alt="メンバー紹介" />
+						<img src="assets/images/pic03.webp" alt="メンバー紹介" width="864" height="410" loading="lazy" />
 					</span>
 					<header class="major">
 						<h3><a href="/members.html" class="link">メンバー紹介</a></h3>
@@ -112,7 +120,7 @@
 
 				<article>
 					<span class="image">
-						<img src="assets/images/pic02.webp" alt="お知らせ" />
+						<img src="assets/images/pic02.webp" alt="お知らせ" width="864" height="409" loading="lazy" />
 					</span>
 					<header class="major">
 						<h3><a href="/news.html" class="link">お知らせ</a></h3>
@@ -122,7 +130,7 @@
 
 				<article>
 					<span class="image">
-						<img src="assets/images/pic06.webp" alt="ミニゲーム広場" />
+						<img src="assets/images/pic06.webp" alt="ミニゲーム広場" width="864" height="409" loading="lazy" />
 					</span>
 					<header class="major">
 						<h3><a href="/minigames.html" class="link">ミニゲーム広場</a></h3>
@@ -131,7 +139,7 @@
 				</article>
 
 			</section>
-		</div>
+		</main>
 
 		
 		<!-- Note Articles (Latest Activity) -->
@@ -141,21 +149,21 @@
 					<h2>最新の活動記録</h2>
 				</header>
 				<p>はじっこぐらしの裏側や、日々の活動をnoteで発信しています！</p>
-				<div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 2em;">
+				<div class="note-cards-container">
 					<!-- Note Card 1 -->
-					<a href="https://note.com/hajikkogurashi01/n/n5c3d29c281e1" target="_blank" rel="noopener noreferrer" style="flex: 1 1 300px; background: rgba(255,255,255,0.05); border-radius: 8px; overflow: hidden; text-decoration: none; border: 1px solid rgba(255,255,255,0.1); transition: transform 0.3s, box-shadow 0.3s;" class="note-card">
-						<div style="height: 160px; background: url('assets/images/pic02.webp') center/cover;"></div>
-						<div style="padding: 20px;">
-							<h3 style="font-size: 1.2em; margin-bottom: 10px; color: #fff;">東京ゲームダンジョンに行ってきた</h3>
-							<p style="font-size: 0.9em; color: rgba(255,255,255,0.7); margin: 0;">2025年05月09日</p>
+					<a href="https://note.com/hajikkogurashi01/n/n5c3d29c281e1" target="_blank" rel="noopener noreferrer" class="note-card">
+						<div class="note-card-thumb" style="background-image: url('assets/images/pic02.webp');"></div>
+						<div class="note-card-body">
+							<h3 class="note-card-title">東京ゲームダンジョンに行ってきた</h3>
+							<p class="note-card-date">2025年05月09日</p>
 						</div>
 					</a>
 					<!-- Note Card 2 (Placeholder) -->
-					<a href="https://note.com/hajikkogurashi01" target="_blank" rel="noopener noreferrer" style="flex: 1 1 300px; background: rgba(255,255,255,0.05); border-radius: 8px; overflow: hidden; text-decoration: none; border: 1px solid rgba(255,255,255,0.1); transition: transform 0.3s, box-shadow 0.3s;" class="note-card">
-						<div style="height: 160px; background: url('assets/images/pic03.webp') center/cover;"></div>
-						<div style="padding: 20px;">
-							<h3 style="font-size: 1.2em; margin-bottom: 10px; color: #fff;">はじっこぐらし、活動開始！</h3>
-							<p style="font-size: 0.9em; color: rgba(255,255,255,0.7); margin: 0;">2024年08月16日</p>
+					<a href="https://note.com/hajikkogurashi01" target="_blank" rel="noopener noreferrer" class="note-card">
+						<div class="note-card-thumb" style="background-image: url('assets/images/pic03.webp');"></div>
+						<div class="note-card-body">
+							<h3 class="note-card-title">はじっこぐらし、活動開始！</h3>
+							<p class="note-card-date">2024年08月16日</p>
 						</div>
 					</a>
 				</div>
@@ -166,81 +174,7 @@
 		</section>
 
 		<!-- Contact -->
-		<section id="contact">
-			<div class="inner">
-				<section class="contact-panel contact-panel--form">
-					<header class="major">
-						<h2>お問い合わせ</h2>
-					</header>
-					<form action="/contact.php" method="POST" class="contact-form">
-						<div class="field half first">
-							<label for="name">お名前</label>
-							<input type="text" name="name" id="name" autocomplete="name" required />
-						</div>
-						<div class="field half">
-							<label for="email"><span class="required-mark">※</span>メールアドレス</label>
-							<input type="email" name="_replyto" id="email" autocomplete="email" inputmode="email" placeholder="例：example@mail.com" required />
-						</div>
-						<div class="field">
-							<label for="message">お問い合わせ内容</label>
-							<textarea name="message" id="message" rows="6" required></textarea>
-						</div>
-						<input type="hidden" name="return_to" value="/" />
-						<div style="display:none;">
-							<label for="company">会社名</label>
-							<input type="text" name="company" id="company" tabindex="-1" autocomplete="off" />
-						</div>
-						<ul class="actions">
-							<li><input type="submit" value="送信する" class="special" /></li>
-							<li><input type="reset" value="入力をリセット" /></li>
-						</ul>
-					</form>
-					<p>フォームが送信できない場合は、<a href="mailto:hajikkogurashi.official@gmail.com">メール</a>でもご連絡いただけます。</p>
-				</section>
-
-				<section class="split contact-panel contact-panel--info">
-					<section>
-						<div class="contact-method">
-							<span class="icon alt fa-envelope"></span>
-							<h3>メール</h3>
-							<a href="mailto:hajikkogurashi.official@gmail.com">hajikkogurashi.official@gmail.com</a>
-						</div>
-					</section>
-
-					<section>
-						<div class="contact-method">
-							<span class="icon alt fa-home"></span>
-							<h3>拠点</h3>
-							<span>日本のどこかのはじっこ</span>
-						</div>
-					</section>
-
-					<section>
-						<div class="contact-method contact-method--social">
-							<span class="icon alt fa-share-alt"></span>
-							<h3>SNS</h3>
-							<ul class="icons social-links">
-								<li class="social-links__item">
-									<a href="https://note.com/hajikkogurashi01" class="icon alt fa-sticky-note-o" target="_blank" rel="noopener noreferrer" aria-label="note" title="note">
-										<span class="label">note</span>
-									</a>
-								</li>
-								<li class="social-links__item">
-									<a href="https://x.com/Corner_neighbor" class="icon alt fa-twitter" target="_blank" rel="noopener noreferrer" aria-label="X" title="X">
-										<span class="label">X</span>
-									</a>
-								</li>
-								<li class="social-links__item">
-									<a href="https://www.youtube.com/@hajikkogurashi" class="icon alt fa-youtube-play" target="_blank" rel="noopener noreferrer" aria-label="YouTube" title="YouTube">
-										<span class="label">YouTube</span>
-									</a>
-								</li>
-							</ul>
-						</div>
-					</section>
-				</section>
-			</div>
-		</section>
+		<?php include 'includes/contact-section.php'; ?>
 
 		<!-- Footer -->
 		<footer id="footer">
