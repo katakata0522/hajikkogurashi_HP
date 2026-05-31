@@ -1,5 +1,5 @@
 // Kanji Slicer & Merge (漢字スライサー・マージ)
-// Version: v1.5.0
+// Version: v1.6.0
 // Core Game Logic
 
 // Virtual coordinate space (maintains consistency across all screens)
@@ -32,6 +32,10 @@ const KANJI_DATA = {
     '門': { tier: 1, color: '#7676f5', glow: '#303f9f', read: 'もん' },
     '口': { tier: 1, color: '#f57a42', glow: '#e64a19', read: 'こう' },
     '火': { tier: 1, color: '#f54a4a', glow: '#d32f2f', read: 'か' },
+    '水': { tier: 1, color: '#3182ce', glow: '#2b4365', read: 'すい' },
+    '小': { tier: 1, color: '#a0aec0', glow: '#4a5568', read: 'しょう' },
+    '田': { tier: 1, color: '#b7791f', glow: '#744210', read: 'でん' },
+    '土': { tier: 1, color: '#9c4221', glow: '#6b2d15', read: 'ど' },
     
     // Tier 2 (Compounds)
     '林': { tier: 2, color: '#68d391', glow: '#2f855a', read: 'りん' },
@@ -44,50 +48,100 @@ const KANJI_DATA = {
     '炎': { tier: 2, color: '#fc8181', glow: '#9b2c2c', read: 'えん' },
     '回': { tier: 2, color: '#fbd38d', glow: '#dd6b20', read: 'かい' },
     '朋': { tier: 2, color: '#90cdf4', glow: '#2b6cb0', read: 'ほう' },
+    '肖': { tier: 2, color: '#e2e8f0', glow: '#718096', read: 'しょう' },
+    '里': { tier: 2, color: '#dd6b20', glow: '#9c4221', read: 'り' },
+    '果': { tier: 2, color: '#48bb78', glow: '#22543d', read: 'か' },
     
     // Tier 3
     '森': { tier: 3, color: '#48bb78', glow: '#22543d', read: 'しん' },
+    '消': { tier: 3, color: '#319795', glow: '#1d4044', read: 'しょう' },
+    '淡': { tier: 3, color: '#718096', glow: '#2d3748', read: 'たん' },
 
     // Tier 4 (Idioms - New for erasing puzzle)
     '森林': { tier: 4, color: '#2f855a', glow: '#1a5235', read: 'しんりん' },
-    '火山': { tier: 4, color: '#e53e3e', glow: '#9b2c2c', read: 'かざん' },
-    '日月': { tier: 4, color: '#3182ce', glow: '#2a4365', read: 'じつげつ' },
-    '明日': { tier: 4, color: '#dd6b20', glow: '#9c4221', read: 'あした' },
-    '人間': { tier: 4, color: '#805ad5', glow: '#553c9a', read: 'にんげん' },
-    '岩石': { tier: 4, color: '#718096', glow: '#4a5568', read: 'がんせき' },
-    '女子': { tier: 4, color: '#d53f8c', glow: '#97266f', read: 'じょし' },
-    '門口': { tier: 4, color: '#319795', glow: '#234e52', read: 'かどぐち' },
     '山林': { tier: 4, color: '#38a169', glow: '#22543d', read: 'さんりん' },
-    '火炎': { tier: 4, color: '#e53e3e', glow: '#742a2a', read: 'かえん' }
+    '明日': { tier: 4, color: '#dd6b20', glow: '#9c4221', read: 'あした' },
+    '明月': { tier: 4, color: '#faf089', glow: '#b7791f', read: 'めいげつ' },
+    '休日': { tier: 4, color: '#81e6d9', glow: '#2c7a7b', read: 'きゅうじつ' },
+    '門人': { tier: 4, color: '#7676f5', glow: '#303f9f', read: 'もんじん' },
+    '人間': { tier: 4, color: '#805ad5', glow: '#553c9a', read: 'にんげん' },
+    '岩石': { tier: 4, color: '#cbd5e0', glow: '#4a5568', read: 'がんせき' },
+    '岩山': { tier: 4, color: '#a8764a', glow: '#5d4037', read: 'いわやま' },
+    '火炎': { tier: 4, color: '#e53e3e', glow: '#742a2a', read: 'かえん' },
+    '炎山': { tier: 4, color: '#fc8181', glow: '#9b2c2c', read: 'えんざん' },
+    '好日': { tier: 4, color: '#fbb6ce', glow: '#b83280', read: 'こうじつ' },
+    '好人': { tier: 4, color: '#fbb6ce', glow: '#b83280', read: 'こうじん' },
+    '人口': { tier: 4, color: '#f0f0f0', glow: '#9e9e9e', read: 'じんこう' },
+    '火口': { tier: 4, color: '#f54a4a', glow: '#d32f2f', read: 'かこう' },
+    '火山': { tier: 4, color: '#e53e3e', glow: '#9b2c2c', read: 'かざん' },
+    '消火': { tier: 4, color: '#e53e3e', glow: '#d32f2f', read: 'しょうか' },
+    '淡水': { tier: 4, color: '#3182ce', glow: '#2b4365', read: 'たんすい' },
+    '水田': { tier: 4, color: '#38a169', glow: '#22543d', read: 'すいでん' },
+    '里山': { tier: 4, color: '#b7791f', glow: '#744210', read: 'さとやま' },
+    '山水': { tier: 4, color: '#3182ce', glow: '#2b4365', read: 'さんすい' },
+    '土木': { tier: 4, color: '#9c4221', glow: '#6b2d15', read: 'どぼく' },
+    '里人': { tier: 4, color: '#805ad5', glow: '#553c9a', read: 'さとびと' },
+    '土石': { tier: 4, color: '#9c4221', glow: '#6b2d15', read: 'どせき' },
+    '田口': { tier: 4, color: '#b7791f', glow: '#744210', read: 'たぐち' }
 };
 
-const TIER1_KANJI = ['木', '日', '月', '人', '女', '子', '山', '石', '門', '口', '火'];
-const TIER2_KANJI = ['林', '明', '休', '好', '岩', '間', '問', '炎', '回', '朋'];
+const TIER1_KANJI = ['木', '日', '月', '人', '女', '子', '山', '石', '門', '口', '火', '水', '小', '田', '土'];
+const TIER2_KANJI = ['林', '明', '休', '好', '岩', '間', '問', '炎', '回', '朋', '肖', '里', '果'];
 
-// Idiom Recipes (A + B collisions erase instantly)
+// Idiom Recipes (A + B collisions erase instantly. Avoids overlap with RECIPES)
 const IDIOM_RECIPES = [
-    { a: '木', b: '林', result: '森林' },
-    { a: '林', b: '木', result: '森林' },
     { a: '木', b: '森', result: '森林' },
     { a: '森', b: '木', result: '森林' },
-    { a: '火', b: '山', result: '火山' },
-    { a: '山', b: '火', result: '火山' },
-    { a: '日', b: '月', result: '日月' },
-    { a: '月', b: '日', result: '日月' },
-    { a: '明', b: '日', result: '明日' },
-    { a: '日', b: '明', result: '明日' },
-    { a: '人', b: '間', result: '人間' },
-    { a: '間', b: '人', result: '人間' },
-    { a: '石', b: '岩', result: '岩石' },
-    { a: '岩', b: '石', result: '岩石' },
-    { a: '女', b: '子', result: '女子' },
-    { a: '子', b: '女', result: '女子' },
-    { a: '門', b: '口', result: '門口' },
-    { a: '口', b: '門', result: '門口' },
+    { a: '林', b: '森', result: '森林' },
+    { a: '森', b: '林', result: '森林' },
     { a: '山', b: '林', result: '山林' },
     { a: '林', b: '山', result: '山林' },
+    { a: '明', b: '日', result: '明日' },
+    { a: '日', b: '明', result: '明日' },
+    { a: '明', b: '月', result: '明月' },
+    { a: '月', b: '明', result: '明月' },
+    { a: '休', b: '日', result: '休日' },
+    { a: '日', b: '休', result: '休日' },
+    { a: '門', b: '人', result: '門人' },
+    { a: '人', b: '門', result: '門人' },
+    { a: '人', b: '間', result: '人間' },
+    { a: '間', b: '人', result: '人間' },
+    { a: '岩', b: '石', result: '岩石' },
+    { a: '石', b: '岩', result: '岩石' },
+    { a: '岩', b: '山', result: '岩山' },
+    { a: '山', b: '岩', result: '岩山' },
     { a: '火', b: '炎', result: '火炎' },
-    { a: '炎', b: '火', result: '火炎' }
+    { a: '炎', b: '火', result: '火炎' },
+    { a: '炎', b: '山', result: '炎山' },
+    { a: '山', b: '炎', result: '炎山' },
+    { a: '好', b: '日', result: '好日' },
+    { a: '日', b: '好', result: '好日' },
+    { a: '好', b: '人', result: '好人' },
+    { a: '人', b: '好', result: '好人' },
+    { a: '人', b: '口', result: '人口' },
+    { a: '口', b: '人', result: '人口' },
+    { a: '火', b: '口', result: '火口' },
+    { a: '口', b: '火', result: '火口' },
+    { a: '火', b: '山', result: '火山' },
+    { a: '山', b: '火', result: '火山' },
+    { a: '消', b: '火', result: '消火' },
+    { a: '火', b: '消', result: '消火' },
+    { a: '淡', b: '水', result: '淡水' },
+    { a: '水', b: '淡', result: '淡水' },
+    { a: '水', b: '田', result: '水田' },
+    { a: '田', b: '水', result: '水田' },
+    { a: '里', b: '山', result: '里山' },
+    { a: '山', b: '里', result: '里山' },
+    { a: '山', b: '水', result: '山水' },
+    { a: '水', b: '山', result: '山水' },
+    { a: '土', b: '木', result: '土木' },
+    { a: '木', b: '土', result: '土木' },
+    { a: '里', b: '人', result: '里人' },
+    { a: '人', b: '里', result: '里人' },
+    { a: '土', b: '石', result: '土石' },
+    { a: '石', b: '土', result: '土石' },
+    { a: '田', b: '口', result: '田口' },
+    { a: '口', b: '田', result: '田口' }
 ];
 
 // Merge Recipes
@@ -109,7 +163,19 @@ const RECIPES = [
     { a: '口', b: '門', result: '問', tier: 2 },
     { a: '火', b: '火', result: '炎', tier: 2 },
     { a: '口', b: '口', result: '回', tier: 2 },
-    { a: '月', b: '月', result: '朋', tier: 2 }
+    { a: '月', b: '月', result: '朋', tier: 2 },
+    
+    // Package A & B
+    { a: '小', b: '月', result: '肖', tier: 2 },
+    { a: '月', b: '小', result: '肖', tier: 2 },
+    { a: '田', b: '土', result: '里', tier: 2 },
+    { a: '土', b: '田', result: '里', tier: 2 },
+    { a: '木', b: '田', result: '果', tier: 2 },
+    { a: '田', b: '木', result: '果', tier: 2 },
+    { a: '水', b: '肖', result: '消', tier: 3 },
+    { a: '肖', b: '水', result: '消', tier: 3 },
+    { a: '水', b: '炎', result: '淡', tier: 3 },
+    { a: '炎', b: '水', result: '淡', tier: 3 }
 ];
 
 // Decomposition mappings for Slicing
@@ -124,7 +190,14 @@ const DECOMPOSITIONS = {
     '問': ['門', '口'],
     '炎': ['火', '火'],
     '回': ['口', '口'],
-    '朋': ['月', '月']
+    '朋': ['月', '月'],
+    
+    // Package A & B
+    '肖': ['小', '月'],
+    '里': ['田', '土'],
+    '果': ['木', '田'],
+    '消': ['水', '肖'],
+    '淡': ['水', '炎']
 };
 
 // Radii based on Tier
@@ -444,7 +517,12 @@ function spawnIdiomFloatingText(x, y, text, color) {
 
 // Discovered Kanji tracking (Encyclopedia)
 let discoveredKanji = JSON.parse(localStorage.getItem('kanjislicer_discovered') || '[]');
-const VALID_IDIOMS = ['森林', '火山', '日月', '明日', '人間', '岩石', '女子', '門口', '山林', '火炎'];
+const VALID_IDIOMS = [
+    '森林', '山林', '明日', '明月', '休日', '門人', 
+    '人間', '岩石', '岩山', '火炎', '炎山', '好日', 
+    '好人', '人口', '火口', '火山', '消火', '淡水', 
+    '水田', '里山', '山水', '土木', '里人', '土石', '田口'
+];
 discoveredKanji = discoveredKanji.filter(k => VALID_IDIOMS.includes(k));
 localStorage.setItem('kanjislicer_discovered', JSON.stringify(discoveredKanji));
 
@@ -540,7 +618,7 @@ function generateNextKanji() {
 
 // Choose a New Mission (Pulling from valid 2-character idioms)
 function chooseNewMission() {
-    const pool = ['森林', '火山', '日月', '明日', '人間', '岩石', '女子', '門口', '山林', '火炎'];
+    const pool = VALID_IDIOMS;
     let oldMission = currentMission;
     
     // Select new random mission, different from current
@@ -1053,7 +1131,7 @@ function initDictionarySkeleton() {
     if (isDictInitialized) return;
     dictGrid.innerHTML = '';
     
-    const targetKanji = ['森林', '火山', '日月', '明日', '人間', '岩石', '女子', '門口', '山林', '火炎'];
+    const targetKanji = VALID_IDIOMS;
     targetKanji.forEach(k => {
         const card = document.createElement('div');
         card.className = 'recipe-card locked';
