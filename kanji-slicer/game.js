@@ -756,8 +756,8 @@ function sliceBody(body, p1, p2) {
 // Input Helpers
 function getVirtualCoords(e) {
     const rect = canvas.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+    const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
     
     // Scale client coordinate to virtual coordinate space
     const x = ((clientX - rect.left) / rect.width) * V_WIDTH;
@@ -768,6 +768,7 @@ function getVirtualCoords(e) {
 // Mouse/Touch Listeners
 function handleStart(e) {
     if (isGameOver || isPaused) return;
+    if (e.cancelable) e.preventDefault();
     soundSynth.init(); // Initialize audio context on first tap
     
     const coords = getVirtualCoords(e);
@@ -788,6 +789,7 @@ function handleStart(e) {
 
 function handleMove(e) {
     if (isGameOver || isPaused) return;
+    if (e.cancelable) e.preventDefault();
     const coords = getVirtualCoords(e);
     
     if (isDraggingPreview) {
@@ -819,6 +821,7 @@ function handleEnd(e) {
         isSlicing = false;
         return;
     }
+    if (e && e.cancelable) e.preventDefault();
     if (isDraggingPreview && dropCooldown === 0) {
         // Drop Kanji!
         const r = getRadiusForTier(1);
@@ -851,13 +854,19 @@ function handleEnd(e) {
     isSlicing = false;
 }
 
-canvas.addEventListener('mousedown', handleStart);
-canvas.addEventListener('mousemove', handleMove);
-window.addEventListener('mouseup', handleEnd);
+if (window.PointerEvent) {
+    canvas.addEventListener('pointerdown', handleStart);
+    canvas.addEventListener('pointermove', handleMove);
+    window.addEventListener('pointerup', handleEnd);
+} else {
+    canvas.addEventListener('mousedown', handleStart);
+    canvas.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseup', handleEnd);
 
-canvas.addEventListener('touchstart', handleStart, { passive: true });
-canvas.addEventListener('touchmove', handleMove, { passive: true });
-window.addEventListener('touchend', handleEnd);
+    canvas.addEventListener('touchstart', handleStart, { passive: false });
+    canvas.addEventListener('touchmove', handleMove, { passive: false });
+    window.addEventListener('touchend', handleEnd);
+}
 window.addEventListener('blur', () => {
     isDraggingPreview = false;
     isSlicing = false;

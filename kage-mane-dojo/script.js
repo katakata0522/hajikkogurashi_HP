@@ -635,11 +635,19 @@ function bindEvents() {
     });
   }
 
-  elements.inputPad.addEventListener('click', (event) => {
+  const handlePadInput = (event) => {
     const button = event.target.closest('[data-direction]');
     if (!button) return;
+    event.preventDefault();
     handleDirection(button.dataset.direction);
-  });
+  };
+
+  if (window.PointerEvent) {
+    elements.inputPad.addEventListener('pointerdown', handlePadInput);
+  } else {
+    elements.inputPad.addEventListener('touchstart', handlePadInput, { passive: false });
+    elements.inputPad.addEventListener('mousedown', handlePadInput);
+  }
 
   window.addEventListener('keydown', (event) => {
     if (event.repeat) return;
