@@ -1,5 +1,5 @@
 /* Kanji Slicer & Merge (漢字スライサー・マージ) */
-/* Version: v1.4.0 */
+/* Version: v1.5.0 */
 
 /* Reset & Base styles */
 *, *::before, *::after {
@@ -132,7 +132,7 @@ body {
 
 #mission-kanji {
     font-family: 'Kaisei Decol', serif;
-    font-size: 2.2em;
+    font-size: 1.8em;
     font-weight: bold;
     color: #fff;
     text-shadow: 0 0 8px rgba(235, 94, 40, 0.8), 0 0 15px rgba(235, 94, 40, 0.4);

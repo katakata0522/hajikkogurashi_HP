@@ -1,5 +1,5 @@
 // Kanji Slicer & Merge (漢字スライサー・マージ)
-// Version: v1.4.0
+// Version: v1.5.0
 // Core Game Logic
 
 // Virtual coordinate space (maintains consistency across all screens)
@@ -46,11 +46,49 @@ const KANJI_DATA = {
     '朋': { tier: 2, color: '#90cdf4', glow: '#2b6cb0', read: 'ほう' },
     
     // Tier 3
-    '森': { tier: 3, color: '#48bb78', glow: '#22543d', read: 'しん' }
+    '森': { tier: 3, color: '#48bb78', glow: '#22543d', read: 'しん' },
+
+    // Tier 4 (Idioms - New for erasing puzzle)
+    '森林': { tier: 4, color: '#2f855a', glow: '#1a5235', read: 'しんりん' },
+    '火山': { tier: 4, color: '#e53e3e', glow: '#9b2c2c', read: 'かざん' },
+    '日月': { tier: 4, color: '#3182ce', glow: '#2a4365', read: 'じつげつ' },
+    '明日': { tier: 4, color: '#dd6b20', glow: '#9c4221', read: 'あした' },
+    '人間': { tier: 4, color: '#805ad5', glow: '#553c9a', read: 'にんげん' },
+    '岩石': { tier: 4, color: '#718096', glow: '#4a5568', read: 'がんせき' },
+    '女子': { tier: 4, color: '#d53f8c', glow: '#97266f', read: 'じょし' },
+    '門口': { tier: 4, color: '#319795', glow: '#234e52', read: 'かどぐち' },
+    '山林': { tier: 4, color: '#38a169', glow: '#22543d', read: 'さんりん' },
+    '火炎': { tier: 4, color: '#e53e3e', glow: '#742a2a', read: 'かえん' }
 };
 
 const TIER1_KANJI = ['木', '日', '月', '人', '女', '子', '山', '石', '門', '口', '火'];
 const TIER2_KANJI = ['林', '明', '休', '好', '岩', '間', '問', '炎', '回', '朋'];
+
+// Idiom Recipes (A + B collisions erase instantly)
+const IDIOM_RECIPES = [
+    { a: '木', b: '林', result: '森林' },
+    { a: '林', b: '木', result: '森林' },
+    { a: '木', b: '森', result: '森林' },
+    { a: '森', b: '木', result: '森林' },
+    { a: '火', b: '山', result: '火山' },
+    { a: '山', b: '火', result: '火山' },
+    { a: '日', b: '月', result: '日月' },
+    { a: '月', b: '日', result: '日月' },
+    { a: '明', b: '日', result: '明日' },
+    { a: '日', b: '明', result: '明日' },
+    { a: '人', b: '間', result: '人間' },
+    { a: '間', b: '人', result: '人間' },
+    { a: '石', b: '岩', result: '岩石' },
+    { a: '岩', b: '石', result: '岩石' },
+    { a: '女', b: '子', result: '女子' },
+    { a: '子', b: '女', result: '女子' },
+    { a: '門', b: '口', result: '門口' },
+    { a: '口', b: '門', result: '門口' },
+    { a: '山', b: '林', result: '山林' },
+    { a: '林', b: '山', result: '山林' },
+    { a: '火', b: '炎', result: '火炎' },
+    { a: '炎', b: '火', result: '火炎' }
+];
 
 // Merge Recipes
 const RECIPES = [
@@ -391,12 +429,23 @@ function spawnFloatingText(x, y, text, color = '#ffffff') {
     });
 }
 
+function spawnIdiomFloatingText(x, y, text, color) {
+    floatingTexts.push({
+        x: x,
+        y: y,
+        vy: -0.8,
+        text: text,
+        color: color,
+        alpha: 1,
+        decay: 0.012,
+        isIdiom: true
+    });
+}
+
 // Discovered Kanji tracking (Encyclopedia)
 let discoveredKanji = JSON.parse(localStorage.getItem('kanjislicer_discovered') || '[]');
-// Tier 1 bases are discovered by default
-TIER1_KANJI.forEach(k => {
-    if (!discoveredKanji.includes(k)) discoveredKanji.push(k);
-});
+const VALID_IDIOMS = ['森林', '火山', '日月', '明日', '人間', '岩石', '女子', '門口', '山林', '火炎'];
+discoveredKanji = discoveredKanji.filter(k => VALID_IDIOMS.includes(k));
 localStorage.setItem('kanjislicer_discovered', JSON.stringify(discoveredKanji));
 
 let hasUnsavedDiscoveries = false;
@@ -459,8 +508,14 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
-// Helper: Get Base Components of a Kanji
+// Helper: Get Base Components of a Kanji (Idiom components decomposition)
 function getBaseComponents(kanji) {
+    if (kanji.length === 2) {
+        return [
+            ...getBaseComponents(kanji[0]),
+            ...getBaseComponents(kanji[1])
+        ];
+    }
     if (TIER1_KANJI.includes(kanji)) return [kanji];
     const decomp = DECOMPOSITIONS[kanji];
     if (!decomp) return [kanji];
@@ -483,9 +538,9 @@ function generateNextKanji() {
     }
 }
 
-// Choose a New Mission
+// Choose a New Mission (Pulling from valid 2-character idioms)
 function chooseNewMission() {
-    const pool = score >= 150 ? [...TIER2_KANJI, '森'] : TIER2_KANJI;
+    const pool = ['森林', '火山', '日月', '明日', '人間', '岩石', '女子', '門口', '山林', '火炎'];
     let oldMission = currentMission;
     
     // Select new random mission, different from current
@@ -497,8 +552,13 @@ function chooseNewMission() {
     
     // Render Rubies for accessibility and educational aids
     const read = KANJI_DATA[currentMission].read;
+    const recipe = IDIOM_RECIPES.find(r => r.result === currentMission);
+    let formulaStr = '';
+    if (recipe) {
+        formulaStr = ` | ${recipe.a} ＋ ${recipe.b} で作ろう！`;
+    }
     if (missionReadingEl) {
-        missionReadingEl.textContent = `読み：${read} | 合体して作ろう！`;
+        missionReadingEl.textContent = `読み：${read}${formulaStr}`;
     }
     
     // Update active drop queue based on new mission base components
@@ -550,7 +610,89 @@ let bodiesToSpawn = [];
 function checkMerge(c1, c2) {
     if (c1.toDelete || c2.toDelete) return;
     
-    // Find recipe
+    // 1. Idiom Recipes check (Priority 1: Erase on match)
+    const idiomRecipe = IDIOM_RECIPES.find(r => 
+        (r.a === c1.kanji && r.b === c2.kanji) || 
+        (r.a === c2.kanji && r.b === c1.kanji)
+    );
+    
+    if (idiomRecipe) {
+        c1.toDelete = true;
+        c2.toDelete = true;
+        
+        const midX = (c1.x + c2.x) / 2;
+        const midY = (c1.y + c2.y) / 2;
+        const newIdiom = idiomRecipe.result;
+        const idiomColor = KANJI_DATA[newIdiom].color;
+        const isMission = (newIdiom === currentMission);
+        
+        // Track discovered idiom
+        if (!discoveredKanji.includes(newIdiom)) {
+            discoveredKanji.push(newIdiom);
+            hasUnsavedDiscoveries = true;
+            spawnFloatingText(midX, midY - 35, '新熟語解放！', '#eb5e28');
+        }
+        
+        // Spawn idiom explosion particles
+        spawnParticles(midX, midY, idiomColor, 16);
+        
+        // Dynamic combo chain check (within 1.2 seconds)
+        const now = Date.now();
+        if (now - lastMergeTime < 1200) {
+            chainCount++;
+        } else {
+            chainCount = 1;
+        }
+        lastMergeTime = now;
+        
+        // Screen Shake & Shockwave effects
+        shakeIntensity = Math.min(shakeIntensity + 8, 14);
+        shockwaves.push({
+            x: midX,
+            y: midY,
+            r: 10,
+            maxR: 90,
+            color: idiomColor,
+            alpha: 1,
+            speed: 3.5
+        });
+
+        // Floating Zen-brush style idiom popup text
+        spawnIdiomFloatingText(midX, midY, newIdiom, idiomColor);
+
+        // Check if this fulfills the mission
+        if (isMission) {
+            const basePoints = 120;
+            const finalPoints = basePoints * chainCount;
+            
+            soundSynth.play('mission_clear');
+            spawnParticles(midX, midY, '#ffd700', 36, true); // Golden sparks
+            addScore(finalPoints);
+            
+            if (chainCount > 1) {
+                spawnFloatingText(midX, midY - 25, `${chainCount}連鎖！お題達成 +${finalPoints}`, '#ffd700');
+            } else {
+                spawnFloatingText(midX, midY - 25, `お題達成！ +${finalPoints}`, '#ffd700');
+            }
+            chooseNewMission();
+        } else {
+            // Normal idiom erase (not the active mission - trash cleaner)
+            const basePoints = 40;
+            const finalPoints = basePoints * chainCount;
+            
+            soundSynth.play('mission_clear'); // Play pleasant chime
+            addScore(finalPoints);
+            
+            if (chainCount > 1) {
+                spawnFloatingText(midX, midY - 25, `${chainCount}連鎖！ +${finalPoints}`, '#ffd700');
+            } else {
+                spawnFloatingText(midX, midY - 25, `+${finalPoints}`, idiomColor);
+            }
+        }
+        return; // Early return to avoid secondary single Kanji merging
+    }
+    
+    // 2. Normal Merge Recipes check (Priority 2: Merge into higher tier circle)
     const recipe = RECIPES.find(r => 
         (r.a === c1.kanji && r.b === c2.kanji) || 
         (r.a === c2.kanji && r.b === c1.kanji)
@@ -565,13 +707,6 @@ function checkMerge(c1, c2) {
         const newKanji = recipe.result;
         const newTier = recipe.tier;
         const newRadius = getRadiusForTier(newTier);
-        
-        // Track discovered encyclopedia
-        if (!discoveredKanji.includes(newKanji)) {
-            discoveredKanji.push(newKanji);
-            hasUnsavedDiscoveries = true;
-            spawnFloatingText(midX, midY - 35, '新漢字解放！', '#eb5e28');
-        }
         
         // Spawn particles
         spawnParticles(midX, midY, KANJI_DATA[newKanji].color, 12);
@@ -597,53 +732,34 @@ function checkMerge(c1, c2) {
             speed: 3.0
         });
 
-        // Check if this fulfills the mission
-        if (newKanji === currentMission) {
-            const basePoints = 100;
-            const finalPoints = basePoints * chainCount;
-            
-            // Mission cleared! Consume the Kanji, do not spawn it, clear space
-            soundSynth.play('mission_clear');
-            spawnParticles(midX, midY, '#ffd700', 32, true); // Golden sparks
-            addScore(finalPoints);
-            
-            // Trigger floating text / notification
-            if (chainCount > 1) {
-                spawnFloatingText(midX, midY - 20, `${chainCount}連鎖！お題達成 +${finalPoints}`, '#ffd700');
-            } else {
-                spawnFloatingText(midX, midY - 20, 'お題達成！ +100', '#ffd700');
-            }
-            chooseNewMission();
+        // Spawn the compound circle
+        const basePoints = newTier * 10;
+        const finalPoints = basePoints * chainCount;
+        
+        bodiesToSpawn.push({
+            x: midX,
+            y: midY,
+            vx: (c1.vx + c2.vx) / 2,
+            vy: (c1.vy + c2.vy) / 2 - 1.5, // slight pop up
+            radius: newRadius,
+            kanji: newKanji,
+            tier: newTier,
+            color: KANJI_DATA[newKanji].color,
+            angle: 0,
+            angularVelocity: (Math.random() - 0.5) * 0.1,
+            mass: newRadius,
+            mergeCooldown: 12,
+            age: 0,
+            toDelete: false
+        });
+        
+        addScore(finalPoints);
+        soundSynth.play('merge');
+        
+        if (chainCount > 1) {
+            spawnFloatingText(midX, midY - 15, `${chainCount}連鎖！ +${finalPoints}`, '#ffd700');
         } else {
-            // Normal merge: Spawn the compound circle
-            const basePoints = newTier * 10;
-            const finalPoints = basePoints * chainCount;
-            
-            bodiesToSpawn.push({
-                x: midX,
-                y: midY,
-                vx: (c1.vx + c2.vx) / 2,
-                vy: (c1.vy + c2.vy) / 2 - 1.5, // slight pop up
-                radius: newRadius,
-                kanji: newKanji,
-                tier: newTier,
-                color: KANJI_DATA[newKanji].color,
-                angle: 0,
-                angularVelocity: (Math.random() - 0.5) * 0.1,
-                mass: newRadius,
-                mergeCooldown: 12, // short delay to prevent instant secondary merges
-                age: 0,
-                toDelete: false
-            });
-            
-            addScore(finalPoints);
-            soundSynth.play('merge');
-            
-            if (chainCount > 1) {
-                spawnFloatingText(midX, midY - 15, `${chainCount}連鎖！ +${finalPoints}`, '#ffd700');
-            } else {
-                spawnFloatingText(midX, midY - 15, `+${finalPoints}`, KANJI_DATA[newKanji].color);
-            }
+            spawnFloatingText(midX, midY - 15, `+${finalPoints}`, KANJI_DATA[newKanji].color);
         }
     }
 }
@@ -916,11 +1032,11 @@ btnPauseRestart.addEventListener('click', () => {
     restartGame();
 });
 
-// Get formula text for dictionary UI
+// Get formula text for dictionary UI (Idiom style)
 function getFormulaText(kanji) {
-    const decomp = DECOMPOSITIONS[kanji];
-    if (!decomp) return '';
-    return `${decomp[0]} + ${decomp[1]}`;
+    const recipe = IDIOM_RECIPES.find(r => r.result === kanji);
+    if (!recipe) return '';
+    return `${recipe.a} + ${recipe.b}`;
 }
 
 // Convert Hex to RGB helper for box shadow transparency
@@ -937,7 +1053,7 @@ function initDictionarySkeleton() {
     if (isDictInitialized) return;
     dictGrid.innerHTML = '';
     
-    const targetKanji = [...TIER2_KANJI, '森'];
+    const targetKanji = ['森林', '火山', '日月', '明日', '人間', '岩石', '女子', '門口', '山林', '火炎'];
     targetKanji.forEach(k => {
         const card = document.createElement('div');
         card.className = 'recipe-card locked';
@@ -945,7 +1061,7 @@ function initDictionarySkeleton() {
         
         const kanjiEl = document.createElement('div');
         kanjiEl.className = 'dict-kanji';
-        kanjiEl.textContent = '?';
+        kanjiEl.textContent = '??';
         
         const readingEl = document.createElement('div');
         readingEl.className = 'dict-reading';
@@ -992,7 +1108,7 @@ function updateDictionaryUI() {
             card.style.borderColor = '';
             card.style.boxShadow = '';
             
-            kanjiEl.textContent = '?';
+            kanjiEl.textContent = '??';
             kanjiEl.style.color = '';
             kanjiEl.style.textShadow = '';
             
@@ -1373,12 +1489,31 @@ function draw() {
     for (let ft of floatingTexts) {
         ctx.save();
         ctx.globalAlpha = ft.alpha;
-        ctx.fillStyle = ft.color;
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
-        ctx.shadowBlur = 6;
-        ctx.font = "bold 16px 'Noto Sans JP', sans-serif";
-        ctx.textAlign = 'center';
-        ctx.fillText(ft.text, ft.x, ft.y);
+        if (ft.isIdiom) {
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+            ctx.shadowBlur = 8;
+            
+            // Draw background stroke (white border)
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 6;
+            ctx.lineJoin = 'round';
+            ctx.font = `bold 28px 'Kaisei Decol', 'Noto Serif JP', serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.strokeText(ft.text, ft.x, ft.y);
+            
+            // Draw actual text on top
+            ctx.fillStyle = ft.color;
+            ctx.fillText(ft.text, ft.x, ft.y);
+        } else {
+            ctx.fillStyle = ft.color;
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+            ctx.shadowBlur = 6;
+            ctx.font = "bold 16px 'Noto Sans JP', sans-serif";
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(ft.text, ft.x, ft.y);
+        }
         ctx.restore();
     }
     ctx.restore(); // Restore screen shake save
