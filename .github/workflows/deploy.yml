@@ -3,11 +3,20 @@ name: Deploy Static Site to Xserver
 on:
   push:
     branches:
-      - main # または main。リポジトリのデフォルトブランチに合わせてください
+      - main
+    paths-ignore:
+      - '**.md'
+      - '.gitignore'
+      - '.gitattributes'
+
+concurrency:
+  group: deploy-hajikkogurashi-hp-main
+  cancel-in-progress: true
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
 
     steps:
       - name: Checkout code

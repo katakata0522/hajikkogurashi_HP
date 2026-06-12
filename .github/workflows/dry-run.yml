@@ -4,10 +4,19 @@ on:
   pull_request:
     branches:
       - main
+    paths-ignore:
+      - '**.md'
+      - '.gitignore'
+      - '.gitattributes'
+
+concurrency:
+  group: static-check-pr-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   static-check:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - name: Run smoke tests
