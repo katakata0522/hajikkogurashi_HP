@@ -23,6 +23,34 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Detect kanji-slicer changes
+        id: changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          kanji_slicer_changed="false"
+
+          changed_files="$(jq -r '[.commits[]? | (.added[]?, .modified[]?, .removed[]?)] | unique[]?' "$GITHUB_EVENT_PATH" 2>/dev/null || true)"
+          if [ -z "$changed_files" ]; then
+            changed_files="$(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA" 2>/dev/null || true)"
+          fi
+
+          echo "Changed files:"
+          if [ -n "$changed_files" ]; then
+            echo "$changed_files"
+          else
+            echo "(none detected)"
+            echo "No changed files were detected, so deploying kanji-slicer as a fail-safe."
+            kanji_slicer_changed="true"
+          fi
+
+          if [ -n "$changed_files" ] && echo "$changed_files" | grep -qE '^kanji-slicer/'; then
+            kanji_slicer_changed="true"
+          fi
+
+          echo "kanji_slicer_changed=$kanji_slicer_changed" >> "$GITHUB_OUTPUT"
+          echo "Kanji slicer extra deploy: $kanji_slicer_changed"
+
       - name: Validate static site
         run: |
           pwsh -File ./scripts/static-site-smoke-test.ps1
@@ -33,22 +61,26 @@ jobs:
       - name: Generate sitemap.xml
         run: pwsh -File ./scripts/generate-sitemap.ps1
 
-      - name: Deploy to Xserver via Rsync
+      - name: Setup SSH
         env:
           XS_SSH_KEY: ${{ secrets.XS_SSH_KEY }}
+          XS_HOST: ${{ secrets.XS_HOST }}
+          XS_PORT: ${{ secrets.XS_PORT }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          echo "$XS_SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -p "$XS_PORT" -H "$XS_HOST" >> ~/.ssh/known_hosts
+
+      - name: Deploy to Xserver via Rsync
+        env:
           XS_HOST: ${{ secrets.XS_HOST }}
           XS_PORT: ${{ secrets.XS_PORT }}
           XS_USER: ${{ secrets.XS_USER }}
           XS_REMOTE_DIR: ${{ secrets.XS_REMOTE_DIR }}
         run: |
-          # SSHディレクトリの準備
-          mkdir -p ~/.ssh
-          echo "$XS_SSH_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          
-          # 既知のホストとして登録（対話モード回避）
-          ssh-keyscan -p $XS_PORT -H $XS_HOST >> ~/.ssh/known_hosts
-
+          set -euo pipefail
           # 静的ファイルだけを公開先へ同期する
           rsync -avz --delete \
             --exclude ".git/" \
@@ -60,7 +92,14 @@ jobs:
             -e "ssh -p $XS_PORT -i ~/.ssh/id_rsa" \
             ./ $XS_USER@$XS_HOST:$XS_REMOTE_DIR
 
-          # 漢字スライサーを playpoint-sim.com のサブディレクトリへデプロイする
+      - name: Deploy kanji-slicer to playpoint-sim.com
+        if: steps.changes.outputs.kanji_slicer_changed == 'true'
+        env:
+          XS_HOST: ${{ secrets.XS_HOST }}
+          XS_PORT: ${{ secrets.XS_PORT }}
+          XS_USER: ${{ secrets.XS_USER }}
+        run: |
+          set -euo pipefail
           rsync -avz --delete \
             -e "ssh -p $XS_PORT -i ~/.ssh/id_rsa" \
             ./kanji-slicer/ $XS_USER@$XS_HOST:/home/hajikkoroom/playpoint-sim.com/public_html/kanji-slicer/
