@@ -1,16 +1,10 @@
-name: Static Site Check on Push
+name: Static Site Check on Demand
 
 on:
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - '**.md'
-      - '.gitignore'
-      - '.gitattributes'
+  workflow_dispatch:
 
 concurrency:
-  group: static-check-push-${{ github.ref }}
+  group: static-check-manual-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
