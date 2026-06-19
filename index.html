@@ -29,12 +29,26 @@
 	<link rel="stylesheet" href="/assets/css/custom.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/css/custom.css'); ?>" />
 	<link rel="stylesheet" href="/assets/css/index.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/css/index.css'); ?>" />
 	<script type="application/ld+json">
-	{
-		"@context": "https://schema.org",
-		"@type": "WebSite",
-		"name": "はじっこぐらし",
-		"url": "https://hajikkoroom.xsrv.jp/"
-	}
+	[
+		{
+			"@context": "https://schema.org",
+			"@type": "WebSite",
+			"name": "はじっこぐらし",
+			"url": "https://hajikkoroom.xsrv.jp/"
+		},
+		{
+			"@context": "https://schema.org",
+			"@type": "Organization",
+			"name": "はじっこぐらし",
+			"alternateName": "Corner Neighbor",
+			"url": "https://hajikkoroom.xsrv.jp/",
+			"sameAs": [
+				"https://note.com/hajikkogurashi01",
+				"https://x.com/Corner_neighbor",
+				"https://www.youtube.com/@hajikkogurashi"
+			]
+		}
+	]
 	</script>
 </head>
 
@@ -74,12 +88,14 @@
 		<section id="banner" class="major">
 			<div class="inner">
 				<header class="major">
-					<h1>ようこそ、はじっこぐらしへ！</h1>
+					<h1>Re:青春！はじっこからゲームを作る</h1>
 				</header>
 				<div class="content">
-					<p>遊びに来てくれてありがとう。ゆっくりしていってね。</p>
+					<p>はじっこぐらしは、Unreal Engine 5を中心に活動するインディーゲーム制作サークルです。<br />まずは作品とミニゲームを見ていってね。</p>
 					<ul class="actions">
-						<li><a href="/aboutus.html" class="button next">見に行く</a></li>
+						<li><a href="/portfolio.html" class="button next">作品を見る</a></li>
+						<li><a href="/minigames.html" class="button">ミニゲームで遊ぶ</a></li>
+						<li><a href="/aboutus.html" class="button">サークルを知る</a></li>
 					</ul>
 				</div>
 			</div>
@@ -117,7 +133,6 @@
 						<p>個性豊かなメンバーを覗いてみよう！</p>
 					</header>
 				</article>
-
 				<article>
 					<span class="image">
 						<img src="assets/images/pic02.webp" alt="お知らせ" width="864" height="409" loading="lazy" />
@@ -260,4 +275,3 @@ foreach ($items as $index => $note_item):
 </body>
 
 </html>
-
