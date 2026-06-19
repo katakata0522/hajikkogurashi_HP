@@ -7,6 +7,14 @@ on:
     - cron: '0 18 * * 0'
   workflow_dispatch:
 
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: weekly-link-checker-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check-links:
     name: 全サイト リンク切れチェック
