@@ -1,0 +1,119 @@
+/* --- Hover Effects for Buttons --- */
+.button {
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+.button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+/* 1. Header — ロゴ・ナビ・ハンバーガーの垂直揃え */
+#header {
+    align-items: center;
+}
+
+#header .logo {
+    padding-top: 1em;
+    padding-bottom: 1em;
+}
+
+#header .logo strong {
+    background-color: transparent;
+    color: #ffffff;
+    font-size: 2em;
+    letter-spacing: .15em;
+    padding: 0;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, .3);
+    border: none;
+    box-shadow: none;
+}
+
+#header .logo span {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 1em;
+    margin-top: .3em;
+    letter-spacing: .05em;
+}
+
+/* ホバー時もボックスを出さない */
+#header .logo:hover strong {
+    background-color: transparent;
+    color: #9bf1ff;
+}
+
+/* ハンバーガーメニューをロゴタイトルの高さに合わせる
+   計測値: ロゴtop=28, ナビtop=46 → 18px低い
+   ロゴ中心=45, ナビ中心=66 → 21px低い */
+#header nav {
+    align-self: flex-start;
+    margin-top: 8px;
+}
+
+/* 2. Fix Mobile Horizontal Overflow Layout Bug */
+body, #wrapper {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+}
+
+/* 3. Banner — タイトル折り返し + ボタン高さ揃え */
+#banner h1 {
+    word-break: auto-phrase;
+    overflow-wrap: break-word;
+}
+
+/* 「見ていく →」ボタンをテキストと揃える
+   サイズはテーマデフォルトのまま、位置だけ上に微調整 */
+#banner .content {
+    align-items: center;
+}
+
+#banner .content .button.next {
+    margin-top: -12px;
+}
+
+@media screen and (max-width: 736px) {
+    #banner h1 {
+        font-size: 1.8em;
+    }
+    /* モバイルではテキストとボタンを縦並びに */
+    #banner .content {
+        display: block;
+        align-items: initial;
+    }
+    #banner .content p {
+        width: 100%;
+        max-width: 100%;
+        margin-right: 0;
+    }
+    #banner .content .actions {
+        margin-top: 1em;
+    }
+    #banner .content .button.next {
+        margin-top: 0;
+    }
+    #header .logo strong {
+        font-size: 1.5em;
+    }
+    #header .logo span {
+        display: block;
+        font-size: .85em;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    #banner h1 {
+        font-size: 1.5em;
+    }
+    #header .logo span {
+        display: block;
+        font-size: .75em;
+    }
+}
+

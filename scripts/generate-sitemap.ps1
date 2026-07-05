@@ -1,9 +1,8 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 
-$repoRoot = (Split-Path -Parent $PSScriptRoot)
+$repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $baseUrl = 'https://hajikkoroom.xsrv.jp'
 $today = (Get-Date).ToString('yyyy-MM-dd')
-$excludes = @('404.html')
 
 function Get-Priority {
     param(
@@ -25,6 +24,34 @@ function Get-Priority {
 function Escape-HtmlAttribute {
     param([Parameter(Mandatory = $true)][string]$Value)
     return [System.Net.WebUtility]::HtmlEncode($Value)
+}
+
+function New-SitemapEntry {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Loc,
+        [Parameter(Mandatory = $true)]
+        [string]$Priority
+    )
+
+    return "  <url>`n    <loc>$Loc</loc>`n    <lastmod>$today</lastmod>`n    <priority>$Priority</priority>`n  </url>"
+}
+
+function Add-RootPageEntry {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$FileName
+    )
+
+    if ([System.IO.File]::Exists((Join-Path $repoRoot $FileName))) {
+        $loc = if ($FileName -eq 'index.html') {
+            "$baseUrl/"
+        } else {
+            "$baseUrl/$FileName"
+        }
+
+        $script:entries += New-SitemapEntry -Loc $loc -Priority (Get-Priority -FileName $FileName)
+    }
 }
 
 function Set-MinigameSeoBlock {
@@ -86,35 +113,26 @@ function Set-MinigameSeoBlock {
     Write-Output "SEO metadata injected -> $RelativePath"
 }
 
-# 1. ルート直下のHTMLファイルを処理
-$htmlFiles = Get-ChildItem -Path $repoRoot -Filter '*.html' -File |
-    Where-Object { $excludes -notcontains $_.Name } |
-    Sort-Object Name
-
-$entries = New-Object System.Collections.Generic.List[string]
-
-foreach ($file in $htmlFiles) {
-    $loc = if ($file.Name -eq 'index.html') {
-        "$baseUrl/"
-    } else {
-        "$baseUrl/$($file.Name)"
-    }
-
-    $entries.Add(@"
-  <url>
-    <loc>$loc</loc>
-    <lastmod>$today</lastmod>
-    <priority>$(Get-Priority -FileName $file.Name)</priority>
-  </url>
-"@)
-}
+# 1. ルート直下の公開ページを処理
+# 404.html は直接クロール対象にしない。公開ページは順序を固定し、漏れを防ぐ。
+$entries = @()
+Add-RootPageEntry -FileName 'index.html'
+Add-RootPageEntry -FileName 'aboutus.html'
+Add-RootPageEntry -FileName 'portfolio.html'
+Add-RootPageEntry -FileName 'minigames.html'
+Add-RootPageEntry -FileName 'news.html'
+Add-RootPageEntry -FileName 'members.html'
+Add-RootPageEntry -FileName 'coming-soon.html'
+Add-RootPageEntry -FileName 'privacy-policy.html'
+Add-RootPageEntry -FileName 'terms-of-service.html'
 
 # 2. ミニゲーム等のサブディレクトリを処理
 # index.html を含み、システム/アセット系以外の非隠しフォルダを自動検出
 $systemDirs = @('assets', 'includes', 'scripts')
-$subDirs = Get-ChildItem -Path $repoRoot -Directory |
-    Where-Object { 
-        $systemDirs -notcontains $_.Name -and 
+$subDirs = Get-ChildItem -LiteralPath $repoRoot |
+    Where-Object {
+        $_.PSIsContainer -and
+        $systemDirs -notcontains $_.Name -and
         $_.Name -notmatch '^\.' -and
         (Test-Path (Join-Path $_.FullName 'index.html'))
     } |
@@ -122,13 +140,7 @@ $subDirs = Get-ChildItem -Path $repoRoot -Directory |
 
 foreach ($dir in $subDirs) {
     $loc = "$baseUrl/$($dir.Name)/"
-    $entries.Add(@"
-  <url>
-    <loc>$loc</loc>
-    <lastmod>$today</lastmod>
-    <priority>0.5</priority>
-  </url>
-"@)
+    $entries += New-SitemapEntry -Loc $loc -Priority '0.5'
 }
 
 $sitemap = @(
@@ -140,7 +152,8 @@ $sitemap = @(
 
 $outPath = Join-Path $repoRoot 'sitemap.xml'
 [System.IO.File]::WriteAllText($outPath, $sitemap, [System.Text.UTF8Encoding]::new($false))
-Write-Output "sitemap.xml generated with $($entries.Count) URLs -> $outPath"
+$urlCount = ([regex]::Matches($sitemap, '<loc>')).Count
+Write-Output "sitemap.xml generated with $urlCount URLs -> $outPath"
 
 $minigamePages = @(
     @{ Path = 'blackhole-sweeper/index.html'; Title = 'ブラックホール・スイーパー | はじっこぐらし'; Description = '線でバグを囲んで一網打尽にする、スマホ対応の一筆書きアクションゲームです。はじっこぐらしのブラウザミニゲームとして公開中。'; Image = '/assets/images/blackhole_sweeper_thumbnail_1779194532152.png' },

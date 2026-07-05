@@ -1,0 +1,95 @@
+/* 13. ホーム画面のタイルにフワッと感（ホバーエフェクト）を追加 */
+.tiles article .image img {
+    transition: transform 0.4s ease;
+}
+.tiles article:hover .image img {
+    transform: scale(1.08);
+}
+
+/* 14. ヘッダーのサークル説明文の視認性を高める */
+#header .logo span {
+    font-weight: 500;
+    opacity: 0.85;
+    letter-spacing: 0.05em;
+}
+
+/* 15. 送信ボタンの発光エフェクト（JSで .is-active クラスが付与されたとき） */
+.contact-form input[type="submit"] {
+    transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+}
+.contact-form input[type="submit"].is-active {
+    background-color: #9bf1ff;
+    color: #050a15;
+    border-color: #9bf1ff;
+    box-shadow: 0 0 12px rgba(155, 241, 255, 0.45), 0 0 28px rgba(155, 241, 255, 0.2);
+}
+
+/* 16. 必須マーク（赤い※） */
+.required-mark {
+    color: #ff4444;
+    font-weight: bold;
+    margin-right: 0.3em;
+}
+
+/* 17. お問い合わせ欄のレイアウト（form左=広い、info右=狭い） */
+@media screen and (min-width: 981px) {
+    #contact > .inner {
+        display: flex;
+    }
+    #contact > .inner > .contact-panel--form {
+        width: 65%;
+        border-right: 1px solid rgba(116,241,255,.1);
+    }
+    #contact > .inner > .contact-panel--info {
+        width: 35%;
+    }
+}
+
+/* 18. メニューボタン：≡→× モーフィング（デザインA） */
+#header nav a[href="#menu"] {
+    position: relative;
+    padding-right: 3em;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    font-size: 1.1em;
+}
+#header nav a[href="#menu"]::before,
+#header nav a[href="#menu"]::after {
+    content: "";
+    position: absolute;
+    right: 0.7em;
+    width: 1.5em;
+    height: 2px;
+    background: currentColor;
+    opacity: 1;
+    transition: transform 0.3s ease, top 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease;
+}
+/* 真ん中の線（::before本体）と、上の線（box-shadow） */
+#header nav a[href="#menu"]::before {
+    top: 50%;
+    margin-top: -1px; /* height 2px の半分 */
+    box-shadow: 0 -7px 0 0 currentColor;
+}
+/* 下の線 */
+#header nav a[href="#menu"]::after {
+    top: calc(50% + 7px);
+    margin-top: -1px;
+}
+/* メニュー開いたとき→Xに変形 */
+.is-menu-visible #header nav a[href="#menu"]::before {
+    box-shadow: 0 0 0 0 transparent; /* 上の線を消す */
+    transform: rotate(45deg);
+}
+.is-menu-visible #header nav a[href="#menu"]::after {
+    top: 50%;
+    transform: rotate(-45deg);
+}
+
+/* メニューパネルのすりガラス（Glassmorphism）効果 */
+#menu {
+    background: rgba(36, 41, 67, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+/* 19. 注意書きボックス（ミニゲーム広場用） */
