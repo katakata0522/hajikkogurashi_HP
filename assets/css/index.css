@@ -5,7 +5,7 @@ body.is-home #banner.major {
     url("/assets/images/kanji_slicer_thumbnail.png") center right / min(46vw, 38rem) auto no-repeat,
     var(--theme-bg-gradient);
   border-bottom: 1px solid var(--theme-line);
-  min-height: 38rem;
+  min-height: 28rem !important; /* 38rem から 28rem へ縮小しスクロール負荷を低減 */
   display: flex;
   align-items: center;
 }
@@ -84,6 +84,8 @@ body.is-home #banner .button:not(.next):hover {
   transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1),
               box-shadow 0.35s cubic-bezier(0.25, 0.8, 0.25, 1),
               border-color 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+  min-height: 18rem !important; /* 縦スクロール量を減らすため368pxから288pxへ引き締め */
+  padding: 3rem 3rem 1.5rem 3rem !important; /* パディングも引き締めてスマートに */
 }
 
 .tiles article:after {
@@ -144,21 +146,21 @@ body.is-home #banner .button:not(.next):hover {
 }
 
 .note-card-thumb {
-  height: 160px;
+  height: 120px !important; /* 160px から 120px へコンパクト化 */
   background-size: cover;
   background-position: center;
 }
 
 .note-card-body {
-  padding: 1.5rem;
+  padding: 1.2rem !important; /* パディングをタイトに */
 }
 
 .note-card-title {
   font-family: var(--theme-font-sans);
-  font-size: 1rem;
+  font-size: 0.95rem !important; /* 本文の比率に合わせて適正化 */
   font-weight: 700;
   color: #ffffff;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.3rem !important; /* 隙間を詰めてスクロールを削減 */
   line-height: 1.5;
 }
 
@@ -193,12 +195,27 @@ body.is-home #banner .button:not(.next):hover {
       url("/assets/images/kanji_slicer_thumbnail.png") center bottom / cover no-repeat,
       var(--theme-bg-gradient) !important;
     min-height: auto;
-    padding: 6rem 0;
+    padding: 4rem 0 !important; /* パディングを 6rem から 4rem へ引き締め */
   }
   body.is-home #banner .inner {
     padding: 0 1.5rem;
   }
   body.is-home #banner h1 {
     font-size: 2.1em;
+  }
+}
+
+/* --- Responsive Tile Compress Overrides --- */
+@media screen and (max-width: 1280px) {
+  .tiles article {
+    min-height: 13rem !important; /* 高さ上限の縮小 */
+    padding: 2.5rem 2rem 1.5rem 2rem !important;
+  }
+}
+
+@media screen and (max-width: 736px) {
+  .tiles article {
+    height: 13rem !important; /* 高さを 16em から 13rem へ */
+    padding: 2.5rem 1.5rem 1rem 1.5rem !important;
   }
 }

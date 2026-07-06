@@ -181,4 +181,16 @@ body:not(.is-home) #header .logo span {
     }
 }
 
+/* --- Contact & Footer height reduction for better scrolling --- */
+#contact {
+    padding: 3rem 0 1.5rem 0 !important; /* 全体の縦スクロールを引き締め */
+}
+#contact .inner {
+    padding: 0 2rem !important;
+}
+#footer {
+    padding: 2rem 0 !important;
+}
+
+
 
