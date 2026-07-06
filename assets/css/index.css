@@ -2,7 +2,6 @@
 body.is-home #banner.major {
   background:
     linear-gradient(90deg, #121526 0%, rgba(18, 21, 38, 0.94) 35%, rgba(18, 21, 38, 0.25) 100%),
-    url("/assets/images/kanji_slicer_thumbnail.png") center right / min(46vw, 38rem) auto no-repeat,
     var(--theme-bg-gradient);
   border-bottom: 1px solid var(--theme-line);
   min-height: 28rem !important; /* 38rem から 28rem へ縮小しスクロール負荷を低減 */
@@ -174,7 +173,6 @@ body.is-home #banner .button:not(.next):hover {
   body.is-home #banner.major {
     background:
       linear-gradient(90deg, #121526 0%, rgba(18, 21, 38, 0.95) 45%, rgba(18, 21, 38, 0.35) 100%),
-      url("/assets/images/kanji_slicer_thumbnail.png") right center / min(44vw, 32rem) auto no-repeat,
       var(--theme-bg-gradient) !important;
   }
 }
@@ -183,7 +181,6 @@ body.is-home #banner .button:not(.next):hover {
   body.is-home #banner.major {
     background:
       linear-gradient(90deg, #121526 0%, rgba(18, 21, 38, 0.96) 55%, rgba(18, 21, 38, 0.4) 100%),
-      url("/assets/images/kanji_slicer_thumbnail.png") right center / min(40vw, 28rem) auto no-repeat,
       var(--theme-bg-gradient) !important;
   }
 }
@@ -192,7 +189,6 @@ body.is-home #banner .button:not(.next):hover {
   body.is-home #banner.major {
     background:
       linear-gradient(180deg, rgba(18, 21, 38, 0.92) 0%, rgba(18, 21, 38, 0.97) 100%),
-      url("/assets/images/kanji_slicer_thumbnail.png") center bottom / cover no-repeat,
       var(--theme-bg-gradient) !important;
     min-height: auto;
     padding: 4rem 0 !important; /* パディングを 6rem から 4rem へ引き締め */
