@@ -32,11 +32,27 @@ body.is-home #banner h1 {
   letter-spacing: 0.05em;
 }
 
+body.is-home #banner .content {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  width: 100% !important;
+}
+
 body.is-home #banner .content p {
   color: var(--theme-ink);
   font-size: 1.05rem;
   line-height: 1.8;
   opacity: 0.95;
+  text-transform: none !important;
+  margin-bottom: 1.5rem !important;
+  width: 100% !important;
+  max-width: 44rem !important;
+}
+
+body.is-home #banner .content .actions {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
 }
 
 /* --- Banner Button Customizations (Soft & Readable) --- */
