@@ -1,0 +1,141 @@
+/* --- Global Wrapper & Background --- */
+#wrapper {
+    background:
+        radial-gradient(rgba(255, 204, 0, 0.02) 1px, transparent 1px) 0 0 / 1.5rem 1.5rem,
+        radial-gradient(circle at 15% 15%, rgba(161, 0, 255, 0.04), transparent 45rem),
+        radial-gradient(circle at 85% 85%, rgba(255, 204, 0, 0.03), transparent 45rem),
+        var(--theme-bg-gradient) !important;
+}
+
+/* --- Header & Navigation Bar --- */
+#header {
+    background-color: rgba(18, 21, 38, 0.9) !important;
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--theme-line);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+#header .logo {
+    background: transparent !important; /* 不自然な白背景を完全排除 */
+    padding: 1.2em 1.5em;
+    display: flex;
+    flex-direction: column;
+}
+
+#header .logo strong,
+#header.alt .logo strong {
+    background-color: transparent !important; /* 子要素の強烈な白背景を透過リセット */
+    padding: 0 !important;
+}
+
+#header .logo strong {
+    color: #ffffff !important;
+    font-family: var(--theme-font-display);
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    transition: color 0.3s ease;
+}
+
+#header .logo:hover strong {
+    color: var(--theme-accent, #ffcc00) !important;
+}
+
+/* 致命的な視認性崩壊の修復（コントラスト比の最大化） */
+#header .logo span {
+    color: var(--theme-muted) !important; /* 十分に明るい半透明オフホワイトに修正 */
+    font-size: 0.72rem;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    margin-top: 0.3em;
+    display: block;
+    opacity: 0.95;
+}
+
+/* --- Menu Trigger Button --- */
+#header nav a[href="#menu"] {
+    font-family: var(--theme-font-display);
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    border: 1px solid var(--theme-line) !important;
+    padding: 0.5em 1.5em;
+    border-radius: 4px;
+    color: var(--theme-ink) !important;
+    background-color: rgba(255, 204, 0, 0.02);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+#header nav a[href="#menu"]:hover {
+    border-color: var(--theme-accent) !important;
+    color: var(--theme-accent) !important;
+    box-shadow: var(--theme-glow);
+    background-color: rgba(255, 204, 0, 0.06);
+    transform: translateY(-2px);
+}
+
+/* --- Navigation Menu Panel --- */
+#menu {
+    background-color: var(--theme-panel-deep) !important;
+    backdrop-filter: blur(12px);
+    border-left: 1px solid var(--theme-line) !important;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.3);
+}
+
+/* 白い太い縦線の除去（スクロールバーのカスタマイズ） */
+#menu::-webkit-scrollbar {
+    width: 6px;
+}
+#menu::-webkit-scrollbar-track {
+    background: transparent;
+}
+#menu::-webkit-scrollbar-thumb {
+    background: var(--theme-line);
+    border-radius: 3px;
+}
+
+#menu .inner {
+    padding: 4rem 2.8rem;
+}
+
+#menu ul.links li a {
+    font-family: var(--theme-font-display);
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    color: var(--theme-ink) !important;
+    transition: color 0.3s ease, padding-left 0.3s ease;
+}
+
+#menu ul.links li a:hover {
+    color: var(--theme-accent) !important;
+    padding-left: 0.5rem;
+}
+
+#menu .close {
+    border: 1px solid var(--theme-line) !important;
+    background-color: rgba(255, 204, 0, 0.02) !important;
+    transition: all 0.3s ease;
+}
+
+#menu .close:hover {
+    border-color: var(--theme-accent) !important;
+    box-shadow: var(--theme-glow);
+    transform: scale(1.05);
+}
+
+/* --- Scroll To Top Button --- */
+#scrollToTopBtn {
+    background-color: var(--theme-panel) !important;
+    border: 1px solid var(--theme-line) !important;
+    color: var(--theme-accent) !important;
+    border-radius: 50% !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s ease;
+}
+
+#scrollToTopBtn:hover {
+    background-color: var(--theme-accent) !important;
+    color: var(--theme-bg) !important;
+    box-shadow: var(--theme-glow);
+    transform: translateY(-4px);
+}

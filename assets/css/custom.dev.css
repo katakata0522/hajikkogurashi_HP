@@ -1,0 +1,40 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Grotesk:wght@400;500;700&family=Orbitron:wght@400;700&display=swap");
+@import url("./components/loading.css");
+@import url("./components/global-ui.css");
+@import url("./components/contact.css");
+@import url("./components/content-pages.css");
+@import url("./components/effects.css");
+@import url("./components/minigames.css");
+@import url("./components/page-header.css");
+
+:root {
+  --theme-bg: #121526; /* 温かみのある深みトワイライトネイビー */
+  --theme-bg-gradient: linear-gradient(135deg, #0d101d 0%, #171c33 100%);
+  --theme-ink: rgba(245, 240, 235, 0.95); /* 目に優しいオフホワイト */
+  --theme-muted: rgba(245, 240, 235, 0.72); /* 視認性十分なサブカラー */
+  --theme-dim: rgba(245, 240, 235, 0.48);
+  --theme-accent: #ffcc00; /* 穏やかで上品なソフトゴールド */
+  --theme-accent-alt: #00f0ff; /* トワイライトを彩る極小ネオンシアン */
+  --theme-glow: 0 0 12px rgba(255, 204, 0, 0.25);
+  --theme-panel: rgba(25, 30, 55, 0.65); /* トワイライトガラスパネル */
+  --theme-panel-deep: rgba(15, 18, 33, 0.92);
+  --theme-line: rgba(255, 204, 0, 0.15);
+  --theme-shadow: 0 1.2rem 3.5rem rgba(0, 0, 0, 0.4);
+  
+  --theme-font-sans: 'Noto Sans JP', 'Source Sans Pro', Helvetica, Arial, sans-serif;
+  --theme-font-display: 'Space Grotesk', 'Orbitron', 'Noto Sans JP', sans-serif;
+}
+
+body, input, select, textarea, button, .button {
+  font-family: var(--theme-font-sans);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--theme-font-display);
+  letter-spacing: 0.12em;
+}
+
+body {
+  background-color: var(--theme-bg);
+  color: var(--theme-ink);
+}
