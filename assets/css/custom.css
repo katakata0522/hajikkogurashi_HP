@@ -1,303 +1,645 @@
-﻿@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Grotesk:wght@400;500;700&family=Orbitron:wght@400;700&display=swap");
-/* --- Loading Animation (Hologram Fade) --- */
+/* ======================================
+   HAJIKKOGURASHI — Custom Overrides
+   custom.css  v20260417-8
+   ====================================== */
+
+/* --- Loading Animation --- */
 #loader {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: var(--theme-bg-gradient, #0b0e1a);
+    background-color: #242943; /* Theme base color */
     z-index: 99999;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), 
-                visibility 0.8s cubic-bezier(0.25, 1, 0.5, 1),
-                transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+    transition: opacity 0.6s ease, visibility 0.6s ease;
 }
 
 body.loaded #loader {
     opacity: 0;
     visibility: hidden;
-    transform: scale(1.08); /* 螂･縺ｸ蠎・′繧九ｈ縺・↑繝輔ぉ繝ｼ繝峨い繧ｦ繝・*/
 }
 
-/* 繧ｹ繝斐リ繝ｼ縺ｯ蟒・ｭ｢縺励√Ο繧ｴ縺ｨ繝・く繧ｹ繝医・貍泌・縺ｫ迚ｹ蛹・*/
 #loader .spinner {
-    display: none;
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.2);
+    border-top-color: #9bf1ff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
 }
 
 #loader h2 {
-    color: var(--theme-accent, #00f0ff);
-    font-family: var(--theme-font-display);
-    font-size: 2.4em;
-    font-weight: 700;
-    letter-spacing: 0.3em;
-    margin: 0 0 0 0.3em; /* 蟄鈴俣隱ｿ謨ｴ縺ｮ縺溘ａ縺ｮ蜿ｳ繝槭・繧ｸ繝ｳ逶ｸ谿ｺ */
-    text-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
-    animation: loader-pulse 2s ease-in-out infinite;
+    color: #fff;
+    font-size: 1.5em;
+    letter-spacing: 0.1em;
+    animation: pulse 1.5s ease-in-out infinite;
 }
 
-#loader::after {
-    content: "CONNECTING TO CORNER NEIGHBOR...";
-    color: var(--theme-ink, #e2e8f0);
-    font-family: var(--theme-font-display);
-    font-size: 0.7rem;
-    font-weight: 500;
-    letter-spacing: 0.25em;
-    margin-top: 1.8rem;
-    opacity: 0.6;
-    animation: loader-sub-pulse 2s ease-in-out infinite;
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
-@keyframes loader-pulse {
-    0%, 100% {
-        opacity: 0.35;
-        transform: scale(0.97);
-        filter: blur(1.5px);
-    }
-    50% {
-        opacity: 1;
-        transform: scale(1.02);
-        filter: blur(0px);
-        text-shadow: 0 0 25px rgba(0, 240, 255, 0.8), 0 0 10px rgba(0, 240, 255, 0.4);
-    }
+@keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
 }
 
-@keyframes loader-sub-pulse {
-    0%, 100% { opacity: 0.25; }
-    50% { opacity: 0.85; }
+/* --- Hover Effects for Buttons --- */
+.button {
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease !important;
 }
 
-/* --- Global Wrapper Dot Matrix & SF Background --- */
-#wrapper {
-    background:
-        radial-gradient(rgba(0, 240, 255, 0.05) 1px, transparent 1px) 0 0 / 1.5rem 1.5rem,
-        radial-gradient(circle at 15% 15%, rgba(161, 0, 255, 0.06), transparent 40rem),
-        radial-gradient(circle at 85% 85%, rgba(0, 240, 255, 0.05), transparent 45rem),
-        var(--theme-bg-gradient) !important;
+.button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
-/* --- Header Branding Upgrade --- */
+.button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+/* 1. Header — ロゴ・ナビ・ハンバーガーの垂直揃え */
 #header {
-    background-color: rgba(11, 14, 26, 0.85) !important;
-    backdrop-filter: blur(8px);
-    border-bottom: 1px solid var(--theme-line);
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
-    transition: background-color 0.3s ease, border-color 0.3s ease;
+    align-items: center;
 }
 
 #header .logo {
-    transition: transform 0.25s ease;
-}
-
-#header .logo:hover {
-    transform: scale(1.02);
+    padding-top: 1em !important;
+    padding-bottom: 1em !important;
 }
 
 #header .logo strong {
-    color: var(--theme-accent, #00f0ff) !important;
-    font-family: var(--theme-font-display);
-    text-shadow: 0 0 8px rgba(0, 240, 255, 0.4);
-    transition: text-shadow 0.3s ease, color 0.3s ease;
+    background-color: transparent !important;
+    color: #ffffff !important;
+    font-size: 2em !important;
+    letter-spacing: .15em;
+    padding: 0 !important;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, .3);
+    border: none !important;
+    box-shadow: none !important;
 }
 
+#header .logo span {
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-size: 1em !important;
+    margin-top: .3em !important;
+    letter-spacing: .05em;
+}
+
+/* ホバー時もボックスを出さない */
 #header .logo:hover strong {
-    text-shadow: 0 0 15px rgba(0, 240, 255, 0.8), 0 0 5px rgba(0, 240, 255, 0.4);
+    background-color: transparent !important;
+    color: #9bf1ff !important;
 }
 
-/* --- Menu Trigger Button --- */
-#header nav a[href="#menu"] {
-    font-family: var(--theme-font-display);
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    border: 1px solid var(--theme-line) !important;
-    padding: 0.5em 1.5em;
-    border-radius: 4px;
-    color: var(--theme-ink) !important;
-    background-color: rgba(0, 240, 255, 0.03);
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+/* ハンバーガーメニューをロゴタイトルの高さに合わせる
+   計測値: ロゴtop=28, ナビtop=46 → 18px低い
+   ロゴ中心=45, ナビ中心=66 → 21px低い */
+#header nav {
+    align-self: flex-start !important;
+    margin-top: 8px;
 }
 
-#header nav a[href="#menu"]:hover {
-    border-color: var(--theme-accent) !important;
-    color: var(--theme-accent) !important;
-    box-shadow: var(--theme-glow);
-    background-color: rgba(0, 240, 255, 0.08);
-    transform: translateY(-2px);
+/* 2. Fix Mobile Horizontal Overflow Layout Bug */
+body, #wrapper {
+    overflow-x: hidden !important;
+    width: 100%;
+    max-width: 100vw;
 }
 
-/* --- Navigation Menu Panel --- */
-#menu {
-    background-color: var(--theme-panel-deep) !important;
-    backdrop-filter: blur(12px);
-    border-left: 1px solid var(--theme-line);
+/* 3. Banner — タイトル折り返し + ボタン高さ揃え */
+#banner h1 {
+    word-break: auto-phrase;
+    overflow-wrap: break-word;
 }
 
-#menu .inner {
-    padding: 3rem 2.5rem;
+/* 「見ていく →」ボタンをテキストと揃える
+   サイズはテーマデフォルトのまま、位置だけ上に微調整 */
+#banner .content {
+    align-items: center !important;
 }
 
-#menu ul.links li a {
-    font-family: var(--theme-font-display);
-    font-size: 0.9rem;
+#banner .content .button.next {
+    margin-top: -12px;
+}
+
+@media screen and (max-width: 736px) {
+    #banner h1 {
+        font-size: 1.8em !important;
+    }
+    /* モバイルではテキストとボタンを縦並びに */
+    #banner .content {
+        display: block !important;
+        align-items: initial !important;
+    }
+    #banner .content p {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-right: 0 !important;
+    }
+    #banner .content .actions {
+        margin-top: 1em;
+    }
+    #banner .content .button.next {
+        margin-top: 0;
+    }
+    #header .logo strong {
+        font-size: 1.5em !important;
+    }
+    #header .logo span {
+        display: block !important;
+        font-size: .85em !important;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    #banner h1 {
+        font-size: 1.5em !important;
+    }
+    #header .logo span {
+        display: block !important;
+        font-size: .75em !important;
+    }
+}
+
+/* 4. 404 Error Page Styles */
+.error-message {
+    text-align: center;
+    font-size: 1.2em;
+    margin: 2em 0;
+}
+
+.error-guide {
+    text-align: center;
+}
+
+/* 5. Contact Form — 入力欄のコントラスト向上 */
+#contact input[type="text"],
+#contact input[type="email"],
+#contact textarea {
+    background: rgba(212, 212, 255, .08);
+    border: 1px solid rgba(212, 212, 255, .15);
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+#contact input[type="text"]:focus,
+#contact input[type="email"]:focus,
+#contact textarea:focus {
+    background: rgba(212, 212, 255, .12);
+    border-color: #9bf1ff;
+    box-shadow: 0 0 0 2px rgba(155, 241, 255, .15);
+}
+
+/* 6. Contact Form — 送信/リセットボタンのサイズ適正化
+   テーマデフォルトのボタンが巨大すぎるため縮小 */
+#contact .actions input[type="submit"],
+#contact .actions input[type="reset"] {
+    font-size: .7em;
+    height: 3em;
+    line-height: 3em;
+    padding: 0 1.5em;
+    letter-spacing: .15em;
+}
+
+/* 7. SNS Icons — 視認性とタップ領域の改善 */
+.contact-method--social .social-links {
+    display: flex;
+    gap: 0.8em;
+    margin-top: 0.5em;
+}
+
+.contact-method--social .social-links .icon {
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+}
+
+.contact-method--social .social-links .icon.alt:before {
+    width: 2.4em;
+    height: 2.4em;
+    line-height: 2.4em;
+    font-size: 1.1em;
+}
+
+/* 8. Contact Form — パネル内側のゆとりを持たせる */
+#contact > .inner > .contact-panel--form {
+    padding-left: 2.5em !important;
+}
+
+@media screen and (max-width: 980px) {
+    #contact > .inner > .contact-panel--form,
+    #contact > .inner > .contact-panel--info {
+        padding-left: 2em !important;
+        padding-right: 2em !important;
+    }
+}
+
+/* 9. パンくずリスト（Breadcrumbs） */
+#main nav.breadcrumbs {
+    margin-bottom: 2.5em;
+    font-size: 0.9em;
+}
+
+#main nav.breadcrumbs ol {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+}
+
+#main nav.breadcrumbs li {
+    list-style: none !important;
+    padding-left: 0 !important;
+    margin-bottom: 0 !important;
+    display: inline-flex;
+    align-items: center;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+#main nav.breadcrumbs li::before {
+    display: none !important;
+}
+
+#main nav.breadcrumbs li:not(:last-child)::after {
+    content: "＞";
+    margin: 0 0.8em;
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 0.8em;
+}
+
+#main nav.breadcrumbs li a {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    border-bottom: none;
+    transition: color 0.2s ease;
+}
+
+#main nav.breadcrumbs li a:hover {
+    color: #9bf1ff;
+}
+
+/* 10. 可読性の向上（最大幅の制限） */
+#main > section > .inner > p,
+#main > section > .inner > ul,
+#main > section > .inner > ol {
+    max-width: 48em;
+    line-height: 1.8;
+}
+
+/* 11. フォームの親切なガイド */
+.contact-form input:not(:placeholder-shown):valid,
+.contact-form textarea:not(:placeholder-shown):valid {
+    border-color: #4CAF50 !important;
+    box-shadow: inset 0 0 0 1px rgba(76, 175, 80, 0.2) !important;
+    background: rgba(76, 175, 80, 0.05) !important;
+}
+
+/* 12. 各ページの「デカすぎる写真」をスリム化 */
+span.image.main img {
+    max-height: 40vh;
+    object-fit: cover;
+    width: 100%;
+    object-position: center 20%;
+}
+
+/* 13. ホーム画面のタイルにフワッと感（ホバーエフェクト）を追加 */
+.tiles article .image img {
+    transition: transform 0.4s ease !important;
+}
+.tiles article:hover .image img {
+    transform: scale(1.08) !important;
+}
+
+/* 14. ヘッダーのサークル説明文の視認性を高める */
+#header .logo span {
     font-weight: 500;
-    letter-spacing: 0.2em;
-    transition: color 0.3s ease, padding-left 0.3s ease;
+    opacity: 0.85;
+    letter-spacing: 0.05em;
 }
 
-#menu ul.links li a:hover {
-    color: var(--theme-accent) !important;
-    padding-left: 0.5rem;
+/* 15. 送信ボタンの発光エフェクト（JSで .is-active クラスが付与されたとき） */
+.contact-form input[type="submit"] {
+    transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease !important;
+}
+.contact-form input[type="submit"].is-active {
+    background-color: #9bf1ff !important;
+    color: #050a15 !important;
+    border-color: #9bf1ff !important;
+    box-shadow: 0 0 12px rgba(155, 241, 255, 0.45), 0 0 28px rgba(155, 241, 255, 0.2) !important;
 }
 
-/* --- Scroll To Top Button --- */
-#scrollToTopBtn {
-    background-color: var(--theme-panel) !important;
-    border: 1px solid var(--theme-line) !important;
-    color: var(--theme-accent) !important;
-    border-radius: 50% !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-    transition: all 0.3s ease;
+/* 16. 必須マーク（赤い※） */
+.required-mark {
+    color: #ff4444;
+    font-weight: bold;
+    margin-right: 0.3em;
 }
 
-#scrollToTopBtn:hover {
-    background-color: var(--theme-accent) !important;
-    color: var(--theme-bg) !important;
-    box-shadow: var(--theme-glow);
-    transform: translateY(-4px);
+/* 17. お問い合わせ欄のレイアウト（form左=広い、info右=狭い） */
+@media screen and (min-width: 981px) {
+    #contact > .inner {
+        display: flex;
+    }
+    #contact > .inner > .contact-panel--form {
+        width: 65% !important;
+        border-right: 1px solid rgba(116,241,255,.1) !important;
+    }
+    #contact > .inner > .contact-panel--info {
+        width: 35% !important;
+    }
 }
 
-/* --- Contact Section Styles placeholder --- */
-
-/* --- Content Pages Styles placeholder --- */
-
-/* --- Animation & Special Effects placeholder --- */
-
-/* --- Mini-Games Grid & Theme Glow --- */
-.minigames-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
-  gap: 2rem;
-  margin-top: 2rem;
+/* 18. メニューボタン：≡→× モーフィング（デザインA） */
+#header nav a[href="#menu"] {
+    position: relative;
+    padding-right: 3em !important;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    font-size: 1.1em;
+}
+#header nav a[href="#menu"]::before,
+#header nav a[href="#menu"]::after {
+    content: "" !important;
+    position: absolute;
+    right: 0.7em;
+    width: 1.5em;
+    height: 2px;
+    background: currentColor !important;
+    opacity: 1 !important;
+    transition: transform 0.3s ease, top 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease;
+}
+/* 真ん中の線（::before本体）と、上の線（box-shadow） */
+#header nav a[href="#menu"]::before {
+    top: 50%;
+    margin-top: -1px; /* height 2px の半分 */
+    box-shadow: 0 -7px 0 0 currentColor;
+}
+/* 下の線 */
+#header nav a[href="#menu"]::after {
+    top: calc(50% + 7px);
+    margin-top: -1px;
+}
+/* メニュー開いたとき→Xに変形 */
+.is-menu-visible #header nav a[href="#menu"]::before {
+    box-shadow: 0 0 0 0 transparent; /* 上の線を消す */
+    transform: rotate(45deg);
+}
+.is-menu-visible #header nav a[href="#menu"]::after {
+    top: 50%;
+    transform: rotate(-45deg);
 }
 
+/* メニューパネルのすりガラス（Glassmorphism）効果 */
+#menu {
+    background: rgba(36, 41, 67, 0.75) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+}
+
+/* 19. 注意書きボックス（ミニゲーム広場用） */
+.notice {
+    background: rgba(255, 200, 50, 0.08);
+    border: 1px solid rgba(255, 200, 50, 0.25);
+    border-left: 3px solid rgba(255, 200, 50, 0.6);
+    border-radius: 0.3rem;
+    padding: 1rem 1.2rem;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.95rem;
+    line-height: 1.7;
+}
+
+/* 20. モバイル向けレスポンシブ修正 */
+@media screen and (max-width: 736px) {
+    /* 20a. メニューボタンをコンパクトに */
+    #header nav a[href="#menu"] {
+        font-size: 1em !important;
+        padding: 0 2.5em 0 0.6em !important;
+        white-space: nowrap;
+    }
+
+    /* 20b. (上の736pxメディアクエリに統合済み) */
+
+    /* 20c. メールアドレスのはみ出し防止 */
+    .contact-method a[href^="mailto:"] {
+        word-break: break-all;
+        overflow-wrap: break-word;
+        font-size: 0.85em;
+    }
+
+    /* 20d. テキストの左右余白を確保 */
+    #main .inner,
+    #contact .inner,
+    #footer .inner {
+        padding-left: 1.2em !important;
+        padding-right: 1.2em !important;
+    }
+}
+
+/* 21. Note Card Hover Effects */
+.note-card:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* 22. ミニゲーム広場（minigames.html）専用スタイル */
+.minigames-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2em;
+}
+
+/* ゲームカード本体 */
 .game-card {
-  background-color: var(--theme-panel);
-  border: 1px solid var(--theme-line);
-  border-radius: 8px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1),
-              box-shadow 0.35s cubic-bezier(0.25, 0.8, 0.25, 1),
-              border-color 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+    padding: 0;
+    overflow: hidden;
+    border-radius: 8px;
+    border: 1px solid var(--game-theme-alpha, rgba(255, 255, 255, 0.15)) !important;
+    display: flex;
+    flex-direction: column;
+    background: rgba(0, 0, 0, 0.2) !important;
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), 
+                box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), 
+                border-color 0.3s ease !important;
 }
 
+/* プレミアムな浮遊感とテーマカラーでの発光ホバーエフェクト */
 .game-card:hover {
-  transform: translateY(-6px);
-  /* 繧､繝ｳ繝ｩ繧､繝ｳ縺ｧ謖・ｮ壹＆繧後◆蜷・ご繝ｼ繝縺ｮ繝・・繝槭き繝ｩ繝ｼ (--game-theme) 縺ｧ逋ｺ蜈・*/
-  border-color: var(--game-theme, var(--theme-accent)) !important;
-  box-shadow: 0 10px 30px var(--game-theme, rgba(0, 240, 255, 0.35));
+    transform: translateY(-6px) !important;
+    border-color: var(--game-theme) !important;
+    box-shadow: 0 12px 28px -10px var(--game-theme), 
+                0 6px 20px rgba(0, 0, 0, 0.5) !important;
 }
 
-.game-thumb-wrapper {
-  position: relative;
-  height: 180px;
-  background-size: cover;
-  background-position: center;
-  border-bottom: 1px solid var(--theme-line);
-  transition: border-color 0.3s ease;
+/* サムネイル画像リンク */
+.game-card .image-link {
+    display: block;
+    border-bottom: 1px solid var(--game-theme-alpha, rgba(255, 255, 255, 0.1)) !important;
+    text-decoration: none;
 }
 
-.game-card:hover .game-thumb-wrapper {
-  border-color: var(--game-theme, var(--theme-accent));
+/* サムネイル画像 */
+.game-card .image-link img {
+    width: 100%;
+    height: auto !important;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease !important;
 }
 
-.game-card-body {
-  padding: 1.8rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  flex-grow: 1;
+.game-card:hover .image-link img {
+    transform: scale(1.03) !important;
 }
 
-.game-title {
-  font-family: var(--theme-font-sans);
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #ffffff;
-  margin-bottom: 0.6rem;
+/* コンテンツエリア */
+.game-card-content {
+    padding: 2em;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
 }
 
-.game-desc {
-  font-size: 0.88rem;
-  line-height: 1.6;
-  color: var(--theme-muted);
-  margin-bottom: 1.5rem;
+/* ゲームタイトル */
+.game-card-title {
+    margin-bottom: 1em !important;
 }
 
-/* 繝励Ξ繧､繝懊ち繝ｳ (繝槭う繧ｯ繝ｭ繧､繝ｳ繧ｿ繝ｩ繧ｯ繧ｷ繝ｧ繝ｳ) */
-.play-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--theme-font-display);
-  font-weight: 700;
-  font-size: 0.8rem;
-  letter-spacing: 0.15em;
-  padding: 0.6em 1.5em;
-  border-radius: 4px;
-  text-decoration: none;
-  background-color: rgba(0, 240, 255, 0.04);
-  border: 1px solid var(--theme-line);
-  color: var(--theme-ink) !important;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  margin-top: auto;
+.game-card-title a {
+    text-decoration: none;
+    border-bottom: none !important;
+    transition: color 0.2s ease !important;
 }
 
-.game-card:hover .play-btn {
-  background-color: var(--game-theme, var(--theme-accent));
-  border-color: var(--game-theme, var(--theme-accent));
-  color: var(--theme-bg) !important;
-  box-shadow: 0 4px 15px var(--game-theme, rgba(0, 240, 255, 0.35));
+.game-card-title a:hover {
+    color: var(--game-theme) !important;
 }
 
-/* --- Page Header Styles placeholder --- */
-
-
-:root {
-  --theme-bg: #0b0e1a; /* 豺ｱ縺ｿ縺ｮ縺ゅｋ繧ｹ繝ｬ繝ｼ繝医ロ繧､繝薙・・医し繝ｼ繧ｯ繝ｫ縺ｮ菴懈･ｭ遨ｺ髢難ｼ・*/
-  --theme-bg-gradient: linear-gradient(135deg, #070914 0%, #0d1226 100%);
-  --theme-ink: #e2e8f0; /* 逋ｽ縺ｫ霑代＞繧ｰ繝ｬ繝ｼ・郁ｪｭ縺ｿ繧・☆縺暮㍾隕厄ｼ・*/
-  --theme-muted: rgba(226, 232, 240, 0.7);
-  --theme-dim: rgba(226, 232, 240, 0.5);
-  --theme-accent: #00f0ff; /* 逋ｺ蜈画─縺ｮ縺ゅｋ繝阪が繝ｳ繧ｷ繧｢繝ｳ・・E5縺ｮ蜈磯ｲ謚陦薙う繝｡繝ｼ繧ｸ・・*/
-  --theme-accent-alt: #ff5e00; /* 繧ｨ繝ｬ繧ｯ繝医Μ繝・け繧ｪ繝ｬ繝ｳ繧ｸ・育・驥上→驕翫・蠢・ｼ・*/
-  --theme-glow: 0 0 15px rgba(0, 240, 255, 0.3);
-  --theme-glow-orange: 0 0 15px rgba(255, 94, 0, 0.3);
-  --theme-panel: rgba(16, 22, 46, 0.65); /* 繧ｬ繝ｩ繧ｹ繝｢繝ｫ繝輔ぅ繧ｺ繝逕ｨ蜊企乗・繝代ロ繝ｫ */
-  --theme-panel-deep: rgba(7, 9, 20, 0.88);
-  --theme-line: rgba(0, 240, 255, 0.18);
-  --theme-shadow: 0 1.6rem 4rem rgba(0, 0, 0, 0.45);
-  
-  --theme-font-sans: 'Noto Sans JP', 'Source Sans Pro', Helvetica, Arial, sans-serif;
-  --theme-font-display: 'Space Grotesk', 'Orbitron', 'Noto Sans JP', sans-serif;
+/* 説明文 */
+.game-card-desc {
+    font-size: 0.9em;
+    margin-bottom: 1.5em !important;
+    line-height: 1.6;
 }
 
-body, input, select, textarea, button, .button {
-  font-family: var(--theme-font-sans);
+/* タグ（ジャンル・対応環境バッジ） */
+.game-badge {
+    color: var(--game-theme) !important;
+    font-size: 0.85em;
+    letter-spacing: 0.1em;
+    border: 1px solid var(--game-theme-alpha) !important;
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.02) !important;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--theme-font-display);
-  letter-spacing: 0.12em;
+/* 遊ぶボタン */
+.game-card .actions {
+    margin-top: auto;
+    margin-bottom: 0 !important;
 }
 
-body {
-  background-color: var(--theme-bg);
-  color: var(--theme-ink);
+/* 23. ページ共通ヘッダータイトル */
+.page-header-container {
+    text-align: center !important;
+    margin-bottom: 2em !important;
+}
+
+.page-header-title {
+    display: inline-block !important;
+    text-align: left !important;
+}
+
+/* 24. トップページ（index.html）活動記録 Noteカード */
+.note-cards-container {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 2em !important;
+}
+
+.note-card {
+    flex: 1 1 300px;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-radius: 8px;
+    overflow: hidden;
+    text-decoration: none;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), 
+                box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), 
+                border-color 0.3s ease !important;
+}
+
+.note-card-thumb {
+    height: 160px;
+    background-position: center !important;
+    background-size: cover !important;
+}
+
+.note-card-body {
+    padding: 20px;
+}
+
+.note-card-title {
+    font-size: 1.2em !important;
+    margin-bottom: 10px !important;
+    color: #ffffff !important;
+    border: none !important;
+}
+
+.note-card-date {
+    font-size: 0.9em;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0 !important;
+}
+
+/* 25. メンバー紹介（members.html）SNSリンク */
+.member-sns-container {
+    margin-left: auto !important;
+}
+
+.member-sns-link {
+    color: #1da1f2 !important;
+    font-size: 1.2em !important;
+    border-bottom: none !important;
+    transition: transform 0.2s ease, opacity 0.2s ease !important;
+    display: inline-block;
+}
+
+.member-sns-link:hover {
+    transform: scale(1.15);
+    opacity: 0.85;
+}
+
+/* 26. 404 エラーページ (404.html) 用スタイル */
+.error-lead {
+    font-size: 1.5em !important;
+    font-weight: bold;
+    margin-bottom: 0.5em !important;
+}
+
+.error-game-box {
+    background-color: rgba(255, 51, 51, 0.05) !important;
+    border: 1px solid rgba(255, 51, 51, 0.2) !important;
+    border-left: 4px solid #ff3333 !important; /* よりインディーゲーム感のある鮮烈な警告枠 */
+    padding: 2em !important;
+    border-radius: 8px !important;
+    margin-bottom: 2em !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.error-game-actions {
+    justify-content: center !important;
+    margin-top: 1.5em !important;
 }
