@@ -2,6 +2,11 @@ $ErrorActionPreference = "Stop"
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $port = 8000
+
+# CSSの自動結合ビルドを実行
+Write-Host "Running CSS bundle build before starting server..."
+powershell -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "bundle-css.ps1")
+
 $serverCommands = @(
     @{ Command = "py"; Arguments = @("-m", "http.server", "$port") },
     @{ Command = "python"; Arguments = @("-m", "http.server", "$port") }

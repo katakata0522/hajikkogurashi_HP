@@ -1,0 +1,41 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Grotesk:wght@400;500;700&family=Orbitron:wght@400;700&display=swap");
+@import url("./components/loading.css");
+@import url("./components/global-ui.css");
+@import url("./components/contact.css");
+@import url("./components/content-pages.css");
+@import url("./components/effects.css");
+@import url("./components/minigames.css");
+@import url("./components/page-header.css");
+
+:root {
+  --theme-bg: #0b0e1a; /* 深みのあるスレートネイビー（サークルの作業空間） */
+  --theme-bg-gradient: linear-gradient(135deg, #070914 0%, #0d1226 100%);
+  --theme-ink: #e2e8f0; /* 白に近いグレー（読みやすさ重視） */
+  --theme-muted: rgba(226, 232, 240, 0.7);
+  --theme-dim: rgba(226, 232, 240, 0.5);
+  --theme-accent: #00f0ff; /* 発光感のあるネオンシアン（UE5の先進技術イメージ） */
+  --theme-accent-alt: #ff5e00; /* エレクトリックオレンジ（熱量と遊び心） */
+  --theme-glow: 0 0 15px rgba(0, 240, 255, 0.3);
+  --theme-glow-orange: 0 0 15px rgba(255, 94, 0, 0.3);
+  --theme-panel: rgba(16, 22, 46, 0.65); /* ガラスモルフィズム用半透明パネル */
+  --theme-panel-deep: rgba(7, 9, 20, 0.88);
+  --theme-line: rgba(0, 240, 255, 0.18);
+  --theme-shadow: 0 1.6rem 4rem rgba(0, 0, 0, 0.45);
+  
+  --theme-font-sans: 'Noto Sans JP', 'Source Sans Pro', Helvetica, Arial, sans-serif;
+  --theme-font-display: 'Space Grotesk', 'Orbitron', 'Noto Sans JP', sans-serif;
+}
+
+body, input, select, textarea, button, .button {
+  font-family: var(--theme-font-sans);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--theme-font-display);
+  letter-spacing: 0.12em;
+}
+
+body {
+  background-color: var(--theme-bg);
+  color: var(--theme-ink);
+}

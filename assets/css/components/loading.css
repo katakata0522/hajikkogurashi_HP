@@ -1,0 +1,70 @@
+/* --- Loading Animation (Hologram Fade) --- */
+#loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: var(--theme-bg-gradient, #0b0e1a);
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), 
+                visibility 0.8s cubic-bezier(0.25, 1, 0.5, 1),
+                transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+body.loaded #loader {
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(1.08); /* 奥へ広がるようなフェードアウト */
+}
+
+/* スピナーは廃止し、ロゴとテキストの演出に特化 */
+#loader .spinner {
+    display: none;
+}
+
+#loader h2 {
+    color: var(--theme-accent, #00f0ff);
+    font-family: var(--theme-font-display);
+    font-size: 2.4em;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    margin: 0 0 0 0.3em; /* 字間調整のための右マージン相殺 */
+    text-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+    animation: loader-pulse 2s ease-in-out infinite;
+}
+
+#loader::after {
+    content: "CONNECTING TO CORNER NEIGHBOR...";
+    color: var(--theme-ink, #e2e8f0);
+    font-family: var(--theme-font-display);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.25em;
+    margin-top: 1.8rem;
+    opacity: 0.6;
+    animation: loader-sub-pulse 2s ease-in-out infinite;
+}
+
+@keyframes loader-pulse {
+    0%, 100% {
+        opacity: 0.35;
+        transform: scale(0.97);
+        filter: blur(1.5px);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.02);
+        filter: blur(0px);
+        text-shadow: 0 0 25px rgba(0, 240, 255, 0.8), 0 0 10px rgba(0, 240, 255, 0.4);
+    }
+}
+
+@keyframes loader-sub-pulse {
+    0%, 100% { opacity: 0.25; }
+    50% { opacity: 0.85; }
+}

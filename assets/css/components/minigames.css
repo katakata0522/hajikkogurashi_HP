@@ -1,0 +1,90 @@
+/* --- Mini-Games Grid & Theme Glow --- */
+.minigames-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.game-card {
+  background-color: var(--theme-panel);
+  border: 1px solid var(--theme-line);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1),
+              box-shadow 0.35s cubic-bezier(0.25, 0.8, 0.25, 1),
+              border-color 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+}
+
+.game-card:hover {
+  transform: translateY(-6px);
+  /* インラインで指定された各ゲームのテーマカラー (--game-theme) で発光 */
+  border-color: var(--game-theme, var(--theme-accent)) !important;
+  box-shadow: 0 10px 30px var(--game-theme, rgba(0, 240, 255, 0.35));
+}
+
+.game-thumb-wrapper {
+  position: relative;
+  height: 180px;
+  background-size: cover;
+  background-position: center;
+  border-bottom: 1px solid var(--theme-line);
+  transition: border-color 0.3s ease;
+}
+
+.game-card:hover .game-thumb-wrapper {
+  border-color: var(--game-theme, var(--theme-accent));
+}
+
+.game-card-body {
+  padding: 1.8rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex-grow: 1;
+}
+
+.game-title {
+  font-family: var(--theme-font-sans);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 0.6rem;
+}
+
+.game-desc {
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--theme-muted);
+  margin-bottom: 1.5rem;
+}
+
+/* プレイボタン (マイクロインタラクション) */
+.play-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--theme-font-display);
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  padding: 0.6em 1.5em;
+  border-radius: 4px;
+  text-decoration: none;
+  background-color: rgba(0, 240, 255, 0.04);
+  border: 1px solid var(--theme-line);
+  color: var(--theme-ink) !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  margin-top: auto;
+}
+
+.game-card:hover .play-btn {
+  background-color: var(--game-theme, var(--theme-accent));
+  border-color: var(--game-theme, var(--theme-accent));
+  color: var(--theme-bg) !important;
+  box-shadow: 0 4px 15px var(--game-theme, rgba(0, 240, 255, 0.35));
+}

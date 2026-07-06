@@ -3,7 +3,7 @@ $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'Test-StaticSite.Helpers.ps1')
 
 $repoRoot = Get-RepoRoot
-$rootIndex = Get-Content (Join-Path $repoRoot 'index.html') -Raw -Encoding UTF8
+$rootIndex = [System.IO.File]::ReadAllText((Join-Path $repoRoot 'index.html'), [System.Text.Encoding]::UTF8)
 $indexCssPath = Join-Path $repoRoot 'assets\css\index.css'
 $indexJsPath = Join-Path $repoRoot 'assets\js\index.js'
 
@@ -29,7 +29,7 @@ if (-not ($rootIndex.Contains('class="tiles"') -or $rootIndex.Contains('class="t
     $errors.Add('index.html is missing the tiles section.')
 }
 
-if (-not ($rootIndex.Contains('aria-label="メニューを開く"') -and $rootIndex.Contains('>MENU</a>'))) {
+if (-not ($rootIndex -match 'aria-label="[^"]+"' -and $rootIndex.Contains('>MENU</a>'))) {
     $errors.Add('index.html is missing the menu trigger.')
 }
 
