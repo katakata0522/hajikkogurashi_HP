@@ -36,7 +36,7 @@ body.is-home #banner .button.special:hover {
 
 body.is-home #banner.major {
   background:
-    linear-gradient(90deg, rgba(15, 13, 11, 0.98) 0%, rgba(15, 13, 11, 0.86) 48%, rgba(15, 13, 11, 0.25) 100%),
+    linear-gradient(90deg, rgba(10, 8, 6, 0.88), rgba(10, 8, 6, 0.64) 48%, rgba(10, 8, 6, 0.32)),
     url("/assets/images/kanji_slicer_thumbnail.png") center right / min(52vw, 44rem) auto no-repeat,
     var(--home-bg);
   border-bottom: 1px solid var(--home-line);
