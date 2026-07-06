@@ -27,6 +27,8 @@
 
 body, input, select, textarea, button, .button {
   font-family: var(--theme-font-sans);
+  font-size: 1.05rem; /* 本文の表示サイズを適正な17px相当にリサイズ */
+  line-height: 1.7;
 }
 
 h1, h2, h3, h4, h5, h6 {

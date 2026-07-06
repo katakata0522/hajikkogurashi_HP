@@ -103,9 +103,9 @@ body.loaded #loader {
 #header .logo strong {
     color: #ffffff !important;
     font-family: var(--theme-font-display);
-    font-size: 1.35rem;
+    font-size: 1.75rem !important; /* 繧ｵ繧､繝医・鬘斐→縺励※譛ｬ譁・ｈ繧雁香蛻・↓蠑輔″荳翫￡ */
     font-weight: 700;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.08em;
     transition: color 0.3s ease;
 }
 
@@ -151,6 +151,7 @@ body.loaded #loader {
     backdrop-filter: blur(12px);
     border-left: 1px solid var(--theme-line) !important;
     box-shadow: -10px 0 30px rgba(0, 0, 0, 0.3);
+    overflow: hidden !important; /* 逕ｻ髱｢縺ｩ逵溘ｓ荳ｭ縺ｮ荳崎・辟ｶ縺ｪ繧ｹ繧ｯ繝ｭ繝ｼ繝ｫ繝舌・繧貞ｮ悟・謗帝勁 */
 }
 
 /* 逋ｽ縺・､ｪ縺・ｸｦ邱壹・髯､蜴ｻ・医せ繧ｯ繝ｭ繝ｼ繝ｫ繝舌・縺ｮ繧ｫ繧ｹ繧ｿ繝槭う繧ｺ・・*/
@@ -166,7 +167,12 @@ body.loaded #loader {
 }
 
 #menu .inner {
-    padding: 4rem 2.8rem;
+    padding: 3rem 2rem !important; /* 邵ｦ縺ｫ縺ｯ縺ｿ蜃ｺ縺輔↑縺・ｈ縺・ｽ咏區繧貞ｼ輔″邱繧・*/
+}
+
+#menu ul.links li {
+    padding: 0 !important;
+    margin-bottom: 0.8rem; /* 陦碁俣繧偵さ繝ｳ繝代け繝医↓隱ｿ謨ｴ */
 }
 
 #menu ul.links li a {
@@ -184,15 +190,23 @@ body.loaded #loader {
 }
 
 #menu .close {
-    border: 1px solid var(--theme-line) !important;
-    background-color: rgba(255, 204, 0, 0.02) !important;
-    transition: all 0.3s ease;
+    border: none !important; /* 荳崎・辟ｶ縺ｪ蟾ｨ螟ｧ驕ｸ謚樊棧繧貞ｮ悟・蟒・ｭ｢ */
+    background-color: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+    transition: transform 0.2s ease;
 }
 
 #menu .close:hover {
-    border-color: var(--theme-accent) !important;
-    box-shadow: var(--theme-glow);
-    transform: scale(1.05);
+    transform: scale(1.1);
+}
+
+/* 繝帙ヰ繝ｼ繝ｻ繝輔か繝ｼ繧ｫ繧ｹ譎ゅ↓縲・怜魂縺ｮ邱夊・菴薙ｒ繧ｴ繝ｼ繝ｫ繝峨↓蜈峨ｉ縺帙ｋ荳雁刀縺ｪ貍泌・ */
+#menu .close:hover:before,
+#menu .close:hover:after,
+#menu .close:focus:before,
+#menu .close:focus:after {
+    background-color: var(--theme-accent) !important;
 }
 
 /* --- Scroll To Top Button --- */
@@ -346,6 +360,8 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus {
 
 body, input, select, textarea, button, .button {
   font-family: var(--theme-font-sans);
+  font-size: 1.05rem; /* 譛ｬ譁・・陦ｨ遉ｺ繧ｵ繧､繧ｺ繧帝←豁｣縺ｪ17px逶ｸ蠖薙↓繝ｪ繧ｵ繧､繧ｺ */
+  line-height: 1.7;
 }
 
 h1, h2, h3, h4, h5, h6 {

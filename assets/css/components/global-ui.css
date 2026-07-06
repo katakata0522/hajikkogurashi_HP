@@ -31,9 +31,9 @@
 #header .logo strong {
     color: #ffffff !important;
     font-family: var(--theme-font-display);
-    font-size: 1.35rem;
+    font-size: 1.75rem !important; /* サイトの顔として本文より十分に引き上げ */
     font-weight: 700;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.08em;
     transition: color 0.3s ease;
 }
 
@@ -79,6 +79,7 @@
     backdrop-filter: blur(12px);
     border-left: 1px solid var(--theme-line) !important;
     box-shadow: -10px 0 30px rgba(0, 0, 0, 0.3);
+    overflow: hidden !important; /* 画面ど真ん中の不自然なスクロールバーを完全排除 */
 }
 
 /* 白い太い縦線の除去（スクロールバーのカスタマイズ） */
@@ -94,7 +95,12 @@
 }
 
 #menu .inner {
-    padding: 4rem 2.8rem;
+    padding: 3rem 2rem !important; /* 縦にはみ出さないよう余白を引き締め */
+}
+
+#menu ul.links li {
+    padding: 0 !important;
+    margin-bottom: 0.8rem; /* 行間をコンパクトに調整 */
 }
 
 #menu ul.links li a {
@@ -112,15 +118,23 @@
 }
 
 #menu .close {
-    border: 1px solid var(--theme-line) !important;
-    background-color: rgba(255, 204, 0, 0.02) !important;
-    transition: all 0.3s ease;
+    border: none !important; /* 不自然な巨大選択枠を完全廃止 */
+    background-color: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+    transition: transform 0.2s ease;
 }
 
 #menu .close:hover {
-    border-color: var(--theme-accent) !important;
-    box-shadow: var(--theme-glow);
-    transform: scale(1.05);
+    transform: scale(1.1);
+}
+
+/* ホバー・フォーカス時に、×印の線自体をゴールドに光らせる上品な演出 */
+#menu .close:hover:before,
+#menu .close:hover:after,
+#menu .close:focus:before,
+#menu .close:focus:after {
+    background-color: var(--theme-accent) !important;
 }
 
 /* --- Scroll To Top Button --- */
