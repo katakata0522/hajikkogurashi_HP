@@ -34,10 +34,8 @@
 	body.classList.add('is-loading');
 
 	window.addEventListener('load', function () {
-		setTimeout(function () {
-			body.classList.remove('is-loading');
-			body.classList.add('loaded'); // For custom loader fade out
-		}, 300); // 少しディレイを入れてローダーを見せる
+		body.classList.remove('is-loading');
+		body.classList.add('loaded'); // For custom loader fade out
 	});
 
 	// Clear transitioning state on unload
