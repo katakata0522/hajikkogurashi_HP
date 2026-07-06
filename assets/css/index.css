@@ -4,34 +4,35 @@
 */
 
 body.is-home {
-  --home-bg: var(--theme-bg);
-  --home-ink: var(--theme-ink);
-  --home-muted: var(--theme-muted);
-  --home-dim: var(--theme-dim);
-  --home-accent: var(--theme-accent);
-  --home-cyan: var(--theme-cyan);
-  --home-panel: var(--theme-panel);
-  --home-panel-deep: var(--theme-panel-deep);
-  --home-line: var(--theme-line);
-  --home-shadow: var(--theme-shadow);
+  --home-bg: #15120f;
+  --home-ink: #f5ebd4;
+  --home-muted: rgba(245, 235, 212, 0.82);
+  --home-dim: rgba(245, 235, 212, 0.68);
+  --home-accent: #ffb21f;
+  --home-cyan: #69d391;
+  --home-panel: rgba(18, 16, 13, 0.82);
+  --home-panel-deep: rgba(9, 8, 6, 0.92);
+  --home-line: rgba(255, 178, 31, 0.22);
+  --home-shadow: 0 1.6rem 4rem rgba(0, 0, 0, 0.38);
+}
+
+body.is-home #wrapper {
+  background:
+    linear-gradient(90deg, rgba(255, 178, 31, 0.055) 1px, transparent 1px) 0 0 / 3rem 3rem,
+    linear-gradient(0deg, rgba(255, 178, 31, 0.04) 1px, transparent 1px) 0 0 / 3rem 3rem,
+    radial-gradient(circle at 15% 8%, rgba(255, 83, 61, 0.2), transparent 28rem),
+    radial-gradient(circle at 88% 0%, rgba(105, 211, 145, 0.13), transparent 30rem),
+    var(--home-bg);
 }
 
 body.is-home #header .logo span {
-  color: var(--theme-dim);
+  color: var(--home-dim);
 }
 
-/* バナーの special ボタン（ミニゲームで遊ぶ）のゴールド配色 */
-body.is-home #banner .button.special {
-  background-color: var(--theme-accent) !important;
-  color: #12100d !important;
-  border-color: var(--theme-accent) !important;
-  box-shadow: 0 4px 14px rgba(255, 178, 31, 0.3) !important;
-}
-
-body.is-home #banner .button.special:hover {
-  background-color: #e59d1a !important;
-  transform: translateY(-3px) !important;
-  box-shadow: 0 6px 20px rgba(255, 178, 31, 0.45) !important;
+body.is-home #header nav a[href="#menu"] {
+  background: rgba(6, 12, 24, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.4rem;
 }
 
 body.is-home #banner.major {
