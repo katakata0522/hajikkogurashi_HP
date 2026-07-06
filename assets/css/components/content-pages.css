@@ -52,10 +52,24 @@
 }
 
 #main nav.breadcrumbs li a:hover {
-    color: #9bf1ff;
+    color: var(--theme-accent) !important;
+}
+
+/* 一般的なリンクのホバー色 */
+a:hover {
+    color: var(--theme-accent) !important;
+    border-bottom-color: var(--theme-accent) !important;
+}
+
+/* 見出し下線の色をゴールド系に変更 */
+header.major > :first-child:after,
+.page-header-title.major > :first-child:after {
+    background: var(--theme-accent) !important;
 }
 
 /* 10. 可読性の向上（最大幅の制限） */
+
+
 #main > section > .inner > p,
 #main > section > .inner > ul,
 #main > section > .inner > ol {

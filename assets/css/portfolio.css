@@ -14,7 +14,7 @@
   font-size: 1.15rem;
   line-height: 1.9;
   max-width: 44rem;
-  color: rgba(244, 244, 255, 0.92);
+  color: var(--theme-muted);
 }
 
 .portfolio-pillars {
@@ -44,7 +44,7 @@
   letter-spacing: 0.2em;
   text-transform: uppercase;
   font-size: 0.78rem;
-  color: #9bf1ff; /* Matching the theme's highlight color */
+  color: var(--theme-accent); /* Matching the theme's highlight color */
 }
 
 .portfolio-pillar__value {
@@ -60,7 +60,7 @@
 .portfolio-timeline__content p,
 .portfolio-cta p {
   margin: 0.9rem 0 0;
-  color: rgba(244, 244, 255, 0.82);
+  color: var(--theme-muted);
 }
 
 .portfolio-section > .major {

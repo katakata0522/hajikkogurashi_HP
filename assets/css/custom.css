@@ -1,10 +1,4 @@
-/*
-  Project-level styles.
-
-  Keep broad HTML5 UP defaults in main.css and page-specific rules in their own
-  files. This entry only composes shared project styles.
-*/
-
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap");
 @import url("./components/loading.css");
 @import url("./components/global-ui.css");
 @import url("./components/contact.css");
@@ -12,3 +6,35 @@
 @import url("./components/effects.css");
 @import url("./components/minigames.css");
 @import url("./components/page-header.css");
+
+:root {
+  --theme-bg: #15120f;
+  --theme-ink: #f5ebd4;
+  --theme-muted: rgba(245, 235, 212, 0.82);
+  --theme-dim: rgba(245, 235, 212, 0.68);
+  --theme-accent: #ffb21f;
+  --theme-cyan: #69d391;
+  --theme-panel: rgba(18, 16, 13, 0.82);
+  --theme-panel-deep: rgba(9, 8, 6, 0.92);
+  --theme-line: rgba(255, 178, 31, 0.22);
+  --theme-shadow: 0 1.6rem 4rem rgba(0, 0, 0, 0.38);
+  --theme-font: "Noto Sans JP", "Source Sans Pro", Helvetica, Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+}
+
+body, input, select, textarea, button, .button, h1, h2, h3, h4, h5, h6 {
+  font-family: var(--theme-font) !important;
+}
+
+body {
+  background-color: var(--theme-bg) !important;
+  color: var(--theme-ink) !important;
+}
+
+/*
+  Project-level styles.
+
+  Keep broad HTML5 UP defaults in main.css and page-specific rules in their own
+  files. This entry only composes shared project styles.
+*/
+
+
