@@ -364,7 +364,52 @@ body:not(.is-home) #header .logo span {
   font-weight: 700;
 }
 
-/* --- Page Header Styles placeholder --- */
+/* --- Breadcrumbs (Horizontal & Smart) --- */
+.breadcrumbs {
+    margin-bottom: 2rem;
+}
+
+.breadcrumbs ol {
+    list-style: none !important;
+    padding-left: 0 !important;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--theme-dim);
+    letter-spacing: 0.05em;
+    margin: 0;
+}
+
+.breadcrumbs li {
+    padding-left: 0 !important;
+    display: inline-flex;
+    align-items: center;
+}
+
+.breadcrumbs li + li:before {
+    content: "/";
+    margin: 0 0.8rem;
+    color: var(--theme-dim);
+    opacity: 0.6;
+    font-weight: 400;
+}
+
+.breadcrumbs a {
+    color: var(--theme-muted) !important;
+    border-bottom: none !important;
+    transition: color 0.3s ease;
+}
+
+.breadcrumbs a:hover {
+    color: var(--theme-accent) !important;
+}
+
+.breadcrumbs li[aria-current="page"] {
+    color: var(--theme-accent) !important;
+    font-weight: 700;
+}
 
 
 :root {

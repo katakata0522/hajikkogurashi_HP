@@ -1,6 +1,6 @@
 <?php
 /**
- * はじっこぐらし公式ホームページ
+ * Corner Neighbor公式ホームページ
  * お知らせデータファイル (news-data.php)
  * 
  * お知らせを追加する場合は、以下の $news_items 配列の先頭に要素を追加してください。
@@ -20,6 +20,6 @@ $news_items = [
     [
         'date' => '2024年08月16日',
         'title' => 'サークル活動開始！',
-        'content' => '2024年8月16日より、ゲーム制作サークル「はじっこぐらし」の活動を開始しました！応援よろしくお願いします！<br /><a href="https://note.com/hajikkogurashi01">はじっこぐらしのnoteページ</a><br /><a href="https://x.com/Corner_neighbor">Corner Neighbor のXアカウント</a><br /><a href="https://www.youtube.com/@hajikkogurashi">はじっこぐらしのyoutubeアカウント</a>'
+        'content' => '2024年8月16日より、ゲーム制作サークル「Corner Neighbor」の活動を開始しました！応援よろしくお願いします！<br /><a href="https://note.com/hajikkogurashi01">Corner Neighborのnoteページ</a><br /><a href="https://x.com/Corner_neighbor">Corner Neighbor のXアカウント</a><br /><a href="https://www.youtube.com/@hajikkogurashi">Corner NeighborのYouTubeアカウント</a>'
     ]
 ];

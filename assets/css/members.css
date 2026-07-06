@@ -72,3 +72,20 @@
   line-height: 1.6;
   color: var(--theme-muted);
 }
+
+/* SNS Links (Remove underline/dots and style beautifully) */
+.member-sns-link {
+  border-bottom: none !important;
+  color: var(--theme-dim) !important;
+  font-size: 1.1rem;
+  transition: color 0.3s ease, transform 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3em;
+}
+
+.member-sns-link:hover {
+  color: var(--theme-accent) !important;
+  transform: scale(1.1);
+}
