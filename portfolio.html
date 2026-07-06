@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <!--
 	Forty by HTML5 UP
 	html5up.net | @ajlkn
@@ -25,8 +25,8 @@
 	<meta name="twitter:title" content="作品一覧 | はじっこぐらし公式ホームページ" />
 	<meta name="twitter:description" content="ゲーム制作サークル「はじっこぐらし」のインディーゲーム開発実績・作品一覧です。現在公開に向けてUE5で鋭意制作中のメインゲームの進捗状況から、活動記録であるnote記事や動画へのリンクまで幅広く掲載しています。" />
 	<meta name="twitter:image" content="https://hajikkoroom.xsrv.jp/assets/images/pic05.webp" />
-	<link rel="stylesheet" href="/assets/css/main.css?v=20260705" />
-	<link rel="stylesheet" href="/assets/css/custom.css?v=20260705" />
+	<link rel="stylesheet" href="/assets/css/main.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/css/main.css'); ?>" />
+	<link rel="stylesheet" href="/assets/css/custom.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/css/custom.css'); ?>" />
 	<script type="application/ld+json">
 	{
 		"@context": "https://schema.org",
@@ -47,39 +47,35 @@
 		]
 	}
 	</script>
-	<link rel="stylesheet" href="/assets/css/portfolio.css?v=20260705" />
+	<link rel="stylesheet" href="/assets/css/portfolio.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/css/portfolio.css'); ?>" />
 </head>
 
 
 <body>
     <div id="wrapper">
-		<!-- Header -->
-		<header id="header">
-			<a href="/" class="logo">
-				<strong>はじっこぐらし</strong>
-				<span>Unreal Engine 5でゲームを作るサークル</span>
-			</a>
-			<nav>
-				<a href="#menu" aria-label="メニューを開く">MENU</a>
-			</nav>
-		</header>
+        <!-- Header -->
+<header id="header">
+  <a href="/" class="logo">
+    <strong>はじっこぐらし</strong>
+    <span>Unreal Engineでまったりゲームを作るサークル！</span>
+  </a>
+  <nav>
+    <a href="#menu" aria-label="メニューを開く">MENU</a>
+  </nav>
+</header>
 
-		<!-- Menu -->
-		<nav id="menu">
-			<ul class="links">
-				<li><a href="/">ホーム</a></li>
-				<li><a href="/aboutus.html">私たちについて</a></li>
-				<li><a href="/members.html">メンバー紹介</a></li>
-				<li><a href="/news.html">お知らせ</a></li>
-				<li><a href="/portfolio.html">作品一覧</a></li>
-				<li><a href="/minigames.html">ミニゲーム広場</a></li>
-				<li><a href="/coming-soon.html">鋭意制作中！</a></li>
-			</ul>
-		</nav>
-
-
-
-
+<!-- Menu -->
+<nav id="menu">
+  <ul class="links">
+    <li><a href="/">ホーム</a></li>
+    <li><a href="/aboutus.html">私たちについて</a></li>
+    <li><a href="/members.html">メンバー紹介</a></li>
+    <li><a href="/news.html">お知らせ</a></li>
+    <li><a href="/portfolio.html">作品一覧</a></li>
+    <li><a href="/minigames.html">ミニゲーム広場</a></li>
+    <li><a href="/coming-soon.html">鋭意制作中！</a></li>
+  </ul>
+</nav>
 
 
         <!-- Main -->
@@ -119,14 +115,14 @@
       <article class="portfolio-pillar">
         <span class="portfolio-pillar__label">発信先</span>
         <strong class="portfolio-pillar__value">note / X / YouTube</strong>
-        <p>読む、追う、観る入口をまとめています。</p>
+        <p>読む、追う、観るの3方向から活動を追いかけられます。</p>
       </article>
     </div>
   </section>
 
   <section class="portfolio-section">
     <header class="major">
-      <h2>遊べるものと、<br />制作中のもの。</h2>
+      <h2>見て、聞いて、遊んでいって！</h2>
     </header>
 
     <div class="portfolio-card-grid">
@@ -135,11 +131,11 @@
         <h3>制作中の作品</h3>
         <p>
           現在は公開に向けて制作を進めています。<br />
-          今後はジャンル、進捗、開発画面、次回更新予定を集約します。
+          まずは「鋭意制作中！」ページから、これから増えていく作品の入口を用意しています。
         </p>
         <div class="portfolio-links">
-          <a href="/coming-soon.html" class="button special">制作中の入口を見る</a>
-          <a href="/minigames.html" class="button">公開中ゲームで遊ぶ</a>
+          <a href="/coming-soon.html" class="button special">制作中ページを見る</a>
+          <a href="/news.html" class="button">更新情報を見る</a>
         </div>
       </article>
 
@@ -148,7 +144,7 @@
         <h3>note記事</h3>
         <p>
           活動記録やイベント参加の様子は note で発信中です。<br />
-          2025年05月09日には「東京ゲームダンジョンに行ってきた」を公開しました。
+          2025年05月09日には「東京ゲームダンジョンに行ってった」を公開しました。
         </p>
         <div class="portfolio-links">
           <a href="https://note.com/hajikkogurashi01/n/n5c3d29c281e1" class="button" target="_blank" rel="noopener noreferrer">記事を読む</a>
@@ -160,7 +156,7 @@
         <span class="portfolio-card__kicker">Watch</span>
         <h3>活動を追いかける</h3>
         <p>
-          X、YouTube、メンバー紹介への入口をまとめています。<br />
+          リアルタイムの動きは X、動画は YouTube、メンバーの空気感は紹介ページからどうぞ。<br />
           気になったら気軽に覗いていってください。
         </p>
         <div class="portfolio-links">
@@ -179,24 +175,17 @@
 
     <div class="portfolio-timeline">
       <article class="portfolio-timeline__item">
-        <span class="portfolio-timeline__date">2026.06.30</span>
+        <span class="portfolio-timeline__date">2024.08.16</span>
         <div class="portfolio-timeline__content">
-          <h3>note 更新</h3>
-          <p>「東京インディーズへ出展申し込みをしました」を公開しました。</p>
+          <h3>サークル活動開始</h3>
+          <p>ゲーム制作サークル「はじっこぐらし」の活動を開始しました。</p>
         </div>
       </article>
       <article class="portfolio-timeline__item">
         <span class="portfolio-timeline__date">2025.05.09</span>
         <div class="portfolio-timeline__content">
           <h3>note 更新</h3>
-          <p>「東京ゲームダンジョンに行ってきた」を公開しました。</p>
-        </div>
-      </article>
-      <article class="portfolio-timeline__item">
-        <span class="portfolio-timeline__date">2024.08.16</span>
-        <div class="portfolio-timeline__content">
-          <h3>サークル活動開始</h3>
-          <p>ゲーム制作サークル「はじっこぐらし」の活動を開始しました。</p>
+          <p>「東京ゲームダンジョンに行ってった」を公開しました。</p>
         </div>
       </article>
       <article class="portfolio-timeline__item">
@@ -212,7 +201,7 @@
   <section class="portfolio-cta">
     <div class="portfolio-cta__body">
       <h2>気になる更新はお知らせページへ</h2>
-      <p>ホームページ更新、note、イベント参加、ミニゲーム追加をお知らせへ反映していきます。</p>
+      <p>ホームページ更新や外部発信の追加は、先にお知らせへ反映していきます。</p>
     </div>
     <div class="portfolio-links">
       <a href="/news.html" class="button special">お知らせを見る</a>
@@ -223,100 +212,26 @@
                 </div>
             </section>
         </main>
-		<!-- Contact -->
-		<section id="contact">
-			<div class="inner">
-				<section class="contact-panel contact-panel--form">
-					<header class="major">
-						<h2>お問い合わせ</h2>
-					</header>
-					<form action="/contact.php" method="POST" class="contact-form">
-						<div class="field half first">
-							<label for="name">お名前</label>
-							<input type="text" name="name" id="name" autocomplete="name" required />
-						</div>
-						<div class="field half">
-							<label for="email"><span class="required-mark">※</span>メールアドレス</label>
-							<input type="email" name="_replyto" id="email" autocomplete="email" inputmode="email" placeholder="例：example@mail.com" required />
-						</div>
-						<div class="field">
-							<label for="message">お問い合わせ内容</label>
-							<textarea name="message" id="message" rows="6" required></textarea>
-						</div>
-						<input type="hidden" name="return_to" value="/portfolio.html" />
-						<div style="display:none;">
-							<label for="company">会社名</label>
-							<input type="text" name="company" id="company" tabindex="-1" autocomplete="off" />
-						</div>
-						<ul class="actions">
-							<li><input type="submit" value="送信する" class="special" /></li>
-							<li><input type="reset" value="入力をリセット" /></li>
-						</ul>
-					</form>
-					<p>フォームが送信できない場合は、<a href="mailto:hajikkogurashi.official@gmail.com">メール</a>でもご連絡いただけます。</p>
-				</section>
 
-				<section class="split contact-panel contact-panel--info">
-					<section>
-						<div class="contact-method">
-							<span class="icon alt fa-envelope"></span>
-							<h3>メール</h3>
-							<a href="mailto:hajikkogurashi.official@gmail.com">hajikkogurashi.official@gmail.com</a>
-						</div>
-					</section>
-
-					<section>
-						<div class="contact-method">
-							<span class="icon alt fa-home"></span>
-							<h3>拠点</h3>
-							<span>日本のどこかのはじっこ</span>
-						</div>
-					</section>
-
-					<section>
-						<div class="contact-method contact-method--social">
-							<span class="icon alt fa-share-alt"></span>
-							<h3>SNS</h3>
-							<ul class="icons social-links">
-								<li class="social-links__item">
-									<a href="https://note.com/hajikkogurashi01" class="icon alt fa-sticky-note-o" target="_blank" rel="noopener noreferrer" aria-label="note" title="note">
-										<span class="label">note</span>
-									</a>
-								</li>
-								<li class="social-links__item">
-									<a href="https://x.com/Corner_neighbor" class="icon alt fa-twitter" target="_blank" rel="noopener noreferrer" aria-label="X" title="X">
-										<span class="label">X</span>
-									</a>
-								</li>
-								<li class="social-links__item">
-									<a href="https://www.youtube.com/@hajikkogurashi" class="icon alt fa-youtube-play" target="_blank" rel="noopener noreferrer" aria-label="YouTube" title="YouTube">
-										<span class="label">YouTube</span>
-									</a>
-								</li>
-							</ul>
-						</div>
-					</section>
-				</section>
-			</div>
-		</section>
+        <!-- Contact -->
+<?php include 'includes/contact-section.php'; ?>
 
 <!-- Footer -->
-		<footer id="footer">
-			<div class="inner">
-				<ul class="copyright footer-meta">
-					<li>© 2024-2026 はじっこぐらし公式ホームページ</li>
+	<footer id="footer">
+		<div class="inner">
+			
+			<ul class="copyright footer-meta">
+				<li>© 2024-2026 はじっこぐらし公式ホームページ</li>
 				<li>デザイン: <a href="https://html5up.net" target="_blank" rel="noopener noreferrer">HTML5 UP</a></li>
-					<li><a href="/privacy-policy.html">プライバシーポリシー</a></li>
-					<li><a href="/terms-of-service.html">利用規約</a></li>
-				</ul>
-			</div>
-		</footer>
-
-
+				<li><a href="/privacy-policy.html">プライバシーポリシー</a></li>
+				<li><a href="/terms-of-service.html">利用規約</a></li>
+			</ul>
+		</div>
+	</footer>
 
 <a href="#" id="scrollToTopBtn" title="ページトップへ戻る">▲</a>
 <!-- Scripts -->
-	<script src="/assets/js/main.js?v=20260705"></script>
+	<script src="/assets/js/main.js?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/js/main.js'); ?>"></script>
 	
 
     </div>

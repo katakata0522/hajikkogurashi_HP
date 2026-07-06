@@ -1,7 +1,6 @@
 .portfolio-page {
   display: grid;
   gap: 3.5rem;
-  min-width: 0;
   padding-bottom: 1rem;
 }
 
@@ -34,7 +33,6 @@
 
 .portfolio-pillar {
   padding: 1.5rem;
-  min-width: 0;
 }
 
 .portfolio-pillar__label,
@@ -67,11 +65,6 @@
   margin-bottom: 1.8rem;
 }
 
-.portfolio-section > .major h2 {
-  display: block;
-  max-width: 100%;
-}
-
 .portfolio-card-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -81,7 +74,6 @@
 .portfolio-card {
   padding: 1.7rem;
   min-height: 100%;
-  min-width: 0;
 }
 
 .portfolio-card h3,
@@ -139,7 +131,6 @@
   padding: 0.2rem 1.4rem 1.3rem;
   border-radius: 1rem;
   background: rgba(255, 255, 255, 0.03);
-  min-width: 0;
 }
 
 .portfolio-cta {
@@ -152,15 +143,6 @@
 
 .portfolio-cta__body {
   max-width: 38rem;
-  min-width: 0;
-}
-
-.portfolio-page h2,
-.portfolio-page h3,
-.portfolio-page p,
-.portfolio-page a {
-  overflow-wrap: anywhere;
-  word-break: normal;
 }
 
 @media screen and (max-width: 980px) {
@@ -188,7 +170,6 @@
 @media screen and (max-width: 736px) {
   .portfolio-page {
     gap: 2.5rem;
-    overflow-x: hidden;
   }
 
   .portfolio-intro__lead {
@@ -203,29 +184,5 @@
 
   .portfolio-timeline__content {
     padding: 0.2rem 1rem 1rem;
-  }
-
-  .portfolio-links {
-    display: grid;
-    grid-template-columns: 1fr;
-  }
-
-  .portfolio-links .button {
-    min-width: 0;
-    text-align: center;
-    width: 100%;
-  }
-
-  .portfolio-page h2,
-  .portfolio-page h3,
-  .portfolio-page p,
-  .portfolio-page a,
-  .portfolio-card,
-  .portfolio-pillar,
-  .portfolio-timeline__content {
-    max-width: 100%;
-    overflow-wrap: anywhere;
-    white-space: normal;
-    word-break: break-all;
   }
 }

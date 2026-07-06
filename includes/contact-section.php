@@ -1,3 +1,27 @@
+<?php
+// 現在のファイルパスから動的に戻り先URLを判定（安全対策込み）
+$current_script = $_SERVER['SCRIPT_NAME'] ?? '/';
+$allowed_redirect_paths = array(
+    '/',
+    '/index.html',
+    '/aboutus.html',
+    '/portfolio.html'
+);
+
+$safe_return_to = '/';
+foreach ($allowed_redirect_paths as $path) {
+    if (strpos($current_script, $path) !== false) {
+        // 例: /index.html や /aboutus.html に部分一致、または完全一致した場合
+        // Xserver等でディレクトリトップの場合は / になるため / も許可
+        $safe_return_to = $path;
+        break;
+    }
+}
+// index.htmlはルートパス / にマッピング
+if ($safe_return_to === '/index.html') {
+    $safe_return_to = '/';
+}
+?>
 		<!-- Contact -->
 		<section id="contact">
 			<div class="inner">
@@ -18,7 +42,7 @@
 							<label for="message">お問い合わせ内容</label>
 							<textarea name="message" id="message" rows="6" required></textarea>
 						</div>
-						<input type="hidden" name="return_to" value="/" />
+						<input type="hidden" name="return_to" value="<?php echo htmlspecialchars($safe_return_to, ENT_QUOTES, 'UTF-8'); ?>" />
 						<div style="display:none;">
 							<label for="company">会社名</label>
 							<input type="text" name="company" id="company" tabindex="-1" autocomplete="off" />
