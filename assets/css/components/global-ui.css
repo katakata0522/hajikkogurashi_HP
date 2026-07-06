@@ -166,3 +166,19 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus {
     box-shadow: 0 0 0 2px rgba(255, 204, 0, 0.25) !important;
 }
 
+/* --- Lower-level pages header optimizations --- */
+body:not(.is-home) #header .logo span {
+    display: none !important; /* トップページ以外では長文サブテキストを排除 */
+}
+
+/* --- Responsive Header & Logo Refinements --- */
+@media screen and (max-width: 736px) {
+    #header .logo strong {
+        font-size: 1.25rem !important; /* スマホ画面幅に合わせてロゴサイズを縮小 */
+    }
+    #header .logo span {
+        display: none !important; /* スマホではサブテキストを強制非表示にしてMENUとの重なりを防止 */
+    }
+}
+
+

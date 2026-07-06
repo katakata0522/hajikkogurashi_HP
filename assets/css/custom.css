@@ -238,6 +238,22 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus {
     box-shadow: 0 0 0 2px rgba(255, 204, 0, 0.25) !important;
 }
 
+/* --- Lower-level pages header optimizations --- */
+body:not(.is-home) #header .logo span {
+    display: none !important; /* 繝医ャ繝励・繝ｼ繧ｸ莉･螟悶〒縺ｯ髟ｷ譁・し繝悶ユ繧ｭ繧ｹ繝医ｒ謗帝勁 */
+}
+
+/* --- Responsive Header & Logo Refinements --- */
+@media screen and (max-width: 736px) {
+    #header .logo strong {
+        font-size: 1.25rem !important; /* 繧ｹ繝槭・逕ｻ髱｢蟷・↓蜷医ｏ縺帙※繝ｭ繧ｴ繧ｵ繧､繧ｺ繧堤ｸｮ蟆・*/
+    }
+    #header .logo span {
+        display: none !important; /* 繧ｹ繝槭・縺ｧ縺ｯ繧ｵ繝悶ユ繧ｭ繧ｹ繝医ｒ蠑ｷ蛻ｶ髱櫁｡ｨ遉ｺ縺ｫ縺励※MENU縺ｨ縺ｮ驥阪↑繧翫ｒ髦ｲ豁｢ */
+    }
+}
+
+
 
 /* --- Contact Section Styles placeholder --- */
 
