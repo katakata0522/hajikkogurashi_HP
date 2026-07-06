@@ -50,7 +50,6 @@ function renderPage(string $title, string $message, string $returnTo, int $statu
       font-weight: 600;
       letter-spacing: 0.2em;
       text-decoration: none;
-      text-transform: uppercase;
     }
     main {
       flex-grow: 1;
