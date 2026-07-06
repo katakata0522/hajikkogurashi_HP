@@ -1353,8 +1353,8 @@ class GameController {
         }
         const text = `ブラックホールでターゲットを【${Math.floor(this.score)}】点分吸い込みました！ 評価：[${this.ui.rankTextEl.innerText}]`;
         const url = "https://hajikkoroom.xsrv.jp/blackhole-sweeper/";
-        const hashtags = "ブラックホールスイーパー,はじっこぐらし";
-        const shareText = `${text}\n${url}\n#ブラックホールスイーパー #はじっこぐらし`;
+        const hashtags = "ブラックホールスイーパー,CornerNeighbor";
+        const shareText = `${text}\n${url}\n#ブラックホールスイーパー #CornerNeighbor`;
         const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtags)}`;
 
         if (navigator.share) {

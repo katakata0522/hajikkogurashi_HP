@@ -1051,7 +1051,7 @@ class GameController {
             text = `【${this.weather.name}】崖っぷちでストップ！残り距離 ${this.resultDistance}m！！ [評価: ${rankText}]`;
         }
         const url = "https://hajikkoroom.xsrv.jp/girigiri-brake/";
-        const hashtags = "はじっこぐらし,ギリギリブレーキ";
+        const hashtags = "CornerNeighbor,ギリギリブレーキ";
         window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtags)}`);
     }
 }

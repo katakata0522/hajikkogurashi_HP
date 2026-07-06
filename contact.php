@@ -6,7 +6,7 @@ mb_internal_encoding('UTF-8');
 
 const CONTACT_EMAIL = 'hajikkogurashi.official@gmail.com';
 const CONTACT_FROM = 'webform@hajikkoroom.xsrv.jp';
-const CONTACT_SUBJECT = '【はじっこぐらし公式サイト】お問い合わせ';
+const CONTACT_SUBJECT = '【Corner Neighbor公式サイト】お問い合わせ';
 
 /**
  * 日本語を含む最小限の確認ページを返す。
@@ -24,7 +24,7 @@ function renderPage(string $title, string $message, string $returnTo, int $statu
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{$safeTitle} | はじっこぐらし</title>
+  <title>{$safeTitle} | Corner Neighbor</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,600&display=swap">
   <style>
     body {
@@ -125,7 +125,7 @@ function renderPage(string $title, string $message, string $returnTo, int $statu
 </head>
 <body>
   <header>
-    <a href="/" class="logo-text">はじっこぐらし</a>
+    <a href="/" class="logo-text">Corner Neighbor</a>
   </header>
   <main>
     <div class="card">
@@ -135,7 +135,7 @@ function renderPage(string $title, string $message, string $returnTo, int $statu
     </div>
   </main>
   <footer>
-    © 2024-2026 はじっこぐらし公式ホームページ
+    © 2024-2026 Corner Neighbor
   </footer>
 </body>
 </html>
@@ -202,7 +202,7 @@ if (preg_match('/[\r\n]/', $name) || preg_match('/[\r\n]/', $email)) {
 }
 
 $body = implode("\n", array(
-    'はじっこぐらし公式サイトのお問い合わせ',
+    'Corner Neighbor公式サイトのお問い合わせ',
     '送信元ページ: ' . $returnTo,
     '送信日時: ' . date('Y-m-d H:i:s'),
     '',

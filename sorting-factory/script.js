@@ -775,7 +775,7 @@ class GameController {
 
         const text = `脳の処理限界に到達…！ 【${this.score}個】のアイテムを仕分けました！ 称号：[${this.ui.rankTextEl.innerText}]`;
         const url = "https://hajikkoroom.xsrv.jp/sorting-factory/";
-        const hashtags = "はじっこぐらし,超絶仕分け工場";
+        const hashtags = "CornerNeighbor,超絶仕分け工場";
         const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtags)}`;
 
         try {

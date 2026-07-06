@@ -899,8 +899,8 @@ class GameController {
 
         const text = `上司の目を盗んで【${Math.floor(this.score)}】サボりました。バレてクビになりました。 称号：[${this.ui.rankTextEl.innerText}]\n${reasonText}`;
         const url = "https://hajikkoroom.xsrv.jp/stealth-slacker/";
-        const hashtags = "限界ステルスサボタージュ,はじっこぐらし";
-        const shareText = `${text}\n${url}\n#限界ステルスサボタージュ #はじっこぐらし`;
+        const hashtags = "限界ステルスサボタージュ,CornerNeighbor";
+        const shareText = `${text}\n${url}\n#限界ステルスサボタージュ #CornerNeighbor`;
         const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtags)}`;
 
         if (navigator.share) {

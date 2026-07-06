@@ -1,4 +1,4 @@
-# はじっこぐらし公式サイト
+# Corner Neighbor公式サイト
 
 このリポジトリは、`HTML + CSS + JavaScript` だけで管理する静的サイトです。  
 今後は **Jekyll 用の `.md` や `_includes` は触らず**、公開用の `html` を直接編集します。
