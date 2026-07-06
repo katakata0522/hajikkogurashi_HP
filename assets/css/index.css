@@ -166,3 +166,39 @@ body.is-home #banner .button:not(.next):hover {
   font-size: 0.8rem;
   color: var(--theme-dim);
 }
+
+/* --- Responsive Banner Blending Refinements --- */
+@media screen and (max-width: 1280px) {
+  body.is-home #banner.major {
+    background:
+      linear-gradient(90deg, #121526 0%, rgba(18, 21, 38, 0.95) 45%, rgba(18, 21, 38, 0.35) 100%),
+      url("/assets/images/kanji_slicer_thumbnail.png") right center / min(44vw, 32rem) auto no-repeat,
+      var(--theme-bg-gradient) !important;
+  }
+}
+
+@media screen and (max-width: 980px) {
+  body.is-home #banner.major {
+    background:
+      linear-gradient(90deg, #121526 0%, rgba(18, 21, 38, 0.96) 55%, rgba(18, 21, 38, 0.4) 100%),
+      url("/assets/images/kanji_slicer_thumbnail.png") right center / min(40vw, 28rem) auto no-repeat,
+      var(--theme-bg-gradient) !important;
+  }
+}
+
+@media screen and (max-width: 736px) {
+  body.is-home #banner.major {
+    background:
+      linear-gradient(180deg, rgba(18, 21, 38, 0.92) 0%, rgba(18, 21, 38, 0.97) 100%),
+      url("/assets/images/kanji_slicer_thumbnail.png") center bottom / cover no-repeat,
+      var(--theme-bg-gradient) !important;
+    min-height: auto;
+    padding: 6rem 0;
+  }
+  body.is-home #banner .inner {
+    padding: 0 1.5rem;
+  }
+  body.is-home #banner h1 {
+    font-size: 2.1em;
+  }
+}
