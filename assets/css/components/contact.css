@@ -1,1 +1,67 @@
-/* --- Contact Section Styles placeholder --- */
+/* --- Contact Form Usability & Input Visibility --- */
+#contact input[type="text"],
+#contact input[type="email"],
+#contact textarea {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 240, 235, 0.15) !important;
+    border-radius: 4px !important;
+    color: var(--theme-ink) !important;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease !important;
+}
+
+#contact input[type="text"]:focus,
+#contact input[type="email"]:focus,
+#contact textarea:focus {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: var(--theme-accent, #ffcc00) !important;
+    box-shadow: 0 0 12px rgba(255, 204, 0, 0.25) !important;
+}
+
+/* --- SNS Section Layout & Bug Fix --- */
+/*
+   テンプレートの .contact-method .icon (absolute) ルールが 
+   SNSリスト内の a.icon 要素にまで適用されて重なって隠れるバグを修正します。
+*/
+.contact-method--social .social-links {
+    margin-top: 1.25rem !important;
+    padding-left: 0 !important;
+    list-style: none !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+}
+
+.contact-method--social .social-links__item {
+    display: inline-block !important;
+    margin-right: 1.25rem !important;
+    margin-bottom: 0.5rem !important;
+    padding-left: 0 !important; /* リスト項目の左マージンリセット */
+}
+
+.contact-method--social .social-links__item a.icon {
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 240, 235, 0.15) !important;
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1) !important;
+    text-decoration: none !important;
+    color: var(--theme-ink) !important;
+}
+
+.contact-method--social .social-links__item a.icon:hover {
+    background-color: var(--theme-accent, #ffcc00) !important;
+    color: #121526 !important;
+    border-color: var(--theme-accent, #ffcc00) !important;
+    box-shadow: 0 0 15px rgba(255, 204, 0, 0.45) !important;
+    transform: translateY(-3px);
+}
+
+.contact-method--social .social-links__item a.icon::before {
+    font-size: 1.2rem !important;
+}

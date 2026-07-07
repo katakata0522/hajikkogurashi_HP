@@ -182,6 +182,22 @@ body:not(.is-home) #header .logo span {
     }
 }
 
+/* --- Special Button visual upgrades --- */
+.button.special {
+    background: linear-gradient(135deg, #ffdb33 0%, #ffcc00 100%) !important;
+    color: #121526 !important; /* 證励＞繝・く繧ｹ繝・*/
+    font-weight: 700 !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(255, 204, 0, 0.3) !important;
+    transition: transform 0.1s ease, box-shadow 0.3s ease, background 0.3s ease !important;
+}
+
+.button.special:hover {
+    background: linear-gradient(135deg, #ffe366 0%, #ffd633 100%) !important;
+    box-shadow: 0 6px 20px rgba(255, 204, 0, 0.5), 0 0 15px rgba(255, 204, 0, 0.3) !important;
+    color: #121526 !important;
+}
+
 /* --- Contact & Footer height reduction for better scrolling --- */
 #contact {
     padding: 3rem 0 1.5rem 0 !important; /* 蜈ｨ菴薙・邵ｦ繧ｹ繧ｯ繝ｭ繝ｼ繝ｫ繧貞ｼ輔″邱繧・*/
@@ -209,7 +225,72 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--theme-muted) !important;
 }
 
-/* --- Contact Section Styles placeholder --- */
+/* --- Contact Form Usability & Input Visibility --- */
+#contact input[type="text"],
+#contact input[type="email"],
+#contact textarea {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 240, 235, 0.15) !important;
+    border-radius: 4px !important;
+    color: var(--theme-ink) !important;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease !important;
+}
+
+#contact input[type="text"]:focus,
+#contact input[type="email"]:focus,
+#contact textarea:focus {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: var(--theme-accent, #ffcc00) !important;
+    box-shadow: 0 0 12px rgba(255, 204, 0, 0.25) !important;
+}
+
+/* --- SNS Section Layout & Bug Fix --- */
+/*
+   繝・Φ繝励Ξ繝ｼ繝医・ .contact-method .icon (absolute) 繝ｫ繝ｼ繝ｫ縺・
+   SNS繝ｪ繧ｹ繝亥・縺ｮ a.icon 隕∫ｴ縺ｫ縺ｾ縺ｧ驕ｩ逕ｨ縺輔ｌ縺ｦ驥阪↑縺｣縺ｦ髫繧後ｋ繝舌げ繧剃ｿｮ豁｣縺励∪縺吶・*/
+.contact-method--social .social-links {
+    margin-top: 1.25rem !important;
+    padding-left: 0 !important;
+    list-style: none !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+}
+
+.contact-method--social .social-links__item {
+    display: inline-block !important;
+    margin-right: 1.25rem !important;
+    margin-bottom: 0.5rem !important;
+    padding-left: 0 !important; /* 繝ｪ繧ｹ繝磯・岼縺ｮ蟾ｦ繝槭・繧ｸ繝ｳ繝ｪ繧ｻ繝・ヨ */
+}
+
+.contact-method--social .social-links__item a.icon {
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 240, 235, 0.15) !important;
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1) !important;
+    text-decoration: none !important;
+    color: var(--theme-ink) !important;
+}
+
+.contact-method--social .social-links__item a.icon:hover {
+    background-color: var(--theme-accent, #ffcc00) !important;
+    color: #121526 !important;
+    border-color: var(--theme-accent, #ffcc00) !important;
+    box-shadow: 0 0 15px rgba(255, 204, 0, 0.45) !important;
+    transform: translateY(-3px);
+}
+
+.contact-method--social .social-links__item a.icon::before {
+    font-size: 1.2rem !important;
+}
 
 /* --- Content Pages Styles placeholder --- */
 

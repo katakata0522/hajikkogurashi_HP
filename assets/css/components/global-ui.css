@@ -180,6 +180,22 @@ body:not(.is-home) #header .logo span {
     }
 }
 
+/* --- Special Button visual upgrades --- */
+.button.special {
+    background: linear-gradient(135deg, #ffdb33 0%, #ffcc00 100%) !important;
+    color: #121526 !important; /* 暗いテキスト */
+    font-weight: 700 !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(255, 204, 0, 0.3) !important;
+    transition: transform 0.1s ease, box-shadow 0.3s ease, background 0.3s ease !important;
+}
+
+.button.special:hover {
+    background: linear-gradient(135deg, #ffe366 0%, #ffd633 100%) !important;
+    box-shadow: 0 6px 20px rgba(255, 204, 0, 0.5), 0 0 15px rgba(255, 204, 0, 0.3) !important;
+    color: #121526 !important;
+}
+
 /* --- Contact & Footer height reduction for better scrolling --- */
 #contact {
     padding: 3rem 0 1.5rem 0 !important; /* 全体の縦スクロールを引き締め */
