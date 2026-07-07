@@ -222,3 +222,10 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 1.1rem !important;
     color: var(--theme-muted) !important;
 }
+
+/* --- Menu Visible scroll prevention & scrollbar hide --- */
+body.is-menu-visible,
+body.is-menu-visible html {
+    overflow: hidden !important;
+    height: 100vh !important;
+}

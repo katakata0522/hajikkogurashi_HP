@@ -7,6 +7,7 @@ body.is-home #banner.major {
   min-height: 28rem !important; /* 38rem から 28rem へ縮小しスクロール負荷を低減 */
   display: flex;
   align-items: center;
+  padding-top: 4.5rem !important; /* ヘッダー(fixed)の高さ分だけ中身を押し下げて被りを防止 */
 }
 
 body.is-home #banner.major:after {
