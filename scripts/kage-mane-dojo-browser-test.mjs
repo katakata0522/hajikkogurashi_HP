@@ -85,7 +85,7 @@ try {
     cardImage: document.querySelector('img[src="/assets/images/kage_mane_dojo_thumbnail.svg"]') !== null,
   }));
 
-  if (state.title !== '影まね道場 | はじっこぐらし' || state.lesson !== '1' || state.length !== '3' || state.enabledButtons !== 4) {
+  if (state.title !== '影まね道場 | Corner Neighbor' || state.lesson !== '1' || state.length !== '3' || state.enabledButtons !== 4) {
     throw new Error(`unexpected game state: ${JSON.stringify(state)}`);
   }
 
