@@ -90,15 +90,13 @@ body.is-home #banner .button:not(.next):hover {
   transform: translateY(-3px);
 }
 
-/* --- Tiles Grid Soft Glow --- */
+/* --- Tiles Grid Seamless Integration --- */
 .tiles article {
-  border-radius: 6px;
+  border-radius: 0;
   overflow: hidden;
-  margin: 0.5rem;
-  border: 1px solid rgba(255, 204, 0, 0.08); /* 暖かみのある境界線 */
-  transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1),
-              box-shadow 0.35s cubic-bezier(0.25, 0.8, 0.25, 1),
-              border-color 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+  margin: 0;
+  border: none;
+  transition: border-color 0.35s ease;
   min-height: 18rem !important; /* 縦スクロール量を減らすため368pxから288pxへ引き締め */
   padding: 3rem 3rem 1.5rem 3rem !important; /* パディングも引き締めてスマートに */
 }
@@ -110,9 +108,7 @@ body.is-home #banner .button:not(.next):hover {
 
 /* 各タイルのホバーカラーをソフトゴールド基調に上品に輝かせる */
 .tiles article:hover {
-  transform: translateY(-4px) scale(1.012);
-  box-shadow: 0 10px 25px rgba(255, 204, 0, 0.15);
-  border-color: var(--theme-accent) !important;
+  /* シームレスタイルのため浮き上がりは行わず、境界発光と明るさ変化のみに調整 */
   z-index: 2;
 }
 
