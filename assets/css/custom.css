@@ -192,15 +192,167 @@ body:not(.is-home) #header .logo span {
 #footer {
     padding: 2rem 0 !important;
 }
+/* --- Typography & Spacing Optimization --- */
+body, p, input, select, textarea {
+    line-height: 1.8 !important; /* 譌･譛ｬ隱槭・蜿ｯ隱ｭ諤ｧ繧帝ｫ倥ａ繧矩ｻ・≡豈皮紫 */
+    letter-spacing: 0.05em !important; /* 譁・ｭ鈴俣繧剃ｸ雁刀縺ｫ蠎・￡繧・*/
+}
 
+h1, h2, h3, h4, h5, h6 {
+    letter-spacing: 0.1em !important;
+    font-weight: 700 !important;
+    line-height: 1.5 !important;
+}
 
-
+.lead, .intro p {
+    font-size: 1.1rem !important;
+    color: var(--theme-muted) !important;
+}
 
 /* --- Contact Section Styles placeholder --- */
 
 /* --- Content Pages Styles placeholder --- */
 
-/* --- Animation & Special Effects placeholder --- */
+/* --- Twilight Aurora & Geometric Grid Effects --- */
+
+/* 繧ｪ繝ｼ繝ｭ繝ｩ逅・ｽ薙・繧｢繝九Γ繝ｼ繧ｷ繝ｧ繝ｳ螳夂ｾｩ */
+@keyframes aurora-float-1 {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(12%, 8%) scale(1.15);
+  }
+}
+
+@keyframes aurora-float-2 {
+  0% {
+    transform: translate(0, 0) scale(1.1);
+  }
+  100% {
+    transform: translate(-8%, -12%) scale(0.95);
+  }
+}
+
+/* body縺ｮ閭梧勹繧ｪ繝ｼ繝ｭ繝ｩ */
+body::before {
+  content: "";
+  position: fixed;
+  top: -15%;
+  left: -15%;
+  width: 55vw;
+  height: 55vh;
+  background: radial-gradient(circle, rgba(255, 204, 0, 0.08) 0%, transparent 75%);
+  z-index: -2;
+  pointer-events: none;
+  animation: aurora-float-1 22s ease-in-out infinite alternate;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  bottom: -15%;
+  right: -15%;
+  width: 65vw;
+  height: 65vh;
+  background: radial-gradient(circle, rgba(0, 240, 255, 0.05) 0%, transparent 75%);
+  z-index: -2;
+  pointer-events: none;
+  animation: aurora-float-2 28s ease-in-out infinite alternate;
+}
+
+/* #wrapper荳翫・蟷ｾ菴募ｭｦ繧ｰ繝ｪ繝・ラ閭梧勹 */
+#wrapper {
+  position: relative;
+}
+
+#wrapper::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    linear-gradient(rgba(245, 240, 235, 0.012) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(245, 240, 235, 0.012) 1px, transparent 1px);
+  background-size: 50px 50px;
+  background-position: center;
+  z-index: 1; /* 繧ｳ繝ｳ繝・Φ繝・・閭梧勹縺ｫ驟咲ｽｮ縺吶ｋ縺後∫桝莨ｼ隕∫ｴ繧・壼ｸｸ繧ｿ繧､繝ｫ繧医ｊ繧ょ･･ */
+  pointer-events: none;
+}
+
+/* --- Premium Hover Effects for Tiles & Cards --- */
+
+/* 繧ｿ繧､繝ｫ縺ｮ繝帙ヰ繝ｼ繧ｺ繝ｼ繝縺ｨ遶倶ｽ捺ｵｮ縺堺ｸ翫′繧・*/
+.tiles article {
+  transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1), 
+              box-shadow 0.45s cubic-bezier(0.25, 1, 0.5, 1) !important;
+  overflow: hidden;
+}
+
+/* 繝帙ヰ繝ｼ譎ゅ↓繧ｫ繝ｼ繝牙・菴薙ｒ繧上★縺九↓謇句燕縺ｫ謖√■荳翫￡繧・*/
+.tiles article:hover {
+  transform: translateY(-5px) scale(1.01) !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), 
+              0 0 20px rgba(255, 204, 0, 0.15) !important;
+  z-index: 5;
+}
+
+/* 繧ｿ繧､繝ｫ蜀・・閭梧勹逕ｻ蜒上・繧｢繝九Γ繝ｼ繧ｷ繝ｧ繝ｳ */
+.tiles article::after {
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+
+.tiles article:hover::after {
+  transform: scale(1.05) !important;
+}
+
+/* --- Gold Sweep Button Effects & Active Feedback --- */
+
+/* 縺吶∋縺ｦ縺ｮ繝懊ち繝ｳ縺ｫ繧ｹ繧､繝ｼ繝怜・邱壹→繧ｯ繝ｪ繝・け諢溘ｒ霑ｽ蜉 */
+.button, 
+input[type="submit"], 
+input[type="reset"], 
+input[type="button"] {
+  position: relative !important;
+  overflow: hidden !important;
+  transition: background-color 0.3s ease, 
+              box-shadow 0.3s ease, 
+              color 0.3s ease, 
+              transform 0.1s cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+
+.button:active, 
+input[type="submit"]:active, 
+input[type="reset"]:active, 
+input[type="button"]:active {
+  transform: scale(0.96) !important;
+}
+
+.button::before,
+input[type="submit"]::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 204, 0, 0.3),
+    transparent
+  );
+  transform: skewX(-25deg);
+  pointer-events: none;
+}
+
+.button:hover::before,
+input[type="submit"]:hover::before {
+  left: 200%;
+  transition: left 0.7s cubic-bezier(0.25, 1, 0.5, 1);
+}
 
 /* --- Mini-Games Grid & Soft Theme Glow --- */
 .minigames-container {

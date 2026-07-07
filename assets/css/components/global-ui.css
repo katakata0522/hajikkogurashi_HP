@@ -190,6 +190,19 @@ body:not(.is-home) #header .logo span {
 #footer {
     padding: 2rem 0 !important;
 }
+/* --- Typography & Spacing Optimization --- */
+body, p, input, select, textarea {
+    line-height: 1.8 !important; /* 日本語の可読性を高める黄金比率 */
+    letter-spacing: 0.05em !important; /* 文字間を上品に広げる */
+}
 
+h1, h2, h3, h4, h5, h6 {
+    letter-spacing: 0.1em !important;
+    font-weight: 700 !important;
+    line-height: 1.5 !important;
+}
 
-
+.lead, .intro p {
+    font-size: 1.1rem !important;
+    color: var(--theme-muted) !important;
+}
