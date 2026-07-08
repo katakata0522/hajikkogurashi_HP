@@ -128,6 +128,112 @@ const btnCloseModalEl = document.getElementById('btn-close-modal');
 const modalPreviewImageEl = document.getElementById('modal-preview-image');
 const btnDownloadFallbackEl = document.getElementById('btn-download-fallback');
 
+// アフィリエイト商品データベース (かたかた個人のアソシエイトIDを想定したリンク)
+const AFFILIATE_PRODUCTS = {
+    copybook: {
+        title: "📚 コピー本づくりのおすすめ製本グッズ",
+        desc: "コピー本（折本・小冊子）の自宅・コンビニ製本に圧倒的に便利なアイテムです。",
+        items: [
+            {
+                name: "マックス 中とじホッチキス ホッチくる",
+                url: "https://www.amazon.co.jp/dp/B000FHPDFQ?tag=katakata-22",
+                icon: "📌",
+                price: "参考価格: 約800円",
+                reason: "ヘッドが90度回転し、A4用紙の中央に簡単にホッチキスが打てるコピー本作家の必須装備です。"
+            },
+            {
+                name: "コクヨ 上質紙 特厚口 A4 50枚",
+                url: "https://www.amazon.co.jp/dp/B000FL7GZ2?tag=katakata-22",
+                icon: "📄",
+                price: "参考価格: 約600円",
+                reason: "コピー本の表紙や、少しリッチな本文用紙に最適なコシのある特厚口の上質紙です。"
+            }
+        ]
+    },
+    event: {
+        title: "🎪 即売会サークル参加の必須・便利設営グッズ",
+        desc: "コミケやオンリーイベントなどのスペース設営で大活躍するド定番アイテムです。",
+        items: [
+            {
+                name: "折りたたみ式ポスタースタンド（卓上）",
+                url: "https://www.amazon.co.jp/dp/B0BD4XYQ6D?tag=katakata-22",
+                icon: "🚩",
+                price: "参考価格: 約2,500円",
+                reason: "A4やA3のお品書き・ポスターを机の上に自立させてアピール力を激変させる軽量スタンド。"
+            },
+            {
+                name: "ヘッズ クリップ式 値札ホルダー 5個",
+                url: "https://www.amazon.co.jp/dp/B07BLVNDN9?tag=katakata-22",
+                icon: "🏷️",
+                price: "参考価格: 約700円",
+                reason: "新刊の前に値札を挟んで立たせるための透明で見えやすいポップスタンドです。"
+            }
+        ]
+    },
+    shipping: {
+        title: "📦 自家通販・BOOTH梱包用の資材セット",
+        desc: "BOOTHや匿名配送（あんしんBOOTHパック、レターパック等）で本を安全に送るための梱包資材です。",
+        items: [
+            {
+                name: "OPP袋 B5用 テープ付 100枚",
+                url: "https://www.amazon.co.jp/dp/B004GBA9AS?tag=katakata-22",
+                icon: "✉️",
+                price: "参考価格: 約900円",
+                reason: "雨濡れを防ぐための透明OPP袋です。本を美しく包装し、傷から守ります。"
+            },
+            {
+                name: "クッション封筒 B5対応 25枚",
+                url: "https://www.amazon.co.jp/dp/B08CSCW7FF?tag=katakata-22",
+                icon: "📦",
+                price: "参考価格: 約1,200円",
+                reason: "内側にぷちぷちが入っており、封筒に入れるだけでそのまま発送可能な衝撃吸収封筒。"
+            }
+        ]
+    }
+};
+
+// 入力状態に応じてアフィリエイトエリアを書き換える関数
+function updateAffiliateBox() {
+    const affiliateBox = document.getElementById('dynamic-affiliate-box');
+    if (!affiliateBox) return;
+
+    const printType = printTypeEl.value;
+    const isEvent = (eventScaleEl.value === 'large' || eventScaleEl.value === 'medium');
+    
+    let key = 'shipping';
+    if (printType === 'copybook') {
+        key = 'copybook';
+    } else if (isEvent) {
+        key = 'event';
+    }
+    
+    const db = AFFILIATE_PRODUCTS[key];
+    if (!db) return;
+    
+    let html = `
+        <h4 class="affiliate-title">${db.title}</h4>
+        <p class="affiliate-desc">${db.desc}</p>
+        <div class="affiliate-items-grid">
+    `;
+    
+    db.items.forEach(item => {
+        html += `
+            <a href="${item.url}" target="_blank" rel="noopener" class="affiliate-card">
+                <div class="affiliate-card-img-placeholder">${item.icon}</div>
+                <div class="affiliate-card-info">
+                    <span class="affiliate-card-name">${item.name}</span>
+                    <span class="affiliate-card-price">${item.price}</span>
+                    <p class="affiliate-card-reason">${item.reason}</p>
+                    <span class="affiliate-card-btn">Amazonで見る ➔</span>
+                </div>
+            </a>
+        `;
+    });
+    
+    html += `</div>`;
+    affiliateBox.innerHTML = html;
+}
+
 // 線形補間関数 (1次元)
 function interpolate1D(x, xArr, yArr) {
     if (x <= xArr[0]) return yArr[0];
@@ -352,6 +458,9 @@ function calculateAll() {
             profitAdviceTextEl.textContent = `あと ${remaining} 部の頒布で黒字に達します。価格を少し上げるか、お品書きのデザインを工夫してアピールしてみましょう！`;
         }
     }
+    
+    // アフィリエイト情報の動的更新
+    updateAffiliateBox();
 }
 
 // デバウンス関数 (パフォーマンス最適化用)
@@ -629,7 +738,7 @@ function exportSummaryImage() {
     
     ctx.fillStyle = '#9ca3af';
     ctx.font = '11px "Noto Sans JP", sans-serif';
-    ctx.fillText('はじっこぐらし 同人ツール', sx + 10, sy + 18);
+    ctx.fillText('かたかたの同人ツール', sx + 10, sy + 18);
     
     // 検索虫眼鏡マークの描画
     ctx.fillStyle = '#8b5cf6';
@@ -641,7 +750,7 @@ function exportSummaryImage() {
     // コピーライト
     ctx.fillStyle = '#9ca3af';
     ctx.font = '11px "Noto Sans JP", sans-serif';
-    ctx.fillText('Designed by はじっこぐらし (katakatalab.com)', 60, 452);
+    ctx.fillText('Designed by かたかた (katakatalab.com)', 60, 452);
     
     // 画像URLの生成
     try {
