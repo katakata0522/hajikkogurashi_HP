@@ -52,7 +52,7 @@ if ($safe_return_to === '/index.html') {
 							<li><input type="reset" value="入力をリセット" /></li>
 						</ul>
 					</form>
-					<p>フォームが送信できない場合は、<a href="mailto:hajikkogurashi.official@gmail.com">メール</a>でもご連絡いただけます。</p>
+					<p>フォームが送信できない場合は、<a href="#" class="js-contact-email" data-user="hajikkogurashi.official" data-domain="gmail.com">メール</a>でもご連絡いただけます。</p>
 				</section>
 
 				<section class="split contact-panel contact-panel--info">
@@ -60,7 +60,7 @@ if ($safe_return_to === '/index.html') {
 						<div class="contact-method">
 							<span class="icon alt fa-envelope"></span>
 							<h3>メール</h3>
-							<a href="mailto:hajikkogurashi.official@gmail.com">hajikkogurashi.official@gmail.com</a>
+							<a href="#" class="js-contact-email" data-user="hajikkogurashi.official" data-domain="gmail.com" data-display="email">フォームをご利用ください</a>
 						</div>
 					</section>
 

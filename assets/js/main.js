@@ -364,6 +364,22 @@
 	}
 
 	/* ============================
+	   Contact Email — Bot-light display
+	   HTML内に完成メールアドレスとmailtoを置かず、表示時だけ組み立てる
+	   ============================ */
+	function initContactEmailLinks() {
+		var links = document.querySelectorAll('.js-contact-email[data-user][data-domain]');
+		for (var i = 0; i < links.length; i++) {
+			var link = links[i];
+			var email = link.getAttribute('data-user') + '@' + link.getAttribute('data-domain');
+			link.setAttribute('href', 'mailto:' + email);
+			if (link.getAttribute('data-display') === 'email') {
+				link.textContent = email;
+			}
+		}
+	}
+
+	/* ============================
 	   Init
 	   ============================ */
 	document.addEventListener('DOMContentLoaded', function () {
@@ -374,6 +390,7 @@
 		initScrollToTop();
 		initScrolly();
 		initContactFormGlow();
+		initContactEmailLinks();
 	});
 
 })();
