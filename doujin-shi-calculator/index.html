@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO Meta Tags -->
+    <title>同人誌の発行部数＆黒字化シミュレーター | 初心者向け同人誌印刷費・頒布価格計算ツール</title>
+    <meta name="description" content="初めての同人誌制作で「何部刷ればいいか分からない」を解決！X（旧Twitter）のいいね数やpixivのブックマーク数からおすすめ部数を自動予測し、印刷費やイベント経費から損益分岐点を直感的なグラフで可視化する完全無料・ローカル完結ツールです。">
+    <meta name="keywords" content="同人誌,部数,決め方,印刷費,計算,シミュレーター,損益分岐,黒字化,同人,初心者">
+    
+    <!-- Open Graph (OGP) -->
+    <meta property="og:title" content="同人誌の発行部数＆黒字化シミュレーター | はじっこぐらし">
+    <meta property="og:description" content="SNSの反応からおすすめ部数を自動予測！印刷費や経費から何部で黒字になるかをグラフで可視化する、同人作家のための完全無料シミュレーター。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://katakatalab.com/doujin-shi-calculator/">
+    
+    <!-- Font (Google Fonts) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Outfit:wght@600;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="header-container">
+            <a href="../index.html" class="logo-link">はじっこぐらし</a>
+            <span class="nav-tag">創作支援ツール</span>
+        </div>
+    </header>
+
+    <main class="container">
+        <article>
+            <header class="tool-title-area">
+                <span class="category-badge">Webツール（ローカル完結・安全設計）</span>
+                <h1>同人誌の発行部数＆黒字化シミュレーター</h1>
+                <p class="lead-text">「何部刷ればいい？」「1冊いくらで売れば赤字にならない？」を、SNSの反応から予測して視覚化します。</p>
+            </header>
+
+            <div class="tool-grid">
+                <!-- ================= 左カラム：入力フォーム ================= -->
+                <section class="card form-section" aria-labelledby="form-title">
+                    <h2 id="form-title" class="sr-only">シミュレーター入力フォーム</h2>
+                    
+                    <!-- STEP 1: 本の仕様 -->
+                    <div class="form-group-wrapper">
+                        <h3 class="form-step-title"><span class="step-num">1</span>本の仕様を設定</h3>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="book-size">本のサイズ</label>
+                                <select id="book-size">
+                                    <option value="A5">A5サイズ（一般的な漫画・小説）</option>
+                                    <option value="B5">B5サイズ（大きめの漫画・画集）</option>
+                                    <option value="A6">文庫/A6サイズ（一般的な小説）</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row col-2">
+                            <div class="form-group">
+                                <label for="book-pages">総ページ数（表紙含む）</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="book-pages" value="40" min="4" step="4">
+                                    <span class="unit">ページ</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="print-volume">予定部数（シミュレーション用）</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="print-volume" value="100" min="5" step="5">
+                                    <span class="unit">部</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="print-cost">予測印刷費（自動補正あり）</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="print-cost" value="20000" min="0">
+                                    <span class="unit">円</span>
+                                </div>
+                                <p class="input-helper">※サイズ・ページ・部数から平均相場を自動計算しています（自由に変更可能）</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 2: SNS・Webの反応 -->
+                    <div class="form-group-wrapper">
+                        <h3 class="form-step-title"><span class="step-num">2</span>SNS・Webの反応を入力</h3>
+                        <p class="step-helper-desc">※部数の予測に使用します。未投稿の場合は空欄でOKです。</p>
+
+                        <div class="form-row col-2">
+                            <div class="form-group">
+                                <label for="sns-followers">X（Twitter）フォロワー数</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="sns-followers" value="300" min="0">
+                                    <span class="unit">人</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="sns-likes">告知サンプルの「いいね」数</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="sns-likes" value="30" min="0">
+                                    <span class="unit">いいね</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row col-2">
+                            <div class="form-group">
+                                <label for="pixiv-bookmarks">pixivサンプルのブックマーク数</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="pixiv-bookmarks" value="50" min="0">
+                                    <span class="unit">ユーザー</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="event-scale">参加イベントの規模</label>
+                                <select id="event-scale">
+                                    <option value="medium">中〜小規模イベント（地方・オンリー）</option>
+                                    <option value="large" selected>大規模イベント（コミケ・スパコミ等）</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="past-sales">過去の同様の本の販売実績（あれば）</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="past-sales" value="0" min="0" placeholder="なし">
+                                    <span class="unit">部</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 3: 経費と頒布価格 -->
+                    <div class="form-group-wrapper">
+                        <h3 class="form-step-title"><span class="step-num">3</span>経費と頒布価格を設定</h3>
+
+                        <div class="form-row col-2">
+                            <div class="form-group">
+                                <label for="event-fee">イベント参加費・スペース代</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="event-fee" value="7000" min="0">
+                                    <span class="unit">円</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="other-expenses">その他経費（交通費・ポスター等）</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="other-expenses" value="5000" min="0">
+                                    <span class="unit">円</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="selling-price">本の頒布価格（1冊あたりの売値）</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="selling-price" value="500" min="100" step="50">
+                                    <span class="unit">円</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ================= 右カラム：リアルタイム計算結果 ================= -->
+                <div class="result-sticky-wrapper">
+                    <!-- 推奨部数カード -->
+                    <section class="card result-card" aria-labelledby="prediction-title">
+                        <h2 id="prediction-title" class="section-title">推奨発行部数の目安</h2>
+                        <p class="section-desc">※入力されたSNSの反応から統計的に予測したおすすめ部数です。</p>
+                        
+                        <div class="prediction-cards-container">
+                            <div class="pred-card safe">
+                                <span class="pred-label">手堅い部数（赤字回避）</span>
+                                <div class="pred-value-area">
+                                    <span id="pred-safe-value" class="pred-value">--</span><span class="unit">部</span>
+                                </div>
+                                <p class="pred-desc">在庫を残したくない、または初めてで不安な場合の安全な部数です。</p>
+                            </div>
+
+                            <div class="pred-card standard active">
+                                <span class="pred-label">おすすめ標準部数</span>
+                                <div class="pred-value-area">
+                                    <span id="pred-standard-value" class="pred-value">--</span><span class="unit">部</span>
+                                </div>
+                                <p class="pred-desc">一番可能性が高い、イベントと通販を合わせた想定頒布数です。</p>
+                            </div>
+
+                            <div class="pred-card aggressive">
+                                <span class="pred-label">強気の部数（完売防止）</span>
+                                <div class="pred-value-area">
+                                    <span id="pred-aggressive-value" class="pred-value">--</span><span class="unit">部</span>
+                                </div>
+                                <p class="pred-desc">イベント後半まで売り切れを防ぎ、多くの人に届けたい場合の部数です。</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 黒字化・損益分岐点インジケーター -->
+                    <section class="card result-card" aria-labelledby="profit-title">
+                        <h2 id="profit-title" class="section-title">黒字化シミュレーター</h2>
+                        
+                        <div class="summary-box">
+                            <div class="summary-item">
+                                <span class="sum-label">総経費（印刷費＋経費）</span>
+                                <span id="total-expenses-display" class="sum-value font-outfit">--</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="sum-label">1冊あたりの原価</span>
+                                <span id="unit-cost-display" class="sum-value font-outfit">--</span>
+                            </div>
+                        </div>
+
+                        <div class="interactive-slider-wrapper">
+                            <label for="sales-slider" class="slider-label-group">
+                                <span>もしイベントで売れた部数が：</span>
+                                <span class="slider-current-value"><strong id="slider-val-display" class="font-outfit">50</strong> 部だったら</span>
+                            </label>
+                            <input type="range" id="sales-slider" min="0" max="100" value="50" class="custom-slider">
+                            <div class="slider-ticks">
+                                <span>0部</span>
+                                <span id="slider-half-tick">50部</span>
+                                <span id="slider-max-tick">100部</span>
+                            </div>
+                        </div>
+
+                        <!-- 収支結果メーター -->
+                        <div id="profit-status-card" class="profit-status-card loss">
+                            <div class="status-header">
+                                <span id="profit-status-text" class="status-badge">赤字ゾーン</span>
+                                <span id="profit-amount-display" class="status-amount font-outfit">-10,000円</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div id="profit-progress-bar" class="progress-bar" style="width: 50%;"></div>
+                                <div id="breakeven-line" class="breakeven-marker" style="left: 70%;">
+                                    <span class="marker-label">損益分岐点: <strong id="breakeven-sales-display">--</strong>部</span>
+                                </div>
+                            </div>
+                            <p id="profit-advice-text" class="status-advice">あと少しで損益分岐点に達します！頒布価格を上げるか、部数の調整を検討してみましょう。</p>
+                        </div>
+
+                        <!-- シェア画像作成ボタン -->
+                        <div class="action-btn-area">
+                            <button type="button" id="btn-export" class="btn btn-secondary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-share" viewBox="0 0 16 16">
+                                  <path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.5 2.5 0 1 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5m-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3m11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3"/>
+                                </svg>
+                                収支まとめ画像を保存する
+                            </button>
+                        </div>
+                    </section>
+                </div>
+            </div>
+            
+            <!-- キャンバス (画像出力用、非表示) -->
+            <canvas id="export-canvas" width="800" height="500" style="display: none;"></canvas>
+
+            <!-- ================= 下部：SEO・解説コラム ================= -->
+            <section class="card column-section" aria-labelledby="column-title">
+                <h2 id="column-title" class="column-section-title">同人誌の部数の決め方＆黒字化のための初心者ガイド</h2>
+                
+                <div class="column-grid">
+                    <div class="column-item">
+                        <h3>1. 同人誌の「発行部数」はどう決めるべき？</h3>
+                        <p>初めて本を出す際、最も難しいのが部数決定です。SNS（Xやpixiv）の反応は非常に参考になりますが、<strong>「いいねやブクマをしてくれた人全員が買うわけではない」</strong>という点に注意が必要です。</p>
+                        <p>一般的には、<strong>「pixivのサンプルブックマーク数の10%〜15%」</strong>、または<strong>「X（Twitter）サンプルのいいね数の5%〜10%」</strong>がイベント会場での実際の頒布数の目安と言われています。本ツールでは、これらの経験則にイベントの規模を掛け合わせて予測値を算出しています。</p>
+                    </div>
+
+                    <div class="column-item">
+                        <h3>2. 損益分岐点（黒字化）の考え方と価格設定</h3>
+                        <p>同人活動は「赤字が当たり前」と言われることもありますが、長く活動を続けるためには、大赤字を避ける設計が重要です。本の価格を決める際は、以下のステップを意識しましょう。</p>
+                        <ul>
+                            <li><strong>総経費を書き出す</strong>：印刷費だけでなく、イベントの「スペース代（参加費）」、会場までの「交通費」、値札やポスターなどの「設営費」も合算します。</li>
+                            <li><strong>目標頒布率を7割にする</strong>：作った本が「完売」しなくても、<strong>「7割売れた時点でトントン（印刷費＋経費が回収できる）」</strong>になるように1冊の価格を設定するのが、大火傷をしない安全な設計です。</li>
+                        </ul>
+                    </div>
+
+                    <div class="column-item">
+                        <h3>3. 在庫リスクを減らすためのアドバイス</h3>
+                        <p>「せっかく作ったのだから売り切れは避けたい」と多めに刷りたくなるのが人情ですが、余った在庫は保管場所を取るだけでなく、精神的な負担にもなります。初心者のうちは、以下の方法でリスクを分散しましょう。</p>
+                        <p><strong>「イベント分は手堅い部数で刷り、足りない分はとらのあなやBOOTHなどの委託・通販に回す」</strong>という方法がおすすめです。最近のオンデマンド印刷は少部数でも高品質で刷れるため、まずは少なめに刷って、様子を見てから増刷（再版）するのが賢い選択です。</p>
+                    </div>
+                </div>
+            </section>
+        </article>
+    </main>
+
+    <footer class="main-footer">
+        <div class="footer-container">
+            <p>&copy; 2026 はじっこぐらし / かたかた. All Rights Reserved.</p>
+            <p class="footer-note">当ツールは完全ローカル完結型です。入力された個人データや数字が外部サーバーに送信されることは一切ありませんのでご安心ください。</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
