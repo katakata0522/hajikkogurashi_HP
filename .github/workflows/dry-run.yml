@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Run smoke tests
         run: |
           pwsh -File ./scripts/static-site-smoke-test.ps1
