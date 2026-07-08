@@ -9,19 +9,111 @@
         var(--theme-bg-gradient) !important;
 }
 
+/* --- Static news list --- */
+.news-list {
+    display: grid;
+    gap: 1.5rem;
+    margin-top: 1.75rem;
+}
+
+.news-entry {
+    padding: 1.4rem 1.5rem;
+    background-color: var(--theme-panel);
+    border: 1px solid var(--theme-line);
+    border-left: 3px solid var(--theme-accent);
+    border-radius: 6px;
+}
+
+.news-entry h3 {
+    margin-bottom: 0.55rem;
+}
+
+.news-entry p {
+    margin-bottom: 0;
+}
+
+.news-entry__date {
+    display: block;
+    margin: 0 0 0.4rem;
+    color: var(--theme-dim);
+    font-family: var(--theme-font-display);
+    font-size: 0.82rem;
+    letter-spacing: 0.06em;
+}
+
+/* --- Utility fixes for narrow pages --- */
+.page-header-title h1,
+.page-header-container h1,
+#main header.major h1 {
+    overflow-wrap: anywhere;
+}
+
+#one > .inner > header.major h1 {
+    word-break: keep-all;
+    overflow-wrap: normal;
+}
+
+@media screen and (max-width: 480px) {
+    #one > .inner > header.major h1 {
+        font-size: 1.75rem;
+        line-height: 1.35;
+    }
+}
+
+/* --- 404 action buttons --- */
+.error-page-actions,
+#one .actions.fit.error-page-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+@media screen and (max-width: 736px) {
+    .error-game-actions,
+    .error-page-actions,
+    #one .actions.fit.error-page-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .error-game-actions li,
+    .error-page-actions li,
+    #one .actions.fit.error-page-actions li {
+        width: 100%;
+        padding: 0;
+    }
+
+    .error-game-actions .button,
+    .error-page-actions .button,
+    #one .actions.fit.error-page-actions .button {
+        display: flex;
+        width: 100%;
+        min-height: 3.25rem;
+        align-items: center;
+        justify-content: center;
+        white-space: normal;
+        line-height: 1.45;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        text-align: center;
+    }
+}
+
 /* --- Header & Navigation Bar --- */
 #header {
     background-color: rgba(18, 21, 38, 0.9) !important;
     backdrop-filter: blur(8px);
     border-bottom: 1px solid var(--theme-line);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    min-height: 4.25rem !important;
 }
 
 #header .logo {
     background: transparent !important; /* 荳崎・辟ｶ縺ｪ逋ｽ閭梧勹繧貞ｮ悟・謗帝勁 */
-    padding: 1.2em 1.5em;
+    padding: 0.75rem 1.25rem !important;
     display: flex;
     flex-direction: column;
+    justify-content: center;
 }
 
 #header .logo strong,
@@ -33,9 +125,10 @@
 #header .logo strong {
     color: #ffffff !important;
     font-family: var(--theme-font-display);
-    font-size: 1.75rem !important; /* 繧ｵ繧､繝医・鬘斐→縺励※譛ｬ譁・ｈ繧雁香蛻・↓蠑輔″荳翫￡ */
+    font-size: 1.45rem !important; /* 繧ｵ繧､繝医・鬘斐→縺励※譛ｬ譁・ｈ繧雁香蛻・↓蠑輔″荳翫￡ */
     font-weight: 700;
     letter-spacing: 0.08em;
+    line-height: 1.15;
     transition: color 0.3s ease;
 }
 
@@ -46,21 +139,25 @@
 /* 閾ｴ蜻ｽ逧・↑隕冶ｪ肴ｧ蟠ｩ螢翫・菫ｮ蠕ｩ・医さ繝ｳ繝医Λ繧ｹ繝域ｯ斐・譛螟ｧ蛹厄ｼ・*/
 #header .logo span {
     color: var(--theme-muted) !important; /* 蜊∝・縺ｫ譏弱ｋ縺・濠騾乗・繧ｪ繝輔・繝ｯ繧､繝医↓菫ｮ豁｣ */
-    font-size: 0.72rem;
+    font-size: 0.68rem;
     font-weight: 400;
     letter-spacing: 0.08em;
-    margin-top: 0.3em;
+    margin-top: 0.15rem;
     display: block;
     opacity: 0.95;
 }
 
 /* --- Menu Trigger Button --- */
 #header nav a[href="#menu"] {
+    align-items: center;
+    display: inline-flex;
     font-family: var(--theme-font-display);
     font-weight: 700;
+    justify-content: center;
     letter-spacing: 0.15em;
+    min-height: 2.55rem;
     border: 1px solid var(--theme-line) !important;
-    padding: 0.5em 1.5em;
+    padding: 0.45rem 1.2rem !important;
     border-radius: 4px;
     color: var(--theme-ink) !important;
     background-color: rgba(255, 204, 0, 0.02);
@@ -79,9 +176,19 @@
 #menu {
     background-color: var(--theme-panel-deep) !important;
     backdrop-filter: blur(12px);
-    border-left: 1px solid var(--theme-line) !important;
+    align-items: center !important;
+    border-left: 0 !important;
     box-shadow: -10px 0 30px rgba(0, 0, 0, 0.3);
+    display: flex !important;
+    height: 100vh !important;
+    inset: 0 !important;
+    justify-content: center !important;
+    min-height: 100vh !important;
     overflow: hidden !important; /* 逕ｻ髱｢縺ｩ逵溘ｓ荳ｭ縺ｮ荳崎・辟ｶ縺ｪ繧ｹ繧ｯ繝ｭ繝ｼ繝ｫ繝舌・繧貞ｮ悟・謗帝勁 */
+    padding: clamp(4.5rem, 8vh, 6rem) 1.5rem 2rem !important;
+    position: fixed !important;
+    width: 100vw !important;
+    z-index: 10002 !important;
 }
 
 /* 逋ｽ縺・､ｪ縺・ｸｦ邱壹・髯､蜴ｻ・医せ繧ｯ繝ｭ繝ｼ繝ｫ繝舌・繧貞ｮ悟・縺ｫ髱櫁｡ｨ遉ｺ縺ｫ縺励√せ繝槭・繝医↑UI縺ｸ・・*/
@@ -96,7 +203,15 @@
 }
 
 #menu .inner {
-    padding: 3rem 2rem !important; /* 邵ｦ縺ｫ縺ｯ縺ｿ蜃ｺ縺輔↑縺・ｈ縺・ｽ咏區繧貞ｼ輔″邱繧・*/
+    max-height: min(72vh, 42rem) !important;
+    overflow-y: auto !important;
+    padding: 0 !important; /* 邵ｦ縺ｫ縺ｯ縺ｿ蜃ｺ縺輔↑縺・ｈ縺・ｽ咏區繧貞ｼ輔″邱繧・*/
+    scrollbar-width: none;
+    width: min(24rem, calc(100vw - 3rem)) !important;
+}
+
+#menu .inner::-webkit-scrollbar {
+    display: none;
 }
 
 #menu ul.links li {
@@ -106,9 +221,10 @@
 
 #menu ul.links li a {
     font-family: var(--theme-font-display);
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: 500;
     letter-spacing: 0.2em;
+    line-height: 3.2rem !important;
     color: var(--theme-ink) !important;
     transition: color 0.3s ease, padding-left 0.3s ease;
 }
@@ -122,12 +238,28 @@
     border: none !important; /* 荳崎・辟ｶ縺ｪ蟾ｨ螟ｧ驕ｸ謚樊棧繧貞ｮ悟・蟒・ｭ｢ */
     background-color: transparent !important;
     box-shadow: none !important;
+    height: 3.5rem !important;
+    line-height: 3.5rem !important;
     outline: none !important;
+    padding: 0 !important;
+    right: 1.2rem !important;
+    text-indent: 999rem;
+    top: 1.2rem !important;
     transition: transform 0.2s ease;
+    width: 3.5rem !important;
 }
 
 #menu .close:hover {
     transform: scale(1.1);
+}
+
+#menu .close:before,
+#menu .close:after {
+    background-color: transparent !important;
+    height: 3rem !important;
+    right: 0.25rem !important;
+    top: 0.25rem !important;
+    width: 3rem !important;
 }
 
 /* 繝帙ヰ繝ｼ繝ｻ繝輔か繝ｼ繧ｫ繧ｹ譎ゅ↓縲・怜魂縺ｮ邱夊・菴薙ｒ繧ｴ繝ｼ繝ｫ繝峨↓蜈峨ｉ縺帙ｋ荳雁刀縺ｪ貍泌・ */
@@ -135,7 +267,8 @@
 #menu .close:hover:after,
 #menu .close:focus:before,
 #menu .close:focus:after {
-    background-color: var(--theme-accent) !important;
+    background-color: transparent !important;
+    opacity: 0.9;
 }
 
 /* --- Scroll To Top Button --- */
@@ -226,10 +359,16 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* --- Menu Visible scroll prevention & scrollbar hide --- */
-body.is-menu-visible,
-body.is-menu-visible html {
+html.is-menu-visible,
+body.is-menu-visible {
     overflow: hidden !important;
-    height: 100vh !important;
+}
+
+body.is-menu-visible {
+    left: 0;
+    position: fixed;
+    right: 0;
+    width: 100%;
 }
 
 /* --- Contact Form Usability & Input Visibility --- */

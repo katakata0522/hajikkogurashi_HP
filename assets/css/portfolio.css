@@ -101,3 +101,121 @@
   padding: 0.25em 0.75em;
   border-radius: 4px;
 }
+
+/* --- Current portfolio landing cards --- */
+.portfolio-page {
+  max-width: 64rem;
+}
+
+.portfolio-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+  align-items: stretch;
+}
+
+.portfolio-card-grid .portfolio-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: 1.7rem;
+  gap: 1rem;
+  background:
+    linear-gradient(180deg, rgba(255, 204, 0, 0.035), transparent 42%),
+    var(--theme-panel);
+  border: 1px solid var(--theme-line);
+  border-radius: 6px;
+  box-shadow: 0 0.7rem 1.8rem rgba(0, 0, 0, 0.18);
+  overflow: visible;
+}
+
+.portfolio-card-grid .portfolio-card--featured {
+  border-color: rgba(255, 204, 0, 0.32);
+}
+
+.portfolio-card__kicker {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.7rem;
+  padding: 0.25rem 0.55rem;
+  border: 1px solid rgba(255, 204, 0, 0.28);
+  border-radius: 4px;
+  color: var(--theme-accent);
+  background-color: rgba(255, 204, 0, 0.06);
+  font-family: var(--theme-font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.portfolio-card-grid .portfolio-card h3 {
+  margin: 0;
+  color: #fff;
+  font-size: 1.28rem;
+  line-height: 1.45;
+}
+
+.portfolio-card-grid .portfolio-card p {
+  flex: 1 1 auto;
+  margin: 0;
+  color: var(--theme-muted);
+  line-height: 1.8;
+}
+
+.portfolio-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 0.25rem;
+}
+
+.portfolio-links .button {
+  margin: 0;
+}
+
+.portfolio-section {
+  margin-top: 3rem;
+}
+
+.portfolio-timeline {
+  display: grid;
+  gap: 1.6rem;
+}
+
+.portfolio-timeline__date,
+.news-entry__date {
+  display: block;
+  margin: 0 0 0.35rem;
+  color: var(--theme-dim);
+  font-family: var(--theme-font-display);
+  font-size: 0.82rem;
+  letter-spacing: 0.05em;
+}
+
+.portfolio-cta {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+  align-items: center;
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+@media screen and (max-width: 980px) {
+  .portfolio-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .portfolio-card-grid .portfolio-card {
+    padding: 1.35rem;
+  }
+
+  .portfolio-cta {
+    display: block;
+  }
+}

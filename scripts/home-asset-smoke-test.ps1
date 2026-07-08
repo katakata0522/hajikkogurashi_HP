@@ -21,8 +21,12 @@ if (Test-ContainsLiquidSyntax -Content $rootIndex) {
     $errors.Add('index.html still contains Liquid syntax.')
 }
 
-if (-not ($rootIndex.Contains('assets/css/index.css?v=<?php') -and $rootIndex.Contains('assets/js/index.js?v=<?php'))) {
-    $errors.Add('index.html does not reference the PHP cache-busted assets.')
+if (-not ($rootIndex -match 'assets/css/index\.css\?v=[^"]+' -and $rootIndex -match 'assets/js/index\.js\?v=[^"]+')) {
+    $errors.Add('index.html does not reference the versioned home assets.')
+}
+
+if ($rootIndex -match 'file_get_contents|simplexml_load_string') {
+    $errors.Add('index.html still contains runtime RSS PHP that can leak into static previews.')
 }
 
 if (-not ($rootIndex.Contains('class="tiles"') -or $rootIndex.Contains('class="tiles '))) {

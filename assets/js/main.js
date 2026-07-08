@@ -179,6 +179,8 @@
 		if (!menu) return;
 
 		var locked = false;
+		var root = document.documentElement;
+		var menuScrollY = 0;
 
 		// Wrap inner content
 		var inner = menu.querySelector('.inner');
@@ -208,9 +210,26 @@
 			return true;
 		}
 
-		function show()   { if (lock()) body.classList.add('is-menu-visible'); }
-		function hide()   { if (lock()) body.classList.remove('is-menu-visible'); }
-		function toggle() { if (lock()) body.classList.toggle('is-menu-visible'); }
+		function setMenuVisible(visible) {
+			if (visible) {
+				if (body.classList.contains('is-menu-visible')) return;
+				menuScrollY = window.scrollY || root.scrollTop || 0;
+				body.style.top = '-' + menuScrollY + 'px';
+				root.classList.add('is-menu-visible');
+				body.classList.add('is-menu-visible');
+				return;
+			}
+
+			if (!body.classList.contains('is-menu-visible')) return;
+			root.classList.remove('is-menu-visible');
+			body.classList.remove('is-menu-visible');
+			body.style.top = '';
+			window.scrollTo(0, menuScrollY);
+		}
+
+		function show()   { if (lock()) setMenuVisible(true); }
+		function hide()   { if (lock()) setMenuVisible(false); }
+		function toggle() { if (lock()) setMenuVisible(!body.classList.contains('is-menu-visible')); }
 
 		// Menu trigger links
 		document.body.addEventListener('click', function (e) {
@@ -252,7 +271,7 @@
 		menu.addEventListener('click', function (e) {
 			if (e.target === menu) {
 				e.preventDefault();
-				body.classList.remove('is-menu-visible');
+				hide();
 			}
 		});
 

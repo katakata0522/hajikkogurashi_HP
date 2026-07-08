@@ -27,8 +27,8 @@
 	<meta name="twitter:title" content="お知らせ | Corner Neighbor公式ホームページ" />
 	<meta name="twitter:description" content="「Corner Neighbor」サークルの最新ニュースとお知らせをお届け！ホームページのアップデート情報やイベントへの出展情報、note記事の更新、新規ミニゲームのリリース情報など、私たちの活動の「いま」を随時更新しています。" />
 	<meta name="twitter:image" content="https://hajikkoroom.xsrv.jp/assets/images/pic02.webp" />
-	<link rel="stylesheet" href="/assets/css/main.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/css/main.css'); ?>" />
-	<link rel="stylesheet" href="/assets/css/custom.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/css/custom.css'); ?>" />
+	<link rel="stylesheet" href="/assets/css/main.css?v=20260708" />
+	<link rel="stylesheet" href="/assets/css/custom.css?v=20260708-2" />
 	<script type="application/ld+json">
 	{
 		"@context": "https://schema.org",
@@ -97,15 +97,25 @@
                     </div>
                     <h2 id="最新情報">最新情報</h2>
 
-<?php
-include 'includes/news-data.php';
-foreach ($news_items as $item):
-    $safe_id = preg_replace('/[^a-zA-Z0-9]/', '', $item['title']) . preg_replace('/[^0-9]/', '', $item['date']);
-?>
-<h3 id="<?php echo htmlspecialchars($safe_id); ?>"><strong><?php echo htmlspecialchars($item['title']); ?></strong> <?php echo htmlspecialchars($item['date']); ?></h3>
-<p><?php echo $item['content']; ?></p>
-<hr />
-<?php endforeach; ?>
+                    <div class="news-list">
+                        <article class="news-entry">
+                            <p class="news-entry__date">2026年03月31日</p>
+                            <h3 id="homepage-update-20260331">【ホームページ更新！】</h3>
+                            <p>作品一覧ページの整理、公開中ページの仮文言の見直し、サイト情報の整備を進めました。<br />公開内容は今後も順次更新していきます。</p>
+                        </article>
+
+                        <article class="news-entry">
+                            <p class="news-entry__date">2025年05月09日</p>
+                            <h3 id="note-update-20250509">【note 更新！】</h3>
+                            <p>「東京ゲームダンジョンに行ってきた」を公開しました！まだ見ぬインディーズゲームを求めて潜入します。<br /><a href="https://note.com/hajikkogurashi01/n/n5c3d29c281e1" target="_blank" rel="noopener noreferrer">note記事へGO!</a></p>
+                        </article>
+
+                        <article class="news-entry">
+                            <p class="news-entry__date">2024年08月16日</p>
+                            <h3 id="circle-start-20240816">サークル活動開始！</h3>
+                            <p>2024年8月16日より、ゲーム制作サークル「Corner Neighbor」の活動を開始しました！応援よろしくお願いします！<br /><a href="https://note.com/hajikkogurashi01" target="_blank" rel="noopener noreferrer">Corner Neighborのnoteページ</a><br /><a href="https://x.com/Corner_neighbor" target="_blank" rel="noopener noreferrer">Corner Neighbor のXアカウント</a><br /><a href="https://www.youtube.com/@hajikkogurashi" target="_blank" rel="noopener noreferrer">Corner NeighborのYouTubeアカウント</a></p>
+                        </article>
+                    </div>
 
                 </div>
             </section>
@@ -126,7 +136,7 @@ foreach ($news_items as $item):
 
 <a href="#" id="scrollToTopBtn" title="ページトップへ戻る">▲</a>
 <!-- Scripts -->
-	<script src="/assets/js/main.js?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/js/main.js'); ?>"></script>
+	<script src="/assets/js/main.js?v=20260708-2"></script>
 	
 
     </div>

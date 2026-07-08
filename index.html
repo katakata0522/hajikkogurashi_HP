@@ -27,9 +27,9 @@
 	<meta name="twitter:title" content="Corner Neighbor公式ホームページ" />
 	<meta name="twitter:description" content="Unreal EngineやWEBでゲームを制作するサークル「Corner Neighbor」の公式サイトです！私たちが作ったインディーゲームの作品紹介や活動記録を載せています！" />
 	<meta name="twitter:image" content="https://hajikkoroom.xsrv.jp/assets/images/banner.webp" />
-	<link rel="stylesheet" href="/assets/css/main.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/css/main.css'); ?>" />
-	<link rel="stylesheet" href="/assets/css/custom.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/css/custom.css'); ?>" />
-	<link rel="stylesheet" href="/assets/css/index.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/css/index.css'); ?>" />
+	<link rel="stylesheet" href="/assets/css/main.css?v=20260708" />
+	<link rel="stylesheet" href="/assets/css/custom.css?v=20260708-2" />
+	<link rel="stylesheet" href="/assets/css/index.css?v=20260708-2" />
 	<script type="application/ld+json">
 	[
 		{
@@ -161,85 +161,20 @@
 				</header>
 				<p>Corner Neighborの裏側や、日々の活動をnoteで発信しています！</p>
 				<div class="note-cards-container">
-<?php
-// noteのRSSフィードを取得してパース
-$rss_url = 'https://note.com/hajikkogurashi01/rss';
-$context = stream_context_create([
-    'http' => [
-        'timeout' => 5,
-        'header' => "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36\r\n"
-    ]
-]);
-$rss_data = @file_get_contents($rss_url, false, $context);
-$items = [];
-if ($rss_data) {
-    $xml = @simplexml_load_string($rss_data);
-    if ($xml && isset($xml->channel->item)) {
-        $count = 0;
-        foreach ($xml->channel->item as $item) {
-            if ($count >= 2) break;
-            
-            $title = (string)$item->title;
-            $link = (string)$item->link;
-            $pubDate = strtotime((string)$item->pubDate);
-            $formatted_date = date('Y年m月d日', $pubDate);
-            
-            // 画像抽出
-            $image_url = 'assets/images/pic02.webp'; // デフォルトフォールバック
-            $namespaces = $item->getNameSpaces(true);
-            if (isset($namespaces['media'])) {
-                $media = $item->children($namespaces['media']);
-                if (isset($media->thumbnail)) {
-                    $image_url = (string)$media->thumbnail;
-                }
-            }
-            if ($image_url == 'assets/images/pic02.webp') {
-                $desc = (string)$item->description;
-                if (preg_match('/<img[^>]+src=["\']([^"\']+)["\']/', $desc, $matches)) {
-                    $image_url = $matches[1];
-                }
-            }
-            
-            $items[] = [
-                'title' => $title,
-                'link' => $link,
-                'date' => $formatted_date,
-                'image' => $image_url
-            ];
-            $count++;
-        }
-    }
-}
-
-// 取得失敗時のフォールバックデータ
-if (empty($items)) {
-    $items = [
-        [
-            'title' => '東京ゲームダンジョンに行ってきた',
-            'link' => 'https://note.com/hajikkogurashi01/n/n5c3d29c281e1',
-            'date' => '2025年05月09日',
-            'image' => 'assets/images/pic02.webp'
-        ],
-        [
-            'title' => 'Corner Neighbor、活動開始！',
-            'link' => 'https://note.com/hajikkogurashi01',
-            'date' => '2024年08月16日',
-            'image' => 'assets/images/pic03.webp'
-        ]
-    ];
-}
-
-foreach ($items as $index => $note_item):
-?>
-					<!-- Note Card <?php echo $index + 1; ?> -->
-					<a href="<?php echo htmlspecialchars($note_item['link']); ?>" target="_blank" rel="noopener noreferrer" class="note-card">
-						<div class="note-card-thumb" style="background-image: url('<?php echo htmlspecialchars($note_item['image']); ?>');"></div>
+					<a href="https://note.com/hajikkogurashi01/n/n5c3d29c281e1" target="_blank" rel="noopener noreferrer" class="note-card">
+						<div class="note-card-thumb" style="background-image: url('/assets/images/pic02.webp');"></div>
 						<div class="note-card-body">
-							<h3 class="note-card-title"><?php echo htmlspecialchars($note_item['title']); ?></h3>
-							<p class="note-card-date"><?php echo htmlspecialchars($note_item['date']); ?></p>
+							<h3 class="note-card-title">東京ゲームダンジョンに行ってきた</h3>
+							<p class="note-card-date">2025年05月09日</p>
 						</div>
 					</a>
-<?php endforeach; ?>
+					<a href="https://note.com/hajikkogurashi01" target="_blank" rel="noopener noreferrer" class="note-card">
+						<div class="note-card-thumb" style="background-image: url('/assets/images/pic03.webp');"></div>
+						<div class="note-card-body">
+							<h3 class="note-card-title">Corner Neighbor、活動開始！</h3>
+							<p class="note-card-date">2024年08月16日</p>
+						</div>
+					</a>
 				</div>
 				<ul class="actions">
 					<li><a href="/news.html" class="button special">お知らせ一覧を見る</a></li>
@@ -266,8 +201,8 @@ foreach ($items as $index => $note_item):
 		<a href="#" id="scrollToTopBtn" title="ページトップへ戻る">▲</a>
 
 		<!-- Scripts -->
-		<script src="/assets/js/main.js?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/js/main.js'); ?>"></script>
-		<script src="/assets/js/index.js?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/js/index.js'); ?>"></script>
+		<script src="/assets/js/main.js?v=20260708-2"></script>
+		<script src="/assets/js/index.js?v=20260708"></script>
 	</div>
 </body>
 

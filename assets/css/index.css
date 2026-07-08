@@ -4,10 +4,10 @@ body.is-home #banner.major {
     linear-gradient(90deg, #121526 0%, rgba(18, 21, 38, 0.94) 35%, rgba(18, 21, 38, 0.25) 100%),
     var(--theme-bg-gradient);
   border-bottom: 1px solid var(--theme-line);
-  min-height: 28rem !important; /* 38rem から 28rem へ縮小しスクロール負荷を低減 */
+  min-height: clamp(34rem, calc(100vh - 5rem), 42rem) !important;
   display: flex;
-  align-items: center;
-  padding-top: 4.5rem !important; /* ヘッダー(fixed)の高さ分だけ中身を押し下げて被りを防止 */
+  align-items: flex-start;
+  padding-top: 7.25rem !important; /* ヘッダー(fixed)の高さ分だけ中身を押し下げて被りを防止 */
 }
 
 body.is-home #banner.major:after {
@@ -20,17 +20,28 @@ body.is-home #banner .inner {
   border: none !important;
   box-shadow: none !important;
   backdrop-filter: none !important;
-  padding: 3rem 0;
-  max-width: 44rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 1.4rem 0 2.4rem;
+  max-width: 96rem !important;
+  width: calc(100% - 24rem) !important;
+}
+
+body.is-home #wrapper #banner > .inner {
+  max-width: 96rem !important;
+  padding: 1.4rem 0 2.4rem !important;
+  width: calc(100% - 24rem) !important;
 }
 
 body.is-home #banner h1 {
   font-family: var(--theme-font-display);
-  font-size: 2.8em;
+  font-size: clamp(2.2rem, 3vw, 3.1rem);
   font-weight: 700;
+  line-height: 1.18;
   color: #ffffff;
   margin-bottom: 0.6em;
   letter-spacing: 0.05em;
+  max-width: 75rem;
 }
 
 body.is-home #banner .content {
@@ -58,9 +69,15 @@ body.is-home #banner .content .actions {
 
 /* --- Banner Button Customizations (Soft & Readable) --- */
 body.is-home #banner .button {
+  align-items: center;
+  display: inline-flex !important;
   font-family: var(--theme-font-display);
   font-weight: 700;
+  justify-content: center;
   letter-spacing: 0.15em;
+  line-height: 1.2;
+  min-height: 3.35rem;
+  padding: 0.9rem 2.1rem !important;
   border-radius: 4px;
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
@@ -69,6 +86,7 @@ body.is-home #banner .button.next {
   background-color: var(--theme-accent) !important; /* ソフトゴールド */
   color: var(--theme-bg) !important;
   border: 1px solid var(--theme-accent) !important;
+  min-width: 13rem;
 }
 
 body.is-home #banner .button.next:hover {
@@ -195,6 +213,10 @@ body.is-home #banner .button:not(.next):hover {
     background:
       linear-gradient(90deg, #121526 0%, rgba(18, 21, 38, 0.96) 55%, rgba(18, 21, 38, 0.4) 100%),
       var(--theme-bg-gradient) !important;
+    padding-top: 6.5rem !important;
+  }
+  body.is-home #banner h1 {
+    font-size: clamp(2rem, 5vw, 2.8rem);
   }
 }
 
@@ -204,13 +226,23 @@ body.is-home #banner .button:not(.next):hover {
       linear-gradient(180deg, rgba(18, 21, 38, 0.92) 0%, rgba(18, 21, 38, 0.97) 100%),
       var(--theme-bg-gradient) !important;
     min-height: auto;
-    padding: 4rem 0 !important; /* パディングを 6rem から 4rem へ引き締め */
+    padding: 5.5rem 0 3rem !important; /* fixedヘッダーとの被りを避けつつ引き締め */
   }
   body.is-home #banner .inner {
-    padding: 0 1.5rem;
+    padding: 0 1.5rem !important;
+    width: 100% !important;
+  }
+  body.is-home #wrapper #banner > .inner {
+    max-width: none !important;
+    padding: 0 1.5rem !important;
+    width: 100% !important;
   }
   body.is-home #banner h1 {
-    font-size: 2.1em;
+    font-size: clamp(1.75rem, 8vw, 2.1rem);
+  }
+  body.is-home #banner .button {
+    max-width: 18rem;
+    width: 100%;
   }
 }
 
