@@ -34,10 +34,13 @@
     }
     </script>
     
-    <!-- Font (Google Fonts) -->
+    <!-- Font (Google Fonts) - Non-blocking async load -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Outfit:wght@600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Outfit:wght@600;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Outfit:wght@600;800&display=swap" rel="stylesheet">
+    </noscript>
     
     <link rel="stylesheet" href="style.css">
 </head>
@@ -73,12 +76,22 @@
                                 <select id="book-size">
                                     <option value="A5">A5サイズ（一般的な漫画・小説）</option>
                                     <option value="B5">B5サイズ（大きめの漫画・画集）</option>
+                                    <option value="B6">B6サイズ（漫画・中厚本・小説）</option>
                                     <option value="A6">文庫/A6サイズ（一般的な小説）</option>
+                                    <option value="shinsho">新書サイズ（ノベルス・小説）</option>
                                 </select>
                             </div>
                         </div>
 
                         <div class="form-row col-2">
+                            <div class="form-group">
+                                <label for="print-type">本文の印刷仕様</label>
+                                <select id="print-type">
+                                    <option value="monochrome" selected>モノクロ（漫画・小説・通常同人誌）</option>
+                                    <option value="color">フルカラー（イラスト集・絵本等）</option>
+                                    <option value="copybook">コピー本（自宅・コンビニ印刷）</option>
+                                </select>
+                            </div>
                             <div class="form-group">
                                 <label for="book-pages">総ページ数（表紙含む）</label>
                                 <div class="input-with-unit">
@@ -86,6 +99,9 @@
                                     <span class="unit">ページ</span>
                                 </div>
                             </div>
+                        </div>
+
+                        <div class="form-row col-2">
                             <div class="form-group">
                                 <label for="print-volume">予定部数（シミュレーション用）</label>
                                 <div class="input-with-unit">
@@ -93,9 +109,6 @@
                                     <span class="unit">部</span>
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="form-row">
                             <div class="form-group">
                                 <label for="print-cost" class="label-with-badge">
                                     <span>予測印刷費</span>
@@ -108,7 +121,7 @@
                                     </div>
                                     <button type="button" id="btn-reset-cost" class="btn-mini" style="display: none;">自動に戻す</button>
                                 </div>
-                                <p class="input-helper">※サイズ・ページ・部数から平均相場を自動計算しています（自由に変更可能）</p>
+                                <p class="input-helper">※仕様から平均相場を自動計算しています（変更可能）</p>
                             </div>
                         </div>
                     </div>
@@ -163,7 +176,7 @@
                         </div>
                     </div>
 
-                    <!-- STEP 3: 経費と頒布価格 -->
+                     <!-- STEP 3: 経費と頒布価格 -->
                     <div class="form-group-wrapper">
                         <h3 class="form-step-title"><span class="step-num">3</span>経費と頒布価格を設定</h3>
 
@@ -184,13 +197,24 @@
                             </div>
                         </div>
 
-                        <div class="form-row">
+                        <div class="form-row col-2">
                             <div class="form-group">
                                 <label for="selling-price">本の頒布価格（1冊あたりの売値）</label>
                                 <div class="input-with-unit">
                                     <input type="number" id="selling-price" value="500" min="100" step="50">
                                     <span class="unit">円</span>
                                 </div>
+                                <div class="quick-buttons">
+                                    <button type="button" id="btn-quick-500" class="btn-mini-quick">500円</button>
+                                    <button type="button" id="btn-quick-1000" class="btn-mini-quick">1000円</button>
+                                    <button type="button" id="btn-quick-auto" class="btn-mini-quick">自動</button>
+                                </div>
+                            </div>
+                            <div class="form-group checkbox-group-container">
+                                <label class="checkbox-label" for="use-consignment">
+                                    <input type="checkbox" id="use-consignment">
+                                    <span>書店委託を利用する (手数料30%引きを想定)</span>
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -202,6 +226,9 @@
                     <section class="card result-card" aria-labelledby="prediction-title">
                         <h2 id="prediction-title" class="section-title">推奨発行部数の目安</h2>
                         <p class="section-desc">※入力されたSNSの反応から統計的に予測したおすすめ部数です。</p>
+                        
+                        <!-- 警告メッセージ表示エリア -->
+                        <div id="sns-warning-box" class="warning-box" style="display: none;" aria-live="polite"></div>
                         
                         <div class="prediction-cards-container">
                             <div class="pred-card safe">
@@ -271,6 +298,21 @@
                                 </div>
                             </div>
                             <p id="profit-advice-text" class="status-advice">あと少しで損益分岐点に達します！頒布価格を上げるか、部数の調整を検討してみましょう。</p>
+                        </div>
+
+                        <!-- 画像用カスタムテキスト入力 -->
+                        <div class="custom-image-text-area">
+                            <h3 class="custom-text-title">✏️ 画像用の文字入れオプション</h3>
+                            <div class="form-row col-2">
+                                <div class="form-group">
+                                    <label for="custom-circle">サークル名</label>
+                                    <input type="text" id="custom-circle" placeholder="サークル名を入力" maxlength="15">
+                                </div>
+                                <div class="form-group">
+                                    <label for="custom-title">新刊タイトル</label>
+                                    <input type="text" id="custom-title" placeholder="新刊タイトルを入力" maxlength="15">
+                                </div>
+                            </div>
                         </div>
 
                         <!-- シェア画像作成ボタン -->
