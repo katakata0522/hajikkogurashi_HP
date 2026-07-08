@@ -249,6 +249,56 @@ body {
     color: #374151;
 }
 
+/* Label with badge */
+.label-with-badge {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cost-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 8px;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.cost-badge.auto {
+    background-color: var(--primary-bg);
+    color: var(--primary);
+}
+
+.cost-badge.manual {
+    background-color: #fef3c7;
+    color: #d97706;
+}
+
+.input-with-button {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.btn-mini {
+    font-family: inherit;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background-color: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.btn-mini:hover {
+    background-color: #e2e8f0;
+    border-color: #94a3b8;
+}
+
 /* Custom Select & Input */
 select, input[type="number"] {
     font-family: inherit;
@@ -273,6 +323,7 @@ select:focus, input[type="number"]:focus {
     position: relative;
     display: flex;
     align-items: center;
+    width: 100%;
 }
 
 .input-with-unit input {
@@ -613,6 +664,102 @@ select:focus, input[type="number"]:focus {
     transform: scale(0.98);
 }
 
+/* Modal dialog for mobile image save */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.modal.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    background-color: var(--bg-card);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    width: 90%;
+    max-width: 500px;
+    padding: 24px;
+    position: relative;
+    z-index: 1010;
+    transform: scale(0.95);
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal.open .modal-content {
+    transform: scale(1);
+}
+
+.modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    line-height: 1;
+}
+
+.modal-close:hover {
+    color: var(--text-main);
+}
+
+.modal-desc {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.modal-body {
+    background-color: #f1f5f9;
+    border-radius: var(--radius-sm);
+    padding: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.modal-body img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    box-shadow: var(--shadow-sm);
+}
+
+.modal-footer {
+    margin-top: 10px;
+}
+
 /* Column Section at Bottom */
 .column-section {
     margin-top: 50px;
@@ -725,5 +872,45 @@ select:focus, input[type="number"]:focus {
     
     .summary-box {
         grid-template-columns: 1fr;
+    }
+}
+
+/* Support for very small viewports (like iPhone SE/320px) */
+@media (max-width: 360px) {
+    body {
+        padding-bottom: 30px;
+    }
+    
+    .container {
+        padding: 0 10px;
+    }
+    
+    .tool-title-area {
+        margin: 24px 0;
+    }
+    
+    .tool-title-area h1 {
+        font-size: 1.45rem;
+    }
+    
+    .card {
+        padding: 16px 12px;
+    }
+    
+    .form-step-title {
+        font-size: 1.05rem;
+    }
+    
+    select, input[type="number"] {
+        padding: 10px 12px;
+        font-size: 0.9rem;
+    }
+    
+    .pred-card {
+        padding: 12px 14px;
+    }
+    
+    .pred-value {
+        font-size: 1.5rem;
     }
 }

@@ -15,6 +15,25 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://hajikkoroom.xsrv.jp/doujin-shi-calculator/">
     
+    <!-- Structured Data (JSON-LD) for SEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "同人誌の発行部数＆黒字化シミュレーター",
+      "url": "https://hajikkoroom.xsrv.jp/doujin-shi-calculator/",
+      "description": "初めての同人誌制作で「何部刷ればいいか分からない」を解決！X（旧Twitter）のいいね数やpixivのブックマーク数からおすすめ部数を自動予測し、印刷費やイベント経費から損益分岐点を直感的なグラフで可視化する完全無料・ローカル完結ツールです。",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "All",
+      "browserRequirements": "Requires JavaScript. Requires HTML5.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "JPY"
+      }
+    }
+    </script>
+    
     <!-- Font (Google Fonts) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -78,10 +97,16 @@
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="print-cost">予測印刷費（自動補正あり）</label>
-                                <div class="input-with-unit">
-                                    <input type="number" id="print-cost" value="20000" min="0">
-                                    <span class="unit">円</span>
+                                <label for="print-cost" class="label-with-badge">
+                                    <span>予測印刷費</span>
+                                    <span id="cost-auto-badge" class="cost-badge auto">自動計算中</span>
+                                </label>
+                                <div class="input-with-button">
+                                    <div class="input-with-unit">
+                                        <input type="number" id="print-cost" value="20000" min="0">
+                                        <span class="unit">円</span>
+                                    </div>
+                                    <button type="button" id="btn-reset-cost" class="btn-mini" style="display: none;">自動に戻す</button>
                                 </div>
                                 <p class="input-helper">※サイズ・ページ・部数から平均相場を自動計算しています（自由に変更可能）</p>
                             </div>
@@ -182,7 +207,7 @@
                             <div class="pred-card safe">
                                 <span class="pred-label">手堅い部数（赤字回避）</span>
                                 <div class="pred-value-area">
-                                    <span id="pred-safe-value" class="pred-value">--</span><span class="unit">部</span>
+                                    <span id="pred-safe-value" class="pred-value" aria-live="polite" aria-atomic="true">--</span><span class="unit">部</span>
                                 </div>
                                 <p class="pred-desc">在庫を残したくない、または初めてで不安な場合の安全な部数です。</p>
                             </div>
@@ -190,7 +215,7 @@
                             <div class="pred-card standard active">
                                 <span class="pred-label">おすすめ標準部数</span>
                                 <div class="pred-value-area">
-                                    <span id="pred-standard-value" class="pred-value">--</span><span class="unit">部</span>
+                                    <span id="pred-standard-value" class="pred-value" aria-live="polite" aria-atomic="true">--</span><span class="unit">部</span>
                                 </div>
                                 <p class="pred-desc">一番可能性が高い、イベントと通販を合わせた想定頒布数です。</p>
                             </div>
@@ -198,7 +223,7 @@
                             <div class="pred-card aggressive">
                                 <span class="pred-label">強気の部数（完売防止）</span>
                                 <div class="pred-value-area">
-                                    <span id="pred-aggressive-value" class="pred-value">--</span><span class="unit">部</span>
+                                    <span id="pred-aggressive-value" class="pred-value" aria-live="polite" aria-atomic="true">--</span><span class="unit">部</span>
                                 </div>
                                 <p class="pred-desc">イベント後半まで売り切れを防ぎ、多くの人に届けたい場合の部数です。</p>
                             </div>
@@ -212,18 +237,18 @@
                         <div class="summary-box">
                             <div class="summary-item">
                                 <span class="sum-label">総経費（印刷費＋経費）</span>
-                                <span id="total-expenses-display" class="sum-value font-outfit">--</span>
+                                <span id="total-expenses-display" class="sum-value font-outfit" aria-live="polite">--</span>
                             </div>
                             <div class="summary-item">
                                 <span class="sum-label">1冊あたりの原価</span>
-                                <span id="unit-cost-display" class="sum-value font-outfit">--</span>
+                                <span id="unit-cost-display" class="sum-value font-outfit" aria-live="polite">--</span>
                             </div>
                         </div>
 
                         <div class="interactive-slider-wrapper">
                             <label for="sales-slider" class="slider-label-group">
                                 <span>もしイベントで売れた部数が：</span>
-                                <span class="slider-current-value"><strong id="slider-val-display" class="font-outfit">50</strong> 部だったら</span>
+                                <span class="slider-current-value"><strong id="slider-val-display" class="font-outfit" aria-live="polite">50</strong> 部だったら</span>
                             </label>
                             <input type="range" id="sales-slider" min="0" max="100" value="50" class="custom-slider">
                             <div class="slider-ticks">
@@ -237,7 +262,7 @@
                         <div id="profit-status-card" class="profit-status-card loss">
                             <div class="status-header">
                                 <span id="profit-status-text" class="status-badge">赤字ゾーン</span>
-                                <span id="profit-amount-display" class="status-amount font-outfit">-10,000円</span>
+                                <span id="profit-amount-display" class="status-amount font-outfit" aria-live="polite">-10,000円</span>
                             </div>
                             <div class="progress-bar-container">
                                 <div id="profit-progress-bar" class="progress-bar" style="width: 50%;"></div>
@@ -251,7 +276,7 @@
                         <!-- シェア画像作成ボタン -->
                         <div class="action-btn-area">
                             <button type="button" id="btn-export" class="btn btn-secondary">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-share" viewBox="0 0 16 16">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-share" viewBox="0 0 16 16" aria-hidden="true">
                                   <path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.5 2.5 0 1 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5m-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3m11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3"/>
                                 </svg>
                                 収支まとめ画像を保存する
@@ -263,6 +288,24 @@
             
             <!-- キャンバス (画像出力用、非表示) -->
             <canvas id="export-canvas" width="800" height="500" style="display: none;"></canvas>
+
+            <!-- モーダルウィンドウ (スマホ向け画像長押し保存用) -->
+            <div id="export-modal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="modal-title">
+                <div class="modal-overlay" id="modal-overlay"></div>
+                <div class="modal-content">
+                    <button type="button" class="modal-close" id="btn-close-modal" aria-label="モーダルを閉じる">&times;</button>
+                    <h3 id="modal-title">収支まとめ画像の保存</h3>
+                    <p class="modal-desc">下の画像を<strong>長押し（PCは右クリック）</strong>して「画像を保存」してください。</p>
+                    <div class="modal-body">
+                        <img id="modal-preview-image" src="" alt="収支シミュレーション結果">
+                    </div>
+                    <div class="modal-footer">
+                        <a id="btn-download-fallback" class="btn btn-secondary" href="#" download="doujin_shishi_plan.png">
+                            直接ダウンロードを試す
+                        </a>
+                    </div>
+                </div>
+            </div>
 
             <!-- ================= 下部：SEO・解説コラム ================= -->
             <section class="card column-section" aria-labelledby="column-title">
