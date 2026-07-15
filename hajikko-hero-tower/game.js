@@ -595,7 +595,9 @@
     dom.heroHp = document.getElementById("hero-hp");
     dom.heroMaxHp = document.getElementById("hero-max-hp");
     dom.heroAtk = document.getElementById("hero-atk");
-    dom.hpBarFill = document.getElementById("hp-bar-fill"); // ✅ HPバーフィル要素
+    dom.hpBarFill = document.getElementById("hp-bar-fill");
+    dom.hpBarPrediction = document.getElementById("hp-bar-prediction");
+    dom.hpBarContainer = document.getElementById("hp-bar-container");
 
     dom.predictedDamage = document.getElementById("predicted-damage");
     dom.predictedExp = document.getElementById("predicted-exp");
@@ -1019,12 +1021,37 @@
   }
 
   // リアルタイム予測値の更新 ＆ 盤面上の数値予測バッジの動的反映
+  // リアルタイム予測値の更新 ＆ 盤面上の数値予測バッジの動的反映
   function simulatePathEffects() {
     const sim = simulatePathDetails();
     
     dom.predictedDamage.textContent = Math.max(0, sim.damageTaken).toLocaleString();
     dom.predictedExp.textContent = `+${sim.expGained} EXP`;
     dom.predictedGold.textContent = `+${sim.goldGained} G`;
+
+    // 🟢 HP予測ゴーストバーの反映
+    const maxHp = state.hero.maxHp;
+    if (dom.hpBarPrediction && dom.hpBarContainer) {
+      if (sim.hp <= 0) {
+        // 💀 死亡予測時はHPバー全体を赤色の明滅警告にする
+        dom.hpBarContainer.classList.add("death-warning");
+        dom.hpBarPrediction.style.width = `${(state.hero.hp / maxHp) * 100}%`;
+        dom.hpBarPrediction.style.left = "0%";
+      } else {
+        dom.hpBarContainer.classList.remove("death-warning");
+        if (sim.hp < state.hero.hp) {
+          // ダメージを受ける場合、減少予測分を赤いバーで表示
+          const dmgPercent = ((state.hero.hp - sim.hp) / maxHp) * 100;
+          const leftPercent = (sim.hp / maxHp) * 100;
+          dom.hpBarPrediction.style.width = `${dmgPercent}%`;
+          dom.hpBarPrediction.style.left = `${leftPercent}%`;
+        } else {
+          // 回復時やHPに変化がない場合
+          dom.hpBarPrediction.style.width = "0%";
+          dom.hpBarPrediction.style.left = "100%";
+        }
+      }
+    }
 
     if (sim.hp <= 0) {
       dom.predictedDamage.innerHTML = `<span class="dmg-val font-outfit">💀 死亡予測</span>`;
@@ -1042,7 +1069,6 @@
     }
 
     let currentHp = state.hero.hp;
-    const maxHp = state.hero.maxHp;
     const atk = state.hero.atk;
     const swordMultiplier = state.artifacts.sword ? 2.5 : 1.8;
     let hasSwordBuff = false;
@@ -1069,11 +1095,16 @@
 
         if (currentHp <= 0) {
           badge.textContent = "💀";
-          badge.classList.add("badge-dmg");
+          badge.classList.add("badge-dmg", "death-warning-badge");
         } else {
-          // ✅ 残りHP予測値を直接表示（直感的UX）
-          badge.textContent = `HP ${currentHp}`;
-          badge.classList.add("badge-dmg");
+          // ✅ ダメージが0なら「OK」、受けるなら「HP値」
+          if (battle.dmg === 0) {
+            badge.textContent = "🛡️ OK";
+            badge.classList.add("badge-buff"); // 盾（ゴールド枠）で安全を示す
+          } else {
+            badge.textContent = `HP ${currentHp}`;
+            badge.classList.add("badge-dmg");
+          }
         }
       }
       else if (cell.type === 'potion') {
@@ -1084,7 +1115,7 @@
       }
       else if (cell.type === 'sword') {
         hasSwordBuff = true;
-        badge.textContent = `バフ`;
+        badge.textContent = `ATK UP`;
         badge.classList.add("badge-buff");
       }
       else if (cell.type === 'trap') {
@@ -1098,7 +1129,7 @@
           currentHp -= trapDmg;
           if (currentHp <= 0) {
             badge.textContent = "💀";
-            badge.classList.add("badge-dmg");
+            badge.classList.add("badge-dmg", "death-warning-badge");
           } else {
             badge.textContent = `HP ${currentHp}`;
             badge.classList.add("badge-dmg");
@@ -1119,7 +1150,7 @@
         badge.classList.add("badge-heal");
       }
       else if (cell.type === 'door') {
-        badge.textContent = "CLEAR🚪";
+        badge.textContent = "CLEAR 🚪";
         badge.classList.add("badge-buff");
       }
     });
@@ -2021,6 +2052,12 @@
               ? 'linear-gradient(90deg, #f39c12, #e67e22)'
               : 'linear-gradient(90deg, #e74c3c, #c0392b)';
         }
+        // ✅ 実HP更新時は予測ゴーストバーをリセット
+        if (dom.hpBarPrediction && dom.hpBarContainer) {
+          dom.hpBarPrediction.style.width = "0%";
+          dom.hpBarPrediction.style.left = "100%";
+          dom.hpBarContainer.classList.remove("death-warning");
+        }
       }
       if (this.cache.heroAtk !== hero.atk) {
         this.cache.heroAtk = hero.atk;
@@ -2364,6 +2401,43 @@
     ctx.shadowBlur = 0;
     ctx.stroke();
 
+    // ☄️ コネクション・アロー / 流れる光の粒子アニメーション (なぞりの方向と順序を直感的に可視化)
+    const dotSpacing = 40; // 粒子の間隔
+    const particleSpeed = (Date.now() / 10) % dotSpacing; // 時間経過によるオフセット
+    ctx.fillStyle = '#ffffff';
+    ctx.shadowColor = state.isFever ? '#00ffff' : '#ff007f';
+    ctx.shadowBlur = 6;
+
+    for (let i = 1; i < len; i++) {
+      const currIdx = path[i];
+      const prevIdx = path[i - 1];
+      const cx = prevIdx % 5;
+      const cy = Math.floor(prevIdx / 5);
+      const tx = currIdx % 5;
+      const ty = Math.floor(currIdx / 5);
+      const isAdjacent = (Math.abs(tx - cx) + Math.abs(ty - cy) === 1);
+
+      if (isAdjacent) {
+        const p1 = getCenter(prevIdx);
+        const p2 = getCenter(currIdx);
+        const dx = p2.x - p1.x;
+        const dy = p2.y - p1.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const unitX = dx / distance;
+        const unitY = dy / distance;
+
+        let startDist = particleSpeed;
+        while (startDist < distance) {
+          const px = p1.x + unitX * startDist;
+          const py = p1.y + unitY * startDist;
+          ctx.beginPath();
+          ctx.arc(px, py, 2.8, 0, Math.PI * 2);
+          ctx.fill();
+          startDist += dotSpacing;
+        }
+      }
+    }
+
     ctx.restore();
   }
 
@@ -2573,13 +2647,30 @@
       }
     }
 
+    // 🧠 人間工学的スナップ判定: 各セルの中心点からの距離を測定し、最も近いセルに滑らかに吸着させる
+    let closestIdx = -1;
+    let minDistance = Infinity;
+
     const len = cellBoundsCache.length;
     for (let i = 0; i < len; i++) {
       const bounds = cellBoundsCache[i];
-      if (px >= bounds.left && px <= bounds.right && py >= bounds.top && py <= bounds.bottom) {
-        pathTracker.moveTo(i);
-        break;
+      const centerX = (bounds.left + bounds.right) / 2;
+      const centerY = (bounds.top + bounds.bottom) / 2;
+      const dx = px - centerX;
+      const dy = py - centerY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      const cellWidth = bounds.right - bounds.left;
+      const activeRadius = cellWidth * 0.75; // 判定範囲をセルの幅の75%まで広げて遊び幅(余白)を確保
+
+      if (dist < activeRadius && dist < minDistance) {
+        minDistance = dist;
+        closestIdx = i;
       }
+    }
+
+    if (closestIdx !== -1) {
+      pathTracker.moveTo(closestIdx);
     }
     e.preventDefault();
   }
@@ -2919,7 +3010,17 @@
         const pLen = panels.length;
         for (let i = 0; i < pLen; i++) {
           const badge = panels[i]?.querySelector(".panel-prediction-badge");
-          if (badge) badge.classList.remove("active");
+          if (badge) {
+            badge.textContent = "";
+            badge.className = "panel-prediction-badge";
+          }
+        }
+
+        // 🟢 HP予測表示と死亡警告の強制リセット
+        if (dom.hpBarPrediction && dom.hpBarContainer) {
+          dom.hpBarPrediction.style.width = "0%";
+          dom.hpBarPrediction.style.left = "100%";
+          dom.hpBarContainer.classList.remove("death-warning");
         }
 
         // 📱 スマホプレビューの非表示化

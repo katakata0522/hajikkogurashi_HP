@@ -253,6 +253,31 @@ body {
   transition: width 0.25s ease-out, background 0.5s ease;
 }
 
+.hp-bar-prediction {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: rgba(255, 59, 48, 0.7);
+  box-shadow: 0 0 8px rgba(255, 59, 48, 0.6);
+  transition: width 0.2s ease, left 0.2s ease;
+  width: 0%;
+  left: 100%;
+  pointer-events: none;
+  border-radius: 5px;
+}
+
+/* HP死亡予測時のHPバー外枠の危機的警告明滅 */
+.hp-bar-wrap.death-warning {
+  border-color: #ff3b30 !important;
+  box-shadow: 0 0 12px rgba(255, 59, 48, 0.9) !important;
+  animation: hpBarDeathPulse 0.4s infinite alternate ease-in-out !important;
+}
+
+@keyframes hpBarDeathPulse {
+  0% { background: rgba(255, 59, 48, 0.05); }
+  100% { background: rgba(255, 59, 48, 0.35); }
+}
+
 .hp-bar-text {
   position: absolute;
   top: 50%;
@@ -1162,20 +1187,21 @@ body {
 /* ─── リアルタイム盤面予測バッジ ─── */
 .panel-prediction-badge {
   position: absolute;
-  top: 2px;
-  right: 2px;
+  top: -4px;
+  right: -4px;
   font-family: 'Outfit', sans-serif;
-  font-size: 0.46rem;
+  font-size: 0.52rem;
   font-weight: 900;
-  padding: 1px 3px;
-  border-radius: 4px;
+  padding: 2px 5px;
+  border-radius: 6px;
   pointer-events: none;
-  background: rgba(0, 0, 0, 0.85);
-  border: 0.5px solid rgba(255, 255, 255, 0.2);
+  background: rgba(10, 10, 15, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   z-index: 10;
   opacity: 0;
-  transform: scale(0.8);
+  transform: scale(0.7);
   transition: all 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 3px 6px rgba(0,0,0,0.6);
 }
 
 .panel-prediction-badge.active {
@@ -1185,20 +1211,34 @@ body {
 
 .badge-dmg {
   color: #ff3b30;
-  border-color: rgba(255, 59, 48, 0.4);
-  box-shadow: 0 0 4px rgba(255, 59, 48, 0.2);
+  border-color: #ff3b30;
+  box-shadow: 0 0 8px rgba(255, 59, 48, 0.45);
+}
+
+/* 💀死亡予測時はベタ塗りの警告色にして視認性を最大化 */
+.badge-dmg.death-warning-badge {
+  background: #ff3b30 !important;
+  color: #fff !important;
+  border-color: #fff !important;
+  box-shadow: 0 0 12px #ff3b30 !important;
+  animation: deathBadgeFlash 0.3s infinite alternate ease-in-out;
+}
+
+@keyframes deathBadgeFlash {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.1); }
 }
 
 .badge-heal {
-  color: #2ecc71;
-  border-color: rgba(46, 204, 113, 0.4);
-  box-shadow: 0 0 4px rgba(46, 204, 113, 0.2);
+  color: #00ff66;
+  border-color: #00ff66;
+  box-shadow: 0 0 8px rgba(0, 255, 102, 0.45);
 }
 
 .badge-buff {
-  color: #f1c40f;
-  border-color: rgba(241, 196, 15, 0.4);
-  box-shadow: 0 0 4px rgba(241, 196, 15, 0.2);
+  color: #ffd700;
+  border-color: #ffd700;
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.45);
 }
 
 /* ─── v3.0.0 新規: サイバーネオン背景 ─── */
@@ -1672,6 +1712,39 @@ body {
 #pc-left-sidebar ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 0, 127, 0.65);
   box-shadow: 0 0 8px rgba(255, 0, 127, 0.5);
+}
+
+/* ─── 盤面セルのリアルタイム戦闘予測バッジ ─── */
+
+/* 🧪 回復・攻撃パネルの背景脈動ネオン（視認性向上） */
+.grid-panel[data-type="potion"]::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1.5px solid rgba(46, 204, 113, 0.4);
+  border-radius: 50%;
+  animation: potionPulseGreen 2.0s infinite ease-in-out;
+  pointer-events: none;
+  z-index: 0;
+}
+@keyframes potionPulseGreen {
+  0%, 100% { transform: scale(0.85); opacity: 0.25; box-shadow: inset 0 0 4px rgba(46, 204, 113, 0.3); }
+  50% { transform: scale(1.0); opacity: 0.75; box-shadow: inset 0 0 10px rgba(46, 204, 113, 0.6); }
+}
+
+.grid-panel[data-type="atk"]::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1.5px solid rgba(241, 196, 15, 0.4);
+  border-radius: 8px;
+  animation: atkPulseGold 2.0s infinite ease-in-out;
+  pointer-events: none;
+  z-index: 0;
+}
+@keyframes atkPulseGold {
+  0%, 100% { transform: scale(0.85); opacity: 0.25; box-shadow: inset 0 0 4px rgba(241, 196, 15, 0.3); }
+  50% { transform: scale(1.0); opacity: 0.75; box-shadow: inset 0 0 10px rgba(241, 196, 15, 0.6); }
 }
 
 
