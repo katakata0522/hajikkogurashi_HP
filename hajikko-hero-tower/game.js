@@ -674,7 +674,7 @@
     if (!dom.pcLogTerminal) return;
     const line = document.createElement("div");
     line.className = `terminal-line ${type}-msg`;
-    line.textContent = `> ${msg}`;
+    line.innerHTML = `<span class="log-prompt">&gt;</span> ${msg}`;
     dom.pcLogTerminal.appendChild(line);
     
     if (dom.pcLogTerminal.children.length > 50) {
