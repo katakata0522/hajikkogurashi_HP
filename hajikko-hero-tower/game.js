@@ -21,9 +21,17 @@
   const ctx = canvas.getContext("2d");
   let _feverGradCache = null; // ✅ フィーバーグラデーションキャッシュ（毎フレームのオブジェクト生成を防止）
   
-  // 🎇 v3.0.0 新規: ネオンパーティクルシステム
-  let particles = [];
-  let shockwaves = []; // 衝撃波エフェクト用
+  // 🎇 v3.0.0 新規: ネオンパーティクルシステム (v3.2.1 オブジェクトプール化でGC抑制)
+  const PARTICLE_POOL_SIZE = 300;
+  const SHOCKWAVE_POOL_SIZE = 30;
+  
+  const particlePool = Array.from({ length: PARTICLE_POOL_SIZE }, () => ({
+    active: false, x: 0, y: 0, vx: 0, vy: 0, size: 0, color: '#fff', alpha: 0, decay: 0, gravity: 0
+  }));
+  const shockwavePool = Array.from({ length: SHOCKWAVE_POOL_SIZE }, () => ({
+    active: false, x: 0, y: 0, radius: 0, maxRadius: 0, alpha: 0, color: '#fff', speed: 0
+  }));
+
   function spawnParticles(x, y, type = 'pink', count = 5) {
     let colors = ['#ff007f', '#ff00ff', '#ffffff']; // デフォルトはピンク
     if (type === 'fever') colors = ['#00ffff', '#00ff00', '#ff00ff', '#ffffff'];
@@ -33,23 +41,28 @@
     else if (type === 'error') colors = ['#ff3b30', '#ff0055', '#ffffff'];
     else if (type === 'towel') colors = ['#fc6767', '#ec008c', '#ffffff'];
 
-    for (let i = 0; i < count; i++) {
-      const angle = Math.random() * Math.PI * 2;
-      const speed = 1.0 + Math.random() * 3.5;
-      particles.push({
-        x: x,
-        y: y,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - 0.5, // わずかに上昇気流
-        size: 2.0 + Math.random() * 4,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        alpha: 1.0,
-        decay: 0.015 + Math.random() * 0.02,
-        gravity: 0.04
-      });
+    // 1. パーティクルをプールから割り当て
+    let spawnedCount = 0;
+    for (let i = 0; i < PARTICLE_POOL_SIZE && spawnedCount < count; i++) {
+      const p = particlePool[i];
+      if (!p.active) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 1.0 + Math.random() * 3.5;
+        p.active = true;
+        p.x = x;
+        p.y = y;
+        p.vx = Math.cos(angle) * speed;
+        p.vy = Math.sin(angle) * speed - 0.5;
+        p.size = 2.0 + Math.random() * 4;
+        p.color = colors[Math.floor(Math.random() * colors.length)];
+        p.alpha = 1.0;
+        p.decay = 0.015 + Math.random() * 0.02;
+        p.gravity = 0.04;
+        spawnedCount++;
+      }
     }
 
-    // 衝撃波（輪っか）を1つ生成
+    // 2. 衝撃波（輪っか）をプールから1つ割り当て
     let waveColor = '#ff007f';
     if (type === 'fever') waveColor = '#00ffff';
     else if (type === 'heal') waveColor = '#2ecc71';
@@ -58,30 +71,47 @@
     else if (type === 'error') waveColor = '#ff3b30';
     else if (type === 'towel') waveColor = '#ec008c';
 
-    shockwaves.push({
-      x: x,
-      y: y,
-      radius: 5,
-      maxRadius: 45 + Math.random() * 15,
-      alpha: 1.0,
-      color: waveColor,
-      speed: 2.5
-    });
+    for (let i = 0; i < SHOCKWAVE_POOL_SIZE; i++) {
+      const w = shockwavePool[i];
+      if (!w.active) {
+        w.active = true;
+        w.x = x;
+        w.y = y;
+        w.radius = 5;
+        w.maxRadius = 45 + Math.random() * 15;
+        w.alpha = 1.0;
+        w.color = waveColor;
+        w.speed = 2.5;
+        break;
+      }
+    }
+  }
+
+  function hasActiveParticlesOrShockwaves() {
+    for (let i = 0; i < PARTICLE_POOL_SIZE; i++) {
+      if (particlePool[i].active) return true;
+    }
+    for (let i = 0; i < SHOCKWAVE_POOL_SIZE; i++) {
+      if (shockwavePool[i].active) return true;
+    }
+    return false;
   }
 
   function updateAndDrawParticles() {
-    if (particles.length === 0 && shockwaves.length === 0) return;
+    if (!hasActiveParticlesOrShockwaves()) return;
     ctx.save();
     ctx.globalCompositeOperation = 'screen';
 
     // 1. 衝撃波の更新と描画
-    for (let i = shockwaves.length - 1; i >= 0; i--) {
-      const w = shockwaves[i];
+    for (let i = 0; i < SHOCKWAVE_POOL_SIZE; i++) {
+      const w = shockwavePool[i];
+      if (!w.active) continue;
+
       w.radius += w.speed;
       w.alpha = 1.0 - (w.radius / w.maxRadius);
 
       if (w.radius >= w.maxRadius || w.alpha <= 0) {
-        shockwaves.splice(i, 1);
+        w.active = false;
         continue;
       }
 
@@ -96,20 +126,23 @@
     }
 
     // 2. 普通のパーティクルの更新と描画
-    for (let i = particles.length - 1; i >= 0; i--) {
-      const p = particles[i];
+    for (let i = 0; i < PARTICLE_POOL_SIZE; i++) {
+      const p = particlePool[i];
+      if (!p.active) continue;
+
       p.x += p.vx;
       p.y += p.vy;
       p.vy += p.gravity;
       p.alpha -= p.decay;
 
-      if (p.alpha <= 0 || p.size <= 0.1) {
-        particles.splice(i, 1);
+      const currentSize = p.size * p.alpha;
+      if (p.alpha <= 0 || currentSize <= 0.1) {
+        p.active = false;
         continue;
       }
 
       ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size * p.alpha, 0, Math.PI * 2);
+      ctx.arc(p.x, p.y, currentSize, 0, Math.PI * 2);
       ctx.fillStyle = p.color;
       ctx.globalAlpha = p.alpha;
       ctx.shadowBlur = 8;
@@ -118,6 +151,7 @@
     }
     ctx.restore();
   }
+
 
   // DFSソルバー用の静的定数
   const DIRS = [
@@ -477,6 +511,7 @@
   const dom = {};
   function initDOMCache() {
     dom.gameContainer = document.getElementById("game-container");
+    dom.gridSectionWrap = document.querySelector(".grid-section-wrap"); // ✅ パフォーマンス最適化: キャッシュ化
     dom.floorDisplay = document.getElementById("floor-display");
     dom.goldDisplay = document.getElementById("gold-display");
     dom.keyDisplay = document.getElementById("key-display");
@@ -2254,8 +2289,8 @@
       }
     }
 
-    // ✅ パーティクルが存在するか、ドラッグ中か、フィーバー中ならキャンバスを更新
-    if ((pathTracker && pathTracker.isDragging) || state.isFever || particles.length > 0) {
+    // ✅ パーティクルが存在するか、ドラッグ中か、フィーバー中ならキャンバスを更新 (最適化)
+    if ((pathTracker && pathTracker.isDragging) || state.isFever || hasActiveParticlesOrShockwaves()) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       if ((pathTracker && pathTracker.isDragging) || state.isFever) {
         drawNeonLines();
@@ -2392,7 +2427,7 @@
     const px = clientX + scrollX;
     const py = clientY + scrollY;
 
-    const wrap = document.querySelector(".grid-section-wrap");
+    const wrap = dom.gridSectionWrap;
     if (wrap) {
       const rect = wrap.getBoundingClientRect();
       const gpx = clientX - rect.left;
@@ -2460,7 +2495,7 @@
 
   // 高DPI/Retinaディスプレイ対応のCanvas鮮明化最適化
   function resizeCanvas() {
-    const wrap = document.querySelector(".grid-section-wrap");
+    const wrap = dom.gridSectionWrap;
     if (wrap) {
       const dpr = window.devicePixelRatio || 1;
       const rect = wrap.getBoundingClientRect();
