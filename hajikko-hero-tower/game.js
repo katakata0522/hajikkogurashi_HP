@@ -21,16 +21,40 @@
   const ctx = canvas.getContext("2d");
   let _feverGradCache = null; // ✅ フィーバーグラデーションキャッシュ（毎フレームのオブジェクト生成を防止）
   
-  // 🎇 v3.0.0 新規: ネオンパーティクルシステム (v3.2.1 オブジェクトプール化でGC抑制)
+  // 🎇 v3.0.0 新規: ネオンパーティクルシステム (v3.2.2 隠しクラス最適化 ＆ 寿命ベース上書きアルゴリズム)
+  class Particle {
+    constructor() {
+      this.active = false;
+      this.x = 0;
+      this.y = 0;
+      this.vx = 0;
+      this.vy = 0;
+      this.size = 0;
+      this.color = '#fff';
+      this.alpha = 0;
+      this.decay = 0;
+      this.gravity = 0;
+    }
+  }
+
+  class Shockwave {
+    constructor() {
+      this.active = false;
+      this.x = 0;
+      this.y = 0;
+      this.radius = 0;
+      this.maxRadius = 0;
+      this.alpha = 0;
+      this.color = '#fff';
+      this.speed = 0;
+    }
+  }
+
   const PARTICLE_POOL_SIZE = 300;
   const SHOCKWAVE_POOL_SIZE = 30;
   
-  const particlePool = Array.from({ length: PARTICLE_POOL_SIZE }, () => ({
-    active: false, x: 0, y: 0, vx: 0, vy: 0, size: 0, color: '#fff', alpha: 0, decay: 0, gravity: 0
-  }));
-  const shockwavePool = Array.from({ length: SHOCKWAVE_POOL_SIZE }, () => ({
-    active: false, x: 0, y: 0, radius: 0, maxRadius: 0, alpha: 0, color: '#fff', speed: 0
-  }));
+  const particlePool = Array.from({ length: PARTICLE_POOL_SIZE }, () => new Particle());
+  const shockwavePool = Array.from({ length: SHOCKWAVE_POOL_SIZE }, () => new Shockwave());
 
   function spawnParticles(x, y, type = 'pink', count = 5) {
     let colors = ['#ff007f', '#ff00ff', '#ffffff']; // デフォルトはピンク
@@ -41,24 +65,47 @@
     else if (type === 'error') colors = ['#ff3b30', '#ff0055', '#ffffff'];
     else if (type === 'towel') colors = ['#fc6767', '#ec008c', '#ffffff'];
 
+    const initParticle = (p) => {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 1.0 + Math.random() * 3.5;
+      p.active = true;
+      p.x = x;
+      p.y = y;
+      p.vx = Math.cos(angle) * speed;
+      p.vy = Math.sin(angle) * speed - 0.5;
+      p.size = 2.0 + Math.random() * 4;
+      p.color = colors[Math.floor(Math.random() * colors.length)];
+      p.alpha = 1.0;
+      p.decay = 0.015 + Math.random() * 0.02;
+      p.gravity = 0.04;
+    };
+
     // 1. パーティクルをプールから割り当て
     let spawnedCount = 0;
     for (let i = 0; i < PARTICLE_POOL_SIZE && spawnedCount < count; i++) {
       const p = particlePool[i];
       if (!p.active) {
-        const angle = Math.random() * Math.PI * 2;
-        const speed = 1.0 + Math.random() * 3.5;
-        p.active = true;
-        p.x = x;
-        p.y = y;
-        p.vx = Math.cos(angle) * speed;
-        p.vy = Math.sin(angle) * speed - 0.5;
-        p.size = 2.0 + Math.random() * 4;
-        p.color = colors[Math.floor(Math.random() * colors.length)];
-        p.alpha = 1.0;
-        p.decay = 0.015 + Math.random() * 0.02;
-        p.gravity = 0.04;
+        initParticle(p);
         spawnedCount++;
+      }
+    }
+
+    // 空きスロットが不足している場合は、アルファ値（残り寿命）の低いアクティブ要素を上書き
+    if (spawnedCount < count) {
+      // 割り当て速度優先でループ探索（ソート負荷を回避するため簡易線形探索）
+      for (let attempt = 0; attempt < (count - spawnedCount); attempt++) {
+        let oldestIdx = -1;
+        let minAlpha = 1.1;
+        for (let i = 0; i < PARTICLE_POOL_SIZE; i++) {
+          if (particlePool[i].active && particlePool[i].alpha < minAlpha) {
+            minAlpha = particlePool[i].alpha;
+            oldestIdx = i;
+          }
+        }
+        if (oldestIdx !== -1) {
+          initParticle(particlePool[oldestIdx]);
+          spawnedCount++;
+        }
       }
     }
 
@@ -71,18 +118,39 @@
     else if (type === 'error') waveColor = '#ff3b30';
     else if (type === 'towel') waveColor = '#ec008c';
 
+    const initShockwave = (w) => {
+      w.active = true;
+      w.x = x;
+      w.y = y;
+      w.radius = 5;
+      w.maxRadius = 45 + Math.random() * 15;
+      w.alpha = 1.0;
+      w.color = waveColor;
+      w.speed = 2.5;
+    };
+
+    let waveSpawned = false;
     for (let i = 0; i < SHOCKWAVE_POOL_SIZE; i++) {
       const w = shockwavePool[i];
       if (!w.active) {
-        w.active = true;
-        w.x = x;
-        w.y = y;
-        w.radius = 5;
-        w.maxRadius = 45 + Math.random() * 15;
-        w.alpha = 1.0;
-        w.color = waveColor;
-        w.speed = 2.5;
+        initShockwave(w);
+        waveSpawned = true;
         break;
+      }
+    }
+
+    // 空きがない場合は一番消えかかっている衝撃波を上書き
+    if (!waveSpawned) {
+      let oldestIdx = -1;
+      let minAlpha = 1.1;
+      for (let i = 0; i < SHOCKWAVE_POOL_SIZE; i++) {
+        if (shockwavePool[i].active && shockwavePool[i].alpha < minAlpha) {
+          minAlpha = shockwavePool[i].alpha;
+          oldestIdx = i;
+        }
+      }
+      if (oldestIdx !== -1) {
+        initShockwave(shockwavePool[oldestIdx]);
       }
     }
   }
@@ -1160,6 +1228,10 @@
 
         if (cell.type === 'boss') {
           keys++;
+          if (state.floor === 25) {
+            spawnFloatingText(`宇宙旅行用タオル🧣獲得!`, cx, cy - 35, "#ff007f");
+            writeTerminalLog(`宇宙の秘宝「宇宙旅行用タオル🧣」を獲得！罠ダメージを完全に無効化します！`, "level");
+          }
           spawnFloatingText(`ボス撃破! 🔑獲得`, cx, cy - 20, "#3498db");
           unlockBossArtifact(state.floor);
           writeTerminalLog(`エリアボスを討伐！鍵🔑を獲得`, "fever");
@@ -2416,6 +2488,7 @@
   // 算術的セル特定 ＆ なぞり連動3Dチルト効果
   function handleGlobalPointerMove(e) {
     if (!gameStarted || !pathTracker || !pathTracker.isDragging) return;
+    recordInteraction(); // ✅ ドラッグ操作中もインタラクション時間を更新し、長考中のBGM停止を防ぐ
 
     const clientX = e.clientX || (e.touches && e.touches[0].clientX);
     const clientY = e.clientY || (e.touches && e.touches[0].clientY);
