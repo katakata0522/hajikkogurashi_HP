@@ -120,8 +120,13 @@
 
       <!-- 勇者ステータス詳細バー -->
       <div class="hero-status-panel glass-panel">
-        <div class="hero-status-row">
+        <div class="hero-status-row first-row">
           <span class="hero-lv-label">Lv.<span id="hero-level">1</span> 勇者</span>
+          <span class="hero-atk-badge text-neon-gold">⚔️ <span id="hero-atk">10</span> ATK</span>
+        </div>
+        
+        <div class="hero-status-row exp-row">
+          <span class="status-bar-label">EXP</span>
           <div class="exp-bar-wrap">
             <div id="exp-bar-fill" class="exp-bar-fill"></div>
             <span id="exp-text" class="exp-text">EXP: 0 / 10</span>
@@ -130,7 +135,7 @@
         
         <!-- FEVERゲージ表示行 -->
         <div class="hero-status-row fever-row">
-          <span class="fever-title-label">FEVER</span>
+          <span class="status-bar-label fever-label">FEVER</span>
           <div class="fever-bar-wrap">
             <div id="fever-bar-fill" class="fever-bar-fill"></div>
             <span id="fever-text" class="fever-text">0%</span>
@@ -138,21 +143,10 @@
         </div>
 
         <div class="hero-status-row hp-row">
-          <span class="hp-title-label">HP</span>
+          <span class="status-bar-label hp-label">HP</span>
           <div class="hp-bar-wrap">
             <div id="hp-bar-fill" class="hp-bar-fill"></div>
             <span class="hp-bar-text"><span id="hero-hp">100</span> / <span id="hero-max-hp">100</span></span>
-          </div>
-        </div>
-
-        <div class="hero-stats-values">
-          <div class="stat-item">
-            <span class="stat-name">Lv.</span>
-            <span class="status-value"><span id="hero-level-display">1</span></span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-name">ATK</span>
-            <span class="status-value atk-text">⚔️ <span id="hero-atk">10</span></span>
           </div>
         </div>
       </div>

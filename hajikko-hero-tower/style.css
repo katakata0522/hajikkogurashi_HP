@@ -135,42 +135,92 @@ body {
 
 /* 勇者ステータス詳細パネル */
 .hero-status-panel {
-  padding: 8px 12px;
+  padding: 12px 14px;
   border-radius: 16px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
   flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), inset 0 0 10px rgba(255,255,255,0.02);
 }
 
 .hero-status-row {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.hero-status-row.first-row {
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 6px;
+  margin-bottom: 2px;
 }
 
 .hero-lv-label {
   font-family: 'Noto Sans JP', sans-serif;
   font-weight: 900;
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   color: var(--color-hero);
-  text-shadow: 0 0 6px rgba(0, 229, 255, 0.3);
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+}
+
+.hero-atk-badge {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 900;
+  font-size: 0.72rem;
+  background: rgba(241, 196, 15, 0.12);
+  border: 1px solid rgba(241, 196, 15, 0.35);
+  padding: 3px 8px;
+  border-radius: 6px;
+  box-shadow: 0 0 8px rgba(241, 196, 15, 0.25);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.status-bar-label {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 900;
+  color: #3498db;
+  text-shadow: 0 0 4px rgba(52, 152, 219, 0.3);
+  width: 42px;
+  flex-shrink: 0;
+}
+
+.status-bar-label.fever-label {
+  color: #ff007f;
+  text-shadow: 0 0 4px rgba(255, 0, 127, 0.3);
+}
+
+.status-bar-label.hp-label {
+  color: #2ecc71;
+  text-shadow: 0 0 4px rgba(46, 204, 113, 0.3);
+}
+
+/* ─── 各種バー ─── */
+.exp-bar-wrap, .fever-bar-wrap, .hp-bar-wrap {
+  flex-grow: 1;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+  position: relative;
+  overflow: hidden;
 }
 
 .exp-bar-wrap {
-  width: 60%;
-  height: 8px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  position: relative;
-  overflow: hidden;
+  border: 0.5px solid rgba(52, 152, 219, 0.25);
 }
 
 .exp-bar-fill {
   height: 100%;
   width: 0%;
   background: linear-gradient(90deg, #3498db, #00e5ff);
-  border-radius: 4px;
+  border-radius: 5px;
   transition: width 0.3s ease-out;
 }
 
@@ -183,51 +233,11 @@ body {
   font-size: 0.5rem;
   font-weight: 900;
   color: #fff;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
   pointer-events: none;
 }
 
-.hero-stats-values {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 2px;
-}
-
-.stat-item {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-}
-.stat-item:last-child {
-  text-align: right;
-}
-
-.stat-name {
-  font-size: 0.6rem;
-  color: rgba(255,255,255,0.5);
-}
-
-/* HPゲージ行 */
-.hp-row {
-  margin-top: 2px;
-}
-
-.hp-title-label {
-  font-size: 0.65rem;
-  font-weight: 900;
-  color: #2ecc71;
-  text-shadow: 0 0 4px rgba(46,204,113,0.3);
-  min-width: 24px;
-}
-
-/* ─── HPゲージ ─── */
 .hp-bar-wrap {
-  width: 60%;
-  height: 10px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 5px;
-  position: relative;
-  overflow: hidden;
   border: 0.5px solid rgba(46, 204, 113, 0.25);
   box-shadow: 0 0 5px rgba(46, 204, 113, 0.15);
 }
@@ -246,7 +256,7 @@ body {
   left: 50%;
   transform: translate(-50%, -50%);
   font-family: 'Outfit', sans-serif;
-  font-size: 0.48rem;
+  font-size: 0.5rem;
   font-weight: 700;
   color: #fff;
   text-shadow: 0 1px 3px rgba(0,0,0,0.7);
@@ -254,35 +264,16 @@ body {
   white-space: nowrap;
 }
 
-/* FEVERゲージ行 */
-.fever-row {
-  margin-top: 4px;
-}
-
-.fever-title-label {
-  font-size: 0.65rem;
-  font-weight: 900;
-  color: #ff007f;
-  text-shadow: 0 0 4px rgba(255,0,127,0.3);
-}
-
-/* ─── FEVERゲージ ─── */
 .fever-bar-wrap {
-  width: 60%;
-  height: 8px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  position: relative;
-  overflow: hidden;
-  border: 0.5px solid rgba(255, 0, 127, 0.2);
-  box-shadow: 0 0 4px rgba(255, 0, 127, 0.1);
+  border: 0.5px solid rgba(255, 0, 127, 0.25);
+  box-shadow: 0 0 5px rgba(255, 0, 127, 0.15);
 }
 
 .fever-bar-fill {
   height: 100%;
   width: 0%;
   background: linear-gradient(90deg, #ff007f, #ff00ff);
-  border-radius: 4px;
+  border-radius: 5px;
   transition: width 0.3s ease-out;
 }
 
@@ -295,7 +286,7 @@ body {
   font-size: 0.5rem;
   font-weight: 900;
   color: #fff;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
   pointer-events: none;
 }
 
@@ -434,7 +425,7 @@ body {
 }
 
 .panel-icon {
-  font-size: 1.4rem;
+  font-size: 1.75rem;
   margin-bottom: 2px;
   pointer-events: none;
   line-height: 1;
@@ -531,7 +522,13 @@ body {
   position: absolute;
   top: 3px;
   left: 3px;
-  font-size: 0.55rem;
+  font-size: 0.8rem;
+  animation: trapPulseRed 1.0s infinite alternate ease-in-out;
+}
+
+@keyframes trapPulseRed {
+  0% { transform: scale(0.95); opacity: 0.65; filter: drop-shadow(0 0 1px #ff3b30); }
+  100% { transform: scale(1.15); opacity: 1.0; filter: drop-shadow(0 0 5px #ff3b30); }
 }
 
 .panel-warp {
@@ -915,24 +912,30 @@ body {
 
 /* ─── アーティファクトバッジ ─── */
 .art-badge {
-  font-size: 1.15rem;
-  opacity: 0.22;
-  filter: grayscale(1) blur(0.3px);
+  font-size: 1.35rem;
   cursor: help;
   transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   position: relative;
   display: inline-block;
+  padding: 4px;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  margin: 0 4px;
 }
 
 .art-badge.locked {
-  opacity: 0.22;
+  opacity: 0.25;
   filter: grayscale(1) blur(0.3px);
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .art-badge.unlocked {
   opacity: 1;
   filter: grayscale(0);
   transform: scale(1.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 #art-fang.unlocked {
@@ -1359,36 +1362,42 @@ body {
   #main-layout-wrapper {
     flex-direction: row;
     justify-content: center;
-    gap: 24px;
+    align-items: center;
+    gap: 20px;
     max-width: 1200px;
-    margin: 40px auto;
-    padding: 0 20px;
+    height: 96vh;
+    margin: 2vh auto;
+    padding: 0 10px;
+    box-sizing: border-box;
   }
 
   .pc-only {
-    display: flex !important; /* PC版ではサイドバーを表示 */
+    display: flex !important;
   }
 
   /* 中央ゲームボードの固定幅（PCでの比率維持） */
   #game-container {
-    width: 380px !important;
+    width: 360px !important;
+    height: 90vh !important;
+    max-height: 680px !important;
     flex-shrink: 0;
     margin: 0 !important;
   }
 
   /* サイドパネル共通 */
   .sidebar-panel {
-    width: 340px;
+    width: 320px;
+    height: 90vh;
+    max-height: 680px;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    padding: 20px;
+    padding: 16px 20px;
     box-sizing: border-box;
     border-radius: 20px;
     border: 1px solid rgba(255, 255, 255, 0.08);
     background: rgba(18, 18, 24, 0.6);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-    min-height: 620px;
   }
 
   #pc-left-sidebar {
@@ -1402,9 +1411,9 @@ body {
   }
 
   .sidebar-title {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     font-weight: 900;
-    margin: 0 0 6px 0;
+    margin: 4px 0 6px 0;
     letter-spacing: 1px;
     text-align: center;
   }
@@ -1597,6 +1606,25 @@ body {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
+}
+
+/* PCサイドバー限定のコンポーネント最適化 */
+@media (min-width: 1024px) {
+  #pc-left-sidebar .shop-list {
+    max-height: none; /* PC版ではショップリストのスクロール制限を解除 */
+    flex-grow: 1;
+    gap: 8px;
+  }
+  
+  #pc-left-sidebar .shop-item {
+    padding: 10px 12px;
+  }
+
+  #pc-right-sidebar #terminal-log {
+    flex-grow: 1;
+    height: 100% !important;
+    max-height: none !important;
+  }
 }
 
 
