@@ -1565,14 +1565,16 @@ body {
 /* 📱 スマホ専用：指隠れ防止プレビューポップアップ ─── */
 .drag-preview-popup {
   position: absolute;
-  background: rgba(18, 18, 24, 0.95);
-  border: 1px solid rgba(0, 255, 255, 0.5);
-  box-shadow: 0 0 12px rgba(0, 255, 255, 0.4);
-  padding: 4px 8px;
-  border-radius: 8px;
+  background: rgba(18, 18, 24, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(0, 229, 255, 0.6);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 10px rgba(0, 229, 255, 0.35);
+  padding: 6px 12px;
+  border-radius: 20px;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   pointer-events: none;
   z-index: 100;
   transform: translate(-50%, -100%);
@@ -1581,15 +1583,15 @@ body {
 }
 
 #drag-preview-icon {
-  font-size: 0.75rem;
+  font-size: 1.0rem;
 }
 
 #drag-preview-hp {
   font-family: 'Outfit', sans-serif;
-  font-size: 0.55rem;
+  font-size: 0.65rem;
   font-weight: 900;
   color: #fff;
-  text-shadow: 0 0 4px rgba(255, 255, 255, 0.4);
+  text-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
 }
 
 @keyframes previewPulse {

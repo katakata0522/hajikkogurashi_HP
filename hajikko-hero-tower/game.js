@@ -360,9 +360,14 @@
       let duration = 0.15;
 
       if (type === 'connect') {
+        // ✅ なぞりコンボ数(chain)が増えるごとに音程を1半音ずつ引き上げる (ドレミ...)
+        const semitone = chain - 1;
+        const startFreq = 261.63 * Math.pow(1.059463, semitone); // C4(261.63Hz)から半音ずつ上昇
+        const endFreq = startFreq * 1.8;
+
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(330, now);
-        osc.frequency.exponentialRampToValueAtTime(660, now + 0.08);
+        osc.frequency.setValueAtTime(startFreq, now);
+        osc.frequency.exponentialRampToValueAtTime(endFreq, now + 0.08);
         gain.gain.setValueAtTime(0.08, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
         gain.gain.linearRampToValueAtTime(0, now + 0.12);
@@ -751,7 +756,7 @@
       
       cacheCellBounds();
       
-      AudioManager.playSound('connect');
+      AudioManager.playSound('connect', this.path.length);
       return true;
     }
 
@@ -763,7 +768,7 @@
         if (idx === this.warpTargetIdx) {
           this.warpLocked = false; // 物理的にワープ先に到着したのでロック解除
           this.warpTargetIdx = -1;
-          AudioManager.playSound('connect');
+          AudioManager.playSound('connect', this.path.length);
         }
         return false;
       }
@@ -850,7 +855,7 @@
       }
 
       this.path.push(idx);
-      AudioManager.playSound('connect');
+      AudioManager.playSound('connect', this.path.length);
 
       if (targetCell && targetCell.type === 'warp') {
         const pairName = targetCell.val;
@@ -859,7 +864,7 @@
           if (otherWarpIdx !== -1) {
             this.warpPairsUsed.add(pairName);
             this.path.push(otherWarpIdx);
-            AudioManager.playSound('connect');
+            AudioManager.playSound('connect', this.path.length);
           }
         }
       }
@@ -1212,19 +1217,19 @@
         // 🔥 コンボ表示の強化
         if (killCount >= 2) {
           const comboLabel = killCount === 2 ? "DOUBLE!" : killCount === 3 ? "TRIPLE!" : `${killCount}COMBO!`;
-          spawnFloatingText(comboLabel, cx, cy - 40, "#ff007f");
+          spawnFloatingText(comboLabel, cx, cy - 40, "#ff007f", killCount);
         }
 
         // ✅ 5チェイン以上で「ライトニング・チェイン」必殺技発動
         if (killCount >= 5) {
-          spawnFloatingText("⚡ LIGHTNING CHAIN! ⚡", cx, cy - 50, "#00ffff");
+          spawnFloatingText("⚡ LIGHTNING CHAIN! ⚡", cx, cy - 50, "#00ffff", killCount);
           spawnParticles(cx, cy, 'fever', 12); // 青白い火花を大量に撒き散らす
           writeTerminalLog(`⚡ライトニング・チェイン必殺発動！戦闘被ダメージを20%軽減！⚡`, "fever");
         }
 
         const chainLabel = killCount > 1 ? ` (${killCount}連撃! x${chainMul.toFixed(2)})` : "";
-        spawnFloatingText(`+${finalGold} G${chainLabel}`, cx, cy + 14, "#f1c40f");
-        spawnFloatingText(`+${finalExp} EXP${chainLabel}`, cx, cy - 14, "#3498db");
+        spawnFloatingText(`+${finalGold} G${chainLabel}`, cx, cy + 14, "#f1c40f", killCount);
+        spawnFloatingText(`+${finalExp} EXP${chainLabel}`, cx, cy - 14, "#3498db", killCount);
 
         if (cell.type === 'boss') {
           keys++;
@@ -1429,7 +1434,7 @@
   }
 
   // ─── 浮遊数値テキストエフェクト ───
-  function spawnFloatingText(text, x, y, color) {
+  function spawnFloatingText(text, x, y, color, chainCount = 0) {
     const floatEl = document.createElement("div");
     floatEl.className = "floating-dmg";
     floatEl.textContent = text;
@@ -1437,6 +1442,15 @@
     floatEl.style.top = `${y}px`;
     floatEl.style.setProperty('--glow-c', color);
     floatEl.style.color = "#fff";
+
+    // ✅ チェインコンボ数(chainCount)に応じてフォントサイズと発光を拡大 (インフレ感の演出)
+    if (chainCount > 1) {
+      const scale = Math.min(1.6, 1.0 + (chainCount - 1) * 0.08);
+      floatEl.style.transform = `translate(-50%, -50%) scale(${scale})`;
+      floatEl.style.fontWeight = "900";
+      floatEl.style.textShadow = `0 0 ${8 * scale}px ${color}, 0 0 ${16 * scale}px ${color}`;
+    }
+    
     dom.floatingTextContainer.appendChild(floatEl);
 
     setTimeout(() => { floatEl.remove(); }, 800);
