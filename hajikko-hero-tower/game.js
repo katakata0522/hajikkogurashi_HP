@@ -564,7 +564,7 @@
   }
 
   // リアクティブ状態
-  const state = createReactiveState(JSON.parse(JSON.stringify(defaultState)), () => {
+  const state = createReactiveState(structuredClone(defaultState), () => {
     UIManager.isDirty = true;
   });
 
@@ -962,7 +962,7 @@
         if (state.isFever) {
           goldGained += Math.floor(maxHp * 0.05);
         } else {
-          const trapRate = state.artifacts.boots ? 0.05 : 0.15;
+          const trapRate = state.artifacts.towel ? 0 : (state.artifacts.boots ? 0.05 : 0.15);
           hp -= Math.floor(maxHp * trapRate);
         }
       }
@@ -1471,7 +1471,7 @@
     state.hasRevivedThisFloor = true;
     
     // バックアップからフロア初期状態を復元
-    gridData = JSON.parse(JSON.stringify(state.floorStartBackup.gridData));
+    gridData = structuredClone(state.floorStartBackup.gridData);
     state.hero.hp = state.floorStartBackup.heroHp;
     state.hero.atk = state.floorStartBackup.heroAtk;
     state.hero.level = state.floorStartBackup.heroLevel;
@@ -1483,12 +1483,12 @@
     
     // ✅ 秘宝（アーティファクト）の所持状況も復元（死による持ち逃げ防止）
     if (state.floorStartBackup.artifacts) {
-      state.artifacts = JSON.parse(JSON.stringify(state.floorStartBackup.artifacts));
+      state.artifacts = structuredClone(state.floorStartBackup.artifacts);
     }
     
     // ✅ 統計データもフロア開始時の状態に巻き戻す（二重加算を防止）
     if (state.floorStartBackup.stats) {
-      state.stats = JSON.parse(JSON.stringify(state.floorStartBackup.stats));
+      state.stats = structuredClone(state.floorStartBackup.stats);
     }
     
     AudioManager.playSound('clear');
@@ -1790,7 +1790,7 @@
   // ⏳ 時の砂時計用のフロアバックアップ関数
   function backupFloorStart() {
     state.floorStartBackup = {
-      gridData: JSON.parse(JSON.stringify(gridData)),
+      gridData: structuredClone(gridData),
       heroHp: state.hero.hp,
       heroAtk: state.hero.atk,
       heroLevel: state.hero.level,
@@ -1799,8 +1799,8 @@
       feverGauge: state.feverGauge,
       isFever: state.isFever,
       feverTurns: state.feverTurns,
-      stats: JSON.parse(JSON.stringify(state.stats)), // ✅ 統計データもフロア開始時にバックアップ
-      artifacts: JSON.parse(JSON.stringify(state.artifacts)) // ✅ アーティファクトの所有状況もバックアップ（死による持ち逃げ防止）
+      stats: structuredClone(state.stats), // ✅ 統計データもフロア開始時にバックアップ
+      artifacts: structuredClone(state.artifacts) // ✅ アーティファクトの所有状況もバックアップ（死による持ち逃げ防止）
     };
   }
 
@@ -2354,6 +2354,7 @@
   }
 
   // ─── ゲームループ ───
+  let isCanvasClean = false; // ✅ 静止時のキャンバスクリアの重複実行を避ける最適化フラグ
   function mainLoop(timestamp) {
     if (timestamp - lastUserInteractionTime >= 180000) {
       if (AudioManager.ctx && AudioManager.ctx.state === 'running') {
@@ -2362,14 +2363,17 @@
     }
 
     // ✅ パーティクルが存在するか、ドラッグ中か、フィーバー中ならキャンバスを更新 (最適化)
-    if ((pathTracker && pathTracker.isDragging) || state.isFever || hasActiveParticlesOrShockwaves()) {
+    const needsDraw = (pathTracker && pathTracker.isDragging) || state.isFever || hasActiveParticlesOrShockwaves();
+    if (needsDraw) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       if ((pathTracker && pathTracker.isDragging) || state.isFever) {
         drawNeonLines();
       }
       updateAndDrawParticles();
-    } else {
+      isCanvasClean = false;
+    } else if (!isCanvasClean) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      isCanvasClean = true;
     }
 
     if (UIManager.isDirty) {
@@ -2582,6 +2586,7 @@
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.scale(dpr, dpr);
       _feverGradCache = null; // ✅ サイズ変更時はグラデーションキャッシュをリセット
+      isCanvasClean = false; // ✅ サイズ変更時は強制的にクリア状態をフラッシュ
     }
     if (gameStarted) cacheCellBounds();
   }
@@ -2590,8 +2595,7 @@
   function saveGame() {
     try {
       state.settings.lastSaveTime = Date.now();
-      const rawState = JSON.parse(JSON.stringify(state));
-      const json = JSON.stringify(rawState);
+      const json = JSON.stringify(state);
       
       const encrypted = encryptData(json);
       const chk = generateChecksum(encrypted);
@@ -2619,7 +2623,7 @@
 
         const parsed = JSON.parse(decrypted);
         if (parsed && typeof parsed === 'object') {
-          const merged = deepMerge(JSON.parse(JSON.stringify(defaultState)), parsed);
+          const merged = deepMerge(structuredClone(defaultState), parsed);
           for (const key in merged) {
             state[key] = merged[key];
           }
