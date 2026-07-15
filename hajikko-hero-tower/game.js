@@ -258,94 +258,30 @@
     }
   }
 
-  // Web Audio API 音響管理
+  // Web Audio API 音響管理 (自動生成BGMを廃止し、手触り向上のためのSE再生に特化)
   const AudioManager = {
     ctx: null,
-    bgmGainNode: null,
     seGainNode: null,
-    currentChord: 0,
-    bgmInterval: null,
-    notes: [
-      [196.00, 246.94, 293.66], // G
-      [220.00, 261.63, 329.63], // Am
-      [174.61, 220.00, 261.63], // F
-      [196.00, 246.94, 293.66]  // G
-    ],
 
     init() {
       if (this.ctx === null) {
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
         this.ctx = new AudioContextClass();
-        this.bgmGainNode = this.ctx.createGain();
         this.seGainNode = this.ctx.createGain();
-        this.bgmGainNode.connect(this.ctx.destination);
         this.seGainNode.connect(this.ctx.destination);
         this.setVolumes();
-        
-        if (state.settings.audioMode === 1 || state.settings.audioMode === 3) {
-          this.startBgmLoop();
-        }
       }
     },
 
     setVolumes() {
-      if (!this.bgmGainNode || !this.seGainNode) return;
-      this.bgmGainNode.gain.setValueAtTime(0.012, this.ctx.currentTime);
+      if (!this.seGainNode) return;
       this.seGainNode.gain.setValueAtTime(0.08, this.ctx.currentTime);
-    },
-
-    startBgmLoop() {
-      if (!this.ctx) return;
-      if (this.bgmInterval) clearInterval(this.bgmInterval);
-
-      this.bgmInterval = setInterval(() => {
-        const mode = state.settings.audioMode;
-        if ((mode !== 1 && mode !== 3) || this.ctx.state === 'suspended') return;
-
-        const now = this.ctx.currentTime;
-        const chord = this.notes[this.currentChord];
-        let pitchMul = getAreaPitchMultiplier();
-
-        if (state.isFever) {
-          pitchMul *= 1.25;
-        }
-
-        chord.forEach((freq, idx) => {
-          const osc = this.ctx.createOscillator();
-          const gain = this.ctx.createGain();
-          osc.connect(gain);
-          gain.connect(this.bgmGainNode);
-          osc.type = 'triangle';
-          
-          const start = now + idx * 0.18;
-          const stop = start + (state.isFever ? 1.8 : 2.5);
-
-          osc.frequency.setValueAtTime(freq * pitchMul, start);
-          
-          gain.gain.setValueAtTime(0, now);
-          gain.gain.linearRampToValueAtTime(0.08, start + 0.05);
-          gain.gain.exponentialRampToValueAtTime(0.001, stop - 0.05);
-          gain.gain.linearRampToValueAtTime(0, stop);
-
-          osc.onended = () => {
-            try {
-              osc.disconnect();
-              gain.disconnect();
-            } catch(e){}
-          };
-
-          osc.start(start);
-          osc.stop(stop);
-        });
-
-        this.currentChord = (this.currentChord + 1) % this.notes.length;
-      }, state.isFever ? 3200 : 4800);
     },
 
     playSound(type, chain = 1) {
       recordInteraction();
       const mode = state.settings.audioMode;
-      if (mode !== 2 && mode !== 3) return;
+      if (mode === 0) return;
       if (!this.ctx) return;
       if (this.ctx.state === 'suspended' || this.ctx.state === 'interrupted') {
         this.ctx.resume().catch(() => {});
@@ -516,7 +452,7 @@
       comboRecord: 0
     },
     settings: {
-      audioMode: 3,
+      audioMode: 1,
       currentSkin: 'area-1',
       lastSaveTime: Date.now()
     }
@@ -605,7 +541,6 @@
     dom.battleLogView = document.getElementById("battle-log-view");
     dom.battleLogText = document.getElementById("battle-log-text");
     dom.previewDefaultView = document.getElementById("preview-default-view");
-    dom.rollbackBtn = document.getElementById("rollback-btn"); // ✅ 時の砂時計手動巻き戻しボタン
 
     dom.gridContainer = document.getElementById("grid-container");
     dom.floatingTextContainer = document.getElementById("floating-text-container");
@@ -684,7 +619,7 @@
     line.innerHTML = `<span class="log-prompt">&gt;</span> ${msg}`;
     dom.pcLogTerminal.appendChild(line);
     
-    if (dom.pcLogTerminal.children.length > 50) {
+    if (dom.pcLogTerminal.children.length > 15) {
       dom.pcLogTerminal.children[0].remove();
     }
     dom.pcLogTerminal.scrollTop = dom.pcLogTerminal.scrollHeight;
@@ -1398,9 +1333,6 @@
         state.feverGauge = 0;
         showToast("フィーバー終了 🧊");
         writeTerminalLog("フィーバータイムが終了しました", "system");
-        if (AudioManager.ctx && (state.settings.audioMode === 1 || state.settings.audioMode === 3)) {
-          AudioManager.startBgmLoop();
-        }
       } else {
         state.feverGauge = (state.feverTurns / GameConfig.baseFeverDuration) * 100;
       }
@@ -1415,9 +1347,6 @@
         triggerFeverOverlay();
         AudioManager.playSound('fever');
         writeTerminalLog("🔥 FEVER TIME 発動！無双ラッシュ開始！", "fever");
-        if (AudioManager.ctx && (state.settings.audioMode === 1 || state.settings.audioMode === 3)) {
-          AudioManager.startBgmLoop();
-        }
       }
     }
 
@@ -1707,9 +1636,7 @@
     else if (skin === 'area-4') document.body.className = "bg-area-4";
     else document.body.className = "bg-area-1";
 
-    if (AudioManager.ctx && (state.settings.audioMode === 1 || state.settings.audioMode === 3)) {
-      AudioManager.startBgmLoop();
-    }
+
   }
 
   // ─── ランダムフロア自動生成アルゴリズム (周回インフレ補正付き) ───
@@ -2007,10 +1934,7 @@
 
     updateAudioButtonVisual() {
       const mode = state.settings.audioMode;
-      if (mode === 3) dom.soundBtn.innerText = "🔊 ON";
-      else if (mode === 2) dom.soundBtn.innerText = "💥 SE";
-      else if (mode === 1) dom.soundBtn.innerText = "🎵 BGM";
-      else dom.soundBtn.innerText = "🔇 消音";
+      dom.soundBtn.innerText = mode === 0 ? "🔇 OFF" : "🔊 ON";
     },
 
     render() {
@@ -2095,11 +2019,7 @@
         dom.artChalice.classList.toggle('locked', !state.artifacts.chalice);
       }
 
-      // ⏳ 時の砂時計ボタンの活性化制御
-      if (dom.rollbackBtn) {
-        const canRollback = state.artifacts.hourglass && !state.hasRevivedThisFloor;
-        dom.rollbackBtn.disabled = !canRollback;
-      }
+
 
       // 💻 PC用常時ショップ＆統計・モニター情報の更新
       if (dom.pcShopGold) {
@@ -2592,23 +2512,7 @@
     const px = clientX + scrollX;
     const py = clientY + scrollY;
 
-    const wrap = dom.gridSectionWrap;
-    if (wrap) {
-      const rect = wrap.getBoundingClientRect();
-      const gpx = clientX - rect.left;
-      const gpy = clientY - rect.top;
-      const dx = (gpx / rect.width) - 0.5;
-      const dy = (gpy / rect.height) - 0.5;
-      const rx = dy * -10;
-      const ry = dx * 10;
-      wrap.style.transition = "none";
-      wrap.style.transform = `perspective(1000px) rotateX(${rx}deg) rotateY(${ry}deg)`;
-
-      // ✅ なぞり中の指先・マウスからパーティクルを発生
-      const ptColor = state.isFever ? 'fever' : 'pink';
-      spawnParticles(gpx, gpy, ptColor, 2);
-
-      // 📱 スマホ専用：指隠れ防止ドラッグプレビュー表示
+    // 📱 スマホ専用：指隠れ防止ドラッグプレビュー表示
       if (window.innerWidth < 1024 && dom.mobileDragPreview && dom.gameContainer) {
         const containerRect = dom.gameContainer.getBoundingClientRect();
         const cx = clientX - containerRect.left;
@@ -2645,7 +2549,6 @@
           }
         }
       }
-    }
 
     // 🧠 人間工学的スナップ判定: 各セルの中心点からの距離を測定し、最も近いセルに滑らかに吸着させる
     let closestIdx = -1;
@@ -2740,17 +2643,8 @@
   }
 
   function toggleAudioMode() {
-    let mode = state.settings.audioMode;
-    mode = (mode + 1) % 4;
-    state.settings.audioMode = mode;
-
+    state.settings.audioMode = state.settings.audioMode === 0 ? 1 : 0;
     UIManager.updateAudioButtonVisual();
-
-    if (mode === 0 || mode === 2) {
-      if (AudioManager.bgmInterval) clearInterval(AudioManager.bgmInterval);
-    } else {
-      AudioManager.startBgmLoop();
-    }
     AudioManager.playSound('buy');
     saveGame();
   }
@@ -2783,14 +2677,7 @@
     // モーダル表示中はRキー巻き戻しやアップグレード購入などのゲームプレイアクションキーをブロック
     if (isAnyModalVisible) return;
     
-    // 2. Rキーによる時の砂時計リターン
-    if (key === 'r' || key === 'R') {
-      if (state.artifacts.hourglass && !state.hasRevivedThisFloor) {
-        rollbackCurrentTurn();
-        e.preventDefault();
-      }
-      return;
-    }
+
     
     // 3. 1〜5キーによるアップグレード購入（誤爆防止のため、ゲームオーバー中のショップ画面のみキー購入を許可）
     // ※通常のPC大画面プレイ中は誤爆リスクが高いため、キー購入は無効化し、マウスでのクリック購入のみ許可する
@@ -2934,9 +2821,7 @@
   // ─── イベントバインド ───
   function bindEvents() {
     dom.soundBtn.addEventListener("click", () => toggleAudioMode());
-    if (dom.rollbackBtn) {
-      dom.rollbackBtn.addEventListener("click", () => rollbackCurrentTurn());
-    }
+
 
     // 💻 PC用常時表示ショップボタンのバインド
     document.getElementById("pc-shop-btn-hp").addEventListener("click", () => buyUpgrade('hp'));
@@ -3029,11 +2914,6 @@
         }
       }
 
-      const wrap = document.querySelector(".grid-section-wrap");
-      if (wrap) {
-        wrap.style.transition = "transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1)";
-        wrap.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg)";
-      }
     };
 
     window.removeEventListener("pointerup", endDrag);
@@ -3078,7 +2958,7 @@
       if (document.hidden) {
         if (AudioManager.ctx) AudioManager.ctx.suspend();
       } else {
-        if (AudioManager.ctx && (state.settings.audioMode === 1 || state.settings.audioMode === 3) && gameStarted) {
+        if (AudioManager.ctx && state.settings.audioMode !== 0 && gameStarted) {
           AudioManager.ctx.resume().catch(() => {});
         }
       }
