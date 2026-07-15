@@ -18,10 +18,10 @@
   <!-- 🌐 デバイス別レイアウト制御ラッパー -->
   <div id="main-layout-wrapper">
 
-    <!-- 💻 PC専用：左サイドパネル（常時ショップ） -->
+    <!-- 💻 PC専用：左サイドパネル（常時ステータスモニター） -->
     <div id="pc-left-sidebar" class="sidebar-panel glass-panel pc-only">
-      <h3 class="sidebar-title font-outfit text-neon-pink">PERMANENT SHOP</h3>
-      <p class="sidebar-subtitle">ゴールドを消費し、勇者のステータスを永続的に強化します。</p>
+      <h3 class="sidebar-title font-outfit text-neon-pink">STATUS MONITOR</h3>
+      <p class="sidebar-subtitle">勇者の永続強化状況を表示するモニターです。</p>
       
       <div class="sidebar-gold-status">
         <span>所持金:</span>
@@ -29,43 +29,68 @@
       </div>
 
       <div class="shop-list">
-        <div class="shop-item">
+        <div class="shop-item status-monitor-item">
           <div class="shop-info">
-            <span class="shop-item-title">初期生命力</span>
+            <div class="monitor-title-row">
+              <span class="shop-item-title">初期生命力</span>
+              <span id="pc-status-lv-hp" class="status-lv font-outfit">Lv.0 / 10</span>
+            </div>
+            <div class="status-progress-bar-wrap">
+              <div id="pc-status-progress-hp" class="status-progress-bar" style="width: 0%"></div>
+            </div>
             <span id="pc-shop-desc-hp" class="shop-item-desc">初期HP+20%</span>
           </div>
-          <button id="pc-shop-btn-hp" class="buy-btn font-outfit">100 G</button>
         </div>
-        <div class="shop-item">
+        <div class="shop-item status-monitor-item">
           <div class="shop-info">
-            <span class="shop-item-title">初期戦闘力</span>
+            <div class="monitor-title-row">
+              <span class="shop-item-title">初期戦闘力</span>
+              <span id="pc-status-lv-atk" class="status-lv font-outfit">Lv.0 / 10</span>
+            </div>
+            <div class="status-progress-bar-wrap">
+              <div id="pc-status-progress-atk" class="status-progress-bar" style="width: 0%"></div>
+            </div>
             <span id="pc-shop-desc-atk" class="shop-item-desc">初期ATK+15%</span>
           </div>
-          <button id="pc-shop-btn-atk" class="buy-btn font-outfit">150 G</button>
         </div>
-        <div class="shop-item">
+        <div class="shop-item status-monitor-item">
           <div class="shop-info">
-            <span class="shop-item-title">回復薬の備え</span>
+            <div class="monitor-title-row">
+              <span class="shop-item-title">回復薬の備え</span>
+              <span id="pc-status-lv-potion" class="status-lv font-outfit">Lv.0 / 3</span>
+            </div>
+            <div class="status-progress-bar-wrap">
+              <div id="pc-status-progress-potion" class="status-progress-bar" style="width: 0%"></div>
+            </div>
             <span id="pc-shop-desc-potion" class="shop-item-desc">開始ポーション所持</span>
           </div>
-          <button id="pc-shop-btn-potion" class="buy-btn font-outfit">300 G</button>
         </div>
-        <div class="shop-item">
+        <div class="shop-item status-monitor-item">
           <div class="shop-info">
-            <span class="shop-item-title">黄金の加護</span>
+            <div class="monitor-title-row">
+              <span class="shop-item-title">黄金の加護</span>
+              <span id="pc-status-lv-gold" class="status-lv font-outfit">Lv.0 / 10</span>
+            </div>
+            <div class="status-progress-bar-wrap">
+              <div id="pc-status-progress-gold" class="status-progress-bar" style="width: 0%"></div>
+            </div>
             <span id="pc-shop-desc-gold" class="shop-item-desc">ゴールド獲得量+10%</span>
           </div>
-          <button id="pc-shop-btn-gold" class="buy-btn font-outfit">200 G</button>
         </div>
-        <div class="shop-item">
+        <div class="shop-item status-monitor-item">
           <div class="shop-info">
-            <span class="shop-item-title">幸運の鍵</span>
+            <div class="monitor-title-row">
+              <span class="shop-item-title">幸運の鍵</span>
+              <span id="pc-status-lv-key" class="status-lv font-outfit">Lv.0 / 2</span>
+            </div>
+            <div class="status-progress-bar-wrap">
+              <div id="pc-status-progress-key" class="status-progress-bar" style="width: 0%"></div>
+            </div>
             <span id="pc-shop-desc-key" class="shop-item-desc">開始キー所持+1</span>
           </div>
-          <button id="pc-shop-btn-key" class="buy-btn font-outfit">1000 G</button>
         </div>
       </div>
-      <div class="sidebar-note">※強化は次回の挑戦（1Fリトライ時）から適用されます<br>※キーボードの 1〜5 キーでも購入可能です</div>
+      <div class="sidebar-note">※強化はショップ画面またはクリア画面で行えます</div>
     </div>
 
     <!-- 🎮 中央メインコンテナ（スマホ版はこれだけ表示） -->

@@ -590,10 +590,12 @@
     // 💻 PC専用サイドパネルDOM
     dom.pcShopGold = document.getElementById("pc-shop-gold");
     dom.pcShopDescs = {};
-    dom.pcShopBtns  = {};
+    dom.pcStatusLvs = {};
+    dom.pcStatusProgresses = {};
     ['hp', 'atk', 'potion', 'gold', 'key'].forEach(k => {
       dom.pcShopDescs[k] = document.getElementById(`pc-shop-desc-${k}`);
-      dom.pcShopBtns[k]  = document.getElementById(`pc-shop-btn-${k}`);
+      dom.pcStatusLvs[k] = document.getElementById(`pc-status-lv-${k}`);
+      dom.pcStatusProgresses[k] = document.getElementById(`pc-status-progress-${k}`);
     });
 
     dom.statKills = document.getElementById("stat-kills");
@@ -1432,6 +1434,28 @@
     writeTerminalLog(`勇者が力尽きました。到達階層:${state.floor} F`, "damage");
   }
 
+  // ⌛ 時の砂時計・自動復活時のタイムワープ逆再生演出
+  function triggerTimeWarpEffect() {
+    const overlay = document.createElement("div");
+    overlay.className = "time-warp-overlay";
+    
+    const hourglassEl = document.createElement("div");
+    hourglassEl.className = "time-warp-hourglass";
+    hourglassEl.textContent = "⌛";
+    overlay.appendChild(hourglassEl);
+    
+    document.body.appendChild(overlay);
+    
+    AudioManager.playSound('clear'); // 神秘的なサウンドを再生
+    
+    setTimeout(() => {
+      overlay.classList.add("fade-out");
+      setTimeout(() => {
+        overlay.remove();
+      }, 800);
+    }, 1100);
+  }
+
   // ⌛ 時の砂時計・手動なぞり直し（RESET）
   function rollbackCurrentTurn() {
     if (!state.artifacts.hourglass || state.hasRevivedThisFloor || !state.floorStartBackup) return;
@@ -1465,7 +1489,7 @@
       state.stats = structuredClone(state.floorStartBackup.stats);
     }
     
-    AudioManager.playSound('clear');
+    triggerTimeWarpEffect(); // タイムワープ逆再生演出を発動
     showToast("⌛ 時の砂時計が輝き、フロア開始時に巻き戻った！");
     writeTerminalLog("⌛ 時の砂時計が発動！フロア開始時に巻き戻しました", "system");
     
@@ -2029,26 +2053,22 @@
           const config = GameConfig.upgrades[key];
           const currentLv = state.permanentUpgrades[key];
           const descEl = dom.pcShopDescs[key];
-          const btnEl = dom.pcShopBtns[key];
+          const lvEl = dom.pcStatusLvs[key];
+          const progressEl = dom.pcStatusProgresses[key];
 
-          if (descEl && btnEl) {
+          if (descEl && lvEl && progressEl) {
             let rateText = "";
-            if (key === 'hp') rateText = `HP+20% (Lv.${currentLv})`;
-            else if (key === 'atk') rateText = `ATK+15% (Lv.${currentLv})`;
-            else if (key === 'potion') rateText = `ポーション所持 (${currentLv})`;
-            else if (key === 'gold') rateText = `ゴールド+10% (Lv.${currentLv})`;
-            else if (key === 'key') rateText = `キー所持+1 (${currentLv})`;
+            if (key === 'hp') rateText = `初期HP +${currentLv * 20}%`;
+            else if (key === 'atk') rateText = `初期ATK +${currentLv * 15}%`;
+            else if (key === 'potion') rateText = `開始ポーション所持: ${currentLv}個`;
+            else if (key === 'gold') rateText = `ゴールド獲得量 +${currentLv * 10}%`;
+            else if (key === 'key') rateText = `開始キー所持: +${currentLv}個`;
 
-            descEl.textContent = `${rateText} / Max.${config.maxLv}`;
+            descEl.textContent = rateText;
+            lvEl.textContent = `Lv.${currentLv} / ${config.maxLv}`;
 
-            if (currentLv >= config.maxLv) {
-              btnEl.textContent = "MAX";
-              btnEl.disabled = true;
-            } else {
-              const cost = Math.floor(config.initialCost * Math.pow(config.scale, currentLv));
-              btnEl.textContent = `${cost} G`;
-              btnEl.disabled = state.gold < cost;
-            }
+            const percent = (currentLv / config.maxLv) * 100;
+            progressEl.style.width = `${percent}%`;
           }
         });
       }
@@ -2554,7 +2574,11 @@
     let closestIdx = -1;
     let minDistance = Infinity;
 
+    const path = pathTracker ? pathTracker.path : [];
     const len = cellBoundsCache.length;
+    const pathLen = path.length;
+    const prevIdx = pathLen > 1 ? path[pathLen - 2] : -1;
+
     for (let i = 0; i < len; i++) {
       const bounds = cellBoundsCache[i];
       const centerX = (bounds.left + bounds.right) / 2;
@@ -2564,7 +2588,13 @@
       const dist = Math.sqrt(dx * dx + dy * dy);
 
       const cellWidth = bounds.right - bounds.left;
-      const activeRadius = cellWidth * 0.75; // 判定範囲をセルの幅の75%まで広げて遊び幅(余白)を確保
+      
+      // ✅ ヒステリシス設計: 一歩戻る(Undo)対象のセルの場合のみ、指が深く中心に近づく（半径40%以下）までUndo判定を抑制する。
+      // 進むセルの場合は、吸着しやすいように従来どおり緩めの判定（半径75%以下）を適用する。
+      let activeRadius = cellWidth * 0.75;
+      if (i === prevIdx) {
+        activeRadius = cellWidth * 0.40;
+      }
 
       if (dist < activeRadius && dist < minDistance) {
         minDistance = dist;
@@ -2822,13 +2852,6 @@
   function bindEvents() {
     dom.soundBtn.addEventListener("click", () => toggleAudioMode());
 
-
-    // 💻 PC用常時表示ショップボタンのバインド
-    document.getElementById("pc-shop-btn-hp").addEventListener("click", () => buyUpgrade('hp'));
-    document.getElementById("pc-shop-btn-atk").addEventListener("click", () => buyUpgrade('atk'));
-    document.getElementById("pc-shop-btn-potion").addEventListener("click", () => buyUpgrade('potion'));
-    document.getElementById("pc-shop-btn-gold").addEventListener("click", () => buyUpgrade('gold'));
-    document.getElementById("pc-shop-btn-key").addEventListener("click", () => buyUpgrade('key'));
 
     // 💻 キーボードショートカットの登録
     window.addEventListener("keydown", handleKeyDown);

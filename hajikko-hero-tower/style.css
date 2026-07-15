@@ -1690,3 +1690,103 @@ body {
 }
 
 
+
+/* 💻 PC版ステータスモニター用進捗ゲージ */
+.status-monitor-item {
+  display: block !important;
+}
+
+.monitor-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.status-lv {
+  font-size: 0.65rem;
+  color: #ff007f;
+  text-shadow: 0 0 5px rgba(255, 0, 127, 0.4);
+  font-weight: bold;
+}
+
+.status-progress-bar-wrap {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.status-progress-bar {
+  height: 100%;
+  width: 0%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #ff007f, #7c3aed);
+  box-shadow: 0 0 8px rgba(255, 0, 127, 0.6);
+  transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* ⌛ 時の砂時計・自動復活時のタイムワープ逆再生演出 */
+.time-warp-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(10, 15, 30, 0.85);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  z-index: 99999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: timeWarpFlash 1.5s ease-out forwards;
+}
+
+.time-warp-hourglass {
+  font-size: 8rem;
+  filter: drop-shadow(0 0 20px rgba(0, 229, 255, 0.8));
+  animation: hourglassSpin 1.2s cubic-bezier(0.68, -0.6, 0.32, 1.6) forwards;
+}
+
+.time-warp-overlay.fade-out {
+  opacity: 0;
+  transition: opacity 0.8s ease-out;
+  pointer-events: none;
+}
+
+@keyframes timeWarpFlash {
+  0% {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(0px);
+  }
+  15% {
+    background: rgba(0, 191, 255, 0.4);
+    backdrop-filter: blur(20px);
+  }
+  100% {
+    background: rgba(10, 15, 30, 0.8);
+    backdrop-filter: blur(10px);
+  }
+}
+
+@keyframes hourglassSpin {
+  0% {
+    transform: scale(0.3) rotate(0deg);
+    opacity: 0;
+  }
+  40% {
+    transform: scale(1.1) rotate(-190deg);
+    opacity: 1;
+  }
+  70% {
+    transform: scale(1.0) rotate(-180deg);
+  }
+  100% {
+    transform: scale(0.9) rotate(-180deg);
+    opacity: 0.9;
+  }
+}
