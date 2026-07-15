@@ -2593,7 +2593,7 @@
       // 進むセルの場合は、吸着しやすいように従来どおり緩めの判定（半径75%以下）を適用する。
       let activeRadius = cellWidth * 0.75;
       if (i === prevIdx) {
-        activeRadius = cellWidth * 0.40;
+        activeRadius = cellWidth * 0.50;
       }
 
       if (dist < activeRadius && dist < minDistance) {

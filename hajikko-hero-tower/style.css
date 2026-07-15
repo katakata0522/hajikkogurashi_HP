@@ -1531,7 +1531,7 @@ body {
   }
 
   #shop-modal .modal-content::after {
-    content: "左のショップで勇者を永続強化し、再挑戦しましょう！";
+    content: "ショップ画面またはキーボードの1〜5キーで勇者を永続強化し、再挑戦しましょう！";
     display: block;
     font-size: 0.68rem;
     color: rgba(255, 255, 255, 0.45);
@@ -1743,6 +1743,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  pointer-events: auto; /* 演出中は入力を完全にブロック */
   animation: timeWarpFlash 1.5s ease-out forwards;
 }
 
