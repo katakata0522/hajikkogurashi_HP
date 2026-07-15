@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>はじっこ勇者のインフレ魔塔 | hajikkogurashi HP</title>
+  
+  <!-- 🎨 Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Outfit:wght@400;600;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-area-1">
+  <!-- 🌐 サイバーネオン背景グリッドデコレーション -->
+  <div class="cyber-bg-grid"></div>
+
+  <!-- 🌐 デバイス別レイアウト制御ラッパー -->
+  <div id="main-layout-wrapper">
+
+    <!-- 💻 PC専用：左サイドパネル（常時ショップ） -->
+    <div id="pc-left-sidebar" class="sidebar-panel glass-panel pc-only">
+      <h3 class="sidebar-title font-outfit text-neon-pink">PERMANENT SHOP</h3>
+      <p class="sidebar-subtitle">ゴールドを消費し、勇者のステータスを永続的に強化します。</p>
+      
+      <div class="sidebar-gold-status">
+        <span>所持金:</span>
+        <span class="gold-amount font-outfit">🪙 <span id="pc-shop-gold">0</span> G</span>
+      </div>
+
+      <div class="shop-list">
+        <div class="shop-item">
+          <div class="shop-info">
+            <span class="shop-item-title">初期生命力</span>
+            <span id="pc-shop-desc-hp" class="shop-item-desc">初期HP+20%</span>
+          </div>
+          <button id="pc-shop-btn-hp" class="buy-btn font-outfit">100 G</button>
+        </div>
+        <div class="shop-item">
+          <div class="shop-info">
+            <span class="shop-item-title">初期戦闘力</span>
+            <span id="pc-shop-desc-atk" class="shop-item-desc">初期ATK+15%</span>
+          </div>
+          <button id="pc-shop-btn-atk" class="buy-btn font-outfit">150 G</button>
+        </div>
+        <div class="shop-item">
+          <div class="shop-info">
+            <span class="shop-item-title">回復薬の備え</span>
+            <span id="pc-shop-desc-potion" class="shop-item-desc">開始ポーション所持</span>
+          </div>
+          <button id="pc-shop-btn-potion" class="buy-btn font-outfit">300 G</button>
+        </div>
+        <div class="shop-item">
+          <div class="shop-info">
+            <span class="shop-item-title">黄金の加護</span>
+            <span id="pc-shop-desc-gold" class="shop-item-desc">ゴールド獲得量+10%</span>
+          </div>
+          <button id="pc-shop-btn-gold" class="buy-btn font-outfit">200 G</button>
+        </div>
+        <div class="shop-item">
+          <div class="shop-info">
+            <span class="shop-item-title">幸運の鍵</span>
+            <span id="pc-shop-desc-key" class="shop-item-desc">開始キー所持+1</span>
+          </div>
+          <button id="pc-shop-btn-key" class="buy-btn font-outfit">1000 G</button>
+        </div>
+      </div>
+      <div class="sidebar-note">※強化は次回の挑戦（1Fリトライ時）から適用されます<br>※キーボードの 1〜5 キーでも購入可能です</div>
+    </div>
+
+    <!-- 🎮 中央メインコンテナ（スマホ版はこれだけ表示） -->
+    <div id="game-container" class="glass-panel">
+      
+      <!-- 🎮 ゲームタイトルロゴ -->
+      <div class="game-logo-area">
+        <h1 class="game-title font-outfit text-neon-pink">はじっこ勇者のインフレ魔塔</h1>
+      </div>
+
+      <!-- 赤色被ダメージフラッシュ -->
+      <div id="damage-flash" class="damage-flash"></div>
+
+      <!-- レベルアップ時の3Dネオン回転コンテナ -->
+      <div id="level-up-overlay" class="level-up-container" style="display: none;">
+        <div class="level-up-text">LEVEL UP!</div>
+      </div>
+
+      <!-- 🔥 フィーバー発動ネオンオーバーレイ -->
+      <div id="fever-overlay" class="level-up-container" style="display: none;">
+        <div class="fever-overlay-text">FEVER TIME! 🔥</div>
+      </div>
+
+      <!-- ─── 上部: ステータス ＆ 階層表示 ─── -->
+      <div class="header-section">
+        <div class="floor-badge-wrap">
+          <span class="ui-label">到達階層</span>
+          <span id="floor-display" class="status-value highlight-text">1 F</span>
+        </div>
+        <div class="gold-badge-wrap">
+          <span class="ui-label">所持ゴールド</span>
+          <span class="status-value gold-text">🪙 <span id="gold-display">0</span></span>
+        </div>
+        <div class="key-badge-wrap">
+          <span class="ui-label">所持キー</span>
+          <span class="status-value key-text">🔑 <span id="key-display">0</span></span>
+        </div>
+      </div>
+
+      <!-- 🏆 アーティファクトスロット -->
+      <div id="artifact-slots" class="header-section artifact-slots-row">
+        <span class="ui-label art-section-label">獲得した宝物</span>
+        <div class="art-badge-container">
+           <span id="art-fang"      class="art-badge locked" data-art="fang"      title="吸血の牙: 敵撃破時HP3%回復">🩸</span>
+          <span id="art-hourglass" class="art-badge locked" data-art="hourglass" title="時の砂時計: 各階で1回だけ即死を巻き戻す">⌛</span>
+          <span id="art-boots"     class="art-badge locked" data-art="boots"     title="浮遊の靴: トゲ被ダメを5%に軽減">🪽</span>
+          <span id="art-towel"     class="art-badge locked" data-art="towel"     title="宇宙旅行用タオル: トラップダメージ無効">🧣</span>
+          <span id="art-sword"     class="art-badge locked" data-art="sword"     title="ルーンの剣: ソード攻撃バフが2.5倍">⚔️</span>
+          <span id="art-chalice"   class="art-badge locked" data-art="chalice"   title="黄金の杯: 宝箱のゴールド2倍">🏆</span>
+        </div>
+      </div>
+
+      <!-- 勇者ステータス詳細バー -->
+      <div class="hero-status-panel glass-panel">
+        <div class="hero-status-row">
+          <span class="hero-lv-label">Lv.<span id="hero-level">1</span> 勇者</span>
+          <div class="exp-bar-wrap">
+            <div id="exp-bar-fill" class="exp-bar-fill"></div>
+            <span id="exp-text" class="exp-text">EXP: 0 / 10</span>
+          </div>
+        </div>
+        
+        <!-- FEVERゲージ表示行 -->
+        <div class="hero-status-row fever-row">
+          <span class="fever-title-label">FEVER</span>
+          <div class="fever-bar-wrap">
+            <div id="fever-bar-fill" class="fever-bar-fill"></div>
+            <span id="fever-text" class="fever-text">0%</span>
+          </div>
+        </div>
+
+        <div class="hero-status-row hp-row">
+          <span class="hp-title-label">HP</span>
+          <div class="hp-bar-wrap">
+            <div id="hp-bar-fill" class="hp-bar-fill"></div>
+            <span class="hp-bar-text"><span id="hero-hp">100</span> / <span id="hero-max-hp">100</span></span>
+          </div>
+        </div>
+
+        <div class="hero-stats-values">
+          <div class="stat-item">
+            <span class="stat-name">Lv.</span>
+            <span class="status-value"><span id="hero-level-display">1</span></span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-name">ATK</span>
+            <span class="status-value atk-text">⚔️ <span id="hero-atk">10</span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── 中部: 5x5 一筆書きパズルグリッド ─── -->
+      <div class="grid-section-wrap glass-panel">
+        <canvas id="neon-canvas"></canvas>
+        <div id="grid-container">
+          <!-- JSで25個のパネルが動的に構築されます -->
+        </div>
+        <!-- 浮遊エフェクト用コンテナ -->
+        <div id="floating-text-container"></div>
+        <!-- スタート時案内手 -->
+        <div id="drag-guide-hand" class="guide-hand">👆</div>
+      </div>
+
+      <!-- ⏳ 時の砂時計・手動なぞり直し（RESET）エリア -->
+      <div class="control-actions-row">
+        <button id="rollback-btn" class="hourglass-btn font-outfit" title="時の砂時計: 触れた瞬間、このフロアの開始時に巻き戻す" disabled>
+          <span class="hourglass-icon">⌛</span> ROLLBACK TURN [R]
+        </button>
+      </div>
+
+      <!-- ─── 下部: リアルタイム行動予測 ─── -->
+      <div class="action-preview-panel glass-panel">
+        <div id="preview-default-view" class="preview-default">
+          <span class="preview-hint">HEROパネル（⚔️）から一筆書きでなぞりましょう！</span>
+        </div>
+        <div class="preview-grid">
+          <div class="preview-item">
+            <span class="preview-label">被ダメージ</span>
+            <span id="predicted-damage" class="preview-val dmg-val">0</span>
+          </div>
+          <div class="preview-item">
+            <span class="preview-label">獲得EXP</span>
+            <span id="predicted-exp" class="preview-val exp-val">+0 EXP</span>
+          </div>
+          <div class="preview-item">
+            <span class="preview-label">獲得ゴールド</span>
+            <span id="predicted-gold" class="preview-val gold-val">+0 G</span>
+          </div>
+        </div>
+        
+        <!-- 動的バトル・アーティファクト説明ログ表示 -->
+        <div id="battle-log-view" style="display:none;">
+          <span id="battle-log-text"></span>
+        </div>
+      </div>
+
+      <!-- 📱 スマホ専用：ドラッグ追従指隠れ防止プレビューポップアップ（チルト干渉防止のためgame-container直下に配置） -->
+      <div id="mobile-drag-preview" class="drag-preview-popup" style="display: none;">
+        <span id="drag-preview-icon">👾</span>
+        <span id="drag-preview-hp">HP 100</span>
+      </div>
+
+      <!-- 音響設定ボタン -->
+      <div class="settings-bar">
+        <button id="sound-btn" class="control-btn font-outfit">🔊 ON</button>
+        <span class="footer-copy font-outfit">v3.1.0</span>
+      </div>
+
+    </div>
+
+    <!-- 📊 PC専用：右サイドパネル（バトルモニター・ゲーム統計） -->
+    <div id="pc-right-sidebar" class="sidebar-panel glass-panel pc-only">
+      <h3 class="sidebar-title font-outfit text-neon-blue">BATTLE MONITOR</h3>
+      
+      <!-- ゲーム統計情報セクション -->
+      <div class="monitor-section">
+        <h4 class="monitor-subtitle font-outfit">PLAY STATS</h4>
+        <div class="stats-grid">
+          <div class="stats-item">
+            <span class="stats-label">総撃破数</span>
+            <span id="stat-kills" class="stats-value font-outfit">0</span>
+          </div>
+          <div class="stats-item">
+            <span class="stats-label">総ターン数</span>
+            <span id="stat-turns" class="stats-value font-outfit">0</span>
+          </div>
+          <div class="stats-item">
+            <span class="stats-label">最大コンボ</span>
+            <span id="stat-combo" class="stats-value font-outfit">0</span>
+          </div>
+          <div class="stats-item">
+            <span class="stats-label">Fever回数</span>
+            <span id="stat-fever" class="stats-value font-outfit">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 常時バトルログセクション -->
+      <div class="monitor-section log-section">
+        <h4 class="monitor-subtitle font-outfit">REALTIME LOG</h4>
+        <div id="pc-log-terminal" class="log-terminal font-noto">
+          <div class="terminal-line system-msg">> 魔塔の観測を開始しました...</div>
+        </div>
+      </div>
+      
+      <div class="sidebar-note">※[Space]キーで次フロアへ進めます</div>
+    </div>
+
+  </div>
+
+  <!-- ─── モーダルエリア ─── -->
+
+  <!-- ショップ ＆ リトライモーダル -->
+  <div id="shop-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content glass-panel font-noto">
+      <h2 class="modal-title font-outfit text-neon-red">GAME OVER</h2>
+      <p class="modal-subtitle">魔塔の守護者に敗北しました。ゴールドを使い、勇者の魂を永続強化して再挑戦しましょう！</p>
+      
+      <div class="shop-gold-status">
+        <span>所持金:</span>
+        <span class="gold-amount font-outfit">🪙 <span id="shop-gold-amount">0</span> G</span>
+      </div>
+
+      <div class="shop-list">
+        <div class="shop-item">
+          <div class="shop-info">
+            <span class="shop-item-title">初期生命力</span>
+            <span id="shop-desc-hp" class="shop-item-desc">初期HP+20%</span>
+          </div>
+          <button id="shop-btn-hp" class="buy-btn font-outfit">100 G</button>
+        </div>
+        <div class="shop-item">
+          <div class="shop-info">
+            <span class="shop-item-title">初期戦闘力</span>
+            <span id="shop-desc-atk" class="shop-item-desc">初期ATK+15%</span>
+          </div>
+          <button id="shop-btn-atk" class="buy-btn font-outfit">150 G</button>
+        </div>
+        <div class="shop-item">
+          <div class="shop-info">
+            <span class="shop-item-title">回復薬の備え</span>
+            <span id="shop-desc-potion" class="shop-item-desc">開始ポーション所持</span>
+          </div>
+          <button id="shop-btn-potion" class="buy-btn font-outfit">300 G</button>
+        </div>
+        <div class="shop-item">
+          <div class="shop-info">
+            <span class="shop-item-title">黄金の加護</span>
+            <span id="shop-desc-gold" class="shop-item-desc">ゴールド獲得量+10%</span>
+          </div>
+          <button id="shop-btn-gold" class="buy-btn font-outfit">200 G</button>
+        </div>
+        <div class="shop-item">
+          <div class="shop-info">
+            <span class="shop-item-title">幸運の鍵</span>
+            <span id="shop-desc-key" class="shop-item-desc">開始キー所持+1</span>
+          </div>
+          <button id="shop-btn-key" class="buy-btn font-outfit">1000 G</button>
+        </div>
+      </div>
+
+      <button id="retry-btn" class="action-btn font-outfit">1Fから再挑戦する [Space]</button>
+    </div>
+  </div>
+
+  <!-- ステージクリアモーダル -->
+  <div id="clear-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content glass-panel font-noto">
+      <h2 class="modal-title font-outfit text-neon-blue">STAGE CLEAR</h2>
+      <p class="modal-subtitle">階層の扉を突破しました！</p>
+      <div class="clear-stats">
+        <div class="clear-stat-row">
+          <span>突破した階層:</span>
+          <span id="clear-floor-label" class="font-outfit highlight-text">1 F</span>
+        </div>
+        <div class="clear-stat-row">
+          <span>次なる階層:</span>
+          <span id="next-floor-label" class="font-outfit highlight-text">2 F</span>
+        </div>
+      </div>
+      <button id="next-floor-btn" class="action-btn font-outfit">次の階層へ進む [Space]</button>
+    </div>
+  </div>
+
+  <!-- 完全制覇モーダル -->
+  <div id="victory-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content glass-panel font-noto">
+      <h2 class="modal-title font-outfit text-neon-gold">VICTORY OVERLORD</h2>
+      <p class="modal-subtitle">おめでとうございます！インフレ魔塔の50Fを完全攻略し、世界に平和を取り戻しました！</p>
+      
+      <div class="victory-stats font-outfit">
+        <div class="victory-stat-item">
+          <span class="victory-label">最終到達Lv</span>
+          <span id="victory-level" class="victory-val">Lv.99</span>
+        </div>
+        <div class="victory-stat-item">
+          <span class="victory-label">総獲得ゴールド</span>
+          <span id="victory-gold" class="victory-val gold-text">10,000 G</span>
+        </div>
+        <div class="victory-stat-item">
+          <span class="victory-label">永続強化回数</span>
+          <span id="victory-upgrades" class="victory-val atk-text">45回</span>
+        </div>
+      </div>
+
+      <button id="victory-reset-btn" class="action-btn font-outfit">強さを引き継いで1Fから再挑戦</button>
+    </div>
+  </div>
+
+  <!-- スタート開始用能動的オーバーレイ -->
+  <div id="start-overlay">
+    <div class="start-content font-noto glass-panel">
+      <h1 class="start-title font-outfit">はじっこ勇者の<br><span class="text-neon-pink">インフレ魔塔</span></h1>
+      <p class="start-desc">一筆書きでルートを描き、勇者をインフレさせて魔王を討伐せよ！</p>
+      
+      <div class="features-list">
+        <div class="feature-item">
+          <span class="feature-icon">✨</span>
+          <span>指先ひとつで遊べる爽快一筆書きパズル</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">🔥</span>
+          <span>100%クリア可能な詰み防止DFS生成アルゴリズム</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">🏆</span>
+          <span>ボスを倒して手に入れる5つのアーティファクト（宝物）</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">⚡</span>
+          <span>ゲージをためて無敵の「FEVER TIME」へ突入！</span>
+        </div>
+      </div>
+
+      <button id="start-play-btn" class="start-btn font-outfit">冒険を開始する</button>
+      <div class="start-note">※BGMと効果音が出ます</div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
