@@ -6,6 +6,29 @@
     gridSize: 5,
     maxFloor: 50,
     baseFeverDuration: 6, // ✅ フィーバーの継続ターン数（3→6に延長: 稀少にした分、発動時の達成感を確保）
+    // 🦸 ヒーロー成長曲線パラメータ
+    heroScaling: {
+      baseHp: 100,          // Lv1の基本HP
+      hpPowBase: 1.2,       // HP = baseHp * pow(level, hpPowBase) + (level-1) * hpLinear
+      hpLinear: 15,          // HPの線形成長ボーナス
+      baseAtk: 10,          // Lv1の基本ATK
+      atkPowBase: 1.1,      // ATK = baseAtk * pow(level, atkPowBase) + (level-1) * atkLinear
+      atkLinear: 3,          // ATKの線形成長ボーナス
+      expPowBase: 1.4,      // 必要EXP = 10 * pow(level, expPowBase)
+      expBase: 10            // 必要EXP計算の基礎値
+    },
+    // 👾 モンスター成長曲線パラメータ
+    monsterScaling: {
+      hpBase: 10,            // モンスターHP基礎値
+      hpPowBase: 1.28,       // HP = hpBase * pow(hpPowBase, floor-1)
+      atkBase: 8,            // モンスターATK基礎値
+      atkPowBase: 1.25,      // ATK = atkBase * pow(atkPowBase, floor-1)
+      expBase: 2,            // モンスターEXP基礎値
+      expPowBase: 1.12,      // EXP = expBase * pow(expPowBase, floor-1) + floor
+      goldBase: 8,           // 宝箱のゴールド基礎値
+      goldPowBase: 1.22,     // 宝箱Gold = goldBase * pow(goldPowBase, floor-1) + 5
+      loopInflation: 0.50    // 周回ごとの敵ステータスインフレ率
+    },
     upgrades: {
       hp: { initialCost: 100, scale: 1.48, maxLv: 50, rate: 0.20 },
       atk: { initialCost: 150, scale: 1.48, maxLv: 50, rate: 0.15 },
@@ -20,6 +43,8 @@
   const canvas = document.getElementById("neon-canvas");
   const ctx = canvas.getContext("2d");
   let _feverGradCache = null; // ✅ フィーバーグラデーションキャッシュ（毎フレームのオブジェクト生成を防止）
+  let isExecutingPath = false; // ⚡ ダッシュアニメーション解決中の入力ガード用フラグ
+  const delay = ms => new Promise(res => setTimeout(res, ms));
   
   // 🎇 v3.0.0 新規: ネオンパーティクルシステム (v3.2.2 隠しクラス最適化 ＆ 寿命ベース上書きアルゴリズム)
   class Particle {
@@ -694,6 +719,11 @@
     if (cell.val && cell.val.vampire && !hasSwordBuff && !hasShield) {
       enemyAtk = Math.floor(enemyAtk * 1.25);
     }
+
+    // 🫧 スライム特性: ATKが20%低下する代わりに、報酬も半減（倒しやすいが旨みが薄い）
+    if (cell.val && cell.val.slime) {
+      enemyAtk = Math.floor(enemyAtk * 0.80);
+    }
     
     const currentAtk = Math.floor(heroAtk * (hasSwordBuff ? swordMultiplier : 1.0) * feverAtkMultiplier);
     
@@ -714,10 +744,139 @@
     }
 
     const goldMul = (1.0 + (state.permanentUpgrades.gold * GameConfig.upgrades.gold.rate)) * (state.isFever ? 3.0 : 1.0);
-    const gold = Math.floor(cell.val.gold * goldMul);
-    const exp = cell.val.exp;
+    let gold = Math.floor(cell.val.gold * goldMul);
+    let exp = cell.val.exp;
+
+    // 🫧 スライム特性: 報酬半減
+    if (cell.val && cell.val.slime) {
+      gold = Math.floor(gold * 0.5);
+      exp = Math.floor(exp * 0.5);
+    }
 
     return { dmg, gold, exp, spikeDmg };
+  }
+
+  // 💡 セル解決の統合ロジック
+  function resolveCellEffect(ctxState, cell) {
+    let damageTaken = 0;
+    let hpHealed = 0;
+    let goldEarned = 0;
+    let expEarned = 0;
+    let keyDelta = 0;
+    let swordBuffActive = false;
+    let shieldConsumed = false;
+    let levelUpOccurred = false;
+
+    if (cell.type === 'monster' || cell.type === 'boss') {
+      ctxState.killCount++;
+      const chainMul = getChainMultiplier(ctxState.killCount);
+      const battle = calculateBattle(ctxState.atk, ctxState.hasSwordBuff, cell, ctxState.activeShield);
+      
+      let dmg = battle.dmg;
+      if (ctxState.activeShield && dmg > 0) {
+        dmg = 0;
+        ctxState.activeShield = false;
+        shieldConsumed = true;
+      }
+
+      if (ctxState.isLightning) {
+        dmg = Math.floor(dmg * 0.8);
+      }
+      ctxState.hp -= dmg;
+      damageTaken = dmg;
+
+      if (battle.spikeDmg > 0) {
+        ctxState.hp -= battle.spikeDmg;
+        damageTaken += battle.spikeDmg;
+      }
+
+      if (state.artifacts.fang && ctxState.hp > 0) {
+        const recover = Math.floor(ctxState.maxHp * 0.03);
+        ctxState.hp = Math.min(ctxState.maxHp, ctxState.hp + recover);
+        hpHealed += recover;
+      }
+
+      goldEarned = Math.floor(battle.gold * chainMul);
+      expEarned = Math.floor(battle.exp * chainMul);
+
+      ctxState.goldGained += goldEarned;
+      ctxState.exp += expEarned;
+      ctxState.expGained += expEarned;
+
+      if (cell.type === 'boss') {
+        ctxState.keys++;
+        keyDelta = 1;
+      }
+    }
+    else if (cell.type === 'potion') {
+      const recover = Math.floor(ctxState.maxHp * 0.30);
+      const oldHp = ctxState.hp;
+      ctxState.hp = Math.min(ctxState.maxHp, ctxState.hp + recover);
+      hpHealed = ctxState.hp - oldHp;
+    }
+    else if (cell.type === 'sword') {
+      ctxState.hasSwordBuff = true;
+      swordBuffActive = true;
+    }
+    else if (cell.type === 'trap') {
+      if (ctxState.isFever) {
+        const trapGold = Math.floor(ctxState.maxHp * 0.05);
+        ctxState.goldGained += trapGold;
+        goldEarned = trapGold;
+      } else {
+        const trapBonusDmgReduction = state.achievements && state.achievements.trap ? 0.05 : 0;
+        let trapRate = state.artifacts.towel ? 0 : (state.artifacts.boots ? 0.05 : 0.15);
+        trapRate = Math.max(0, trapRate - trapBonusDmgReduction);
+
+        const trapDmg = Math.floor(ctxState.maxHp * trapRate);
+        ctxState.hp -= trapDmg;
+        damageTaken = trapDmg;
+      }
+    }
+    else if (cell.type === 'key') {
+      ctxState.keys++;
+      keyDelta = 1;
+    }
+    else if (cell.type === 'chest') {
+      ctxState.keys--;
+      keyDelta = -1;
+      const goldBase = Math.floor(GameConfig.monsterScaling.goldBase * Math.pow(GameConfig.monsterScaling.goldPowBase, state.floor - 1)) + 5;
+      const goldMul = 1.0 + (state.permanentUpgrades.gold * GameConfig.upgrades.gold.rate);
+      let gained = Math.floor(goldBase * 5 * goldMul);
+      
+      if (state.artifacts.chalice) gained *= 2;
+      if (ctxState.isFever) gained *= 3;
+
+      ctxState.goldGained += gained;
+      goldEarned = gained;
+    }
+    else if (cell.type === 'door') {
+      ctxState.keys--;
+      keyDelta = -1;
+    }
+
+    // レベルアップ判定
+    let nextExp = Math.round(GameConfig.heroScaling.expBase * Math.pow(ctxState.level, GameConfig.heroScaling.expPowBase));
+    while (ctxState.exp >= nextExp && ctxState.hp > 0) {
+      ctxState.exp -= nextExp;
+      ctxState.level++;
+      ctxState.maxHp = Math.round(GameConfig.heroScaling.baseHp * Math.pow(ctxState.level, GameConfig.heroScaling.hpPowBase) + (ctxState.level - 1) * GameConfig.heroScaling.hpLinear);
+      ctxState.atk = Math.round(GameConfig.heroScaling.baseAtk * Math.pow(ctxState.level, GameConfig.heroScaling.atkPowBase) + (ctxState.level - 1) * GameConfig.heroScaling.atkLinear);
+      ctxState.hp = ctxState.maxHp;
+      nextExp = Math.round(GameConfig.heroScaling.expBase * Math.pow(ctxState.level, GameConfig.heroScaling.expPowBase));
+      levelUpOccurred = true;
+    }
+
+    return {
+      damageTaken,
+      hpHealed,
+      goldEarned,
+      expEarned,
+      keyDelta,
+      swordBuffActive,
+      shieldConsumed,
+      levelUpOccurred
+    };
   }
 
   // 🔒 安全チェックサム生成
@@ -919,17 +1078,6 @@
 
   // ─── 経路シミュレーション ───
   function simulatePathDetails() {
-    let hp = state.hero.hp;
-    let maxHp = state.hero.maxHp;
-    let atk = state.hero.atk;
-    let level = state.hero.level;
-    let exp = state.hero.exp;
-    let keys = state.key;
-    let goldGained = 0;
-    let expGained = 0;
-    
-    let hasSwordBuff = false;
-    let killCount = 0;
     const path = pathTracker ? pathTracker.path : [];
 
     // ✅ ライトニング・チェイン判定: 経路上の敵が5体以上なら被ダメ20%軽減が発動
@@ -937,105 +1085,40 @@
       const c = gridData[idx];
       return c && (c.type === 'monster' || c.type === 'boss');
     }).length;
-    const isLightning = monsterCount >= 5;
 
-    let activeShield = state.activeShield;
+    const ctxState = {
+      hp: state.hero.hp,
+      maxHp: state.hero.maxHp,
+      atk: state.hero.atk,
+      level: state.hero.level,
+      exp: state.hero.exp,
+      keys: state.key,
+      goldGained: 0,
+      expGained: 0,
+      hasSwordBuff: false,
+      killCount: 0,
+      activeShield: state.activeShield,
+      isFever: state.isFever,
+      isLightning: monsterCount >= 5
+    };
 
     path.forEach(idx => {
       const cell = gridData[idx];
-      if (!cell) return;
-
-      if (cell.type === 'monster' || cell.type === 'boss') {
-        killCount++;
-        const chainMul = getChainMultiplier(killCount);
-        const result = calculateBattle(atk, hasSwordBuff, cell, activeShield);
-        
-        // ✅ 必殺効果: 被ダメージを20%軽減
-        let dmg = result.dmg;
-        
-        // 🛡️ シールド効果適用
-        if (activeShield && dmg > 0) {
-          dmg = 0;
-          activeShield = false;
-        }
-
-        if (isLightning) {
-          dmg = Math.floor(dmg * 0.8);
-        }
-        hp -= dmg;
-        
-        // トゲトゲの反撃ダメージ
-        if (result.spikeDmg > 0) {
-          hp -= result.spikeDmg;
-        }
-
-        if (state.artifacts.fang && hp > 0) {
-          hp = Math.min(maxHp, hp + Math.floor(maxHp * 0.03));
-        }
-        goldGained += Math.floor(result.gold * chainMul);
-        expGained += Math.floor(result.exp * chainMul);
-        
-        if (cell.type === 'boss') keys++;
-      }
-      else if (cell.type === 'potion') {
-        const recover = Math.floor(maxHp * 0.30);
-        hp = Math.min(maxHp, hp + recover);
-      }
-      else if (cell.type === 'sword') {
-        hasSwordBuff = true;
-      }
-      else if (cell.type === 'trap') {
-        if (state.isFever) {
-          goldGained += Math.floor(maxHp * 0.05);
-        } else {
-          const trapRate = state.artifacts.towel ? 0 : (state.artifacts.boots ? 0.05 : 0.15);
-          hp -= Math.floor(maxHp * trapRate);
-        }
-      }
-      else if (cell.type === 'key') {
-        keys++;
-      }
-      else if (cell.type === 'chest') {
-        keys--;
-        const goldBase = Math.floor(8 * Math.pow(1.22, state.floor - 1)) + 5;
-        const goldMul = 1.0 + (state.permanentUpgrades.gold * GameConfig.upgrades.gold.rate);
-        let gained = Math.floor(goldBase * 5 * goldMul);
-        
-        if (state.artifacts.chalice) gained *= 2;
-        if (state.isFever) gained *= 3;
-        
-        goldGained += gained;
-      }
-      else if (cell.type === 'door') {
-        keys--;
+      if (cell) {
+        resolveCellEffect(ctxState, cell);
       }
     });
 
-    let nextExp = Math.round(10 * Math.pow(level, 1.4));
-    let simExp = exp + expGained;
-    let simLevel = level;
-    let simMaxHp = maxHp;
-    let simAtk = atk;
-
-    while (simExp >= nextExp && hp > 0) { // ✅ hp>0ガード: 死亡状態での無限ループを防止
-      simExp -= nextExp;
-      simLevel++;
-      simMaxHp = Math.round(100 * Math.pow(simLevel, 1.2) + (simLevel - 1) * 15);
-      simAtk = Math.round(10 * Math.pow(simLevel, 1.1) + (simLevel - 1) * 3);
-      hp = simMaxHp; // ⚡ レベルアップ時に100%全回復！
-      nextExp = Math.round(10 * Math.pow(simLevel, 1.4));
-    }
-
     return {
-      hp: Math.max(0, hp),
-      maxHp: simMaxHp,
-      atk: simAtk,
-      level: simLevel,
-      exp: simExp,
-      keys: keys,
-      goldGained: goldGained,
-      expGained: expGained,
-      damageTaken: state.hero.hp - hp
+      hp: Math.max(0, ctxState.hp),
+      maxHp: ctxState.maxHp,
+      atk: ctxState.atk,
+      level: ctxState.level,
+      exp: ctxState.exp,
+      keys: ctxState.keys,
+      goldGained: ctxState.goldGained,
+      expGained: ctxState.expGained,
+      damageTaken: state.hero.hp - ctxState.hp
     };
   }
 
@@ -1092,11 +1175,24 @@
     }
 
     let currentHp = state.hero.hp;
-    const atk = state.hero.atk;
-    const swordMultiplier = state.artifacts.sword ? 2.5 : 1.8;
-    let hasSwordBuff = false;
-    let killCount = 0;
-    let activeShield = state.activeShield;
+    const ctxState = {
+      hp: state.hero.hp,
+      maxHp: state.hero.maxHp,
+      atk: state.hero.atk,
+      level: state.hero.level,
+      exp: state.hero.exp,
+      keys: state.key,
+      goldGained: 0,
+      expGained: 0,
+      hasSwordBuff: false,
+      killCount: 0,
+      activeShield: state.activeShield,
+      isFever: state.isFever,
+      isLightning: path.filter(idx => {
+        const c = gridData[idx];
+        return c && (c.type === 'monster' || c.type === 'boss');
+      }).length >= 5
+    };
 
     path.forEach((idx, step) => {
       if (step === 0) return;
@@ -1107,96 +1203,66 @@
 
       badge.className = "panel-prediction-badge active";
 
-      if (cell.type === 'monster' || cell.type === 'boss') {
-        killCount++;
-        const chainMul = getChainMultiplier(killCount);
-        const battle = calculateBattle(atk, hasSwordBuff, cell, activeShield);
-        
-        let dmg = battle.dmg;
-        if (activeShield && dmg > 0) {
-          dmg = 0;
-          activeShield = false;
-        }
-        
-        currentHp -= dmg;
-        if (battle.spikeDmg > 0) {
-          currentHp -= battle.spikeDmg;
-        }
-        
-        if (state.artifacts.fang && currentHp > 0) {
-          currentHp = Math.min(maxHp, currentHp + Math.floor(maxHp * 0.03));
-        }
+      const res = resolveCellEffect(ctxState, cell);
 
-        if (currentHp <= 0) {
+      if (cell.type === 'monster' || cell.type === 'boss') {
+        if (ctxState.hp <= 0) {
           badge.textContent = "💀 DANGER";
-          badge.classList.add("badge-dmg", "death-warning-badge");
+          badge.className = "panel-prediction-badge active badge-dmg death-warning-badge";
           if (panel) panel.classList.add("panel-danger-active");
         } else {
-          if (dmg === 0) {
+          if (res.damageTaken === 0) {
             badge.textContent = "🛡️ OK";
-            badge.classList.add("badge-buff");
+            badge.className = "panel-prediction-badge active badge-buff";
           } else {
-            badge.textContent = `HP ${currentHp}`;
-            badge.classList.add("badge-dmg");
+            badge.textContent = `HP ${ctxState.hp}`;
+            badge.className = "panel-prediction-badge active badge-dmg";
           }
         }
       }
       else if (cell.type === 'potion') {
-        const recover = Math.floor(maxHp * 0.30);
-        currentHp = Math.min(maxHp, currentHp + recover);
-        badge.textContent = `HP ${currentHp}`;
-        badge.classList.add("badge-heal");
+        badge.textContent = `HP ${ctxState.hp}`;
+        badge.className = "panel-prediction-badge active badge-heal";
       }
       else if (cell.type === 'sword') {
-        hasSwordBuff = true;
         badge.textContent = `ATK UP`;
-        badge.classList.add("badge-buff");
+        badge.className = "panel-prediction-badge active badge-buff";
       }
       else if (cell.type === 'trap') {
         if (state.isFever) {
-          const trapGold = Math.floor(maxHp * 0.05);
           badge.textContent = `無敵G`;
-          badge.classList.add("badge-heal");
+          badge.className = "panel-prediction-badge active badge-heal";
         } else {
-          const trapBonusDmgReduction = state.achievements.trap ? 0.05 : 0;
-          let trapRate = state.artifacts.boots ? 0.05 : 0.15;
-          trapRate = Math.max(0, trapRate - trapBonusDmgReduction);
-
-          const trapDmg = Math.floor(maxHp * trapRate);
-          currentHp -= trapDmg;
-          if (currentHp <= 0) {
+          if (ctxState.hp <= 0) {
             badge.textContent = "💀 DANGER";
-            badge.classList.add("badge-dmg", "death-warning-badge");
+            badge.className = "panel-prediction-badge active badge-dmg death-warning-badge";
             if (panel) panel.classList.add("panel-danger-active");
           } else {
-            badge.textContent = `HP ${currentHp}`;
-            badge.classList.add("badge-dmg");
+            badge.textContent = `HP ${ctxState.hp}`;
+            badge.className = "panel-prediction-badge active badge-dmg";
           }
         }
       }
       else if (cell.type === 'key') {
         badge.textContent = "+1 🔑";
-        badge.classList.add("badge-buff");
+        badge.className = "panel-prediction-badge active badge-buff";
       }
       else if (cell.type === 'chest') {
-        const goldBase = Math.floor(8 * Math.pow(1.22, state.floor - 1)) + 5;
-        const goldMul = 1.0 + (state.permanentUpgrades.gold * GameConfig.upgrades.gold.rate);
-        let gained = Math.floor(goldBase * 5 * goldMul);
-        if (state.artifacts.chalice) gained *= 2;
-        if (state.isFever) gained *= 3;
-        badge.textContent = `+${gained}G`;
-        badge.classList.add("badge-heal");
+        badge.textContent = `+${res.goldEarned}G`;
+        badge.className = "panel-prediction-badge active badge-heal";
       }
       else if (cell.type === 'door') {
         badge.textContent = "CLEAR 🚪";
-        badge.classList.add("badge-buff");
+        badge.className = "panel-prediction-badge active badge-buff";
       }
     });
   }
 
   // ─── ルート確定実行 (チェインボーナス ＆ SEピッチ適用) ───
-  function executePath(path) {
-    if (path.length < 2) return;
+  async function executePath(path) {
+    if (path.length < 2 || isExecutingPath) return;
+
+    isExecutingPath = true; // 操作ロック開始
 
     let hp = state.hero.hp;
     let maxHp = state.hero.maxHp;
@@ -1222,9 +1288,40 @@
 
     const panels = dom.gridContainer.children;
 
-    path.forEach(idx => {
+    const ctxState = {
+      hp: state.hero.hp,
+      maxHp: state.hero.maxHp,
+      atk: state.hero.atk,
+      level: state.hero.level,
+      exp: state.hero.exp,
+      keys: state.key,
+      goldGained: 0,
+      expGained: 0,
+      hasSwordBuff: false,
+      killCount: 0,
+      activeShield: state.activeShield,
+      isFever: state.isFever,
+      isLightning: isLightning
+    };
+
+    // 1歩ずつアニメーション解決
+    for (let step = 0; step < path.length; step++) {
+      const idx = path[step];
       const cell = gridData[idx];
-      if (!cell) return;
+
+      // 現在位置を移動する（1マスずつ移動する演出）
+      // 最初のマス以外で移動処理
+      if (step > 0) {
+        const prevIdx = path[step - 1];
+        gridData[prevIdx] = null;
+        gridData[idx] = { type: 'hero' };
+        UIManager.isDirty = true;
+        
+        // わずかなウェイトを入れてコマ送り移動を可視化
+        await delay(120);
+      }
+
+      if (!cell || step === 0) continue;
 
       const rect = panels[idx].getBoundingClientRect();
       const containerRect = dom.gameContainer.getBoundingClientRect();
@@ -1234,54 +1331,36 @@
       const cx = (rect.left + scrollX) - (containerRect.left + scrollX) + rect.width / 2;
       const cy = (rect.top + scrollY) - (containerRect.top + scrollY) + 10;
 
+      const res = resolveCellEffect(ctxState, cell);
+
       if (cell.type === 'monster' || cell.type === 'boss') {
-        killCount++;
+        killCount = ctxState.killCount;
         const chainMul = getChainMultiplier(killCount);
-        const result = calculateBattle(atk, hasSwordBuff, cell);
-        
-        const finalGold = Math.floor(result.gold * chainMul);
-        const finalExp = Math.floor(result.exp * chainMul);
+        const finalGold = res.goldEarned;
+        const finalExp = res.expEarned;
 
-        // ✅ 必殺効果: 被ダメージを20%軽減
-        let dmg = result.dmg;
-
-        // 🛡️ シールド適用
-        if (state.activeShield && dmg > 0) {
-          dmg = 0;
-          state.activeShield = false;
+        if (res.shieldConsumed) {
           showToast("🛡️ シールドが攻撃を完全に防いだ！");
           writeTerminalLog("シールドバフ：被ダメージ無効化シールドを消費しました", "system");
         }
 
-        if (isLightning) {
-          dmg = Math.floor(dmg * 0.8);
-        }
-        hp -= dmg;
-        
-        let healAmount = 0;
-        if (state.artifacts.fang && hp > 0) {
-          healAmount = Math.floor(maxHp * 0.03);
-          hp = Math.min(maxHp, hp + healAmount);
-        }
-
+        hp = ctxState.hp;
         goldGained += finalGold;
-        exp += finalExp;
         expGained += finalExp;
 
         if (!state.isFever) {
-          // ✅ FEVER調整: 敵1体+5、ボス+18 → 約20ターン分の戦闘でFEVER発動（希少性確保）
           gaugeEarned += (cell.type === 'boss') ? 18 : 5;
         }
 
-        if (dmg > 0) {
-          spawnFloatingText(`-${dmg} HP`, cx, cy, "#ff3b30");
+        if (res.damageTaken > 0) {
+          spawnFloatingText(`-${res.damageTaken} HP`, cx, cy, "#ff3b30");
           triggerDamageFlash();
           triggerScreenShake(); // 📳 被ダメージ画面揺れ
           triggerHitStop(60);   // 💥 ヒットストップ
           AudioManager.playSound('hit');
           const lLabel = isLightning ? " [必殺20%減]" : "";
           const cLabel = killCount > 1 ? ` [x${chainMul.toFixed(2)}]` : "";
-          writeTerminalLog(`モンスターから ${dmg} 被ダメ${lLabel}${cLabel} (残:${hp})`, "damage");
+          writeTerminalLog(`モンスターから ${res.damageTaken} 被ダメ${lLabel}${cLabel} (残:${hp})`, "damage");
           spawnParticles(cx, cy, 'error', 8);
         } else {
           AudioManager.playSound('atk', killCount);
@@ -1293,8 +1372,9 @@
           writeTerminalLog(`モンスターを無傷で撃破!${cLabel} (残:${hp})`, "system");
           spawnParticles(cx, cy, 'atk', 8);
         }
-        if (healAmount > 0) {
-          spawnFloatingText(`+${healAmount} HP (吸血)`, cx, cy - 25, "#2ecc71");
+
+        if (res.hpHealed > 0) {
+          spawnFloatingText(`+${res.hpHealed} HP (吸血)`, cx, cy - 25, "#2ecc71");
           spawnParticles(cx, cy - 25, 'heal', 4);
         }
 
@@ -1307,7 +1387,7 @@
         // ✅ 5チェイン以上で「ライトニング・チェイン」必殺技発動
         if (killCount >= 5) {
           spawnFloatingText("⚡ LIGHTNING CHAIN! ⚡", cx, cy - 50, "#00ffff", killCount);
-          spawnParticles(cx, cy, 'fever', 12); // 青白い火花を大量に撒き散らす
+          spawnParticles(cx, cy, 'fever', 12);
           writeTerminalLog(`⚡ライトニング・チェイン必殺発動！戦闘被ダメージを20%軽減！⚡`, "fever");
         }
 
@@ -1316,7 +1396,6 @@
         spawnFloatingText(`+${finalExp} EXP${chainLabel}`, cx, cy - 14, "#3498db", killCount);
 
         if (cell.type === 'boss') {
-          keys++;
           spawnFloatingText(`ボス撃破! 🔑獲得`, cx, cy - 20, "#3498db");
           unlockBossArtifact(state.floor);
           writeTerminalLog(`エリアボスを討伐！鍵🔑を獲得`, "fever");
@@ -1326,11 +1405,10 @@
         gridData[idx] = null;
       }
       else if (cell.type === 'potion') {
-        const recover = Math.floor(maxHp * 0.30);
-        hp = Math.min(maxHp, hp + recover);
-        spawnFloatingText(`+${recover} HP`, cx, cy, "#2ecc71");
+        hp = ctxState.hp;
+        spawnFloatingText(`+${res.hpHealed} HP`, cx, cy, "#2ecc71");
         AudioManager.playSound('heal');
-        writeTerminalLog(`ポーションで回復 +${recover} HP (現在:${hp})`, "system");
+        writeTerminalLog(`ポーションで回復 +${res.hpHealed} HP (現在:${hp})`, "system");
         spawnParticles(cx, cy, 'heal', 8);
         gridData[idx] = null;
       }
@@ -1345,31 +1423,29 @@
       }
       else if (cell.type === 'trap') {
         if (state.isFever) {
-          const trapGold = Math.floor(maxHp * 0.05);
+          const trapGold = res.goldEarned;
           goldGained += trapGold;
           spawnFloatingText(`無敵! +${trapGold} G`, cx, cy, "#ff007f");
           AudioManager.playSound('buy');
           writeTerminalLog(`無敵中トラップ無効！ +${trapGold} Gに還元`, "gain");
           spawnParticles(cx, cy, 'fever', 10);
         } else {
-          const trapRate = state.artifacts.towel ? 0 : (state.artifacts.boots ? 0.05 : 0.15);
-          const trapDmg = Math.floor(maxHp * trapRate);
-          hp -= trapDmg;
+          hp = ctxState.hp;
           if (state.artifacts.towel) {
             spawnFloatingText(`ガード! (タオル)`, cx, cy, "#2ecc71");
             writeTerminalLog(`トラップを踏んだが、宇宙旅行用タオルで安全に防いだ！`, "system");
             spawnParticles(cx, cy, 'towel', 8);
           } else {
-            spawnFloatingText(`-${trapDmg} HP (トゲ)`, cx, cy, "#ff3b30");
+            spawnFloatingText(`-${res.damageTaken} HP (トゲ)`, cx, cy, "#ff3b30");
             triggerDamageFlash();
             AudioManager.playSound('hit');
-            writeTerminalLog(`トゲ罠により ${trapDmg} 被ダメ (残:${hp})`, "damage");
+            writeTerminalLog(`トゲ罠により ${res.damageTaken} 被ダメ (残:${hp})`, "damage");
             spawnParticles(cx, cy, 'error', 8);
           }
         }
       }
       else if (cell.type === 'key') {
-        keys++;
+        keys = ctxState.keys;
         spawnFloatingText("+1 🔑鍵", cx, cy, "#3498db");
         AudioManager.playSound('heal');
         writeTerminalLog("道端で鍵🔑を拾った！", "system");
@@ -1377,14 +1453,8 @@
         gridData[idx] = null;
       }
       else if (cell.type === 'chest') {
-        keys--;
-        const goldBase = Math.floor(8 * Math.pow(1.22, state.floor - 1)) + 5;
-        const goldMul = 1.0 + (state.permanentUpgrades.gold * GameConfig.upgrades.gold.rate);
-        let gained = Math.floor(goldBase * 5 * goldMul);
-        
-        if (state.artifacts.chalice) gained *= 2;
-        if (state.isFever) gained *= 3;
-
+        keys = ctxState.keys;
+        const gained = res.goldEarned;
         goldGained += gained;
         spawnFloatingText(`🎁 +${gained} G!`, cx, cy, "#9b59b6");
         AudioManager.playSound('clear');
@@ -1398,7 +1468,7 @@
         nextFloorTriggered = true;
         writeTerminalLog("フロアの扉を開放した！", "system");
       }
-    });
+    }
 
     state.hero.hp = Math.max(0, hp);
     state.key = keys;
@@ -1808,8 +1878,8 @@
     let bonusAtk = state.achievements && state.achievements.combo ? 2 : 0;
     let bonusGold = state.achievements && state.achievements.gold ? 100 : 0;
 
-    const baseMaxHp = 100 + bonusHp;
-    const baseAtk = 10 + bonusAtk;
+    const baseMaxHp = GameConfig.heroScaling.baseHp + bonusHp;
+    const baseAtk = GameConfig.heroScaling.baseAtk + bonusAtk;
     state.hero.maxHp = Math.round(baseMaxHp * (1.0 + hpLv * GameConfig.upgrades.hp.rate));
     state.hero.atk = Math.round(baseAtk * (1.0 + atkLv * GameConfig.upgrades.atk.rate));
     state.hero.hp = state.hero.maxHp;
@@ -1856,7 +1926,7 @@
     const maxRetries = 100;
     
     // 🪙 2周目以降の敵のインフレ乗数 (1周ごとに+50%強化)
-    const loopMultiplier = 1.0 + (state.loopCount - 1) * 0.50;
+    const loopMultiplier = 1.0 + (state.loopCount - 1) * GameConfig.monsterScaling.loopInflation;
 
     while (retries < maxRetries) {
       gridData = Array(25).fill(null);
@@ -1871,9 +1941,9 @@
 
       if (isBossFloor) {
         const bossIdx = 12;
-        const bHp = Math.round(Math.round(10 * Math.pow(1.28, state.floor - 1)) * 8 * loopMultiplier);
-        const bAtk = Math.round(Math.round(8 * Math.pow(1.25, state.floor - 1)) * 2.2 * loopMultiplier);
-        const bExp = Math.round(2 * Math.pow(1.12, state.floor - 1)) + state.floor;
+        const bHp = Math.round(Math.round(GameConfig.monsterScaling.hpBase * Math.pow(GameConfig.monsterScaling.hpPowBase, state.floor - 1)) * 8 * loopMultiplier);
+        const bAtk = Math.round(Math.round(GameConfig.monsterScaling.atkBase * Math.pow(GameConfig.monsterScaling.atkPowBase, state.floor - 1)) * 2.2 * loopMultiplier);
+        const bExp = Math.round(GameConfig.monsterScaling.expBase * Math.pow(GameConfig.monsterScaling.expPowBase, state.floor - 1)) + state.floor;
         
         gridData[bossIdx] = {
           type: 'boss',
@@ -1908,9 +1978,9 @@
 
         const rand = Math.random();
         if (rand < 0.38) {
-          const baseHp = Math.round(Math.round(10 * Math.pow(1.28, state.floor - 1)) * loopMultiplier);
-          const baseAtk = Math.round(Math.round(8 * Math.pow(1.25, state.floor - 1)) * loopMultiplier);
-          const baseExp = Math.round(2 * Math.pow(1.12, state.floor - 1)) + state.floor;
+          const baseHp = Math.round(Math.round(GameConfig.monsterScaling.hpBase * Math.pow(GameConfig.monsterScaling.hpPowBase, state.floor - 1)) * loopMultiplier);
+          const baseAtk = Math.round(Math.round(GameConfig.monsterScaling.atkBase * Math.pow(GameConfig.monsterScaling.atkPowBase, state.floor - 1)) * loopMultiplier);
+          const baseExp = Math.round(GameConfig.monsterScaling.expBase * Math.pow(GameConfig.monsterScaling.expPowBase, state.floor - 1)) + state.floor;
 
           const isElite = Math.random() < 0.15;
           let isShield = false;
@@ -2017,7 +2087,7 @@
     const currentSwordMul = state.artifacts.sword ? 2.5 : 1.8;
     const feverAtkMul = state.isFever ? 2.0 : 1.0;
 
-    function dfs(curr, hp, maxHp, atk, keys, tempAtk, warpPairsUsed, kills = 0, hasShield = state.activeShield) {
+    function dfs(curr, hp, maxHp, atk, level, exp, keys, hasSwordBuff, warpPairsUsed, kills = 0, hasShield = state.activeShield) {
       if (solved) return;
       if (curr === doorIdx) {
         if (hp > 0) solved = true;
@@ -2044,98 +2114,26 @@
         if (visited.has(next)) continue;
         const cell = gridData[next];
 
-        let nextHp = hp;
-        let nextMaxHp = maxHp;
-        let nextAtk = atk;
-        let nextKeys = keys;
-        let nextTempAtk = tempAtk;
-        let nextWarpPairsUsed = new Set(warpPairsUsed);
-        let nextKills = kills;
-        let nextHasShield = hasShield;
-
         if (!cell) {
-          dfs(next, nextHp, nextMaxHp, nextAtk, nextKeys, nextTempAtk, nextWarpPairsUsed, kills, nextHasShield);
+          if (!solved) {
+            dfs(next, hp, maxHp, atk, level, exp, keys, hasSwordBuff, warpPairsUsed, kills, hasShield);
+          }
           continue;
         }
 
-        if (cell.type === 'monster' || cell.type === 'boss') {
-          nextKills++;
-          const isLightningSim = nextKills >= 5;
+        if (cell.type === 'chest' && keys < 1) continue;
+        if (cell.type === 'door' && keys < 1) continue;
 
-          let enemyAtk = cell.val.atk;
-          // 吸血デビル特性の判定: 剣バフがなく、シールドもない場合、敵のATKが25%アップ
-          if (cell.val && cell.val.vampire && nextTempAtk === 1.0 && !nextHasShield) {
-            enemyAtk = Math.floor(enemyAtk * 1.25);
-          }
-
-          const currentAtk = Math.floor(nextAtk * nextTempAtk * feverAtkMul);
-          let dmg = 0;
-          if (currentAtk < enemyAtk) {
-            dmg = (enemyAtk - currentAtk) * (cell.type === 'boss' ? 2 : 1);
-          }
-
-          // シールドバリア特性 (シールド持ちの敵)
-          if (cell.val && cell.val.shield && nextTempAtk === 1.0) {
-            dmg = dmg === 0 ? 10 : dmg * 2;
-          }
-
-          // 🛡️ 勇者のシールドバフの適用
-          if (nextHasShield && dmg > 0) {
-            dmg = 0;
-            nextHasShield = false;
-          }
-
-          // ⚡ ライトニング軽減適用
-          if (isLightningSim) {
-            dmg = Math.floor(dmg * 0.8);
-          }
-          nextHp -= dmg;
-
-          // トゲトゲモンスターの反撃ダメージ
-          if (cell.val && cell.val.spiky) {
-            nextHp -= Math.floor(nextMaxHp * 0.05);
-          }
-          
-          if (state.artifacts.fang && nextHp > 0) {
-            nextHp = Math.min(nextMaxHp, nextHp + Math.floor(nextMaxHp * 0.03));
-          }
-          if (cell.type === 'boss') nextKeys++;
-        }
-        else if (cell.type === 'potion') {
-          const recover = Math.floor(nextMaxHp * 0.30);
-          nextHp = Math.min(nextMaxHp, nextHp + recover);
-        }
-        else if (cell.type === 'sword') {
-          nextTempAtk = currentSwordMul;
-        }
-        else if (cell.type === 'trap') {
-          if (!state.isFever) {
-            const trapBonusDmgReduction = state.achievements && state.achievements.trap ? 0.05 : 0;
-            let trapRate = state.artifacts.towel ? 0 : (state.artifacts.boots ? 0.05 : 0.15);
-            trapRate = Math.max(0, trapRate - trapBonusDmgReduction);
-            nextHp -= Math.floor(nextMaxHp * trapRate);
-          }
-        }
-        else if (cell.type === 'key') {
-          nextKeys++;
-        }
-        else if (cell.type === 'chest') {
-          if (nextKeys < 1) continue;
-          nextKeys--;
-        }
-        else if (cell.type === 'door') {
-          if (nextKeys < 1) continue;
-          nextKeys--;
-        }
-        else if (cell.type === 'warp') {
+        if (cell.type === 'warp') {
           const pairName = cell.val;
+          const nextWarpPairsUsed = new Set(warpPairsUsed);
           if (!nextWarpPairsUsed.has(pairName)) {
             const otherWarpIdx = gridData.findIndex((c, i) => i !== next && c && c.type === 'warp' && c.val === pairName);
             if (otherWarpIdx !== -1 && !visited.has(otherWarpIdx)) {
               nextWarpPairsUsed.add(pairName);
               visited.add(next);
               if (!solved) {
-                dfs(otherWarpIdx, nextHp, nextMaxHp, nextAtk, nextKeys, nextTempAtk, nextWarpPairsUsed, kills, nextHasShield);
+                dfs(otherWarpIdx, hp, maxHp, atk, level, exp, keys, hasSwordBuff, nextWarpPairsUsed, kills, hasShield);
               }
               visited.delete(next);
               continue;
@@ -2143,15 +2141,34 @@
           }
         }
 
-        if (nextHp > 0 && !solved) {
-          dfs(next, nextHp, nextMaxHp, nextAtk, nextKeys, nextTempAtk, nextWarpPairsUsed, nextKills, nextHasShield);
+        const nextKills = (cell.type === 'monster' || cell.type === 'boss') ? kills + 1 : kills;
+        const ctxState = {
+          hp: hp,
+          maxHp: maxHp,
+          atk: atk,
+          level: level,
+          exp: exp,
+          keys: keys,
+          goldGained: 0,
+          expGained: 0,
+          hasSwordBuff: hasSwordBuff,
+          killCount: kills,
+          activeShield: hasShield,
+          isFever: state.isFever,
+          isLightning: nextKills >= 5
+        };
+
+        resolveCellEffect(ctxState, cell);
+
+        if (ctxState.hp > 0 && !solved) {
+          dfs(next, ctxState.hp, ctxState.maxHp, ctxState.atk, ctxState.level, ctxState.exp, ctxState.keys, ctxState.hasSwordBuff, warpPairsUsed, nextKills, ctxState.activeShield);
         }
       }
 
       visited.delete(curr);
     }
 
-    dfs(startIdx, state.hero.hp, state.hero.maxHp, state.hero.atk, state.key, 1.0, new Set(), 0, state.activeShield);
+    dfs(startIdx, state.hero.hp, state.hero.maxHp, state.hero.atk, state.hero.level, state.hero.exp, state.key, false, new Set(), 0, state.activeShield);
     return solved;
   }
 
@@ -2317,6 +2334,11 @@
       // ─── ✅ 修正: グリッドレンダリングの差分キャッシュ最適化 ───
       const panels = dom.gridContainer.children;
       const path = pathTracker ? pathTracker.path : [];
+      const pathSet = new Set(path);
+      const pathIndexMap = new Map();
+      for (let pi = 0; pi < path.length; pi++) {
+        if (!pathIndexMap.has(path[pi])) pathIndexMap.set(path[pi], pi);
+      }
       const isDragging = pathTracker && pathTracker.isDragging;
       const lastIdx = isDragging ? path[path.length - 1] : null;
 
@@ -2325,7 +2347,7 @@
         if (!panel) continue;
 
         const cell = gridData[i];
-        const isSelected = path.includes(i);
+        const isSelected = pathSet.has(i);
         
         let isAdjacent = false;
         if (isDragging && !isSelected && lastIdx !== null) {
@@ -2352,7 +2374,7 @@
         } else {
           stateKey += "empty|";
         }
-        const pathIndex = path.indexOf(i);
+        const pathIndex = pathIndexMap.has(i) ? pathIndexMap.get(i) : -1;
         stateKey += `${isSelected}|${pathIndex}|${isAdjacent}`;
 
         // 状態が前回から変化していない場合は、DOMの書き換えを完全にスキップ
@@ -2801,7 +2823,7 @@
 
   // イベント委譲
   function handleGridPointerDown(e) {
-    if (!gameStarted) return;
+    if (!gameStarted || isExecutingPath) return;
     const panel = e.target.closest('.grid-panel');
     if (panel && dom.gridContainer.contains(panel)) {
       const idx = parseInt(panel.dataset.index, 10);
@@ -2833,7 +2855,7 @@
 
   // 算術的セル特定 ＆ なぞり連動3Dチルト効果
   function handleGlobalPointerMove(e) {
-    if (!gameStarted || !pathTracker || !pathTracker.isDragging) return;
+    if (!gameStarted || !pathTracker || !pathTracker.isDragging || isExecutingPath) return;
     recordInteraction(); // ✅ ドラッグ操作中もインタラクション時間を更新し、長考中のBGM停止を防ぐ
 
     const clientX = e.clientX || (e.touches && e.touches[0].clientX);
@@ -2996,7 +3018,7 @@
 
   // 💻 キーボード操作ショートカットハンドラ
   function handleKeyDown(e) {
-    if (!gameStarted) return;
+    if (!gameStarted || isExecutingPath) return;
     
     const key = e.key;
 
@@ -3236,6 +3258,7 @@
 
     // はみ出し誤操作キャンセル設計
     const endDrag = (e) => {
+      if (isExecutingPath) return;
       if (pathTracker && pathTracker.isDragging) {
         const clientX = e.clientX || (e.changedTouches && e.changedTouches[0]?.clientX);
         const clientY = e.clientY || (e.changedTouches && e.changedTouches[0]?.clientY);
