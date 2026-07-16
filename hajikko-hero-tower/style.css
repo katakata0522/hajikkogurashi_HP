@@ -1791,3 +1791,148 @@ body {
     opacity: 0.9;
   }
 }
+
+/* 🎇 v4.0.0 新規: サイバーネオン・ビジュアルシステム */
+
+/* グリッドセル内のSVGアイコン表示設定 */
+.grid-panel svg {
+  width: 55%;
+  height: 55%;
+  object-fit: contain;
+  transition: transform 0.2s ease, filter 0.2s ease;
+  filter: drop-shadow(0 0 6px var(--glow-color, rgba(255, 255, 255, 0.5)));
+}
+
+.grid-panel[data-type="hero"] svg { --glow-color: rgba(0, 255, 255, 0.8); }
+.grid-panel[data-type="monster"] svg { --glow-color: rgba(255, 0, 85, 0.8); }
+.grid-panel[data-type="boss"] svg { --glow-color: rgba(255, 0, 255, 0.8); }
+.grid-panel[data-type="potion"] svg { --glow-color: rgba(46, 204, 113, 0.8); }
+.grid-panel[data-type="sword"] svg { --glow-color: rgba(241, 196, 15, 0.8); }
+.grid-panel[data-type="key"] svg { --glow-color: rgba(0, 191, 255, 0.8); }
+.grid-panel[data-type="chest"] svg { --glow-color: rgba(230, 126, 34, 0.8); }
+.grid-panel[data-type="door"] svg { --glow-color: rgba(149, 165, 166, 0.8); }
+.grid-panel[data-type="warp"] svg { --glow-color: rgba(155, 89, 182, 0.8); }
+.grid-panel[data-type="trap"] svg { --glow-color: rgba(231, 76, 60, 0.8); }
+
+/* なぞり中のセル拡大エフェクト */
+.grid-panel.path-active svg {
+  transform: scale(1.2);
+  filter: drop-shadow(0 0 12px var(--glow-color)) brightness(1.2);
+}
+
+/* 画面揺れ演出 */
+.shake-effect {
+  animation: screenShake 0.2s ease-in-out;
+}
+
+@keyframes screenShake {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-4px, 4px); }
+  40% { transform: translate(4px, -4px); }
+  60% { transform: translate(-3px, -3px); }
+  80% { transform: translate(3px, 3px); }
+}
+
+/* 🎁 3択ピックモーダル＆カードスタイル */
+.pick-content {
+  max-width: 580px !important;
+  background: rgba(10, 12, 18, 0.95) !important;
+  border: 1px solid rgba(255, 0, 127, 0.3) !important;
+  box-shadow: 0 0 35px rgba(255, 0, 127, 0.2) !important;
+  text-align: center;
+}
+
+.pick-cards-container {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin: 24px 0 12px 0;
+  flex-wrap: wrap;
+}
+
+.pick-card {
+  width: 150px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 16px 12px;
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  overflow: hidden;
+}
+
+.pick-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+.pick-card:hover {
+  transform: translateY(-8px);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* カード毎の個別レア度ネオンカラー */
+.pick-card.rarity-common:hover {
+  border-color: #00bfff;
+  box-shadow: 0 0 15px rgba(0, 191, 255, 0.25);
+}
+.pick-card.rarity-rare:hover {
+  border-color: #9b59b6;
+  box-shadow: 0 0 15px rgba(155, 89, 182, 0.25);
+}
+.pick-card.rarity-legendary:hover {
+  border-color: #f1c40f;
+  box-shadow: 0 0 20px rgba(241, 196, 15, 0.4);
+}
+
+.pick-card-icon {
+  font-size: 2.2rem;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pick-card-title {
+  font-size: 0.8rem;
+  font-weight: 900;
+  color: #fff;
+}
+
+.pick-card-desc {
+  font-size: 0.62rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.4;
+  text-align: center;
+  flex-grow: 1;
+}
+
+.pick-card-rarity-badge {
+  font-size: 0.52rem;
+  font-weight: 900;
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+.pick-card.rarity-common .pick-card-rarity-badge { background: rgba(0, 191, 255, 0.15); color: #00bfff; }
+.pick-card.rarity-rare .pick-card-rarity-badge { background: rgba(155, 89, 182, 0.15); color: #9b59b6; }
+.pick-card.rarity-legendary .pick-card-rarity-badge { background: rgba(241, 196, 15, 0.15); color: #f1c40f; animation: pulseLegendary 1.5s infinite; }
+
+@keyframes pulseLegendary {
+  0%, 100% { transform: scale(1.0); opacity: 0.9; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
+

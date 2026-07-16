@@ -442,6 +442,9 @@
     feverTurns: 0,
     loopCount: 1,
     hasRevivedThisFloor: false,
+    nextFloorShield: false,
+    nextFloorFever: false,
+    activeShield: false,
     floorStartBackup: null, // 時の砂時計用フロアバックアップ
     // 🏆 統計システム
     stats: {
@@ -566,6 +569,9 @@
     dom.startPlayBtn = document.getElementById("start-play-btn");
     dom.dragGuideHand = document.getElementById("drag-guide-hand");
     dom.soundBtn = document.getElementById("sound-btn");
+
+    dom.pickModal = document.getElementById("pick-modal");
+    dom.pickCardsContainer = document.getElementById("pick-cards-container");
 
     dom.artFang = document.getElementById("art-fang");
     dom.artHourglass = document.getElementById("art-hourglass");
@@ -871,6 +877,8 @@
     }).length;
     const isLightning = monsterCount >= 5;
 
+    let activeShield = state.activeShield;
+
     path.forEach(idx => {
       const cell = gridData[idx];
       if (!cell) return;
@@ -882,6 +890,13 @@
         
         // ✅ 必殺効果: 被ダメージを20%軽減
         let dmg = result.dmg;
+        
+        // 🛡️ シールド効果適用
+        if (activeShield && dmg > 0) {
+          dmg = 0;
+          activeShield = false;
+        }
+
         if (isLightning) {
           dmg = Math.floor(dmg * 0.8);
         }
@@ -1143,6 +1158,15 @@
 
         // ✅ 必殺効果: 被ダメージを20%軽減
         let dmg = result.dmg;
+
+        // 🛡️ シールド適用
+        if (state.activeShield && dmg > 0) {
+          dmg = 0;
+          state.activeShield = false;
+          showToast("🛡️ シールドが攻撃を完全に防いだ！");
+          writeTerminalLog("シールドバフ：被ダメージ無効化シールドを消費しました", "system");
+        }
+
         if (isLightning) {
           dmg = Math.floor(dmg * 0.8);
         }
@@ -1166,6 +1190,8 @@
         if (dmg > 0) {
           spawnFloatingText(`-${dmg} HP`, cx, cy, "#ff3b30");
           triggerDamageFlash();
+          triggerScreenShake(); // 📳 被ダメージ画面揺れ
+          triggerHitStop(60);   // 💥 ヒットストップ
           AudioManager.playSound('hit');
           const lLabel = isLightning ? " [必殺20%減]" : "";
           const cLabel = killCount > 1 ? ` [x${chainMul.toFixed(2)}]` : "";
@@ -1173,6 +1199,10 @@
           spawnParticles(cx, cy, 'error', 8);
         } else {
           AudioManager.playSound('atk', killCount);
+          if (cell.type === 'boss') {
+            triggerScreenShake(); // 📳 ボス撃破画面揺れ
+            triggerHitStop(120);  // 💥 ボス撃破ヒットストップ
+          }
           const cLabel = killCount > 1 ? ` [x${chainMul.toFixed(2)}]` : "";
           writeTerminalLog(`モンスターを無傷で撃破!${cLabel} (残:${hp})`, "system");
           spawnParticles(cx, cy, 'atk', 8);
@@ -1201,10 +1231,6 @@
 
         if (cell.type === 'boss') {
           keys++;
-          if (state.floor === 25) {
-            spawnFloatingText(`宇宙旅行用タオル🧣獲得!`, cx, cy - 35, "#ff007f");
-            writeTerminalLog(`宇宙の秘宝「宇宙旅行用タオル🧣」を獲得！罠ダメージを完全に無効化します！`, "level");
-          }
           spawnFloatingText(`ボス撃破! 🔑獲得`, cx, cy - 20, "#3498db");
           unlockBossArtifact(state.floor);
           writeTerminalLog(`エリアボスを討伐！鍵🔑を獲得`, "fever");
@@ -1375,6 +1401,25 @@
     dom.damageFlash.classList.remove("damage-flash-active");
     void dom.damageFlash.offsetWidth;
     dom.damageFlash.classList.add("damage-flash-active");
+  }
+
+  // 📳 画面揺れ演出
+  function triggerScreenShake() {
+    if (!dom.gameContainer) return;
+    dom.gameContainer.classList.remove("shake-effect");
+    void dom.gameContainer.offsetWidth; // リフロートリガー
+    dom.gameContainer.classList.add("shake-effect");
+    setTimeout(() => {
+      dom.gameContainer.classList.remove("shake-effect");
+    }, 200);
+  }
+
+  // 💥 ヒットストップ演出 (ミリ秒単位でメインスレッドを一瞬止め、打撃の手応えを表現)
+  function triggerHitStop(duration = 60) {
+    const start = performance.now();
+    while (performance.now() - start < duration) {
+      // 意図的なビジーウェイトによる描画の一時ホールド
+    }
   }
 
   // ─── レベルアップ演出 ───
@@ -1587,6 +1632,29 @@
     state.hasRevivedThisFloor = false;
     dom.clearModal.style.display = "none";
     updateSkinForFloor();
+
+    // 🛡️ 呪文書バフの適用: シールド
+    if (state.nextFloorShield) {
+      state.activeShield = true;
+      state.nextFloorShield = false;
+      showToast("🛡️ 呪文書の効果でシールドが展開された！");
+      writeTerminalLog("呪文書バフ：被ダメージ無効化シールドを展開しました", "system");
+    }
+
+    // 🔥 呪文書バフの適用: 即フィーバー
+    if (state.nextFloorFever) {
+      state.isFever = true;
+      state.feverTurns = GameConfig.baseFeverDuration;
+      state.feverGauge = 100;
+      state.nextFloorFever = false;
+      if (state.stats) state.stats.feverCount = (state.stats.feverCount || 0) + 1;
+      setTimeout(() => {
+        triggerFeverOverlay();
+        AudioManager.playSound('fever');
+      }, 300);
+      writeTerminalLog("呪文書バフ：開始からFEVER TIME突入！", "fever");
+    }
+
     generateFloorData();
     saveGame();
   }
@@ -2097,13 +2165,13 @@
         // パネルタイプに基づいてCSSクラスを正確に設定
         if (cell) {
           let typeClass = "panel-empty";
-          let iconText = "";
+          let iconId = "";
           let valText = "";
 
           if (cell.type === 'hero') {
             typeClass = "panel-hero";
-            iconText = "⚔️";
-            valText = "HERO"; // ✅ デザイン調整: 英語に統一
+            iconId = "hero";
+            valText = "HERO";
           }
           else if (cell.type === 'monster') {
             typeClass = cell.val.elite ? "panel-boss" : "panel-monster";
@@ -2111,63 +2179,65 @@
             if (cell.val.shield) {
               typeClass += " panel-shield-active";
             }
-            iconText = cell.val.elite ? "😈" : (cell.val.shield ? "🛡️👾" : "👾");
+            iconId = cell.val.elite ? "boss" : "monster";
             valText = `ATK ${cell.val.atk.toLocaleString()}`;
           }
           else if (cell.type === 'boss') {
             typeClass = "panel-boss";
-            iconText = "👹";
+            iconId = "boss";
             valText = `BOSS ${cell.val.atk.toLocaleString()}`;
           }
           else if (cell.type === 'potion') {
             typeClass = "panel-potion";
-            iconText = "🧪";
+            iconId = "potion";
             valText = "+30%HP";
           }
           else if (cell.type === 'sword') {
             typeClass = "panel-sword";
-            iconText = "🗡️";
+            iconId = "sword";
             valText = `x${swordMultiplier} ATK`;
           }
           else if (cell.type === 'trap') {
             typeClass = "panel-trap";
-            iconText = "🕸️";
+            iconId = "trap";
             valText = state.isFever ? "無敵 G還元" : (state.artifacts.towel ? "0%HP" : (state.artifacts.boots ? "-5%HP" : "-15%HP"));
           }
           else if (cell.type === 'towel') {
             typeClass = "panel-towel";
-            iconText = "🧣";
+            iconId = "towel";
             valText = "TOWEL";
           }
           else if (cell.type === 'key') {
             typeClass = "panel-key";
-            iconText = "🔑";
-            valText = "KEY"; // ✅ デザイン調整: 英語に統一
+            iconId = "key";
+            valText = "KEY";
           }
           else if (cell.type === 'chest') {
             typeClass = "panel-chest";
-            iconText = "🎁";
-            valText = "CHEST"; // ✅ デザイン調整: 英語に統一
+            iconId = "chest";
+            valText = "CHEST";
           }
           else if (cell.type === 'door') {
             typeClass = "panel-door";
-            iconText = "🚪";
-            valText = "DOOR"; // ✅ デザイン調整: 英語に統一
+            iconId = "door";
+            valText = "DOOR";
           }
           else if (cell.type === 'warp') {
             typeClass = "panel-warp";
-            iconText = "🌀";
+            iconId = "warp";
             valText = cell.val;
           }
 
           // クラス名を組み立てる (selectedは明示的な場合のみ付与)
           let className = `grid-panel glass-panel ${typeClass}`;
-          if (isSelected) className += " selected";
+          if (isSelected) className += " selected path-active";
           panel.className = className;
 
           const iconEl = panel.querySelector(".panel-icon");
           const valEl = panel.querySelector(".panel-val");
-          if (iconEl) iconEl.textContent = iconText;
+          if (iconEl && iconId) {
+            iconEl.innerHTML = `<svg><use href="#icon-${iconId}"></use></svg>`;
+          }
           if (valEl) valEl.textContent = valText;
 
           // ✅ シールドバッジの表示制御
@@ -2179,12 +2249,12 @@
         } else {
           // セルが空の場合
           let className = "grid-panel glass-panel";
-          if (isSelected) className += " selected";
+          if (isSelected) className += " selected path-active";
           panel.className = className;
 
           const iconEl = panel.querySelector(".panel-icon");
           const valEl = panel.querySelector(".panel-val");
-          if (iconEl) iconEl.textContent = "";
+          if (iconEl) iconEl.innerHTML = "";
           if (valEl) valEl.textContent = "";
 
           const sBadge = panel.querySelector(".shield-badge");
@@ -2223,35 +2293,31 @@
   }
 
   // ─── 一筆書きネオンライン描画 (Canvas) ───
-  function drawWarpLine(ctx, p1, p2) {
+  function drawWarpLine(ctx, p1, p2, width, blur, overrideColor = null) {
     ctx.save();
     ctx.beginPath();
     ctx.moveTo(p1.x, p1.y);
     ctx.quadraticCurveTo(canvas.width / 2, canvas.height / 2, p2.x, p2.y);
     
-    const pulseSpeed = Date.now() / 150;
-    const pulseWidth = 10 + Math.sin(pulseSpeed) * 1.5;
-    const pulseBlur = 12 + Math.cos(pulseSpeed) * 3;
+    ctx.lineCap = 'round';
+    ctx.lineWidth = width;
+    ctx.shadowBlur = blur;
 
-    if (state.isFever) {
-      ctx.strokeStyle = 'rgba(255, 0, 255, 0.6)';
-      ctx.lineWidth = pulseWidth;
-      ctx.shadowColor = '#ff00ff';
+    if (overrideColor) {
+      ctx.strokeStyle = overrideColor;
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
     } else {
-      ctx.strokeStyle = 'rgba(168, 85, 247, 0.4)';
-      ctx.lineWidth = pulseWidth;
-      ctx.shadowColor = '#a855f7';
+      if (state.isFever) {
+        ctx.strokeStyle = 'rgba(255, 0, 255, 0.6)';
+        ctx.shadowColor = '#ff00ff';
+      } else {
+        ctx.strokeStyle = 'rgba(168, 85, 247, 0.4)';
+        ctx.shadowColor = '#a855f7';
+      }
     }
     
-    ctx.lineCap = 'round';
-    ctx.shadowBlur = pulseBlur;
     ctx.stroke();
-
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 3;
-    ctx.shadowBlur = 0;
-    ctx.stroke();
-    
     ctx.restore();
   }
 
@@ -2271,17 +2337,14 @@
     };
 
     ctx.save();
-    ctx.beginPath();
 
-    const start = getCenter(path[0]);
-    ctx.moveTo(start.x, start.y);
+    // パスから各セグメントを分割して描画（ワープを考慮するため）
+    // segment = { type: 'normal'|'warp', points: [p1, p2, ...] }
+    const segments = [];
+    let currentSegment = { type: 'normal', points: [getCenter(path[0])] };
+    segments.push(currentSegment);
 
-    const len = path.length;
-    const pulseSpeed = Date.now() / 150;
-    const pulseWidth = 12 + Math.sin(pulseSpeed) * 1.5;
-    const pulseBlur = 12 + Math.cos(pulseSpeed) * 3;
-
-    for (let i = 1; i < len; i++) {
+    for (let i = 1; i < path.length; i++) {
       const currIdx = path[i];
       const prevIdx = path[i - 1];
 
@@ -2292,54 +2355,85 @@
       const isAdjacent = (Math.abs(tx - cx) + Math.abs(ty - cy) === 1);
 
       const pt = getCenter(currIdx);
+
       if (isAdjacent) {
-        ctx.lineTo(pt.x, pt.y);
+        currentSegment.points.push(pt);
       } else {
-        if (state.isFever) {
-          ctx.strokeStyle = getFeverStrokeStyle();
-          ctx.shadowColor = '#ff00ff';
-        } else {
-          ctx.strokeStyle = 'rgba(255, 0, 127, 0.4)';
-          ctx.shadowColor = '#ff007f';
-        }
-
-        ctx.lineWidth = pulseWidth;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.shadowBlur = pulseBlur;
-        ctx.stroke();
-
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 4;
-        ctx.shadowBlur = 0;
-        ctx.stroke();
-
-        const p1 = getCenter(prevIdx);
-        drawWarpLine(ctx, p1, pt);
-
-        ctx.beginPath();
-        ctx.moveTo(pt.x, pt.y);
+        // ワープ！セグメントを新規作成
+        currentSegment = { type: 'warp', points: [getCenter(prevIdx), pt] };
+        segments.push(currentSegment);
+        currentSegment = { type: 'normal', points: [pt] };
+        segments.push(currentSegment);
       }
     }
 
-    if (state.isFever) {
-      ctx.strokeStyle = getFeverStrokeStyle();
-      ctx.shadowColor = '#ff00ff';
-    } else {
-      ctx.strokeStyle = 'rgba(255, 0, 127, 0.4)';
-      ctx.shadowColor = '#ff007f';
-    }
+    const pulseSpeed = Date.now() / 120;
+    const baseWidth = 10 + Math.sin(pulseSpeed) * 1.5;
+    const baseBlur = 15 + Math.cos(pulseSpeed) * 3;
 
-    ctx.lineWidth = pulseWidth;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.shadowBlur = pulseBlur;
-    ctx.stroke();
+    // ─── 3レイヤー流体ネオンチューブ描画 ───
+    
+    // 【レイヤー1: 最外周の超広範囲グロー（低不透明度）】
+    segments.forEach(seg => {
+      if (seg.points.length < 2) return;
+      if (seg.type === 'normal') {
+        ctx.beginPath();
+        ctx.moveTo(seg.points[0].x, seg.points[0].y);
+        for (let i = 1; i < seg.points.length; i++) {
+          ctx.lineTo(seg.points[i].x, seg.points[i].y);
+        }
+        ctx.strokeStyle = state.isFever ? 'rgba(255, 0, 255, 0.15)' : 'rgba(255, 0, 127, 0.15)';
+        ctx.shadowColor = state.isFever ? '#ff00ff' : '#ff007f';
+        ctx.lineWidth = baseWidth * 2.2;
+        ctx.shadowBlur = baseBlur * 1.8;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+      } else {
+        drawWarpLine(ctx, seg.points[0], seg.points[1], baseWidth * 2.2, baseBlur * 1.8);
+      }
+    });
 
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 4;
-    ctx.shadowBlur = 0;
-    ctx.stroke();
+    // 【レイヤー2: 鮮やかな中核ネオン光線】
+    segments.forEach(seg => {
+      if (seg.points.length < 2) return;
+      if (seg.type === 'normal') {
+        ctx.beginPath();
+        ctx.moveTo(seg.points[0].x, seg.points[0].y);
+        for (let i = 1; i < seg.points.length; i++) {
+          ctx.lineTo(seg.points[i].x, seg.points[i].y);
+        }
+        ctx.strokeStyle = state.isFever ? 'rgba(0, 255, 255, 0.75)' : 'rgba(168, 85, 247, 0.75)';
+        ctx.shadowColor = state.isFever ? '#00ffff' : '#a855f7';
+        ctx.lineWidth = baseWidth * 1.1;
+        ctx.shadowBlur = baseBlur * 0.6;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+      } else {
+        drawWarpLine(ctx, seg.points[0], seg.points[1], baseWidth * 1.1, baseBlur * 0.6);
+      }
+    });
+
+    // 【レイヤー3: 高輝度ホワイトコア】
+    segments.forEach(seg => {
+      if (seg.points.length < 2) return;
+      if (seg.type === 'normal') {
+        ctx.beginPath();
+        ctx.moveTo(seg.points[0].x, seg.points[0].y);
+        for (let i = 1; i < seg.points.length; i++) {
+          ctx.lineTo(seg.points[i].x, seg.points[i].y);
+        }
+        ctx.strokeStyle = '#ffffff';
+        ctx.shadowBlur = 0;
+        ctx.lineWidth = 3.5;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+      } else {
+        drawWarpLine(ctx, seg.points[0], seg.points[1], 3.5, 0, '#ffffff');
+      }
+    });
 
     // ☄️ コネクション・アロー / 流れる光の粒子アニメーション (なぞりの方向と順序を直感的に可視化)
     const dotSpacing = 40; // 粒子の間隔
@@ -2735,70 +2829,116 @@
 
   // 🔑 アーティファクトアンロック判定
   // ✅ saveGame()重複呼び出し廃止: 呼び出し元のexecutePath末尾で1回だけ保存する
-  function unlockBossArtifact(floor) {
-    const goldBonus = 1500 * state.loopCount;
+  // ─── 🎁 ローグライク・3択ピックアップシステム ───
+  const PICKABLE_ITEMS = {
+    // 🏆 レジェンダリー秘宝
+    fang: { id: 'fang', name: '🩸 吸血の牙', desc: '敵撃破時に最大HPの3%回復。', rarity: 'legendary', type: 'artifact' },
+    hourglass: { id: 'hourglass', name: '⌛ 時の砂時計', desc: 'HPが0になった時、1フロア1回だけやり直す。', rarity: 'legendary', type: 'artifact' },
+    towel: { id: 'towel', name: '🧣 宇宙旅行用タオル', desc: 'トラップによる被ダメージを完全無効化する。', rarity: 'legendary', type: 'artifact' },
+    
+    // 💎 レア秘宝
+    boots: { id: 'boots', name: '🪽 浮遊の靴', desc: 'トラップの被ダメを15%から5%に軽減する。', rarity: 'rare', type: 'artifact' },
+    sword: { id: 'sword', name: '⚔️ ルーンの剣', desc: '剣バフの倍率が1.8倍から2.5倍へ強化。', rarity: 'rare', type: 'artifact' },
+    chalice: { id: 'chalice', name: '🏆 黄金の杯', desc: '宝箱（Chest）の獲得ゴールドが2倍になる。', rarity: 'rare', type: 'artifact' },
+    
+    // 📜 コモン呪文書
+    scrollHp: { id: 'scrollHp', name: '📜 生命力の呪文書', desc: '最大HPが +50 永続加算される。', rarity: 'common', type: 'scroll' },
+    scrollAtk: { id: 'scrollAtk', name: '📜 戦闘力の呪文書', desc: '攻撃力（ATK）が +8 永続加算される。', rarity: 'common', type: 'scroll' },
+    scrollGold: { id: 'scrollGold', name: '🪙 黄金の呪文書', desc: '即座に 500ゴールド 獲得する。', rarity: 'common', type: 'scroll' },
+    scrollShield: { id: 'scrollShield', name: '🛡️ 守護の呪文書', desc: '次のフロアのみ、被ダメージを1回だけ無効化する。', rarity: 'common', type: 'scroll' },
+    scrollFever: { id: 'scrollFever', name: '🔥 熱狂の呪文書', desc: '次のフロア開始時、即座にFEVERモードで突入。', rarity: 'rare', type: 'scroll' }
+  };
 
-    if (floor === 10) {
-      if (!state.artifacts.fang) {
-        state.artifacts.fang = true;
-        showToast("🩸 秘宝『吸血の牙』を獲得しました！");
+  function showArtifactSelection() {
+    if (!dom.pickModal || !dom.pickCardsContainer) return;
+
+    // 現在未所持のアーティファクトと、すべてのスクロールを候補にする
+    const candidates = [];
+    Object.keys(PICKABLE_ITEMS).forEach(key => {
+      const item = PICKABLE_ITEMS[key];
+      if (item.type === 'artifact') {
+        if (!state.artifacts[item.id]) {
+          candidates.push(item);
+        }
       } else {
-        state.gold += goldBonus;
-        state.totalGoldEarned += goldBonus;
-        showToast(`🩸 秘宝共鳴ボーナス！🪙+${goldBonus} G`);
-        writeTerminalLog(`秘宝『吸血の牙』の共鳴ボーナスとして ${goldBonus} G 獲得`, "gain");
+        candidates.push(item);
       }
-    } else if (floor === 15) {
-      if (!state.artifacts.hourglass) {
-        state.artifacts.hourglass = true;
-        showToast("⌛ 秘宝『時の砂時計』を獲得しました！");
-      } else {
-        state.gold += goldBonus;
-        state.totalGoldEarned += goldBonus;
-        showToast(`⌛ 秘宝共鳴ボーナス！🪙+${goldBonus} G`);
-        writeTerminalLog(`秘宝『時の砂時計』の共鳴ボーナスとして ${goldBonus} G 獲得`, "gain");
-      }
-    } else if (floor === 20) {
-      if (!state.artifacts.boots) {
-        state.artifacts.boots = true;
-        showToast("🪽 秘宝『浮遊の靴』を獲得しました！");
-      } else {
-        state.gold += goldBonus;
-        state.totalGoldEarned += goldBonus;
-        showToast(`🪽 秘宝共鳴ボーナス！🪙+${goldBonus} G`);
-        writeTerminalLog(`秘宝『浮遊の靴』の共鳴ボーナスとして ${goldBonus} G 獲得`, "gain");
-      }
-    } else if (floor === 25) {
-      if (!state.artifacts.towel) {
-        state.artifacts.towel = true;
-        showToast("🧣 秘宝『宇宙旅行用タオル』を獲得しました！");
-      } else {
-        state.gold += goldBonus;
-        state.totalGoldEarned += goldBonus;
-        showToast(`🧣 秘宝共鳴ボーナス！🪙+${goldBonus} G`);
-        writeTerminalLog(`秘宝『宇宙旅行用タオル』の共鳴ボーナスとして ${goldBonus} G 獲得`, "gain");
-      }
-    } else if (floor === 30) {
-      if (!state.artifacts.sword) {
-        state.artifacts.sword = true;
-        showToast("⚔️ 秘宝『ルーンの剣』を獲得しました！");
-      } else {
-        state.gold += goldBonus;
-        state.totalGoldEarned += goldBonus;
-        showToast(`⚔️ 秘宝共鳴ボーナス！🪙+${goldBonus} G`);
-        writeTerminalLog(`秘宝『ルーンの剣』の共鳴ボーナスとして ${goldBonus} G 獲得`, "gain");
-      }
-    } else if (floor === 40) {
-      if (!state.artifacts.chalice) {
-        state.artifacts.chalice = true;
-        showToast("🏆 秘宝『黄金の杯』を獲得しました！");
-      } else {
-        state.gold += goldBonus;
-        state.totalGoldEarned += goldBonus;
-        showToast(`🏆 秘宝共鳴ボーナス！🪙+${goldBonus} G`);
-        writeTerminalLog(`秘宝『黄金の杯』の共鳴ボーナスとして ${goldBonus} G 獲得`, "gain");
-      }
+    });
+
+    // 候補からランダムに3つ選ぶ
+    const chosen = [];
+    const shuff = [...candidates].sort(() => 0.5 - Math.random());
+    for (let i = 0; i < Math.min(3, shuff.length); i++) {
+      chosen.push(shuff[i]);
     }
+
+    // カードのDOM構築
+    dom.pickCardsContainer.innerHTML = "";
+    chosen.forEach(item => {
+      const card = document.createElement("div");
+      card.className = `pick-card rarity-${item.rarity}`;
+      
+      const title = document.createElement("div");
+      title.className = "pick-card-title";
+      title.textContent = item.name;
+      
+      const desc = document.createElement("div");
+      desc.className = "pick-card-desc";
+      desc.textContent = item.desc;
+      
+      const badge = document.createElement("span");
+      badge.className = "pick-card-rarity-badge";
+      badge.textContent = item.rarity.toUpperCase();
+      
+      card.appendChild(title);
+      card.appendChild(desc);
+      card.appendChild(badge);
+      
+      card.addEventListener("click", () => {
+        applyPickedItem(item);
+      });
+      
+      dom.pickCardsContainer.appendChild(card);
+    });
+
+    dom.pickModal.style.display = "flex";
+    AudioManager.playSound('clear');
+  }
+
+  function applyPickedItem(item) {
+    if (item.type === 'artifact') {
+      state.artifacts[item.id] = true;
+      showToast(`✨ 秘宝『${item.name}』を獲得！`);
+      writeTerminalLog(`秘宝『${item.name}』をピックアップ獲得しました`, "system");
+    } else {
+      if (item.id === 'scrollHp') {
+        state.hero.maxHp += 50;
+        state.hero.hp = Math.min(state.hero.maxHp, state.hero.hp + 50);
+        showToast("✨ 最大HP +50 永続獲得！");
+      } else if (item.id === 'scrollAtk') {
+        state.hero.atk += 8;
+        showToast("✨ ATK +8 永続獲得！");
+      } else if (item.id === 'scrollGold') {
+        state.gold += 500;
+        state.totalGoldEarned += 500;
+        showToast("🪙 500ゴールド 獲得！");
+      } else if (item.id === 'scrollShield') {
+        state.nextFloorShield = true;
+        showToast("🛡️ 次のフロア開始時にシールド展開！");
+      } else if (item.id === 'scrollFever') {
+        state.nextFloorFever = true;
+        showToast("🔥 次のフロア開始時に即FEVER突入！");
+      }
+      writeTerminalLog(`呪文書『${item.name}』の効果を適用しました`, "system");
+    }
+    
+    dom.pickModal.style.display = "none";
+    UIManager.isDirty = true;
+    saveGame();
+  }
+
+  function unlockBossArtifact(floor) {
+    showArtifactSelection();
   }
 
   // スマホ対応：アーティファクトの動的説明表示
