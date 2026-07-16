@@ -2183,6 +2183,40 @@
     return frees[Math.floor(Math.random() * frees.length)];
   }
 
+  // 🏆 実績UIの更新
+  function updateAchievementsUI() {
+    const list = [
+      { id: 'ach-combo', key: 'combo', label: '初期ATK+2' },
+      { id: 'ach-gold', key: 'gold', label: '初期ゴールド+100G' },
+      { id: 'ach-shield', key: 'shield', label: '開始時シールド30%' },
+      { id: 'ach-trap', key: 'trap', label: '罠被ダメージ5%軽減' },
+      { id: 'ach-clear', key: 'clear', label: '初期最大HP+50' }
+    ];
+
+    let activeBuffs = [];
+
+    list.forEach(item => {
+      const el = document.getElementById(item.id);
+      if (el) {
+        if (state.achievements && state.achievements[item.key]) {
+          el.classList.remove('locked');
+          activeBuffs.push(item.label);
+        } else {
+          el.classList.add('locked');
+        }
+      }
+    });
+
+    const summaryEl = document.getElementById('ach-bonus-summary');
+    if (summaryEl) {
+      if (activeBuffs.length > 0) {
+        summaryEl.textContent = `実績バフ: ${activeBuffs.join(', ')}`;
+      } else {
+        summaryEl.textContent = "実績バフ: なし";
+      }
+    }
+  }
+
   // ─── UI レンダラー ───
   const UIManager = {
     isDirty: true,
