@@ -1963,7 +1963,7 @@
     const currentSwordMul = state.artifacts.sword ? 2.5 : 1.8;
     const feverAtkMul = state.isFever ? 2.0 : 1.0;
 
-    function dfs(curr, hp, maxHp, atk, keys, tempAtk, warpPairsUsed, kills = 0) {
+    function dfs(curr, hp, maxHp, atk, keys, tempAtk, warpPairsUsed, kills = 0, hasShield = state.activeShield) {
       if (solved) return;
       if (curr === doorIdx) {
         if (hp > 0) solved = true;
@@ -1996,9 +1996,10 @@
         let nextTempAtk = tempAtk;
         let nextWarpPairsUsed = new Set(warpPairsUsed);
         let nextKills = kills;
+        let nextHasShield = hasShield;
 
         if (!cell) {
-          dfs(next, nextHp, nextMaxHp, nextAtk, nextKeys, nextTempAtk, nextWarpPairsUsed, kills);
+          dfs(next, nextHp, nextMaxHp, nextAtk, nextKeys, nextTempAtk, nextWarpPairsUsed, kills, nextHasShield);
           continue;
         }
 
@@ -2006,14 +2007,27 @@
           nextKills++;
           const isLightningSim = nextKills >= 5;
 
+          let enemyAtk = cell.val.atk;
+          // 吸血デビル特性の判定: 剣バフがなく、シールドもない場合、敵のATKが25%アップ
+          if (cell.val && cell.val.vampire && nextTempAtk === 1.0 && !nextHasShield) {
+            enemyAtk = Math.floor(enemyAtk * 1.25);
+          }
+
           const currentAtk = Math.floor(nextAtk * nextTempAtk * feverAtkMul);
           let dmg = 0;
-          if (currentAtk < cell.val.atk) {
-            dmg = (cell.val.atk - currentAtk) * (cell.type === 'boss' ? 2 : 1);
+          if (currentAtk < enemyAtk) {
+            dmg = (enemyAtk - currentAtk) * (cell.type === 'boss' ? 2 : 1);
           }
-          // ✅ DFS側にもバリアロジックを追加
+
+          // シールドバリア特性 (シールド持ちの敵)
           if (cell.val && cell.val.shield && nextTempAtk === 1.0) {
             dmg = dmg === 0 ? 10 : dmg * 2;
+          }
+
+          // 🛡️ 勇者のシールドバフの適用
+          if (nextHasShield && dmg > 0) {
+            dmg = 0;
+            nextHasShield = false;
           }
 
           // ⚡ ライトニング軽減適用
@@ -2021,6 +2035,11 @@
             dmg = Math.floor(dmg * 0.8);
           }
           nextHp -= dmg;
+
+          // トゲトゲモンスターの反撃ダメージ
+          if (cell.val && cell.val.spiky) {
+            nextHp -= Math.floor(nextMaxHp * 0.05);
+          }
           
           if (state.artifacts.fang && nextHp > 0) {
             nextHp = Math.min(nextMaxHp, nextHp + Math.floor(nextMaxHp * 0.03));
@@ -2036,7 +2055,9 @@
         }
         else if (cell.type === 'trap') {
           if (!state.isFever) {
-            const trapRate = state.artifacts.boots ? 0.05 : 0.15;
+            const trapBonusDmgReduction = state.achievements && state.achievements.trap ? 0.05 : 0;
+            let trapRate = state.artifacts.towel ? 0 : (state.artifacts.boots ? 0.05 : 0.15);
+            trapRate = Math.max(0, trapRate - trapBonusDmgReduction);
             nextHp -= Math.floor(nextMaxHp * trapRate);
           }
         }
@@ -2058,7 +2079,7 @@
             if (otherWarpIdx !== -1 && !visited.has(otherWarpIdx)) {
               nextWarpPairsUsed.add(pairName);
               visited.add(next);
-              dfs(otherWarpIdx, nextHp, nextMaxHp, nextAtk, nextKeys, nextTempAtk, nextWarpPairsUsed, kills);
+              dfs(otherWarpIdx, nextHp, nextMaxHp, nextAtk, nextKeys, nextTempAtk, nextWarpPairsUsed, kills, nextHasShield);
               visited.delete(next);
               continue;
             }
@@ -2066,14 +2087,14 @@
         }
 
         if (nextHp > 0) {
-          dfs(next, nextHp, nextMaxHp, nextAtk, nextKeys, nextTempAtk, nextWarpPairsUsed, nextKills);
+          dfs(next, nextHp, nextMaxHp, nextAtk, nextKeys, nextTempAtk, nextWarpPairsUsed, nextKills, nextHasShield);
         }
       }
 
       visited.delete(curr);
     }
 
-    dfs(startIdx, state.hero.hp, state.hero.maxHp, state.hero.atk, state.key, 1.0, new Set());
+    dfs(startIdx, state.hero.hp, state.hero.maxHp, state.hero.atk, state.key, 1.0, new Set(), 0, state.activeShield);
     return solved;
   }
 
@@ -2103,10 +2124,12 @@
       heroExp: -1,
       artifacts: null // ✅ アーティファクトキャッシュ追加（毎フレームの無駄なDOM操作を防止）
     },
+    gridCache: Array(25).fill(null), // ✅ 各セルの前回描画状態キャッシュ
 
     init() {
       initDOMCache();
       this.updateAudioButtonVisual();
+      this.gridCache.fill(null);
     },
 
     updateAudioButtonVisual() {
@@ -2234,7 +2257,7 @@
         if (dom.statFever) dom.statFever.textContent = state.stats.feverCount || 0;
       }
 
-      // ─── ✅ 修正: グリッドレンダリングの正確な実装 ───
+      // ─── ✅ 修正: グリッドレンダリングの差分キャッシュ最適化 ───
       const panels = dom.gridContainer.children;
       const path = pathTracker ? pathTracker.path : [];
       const isDragging = pathTracker && pathTracker.isDragging;
@@ -2246,6 +2269,40 @@
 
         const cell = gridData[i];
         const isSelected = path.includes(i);
+        
+        let isAdjacent = false;
+        if (isDragging && !isSelected && lastIdx !== null) {
+          const cx = lastIdx % 5;
+          const cy = Math.floor(lastIdx / 5);
+          const tx = i % 5;
+          const ty = Math.floor(i / 5);
+          isAdjacent = (Math.abs(tx - cx) + Math.abs(ty - cy) === 1);
+        }
+
+        // セルの描画状態を表すキャッシュキーをシリアライズ
+        let stateKey = "";
+        if (cell) {
+          stateKey += `${cell.type}|`;
+          if (cell.type === 'monster') {
+            stateKey += `${cell.val.atk}|${cell.val.elite}|${cell.val.shield}|${cell.val.spiky}|${cell.val.slime}|${cell.val.vampire}|`;
+          } else if (cell.type === 'boss') {
+            stateKey += `${cell.val.atk}|`;
+          } else if (cell.type === 'trap') {
+            stateKey += `${state.isFever}|${state.artifacts.towel}|${state.artifacts.boots}|${state.achievements.trap}|`;
+          } else if (cell.type === 'warp') {
+            stateKey += `${cell.val}|`;
+          }
+        } else {
+          stateKey += "empty|";
+        }
+        const pathIndex = path.indexOf(i);
+        stateKey += `${isSelected}|${pathIndex}|${isAdjacent}`;
+
+        // 状態が前回から変化していない場合は、DOMの書き換えを完全にスキップ
+        if (this.gridCache[i] === stateKey) {
+          continue;
+        }
+        this.gridCache[i] = stateKey;
 
         // パネルタイプに基づいてCSSクラスを正確に設定
         if (cell) {
@@ -2332,16 +2389,23 @@
             valText = cell.val;
           }
 
-          // クラス名を組み立てる (selectedは明示的な場合のみ付与)
+          // クラス名を組み立てる
           let className = `grid-panel glass-panel ${typeClass}`;
           if (isSelected) className += " selected path-active";
+          if (isAdjacent) className += " target-connectable";
           panel.className = className;
 
-          const iconEl = panel.querySelector(".panel-icon");
-          const valEl = panel.querySelector(".panel-val");
-          if (iconEl && iconId) {
-            iconEl.innerHTML = `<svg><use href="#icon-${iconId}"></use></svg>`;
+          const useEl = panel.querySelector(".panel-icon svg use");
+          if (useEl) {
+            if (iconId) {
+              useEl.setAttribute('href', `#icon-${iconId}`);
+              useEl.parentElement.style.display = "block";
+            } else {
+              useEl.setAttribute('href', '');
+              useEl.parentElement.style.display = "none";
+            }
           }
+          const valEl = panel.querySelector(".panel-val");
           if (valEl) valEl.textContent = valText;
 
           // ✅ シールドバッジの表示制御
@@ -2354,28 +2418,20 @@
           // セルが空の場合
           let className = "grid-panel glass-panel";
           if (isSelected) className += " selected path-active";
+          if (isAdjacent) className += " target-connectable";
           panel.className = className;
           panel.removeAttribute('data-monster-type');
 
-          const iconEl = panel.querySelector(".panel-icon");
+          const useEl = panel.querySelector(".panel-icon svg use");
+          if (useEl) {
+            useEl.setAttribute('href', '');
+            useEl.parentElement.style.display = "none";
+          }
           const valEl = panel.querySelector(".panel-val");
-          if (iconEl) iconEl.innerHTML = "";
           if (valEl) valEl.textContent = "";
 
           const sBadge = panel.querySelector(".shield-badge");
           if (sBadge) sBadge.style.display = "none";
-        }
-
-        // ドラッグ中の隣接セル表示
-        if (isDragging && !isSelected && lastIdx !== null) {
-          const cx = lastIdx % 5;
-          const cy = Math.floor(lastIdx / 5);
-          const tx = i % 5;
-          const ty = Math.floor(i / 5);
-          const isAdjacent = (Math.abs(tx - cx) + Math.abs(ty - cy) === 1);
-          if (isAdjacent) {
-            panel.classList.add("target-connectable");
-          }
         }
       }
     }
@@ -2429,7 +2485,8 @@
   function drawNeonLines() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const path = pathTracker ? pathTracker.path : [];
-    if (path.length < 2) return;
+    const len = path.length;
+    if (len < 2) return;
 
     const panels = dom.gridContainer.children;
     const getCenter = (idx) => {
@@ -2662,6 +2719,7 @@
 
       const icon = document.createElement("span");
       icon.className = "panel-icon";
+      icon.innerHTML = `<svg><use href=""></use></svg>`;
       panel.appendChild(icon);
 
       const val = document.createElement("span");
