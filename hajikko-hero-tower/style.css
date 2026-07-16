@@ -608,6 +608,9 @@ body {
   pointer-events: none;
   animation: floatUpFade 0.78s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
   z-index: 100;
+  will-change: transform, opacity; /* ✅ GPUアクセラレーションの強制 */
+  backface-visibility: hidden;    /* ✅ 3D合成レイヤーとしての最適化 */
+  transform: translate3d(0, 0, 0); /* ✅ 合成レイヤー構築を明示 */
 }
 
 #floating-text-container {

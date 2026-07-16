@@ -183,13 +183,21 @@
         continue;
       }
 
+      // 【最適化】重い shadowBlur を廃止し、2重線（太い半透明グロー ＋ 細い白色コア）でネオンを表現
+      // レイヤー1: 広範囲の半透明グロー
       ctx.beginPath();
       ctx.arc(w.x, w.y, w.radius, 0, Math.PI * 2);
       ctx.strokeStyle = w.color;
-      ctx.lineWidth = 3 * w.alpha;
+      ctx.lineWidth = 9 * w.alpha;
+      ctx.globalAlpha = w.alpha * 0.28;
+      ctx.stroke();
+
+      // レイヤー2: 高輝度コア実線
+      ctx.beginPath();
+      ctx.arc(w.x, w.y, w.radius, 0, Math.PI * 2);
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2 * w.alpha;
       ctx.globalAlpha = w.alpha;
-      ctx.shadowBlur = 12;
-      ctx.shadowColor = w.color;
       ctx.stroke();
     }
 
@@ -209,12 +217,19 @@
         continue;
       }
 
+      // 【最適化】重い shadowBlur を廃止し、2重塗り（広範囲半透明グロー ＋ 高輝度白色コア）で描画
+      // レイヤー1: 広範囲グロー
       ctx.beginPath();
-      ctx.arc(p.x, p.y, currentSize, 0, Math.PI * 2);
+      ctx.arc(p.x, p.y, currentSize * 2.2, 0, Math.PI * 2);
       ctx.fillStyle = p.color;
+      ctx.globalAlpha = p.alpha * 0.22;
+      ctx.fill();
+
+      // レイヤー2: 白色コア
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, currentSize * 0.8, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffffff';
       ctx.globalAlpha = p.alpha;
-      ctx.shadowBlur = 8;
-      ctx.shadowColor = p.color;
       ctx.fill();
     }
     ctx.restore();
@@ -531,6 +546,8 @@
   let lastUserInteractionTime = performance.now(); // ✅ performance.nowで統一（mainLoop of timestampと同単位）
   let gameStarted = false;
   let isProcessingPath = false; // ✅ ルート解決アニメーション中フラグ
+  const FLOATING_TEXT_POOL_SIZE = 40; // ✅ 浮遊テキストプールの最大サイズ
+  const floatingTextPool = []; // ✅ 浮遊テキストプール配列
 
   // DOMキャッシュ
   const dom = {};
@@ -630,6 +647,26 @@
     
     // index.htmlの重複id 'hero-level' のうち、ステータス表示用に新設した 'hero-level-display' も登録
     dom.heroLevelDisplay = document.getElementById("hero-level-display");
+
+    // ✅ 浮遊テキストプールの初期化
+    initFloatingTextPool();
+  }
+
+  // ─── 浮遊テキストプールの実DOM生成 ───
+  function initFloatingTextPool() {
+    dom.floatingTextContainer.innerHTML = "";
+    floatingTextPool.length = 0;
+    for (let i = 0; i < FLOATING_TEXT_POOL_SIZE; i++) {
+      const el = document.createElement("div");
+      el.className = "floating-dmg";
+      el.style.display = "none";
+      dom.floatingTextContainer.appendChild(el);
+      floatingTextPool.push({
+        el: el,
+        active: false,
+        timer: null
+      });
+    }
   }
 
   // 💻 PC用リアルタイムログ出力ヘルパー
@@ -1489,27 +1526,44 @@
     setTimeout(() => { dom.levelUpOverlay.style.display = "none"; }, 1800);
   }
 
-  // ─── 浮遊数値テキストエフェクト ───
+  // ─── 浮遊数値テキストエフェクト (DOMプール & GPU合成加速最適化) ───
   function spawnFloatingText(text, x, y, color, chainCount = 0) {
-    const floatEl = document.createElement("div");
-    floatEl.className = "floating-dmg";
-    floatEl.textContent = text;
-    floatEl.style.left = `${x}px`;
-    floatEl.style.top = `${y}px`;
-    floatEl.style.setProperty('--glow-c', color);
-    floatEl.style.color = "#fff";
+    let pObj = floatingTextPool.find(obj => !obj.active);
 
-    // ✅ チェインコンボ数(chainCount)に応じてフォントサイズと発光を拡大 (インフレ感の演出)
-    if (chainCount > 1) {
-      const scale = Math.min(1.6, 1.0 + (chainCount - 1) * 0.08);
-      floatEl.style.transform = `translate(-50%, -50%) scale(${scale})`;
-      floatEl.style.fontWeight = "900";
-      floatEl.style.textShadow = `0 0 ${8 * scale}px ${color}, 0 0 ${16 * scale}px ${color}`;
+    if (!pObj) {
+      pObj = floatingTextPool[0];
+      if (pObj.timer) clearTimeout(pObj.timer);
     }
-    
-    dom.floatingTextContainer.appendChild(floatEl);
 
-    setTimeout(() => { floatEl.remove(); }, 800);
+    pObj.active = true;
+    const el = pObj.el;
+
+    el.className = "floating-dmg";
+    void el.offsetWidth;
+
+    el.textContent = text;
+    el.style.left = `${x}px`;
+    el.style.top = `${y}px`;
+    el.style.setProperty('--glow-c', color);
+    el.style.color = "#fff";
+    el.style.display = "block";
+
+    let scale = 1.0;
+    if (chainCount > 1) {
+      scale = Math.min(1.6, 1.0 + (chainCount - 1) * 0.08);
+      el.style.fontWeight = "900";
+      el.style.textShadow = `0 0 ${8 * scale}px ${color}, 0 0 ${16 * scale}px ${color}`;
+    } else {
+      el.style.fontWeight = "normal";
+      el.style.textShadow = "none";
+    }
+    el.style.transform = `translate3d(-50%, -50%, 0) scale(${scale})`;
+
+    pObj.timer = setTimeout(() => {
+      el.style.display = "none";
+      pObj.active = false;
+      pObj.timer = null;
+    }, 780);
   }
 
   // ─── ゲームオーバー (時の砂時計 1F巻き戻し復活) ───
@@ -1986,6 +2040,7 @@
       }
 
       for (const next of neighbors) {
+        if (solved) return; // ✅ 早期脱出: 解が見つかったら即終了
         if (visited.has(next)) continue;
         const cell = gridData[next];
 
@@ -2079,14 +2134,16 @@
             if (otherWarpIdx !== -1 && !visited.has(otherWarpIdx)) {
               nextWarpPairsUsed.add(pairName);
               visited.add(next);
-              dfs(otherWarpIdx, nextHp, nextMaxHp, nextAtk, nextKeys, nextTempAtk, nextWarpPairsUsed, kills, nextHasShield);
+              if (!solved) {
+                dfs(otherWarpIdx, nextHp, nextMaxHp, nextAtk, nextKeys, nextTempAtk, nextWarpPairsUsed, kills, nextHasShield);
+              }
               visited.delete(next);
               continue;
             }
           }
         }
 
-        if (nextHp > 0) {
+        if (nextHp > 0 && !solved) {
           dfs(next, nextHp, nextMaxHp, nextAtk, nextKeys, nextTempAtk, nextWarpPairsUsed, nextKills, nextHasShield);
         }
       }
