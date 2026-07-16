@@ -446,6 +446,18 @@
     nextFloorFever: false,
     activeShield: false,
     floorStartBackup: null, // 時の砂時計用フロアバックアップ
+    // 🏆 実績システム
+    achievements: {
+      combo: false,
+      gold: false,
+      shield: false,
+      trap: false,
+      clear: false
+    },
+    achStats: {
+      shieldBlocks: 0,
+      trapsStepped: 0
+    },
     // 🏆 統計システム
     stats: {
       totalKills: 0,
@@ -516,8 +528,9 @@
   let gridData = [];
   let pathTracker = null;
   let cellBoundsCache = [];
-  let lastUserInteractionTime = performance.now(); // ✅ performance.nowで統一（mainLoopのtimestampと同単位）
+  let lastUserInteractionTime = performance.now(); // ✅ performance.nowで統一（mainLoop of timestampと同単位）
   let gameStarted = false;
+  let isProcessingPath = false; // ✅ ルート解決アニメーション中フラグ
 
   // DOMキャッシュ
   const dom = {};
@@ -634,11 +647,17 @@
   }
 
   // 💡 戦闘計算の共通化
-  function calculateBattle(heroAtk, hasSwordBuff, cell) {
+  function calculateBattle(heroAtk, hasSwordBuff, cell, hasShield = false) {
     const swordMultiplier = state.artifacts.sword ? 2.5 : 1.8;
     const feverAtkMultiplier = state.isFever ? 2.0 : 1.0;
     
-    const enemyAtk = cell.val.atk;
+    let enemyAtk = cell.val.atk;
+    
+    // 吸血デビルの判定: 剣バフがなく、シールドもない場合、敵のATKが25%アップ
+    if (cell.val && cell.val.vampire && !hasSwordBuff && !hasShield) {
+      enemyAtk = Math.floor(enemyAtk * 1.25);
+    }
+    
     const currentAtk = Math.floor(heroAtk * (hasSwordBuff ? swordMultiplier : 1.0) * feverAtkMultiplier);
     
     let dmg = 0;
@@ -651,11 +670,17 @@
       dmg = dmg === 0 ? 10 : dmg * 2; // 無傷の場合でもシールド抵抗で最低10ダメ
     }
 
+    // トゲトゲモンスターの反撃ダメージ (最大HPの5%)
+    let spikeDmg = 0;
+    if (cell.val && cell.val.spiky) {
+      spikeDmg = Math.floor(state.hero.maxHp * 0.05);
+    }
+
     const goldMul = (1.0 + (state.permanentUpgrades.gold * GameConfig.upgrades.gold.rate)) * (state.isFever ? 3.0 : 1.0);
     const gold = Math.floor(cell.val.gold * goldMul);
     const exp = cell.val.exp;
 
-    return { dmg, gold, exp };
+    return { dmg, gold, exp, spikeDmg };
   }
 
   // 🔒 安全チェックサム生成
@@ -886,7 +911,7 @@
       if (cell.type === 'monster' || cell.type === 'boss') {
         killCount++;
         const chainMul = getChainMultiplier(killCount);
-        const result = calculateBattle(atk, hasSwordBuff, cell);
+        const result = calculateBattle(atk, hasSwordBuff, cell, activeShield);
         
         // ✅ 必殺効果: 被ダメージを20%軽減
         let dmg = result.dmg;
@@ -902,6 +927,11 @@
         }
         hp -= dmg;
         
+        // トゲトゲの反撃ダメージ
+        if (result.spikeDmg > 0) {
+          hp -= result.spikeDmg;
+        }
+
         if (state.artifacts.fang && hp > 0) {
           hp = Math.min(maxHp, hp + Math.floor(maxHp * 0.03));
         }
@@ -1013,6 +1043,10 @@
     const panels = dom.gridContainer.children;
     
     for (let i = 0; i < 25; i++) {
+      const panel = panels[i];
+      if (panel) {
+        panel.classList.remove("panel-danger-active");
+      }
       const badge = panels[i]?.querySelector(".panel-prediction-badge");
       if (badge) {
         badge.textContent = "";
@@ -1025,6 +1059,7 @@
     const swordMultiplier = state.artifacts.sword ? 2.5 : 1.8;
     let hasSwordBuff = false;
     let killCount = 0;
+    let activeShield = state.activeShield;
 
     path.forEach((idx, step) => {
       if (step === 0) return;
@@ -1038,21 +1073,31 @@
       if (cell.type === 'monster' || cell.type === 'boss') {
         killCount++;
         const chainMul = getChainMultiplier(killCount);
-        const battle = calculateBattle(atk, hasSwordBuff, cell);
-        currentHp -= battle.dmg;
+        const battle = calculateBattle(atk, hasSwordBuff, cell, activeShield);
+        
+        let dmg = battle.dmg;
+        if (activeShield && dmg > 0) {
+          dmg = 0;
+          activeShield = false;
+        }
+        
+        currentHp -= dmg;
+        if (battle.spikeDmg > 0) {
+          currentHp -= battle.spikeDmg;
+        }
         
         if (state.artifacts.fang && currentHp > 0) {
           currentHp = Math.min(maxHp, currentHp + Math.floor(maxHp * 0.03));
         }
 
         if (currentHp <= 0) {
-          badge.textContent = "💀";
+          badge.textContent = "💀 DANGER";
           badge.classList.add("badge-dmg", "death-warning-badge");
+          if (panel) panel.classList.add("panel-danger-active");
         } else {
-          // ✅ ダメージが0なら「OK」、受けるなら「HP値」
-          if (battle.dmg === 0) {
+          if (dmg === 0) {
             badge.textContent = "🛡️ OK";
-            badge.classList.add("badge-buff"); // 盾（ゴールド枠）で安全を示す
+            badge.classList.add("badge-buff");
           } else {
             badge.textContent = `HP ${currentHp}`;
             badge.classList.add("badge-dmg");
@@ -1076,12 +1121,16 @@
           badge.textContent = `無敵G`;
           badge.classList.add("badge-heal");
         } else {
-          const trapRate = state.artifacts.boots ? 0.05 : 0.15;
+          const trapBonusDmgReduction = state.achievements.trap ? 0.05 : 0;
+          let trapRate = state.artifacts.boots ? 0.05 : 0.15;
+          trapRate = Math.max(0, trapRate - trapBonusDmgReduction);
+
           const trapDmg = Math.floor(maxHp * trapRate);
           currentHp -= trapDmg;
           if (currentHp <= 0) {
-            badge.textContent = "💀";
+            badge.textContent = "💀 DANGER";
             badge.classList.add("badge-dmg", "death-warning-badge");
+            if (panel) panel.classList.add("panel-danger-active");
           } else {
             badge.textContent = `HP ${currentHp}`;
             badge.classList.add("badge-dmg");
@@ -1633,6 +1682,13 @@
     dom.clearModal.style.display = "none";
     updateSkinForFloor();
 
+    // 🛡️ 実績特典: 鉄壁の守り (フロア開始時に30%の確率でシールド自動展開)
+    if (state.achievements && state.achievements.shield && !state.activeShield && Math.random() < 0.30) {
+      state.activeShield = true;
+      showToast("🛡️ 実績特典: 開始時シールド展開！");
+      writeTerminalLog("実績バフ：フロア開始時にシールドが自動展開されました", "system");
+    }
+
     // 🛡️ 呪文書バフの適用: シールド
     if (state.nextFloorShield) {
       state.activeShield = true;
@@ -1693,11 +1749,20 @@
       };
     }
 
-    const baseMaxHp = 100;
-    const baseAtk = 10;
+    // 実績によるボーナスバフ
+    let bonusHp = state.achievements && state.achievements.clear ? 50 : 0;
+    let bonusAtk = state.achievements && state.achievements.combo ? 2 : 0;
+    let bonusGold = state.achievements && state.achievements.gold ? 100 : 0;
+
+    const baseMaxHp = 100 + bonusHp;
+    const baseAtk = 10 + bonusAtk;
     state.hero.maxHp = Math.round(baseMaxHp * (1.0 + hpLv * GameConfig.upgrades.hp.rate));
     state.hero.atk = Math.round(baseAtk * (1.0 + atkLv * GameConfig.upgrades.atk.rate));
     state.hero.hp = state.hero.maxHp;
+
+    if (!keepLoop) {
+      state.gold = bonusGold; // 初期ゴールド実績ボーナス
+    }
 
     updateSkinForFloor();
     generateFloorData();
@@ -1794,7 +1859,24 @@
           const baseExp = Math.round(2 * Math.pow(1.12, state.floor - 1)) + state.floor;
 
           const isElite = Math.random() < 0.15;
-          const isShield = !isElite && state.floor >= 3 && Math.random() < 0.30; // エリートでなく、3F以上で30%の確率でシールド
+          let isShield = false;
+          let isSpiky = false;
+          let isSlime = false;
+          let isVampire = false;
+
+          if (!isElite && state.floor >= 3) {
+            const randAbility = Math.random();
+            if (randAbility < 0.20) {
+              isShield = true;
+            } else if (state.floor >= 5 && randAbility < 0.35) {
+              isSpiky = true; // 5Fからトゲトゲ出現 (15%確率)
+            } else if (state.floor >= 6 && randAbility < 0.50) {
+              isSlime = true;  // 6Fからスライム出現 (15%確率)
+            } else if (state.floor >= 8 && randAbility < 0.65) {
+              isVampire = true; // 8Fから吸血デビル出現 (15%確率)
+            }
+          }
+
           gridData[i] = {
             type: 'monster',
             val: {
@@ -1803,7 +1885,10 @@
               exp: isElite ? baseExp * 3 : baseExp,
               gold: isElite ? baseExp * 3.5 : baseExp,
               elite: isElite,
-              shield: isShield // ✅ シールドプロパティ
+              shield: isShield,
+              spiky: isSpiky,
+              slime: isSlime,
+              vampire: isVampire
             }
           };
         }
@@ -2164,6 +2249,7 @@
 
         // パネルタイプに基づいてCSSクラスを正確に設定
         if (cell) {
+          panel.removeAttribute('data-monster-type'); // デフォルトで属性をリセット
           let typeClass = "panel-empty";
           let iconId = "";
           let valText = "";
@@ -2175,11 +2261,29 @@
           }
           else if (cell.type === 'monster') {
             typeClass = cell.val.elite ? "panel-boss" : "panel-monster";
-            // ✅ シールドバリア効果のネオンクラスを追加
             if (cell.val.shield) {
               typeClass += " panel-shield-active";
             }
-            iconId = cell.val.elite ? "boss" : "monster";
+            
+            // 属性モンスターの判定
+            let monsterAttr = "";
+            if (cell.val.spiky) {
+              monsterAttr = "spiky";
+              iconId = "monster-spiky";
+            } else if (cell.val.slime) {
+              monsterAttr = "slime";
+              iconId = "monster-slime";
+            } else if (cell.val.vampire) {
+              monsterAttr = "vampire";
+              iconId = "monster-vampire";
+            } else {
+              iconId = cell.val.elite ? "boss" : "monster";
+            }
+
+            if (monsterAttr) {
+              panel.setAttribute('data-monster-type', monsterAttr);
+            }
+
             valText = `ATK ${cell.val.atk.toLocaleString()}`;
           }
           else if (cell.type === 'boss') {
@@ -2251,6 +2355,7 @@
           let className = "grid-panel glass-panel";
           if (isSelected) className += " selected path-active";
           panel.className = className;
+          panel.removeAttribute('data-monster-type');
 
           const iconEl = panel.querySelector(".panel-icon");
           const valEl = panel.querySelector(".panel-val");
@@ -2761,6 +2866,7 @@
           }
         }
       }
+      updateAchievementsUI(); // ロード直後に実績UIを同期
     } catch(e) {
       console.error("ロード失敗:", e);
     }
@@ -3094,6 +3200,7 @@
 
       recordInteraction();
       loadGame();
+      updateAchievementsUI(); // 実績UI同期
       updateSkinForFloor();
       generateFloorData();
       
