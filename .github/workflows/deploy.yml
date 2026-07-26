@@ -90,9 +90,10 @@ jobs:
             for attempt in 1 2 3; do
               if "$@"; then
                 return 0
+              else
+                status=$?
               fi
 
-              status=$?
               if [ "$attempt" -eq 3 ]; then
                 return "$status"
               fi
@@ -128,9 +129,10 @@ jobs:
             for attempt in 1 2 3; do
               if "$@"; then
                 return 0
+              else
+                status=$?
               fi
 
-              status=$?
               if [ "$attempt" -eq 3 ]; then
                 return "$status"
               fi
