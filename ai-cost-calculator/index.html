@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Cost Lab | API料金・性能ベンチマーク・トークンコストリアルタイム比較</title>
+  <meta name="description" content="ChatGPT, Claude 3.5, Gemini 2.0, DeepSeek R1等の最新AIモデルAPI料金単価・性能ベンチマークスコア(100点満点)・Context Windowをリアルタイム一括比較！">
+  <meta name="keywords" content="AI API 料金比較, LLM ベンチマーク 性能比較, GPT-4o コスト, Claude 3.5 Sonnet 性能, DeepSeek V3 API, トークン計算機, Prompt Caching 試算">
+
+  <!-- Open Graph / Social -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="AI Cost Lab | API料金・性能ベンチマーク・トークンコストリアルタイム比較">
+  <meta property="og:description" content="2026年7月最新の公式API料金単価とベンチマーク性能スコア（品質 vs コスパ）を精密リアルタイム試算。">
+  <meta property="og:image" content="https://katakatalab.com/assets/images/ai-cost-lab-ogp.png">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;800;900&family=Plus+Jakarta+Sans:wght@600;700;800;900&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "AI Cost Lab",
+    "operatingSystem": "All",
+    "applicationCategory": "DeveloperApplication",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "JPY" },
+    "description": "主要LLM・画像生成AIの公式API単価（1M Tokens）とベンチマーク性能スコア・Context Windowを比較試算する開発者向けプロシミュレーター。"
+  }
+  </script>
+</head>
+<body>
+
+  <!-- Header Navigation -->
+  <header class="app-header">
+    <div class="header-inner">
+      <a href="../index.html" class="logo">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="logo-svg"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        <span class="logo-text">AI Cost Lab</span>
+        <span class="badge">Benchmark & Pricing 2026</span>
+      </a>
+      <nav class="header-nav">
+        <a href="../index.html" class="nav-link">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+          ホーム
+        </a>
+        <a href="#guide" class="nav-link">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+          モデル性能ガイド
+        </a>
+        <a href="#faq" class="nav-link">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          FAQ
+        </a>
+        <button id="theme-toggle-btn" aria-label="テーマ切替" style="background:var(--bg-input); border:1px solid var(--border-color); color:var(--text-main); padding:0.35rem 0.65rem; border-radius:var(--radius-sm); font-size:0.85rem; font-weight:800; cursor:pointer; margin-left:0.5rem;">🌙/☀️</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Verification Trust Notice Header Banner -->
+  <div class="verification-notice-bar">
+    <div class="verification-inner">
+      <span class="verified-badge">✓ 各社公式ドキュメント検証済み (2026年7月更新)</span>
+      <span class="verified-text">OpenAI, Anthropic, Google, DeepSeek の公表単価・ベンチマークデータ基準</span>
+    </div>
+  </div>
+
+  <!-- Hero Banner -->
+  <section class="hero-section">
+    <div class="hero-container">
+      <div class="hero-text-block">
+        <div class="hero-tag">
+          <span class="tag-pulse"></span>
+          品質 vs コスパ 2軸ベンチマーク分析
+        </div>
+        <h1 class="hero-title">性能とコストの最適解はどれ？<br><span class="highlight">API料金 ＆ 性能スコア</span> リアルタイム比較</h1>
+        <p class="hero-subtitle">OpenAI / Claude / Gemini / DeepSeek 等の公式単価（1M Tokens）に、総合ベンチマーク性能スコア（100点満点）と Context Window を組み合わせて精密比較。Prompt Caching・Batch API割引にも完全対応。</p>
+
+        <div class="hero-features-list">
+          <span class="feat-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> 公式データ検証済み</span>
+          <span class="feat-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> 性能スコア(0-100点)表示</span>
+          <span class="feat-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> 2モデル直接対比ピン留め</span>
+        </div>
+      </div>
+
+      <!-- Real Dynamic UI Demo Card Preview Graphic -->
+      <div class="hero-graphic-block">
+        <div class="ui-mockup-card">
+          <div class="mockup-header">
+            <span class="mockup-dot red"></span>
+            <span class="mockup-dot yellow"></span>
+            <span class="mockup-dot green"></span>
+            <span class="mockup-title">Live Benchmark & Cost Preview</span>
+          </div>
+          <div class="mockup-body" id="hero-mockup-list">
+            <!-- Dynamically rendered by JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 1: Conditions Setup Section -->
+  <section class="step-section step-1-section" id="step-1">
+    <div class="section-container">
+      <div class="step-header">
+        <span class="step-badge">STEP 1</span>
+        <h2>使用条件 ＆ パラメータ設定</h2>
+        <p class="step-sub">ユースケースプリセットを選ぶか、文字数・トークン数・割引オプションを指定してください。</p>
+      </div>
+
+      <div class="step-card-panel">
+        <!-- Quick Live Summary Badge -->
+        <div class="quick-live-counter" id="quick-live-counter">
+          <div class="counter-left">
+            <span class="counter-pulse"></span>
+            <span class="counter-label">最安推論コスト:</span>
+            <strong class="counter-val" id="quick-counter-val">最安 ¥ 4/月 (DeepSeek V3)</strong>
+          </div>
+          <a href="#step-2" class="counter-link">比較チャートを見る ↓</a>
+        </div>
+
+        <!-- Presets -->
+        <div class="preset-group">
+          <label class="panel-label">用途別ワンタップ設定 (Presets):</label>
+          <div class="preset-buttons">
+            <button class="preset-btn active" data-preset="blogger">記事・ブログ生成 (15万字)</button>
+            <button class="preset-btn" data-preset="chatbot">AIチャットボット (3,000 req)</button>
+            <button class="preset-btn" data-preset="coder">コード補完・Dev (出力多め)</button>
+            <button class="preset-btn" data-preset="heavy">エンタープライズ自動化 (500万字)</button>
+            <button class="preset-btn" data-preset="image">画像生成メイン (500枚)</button>
+          </div>
+        </div>
+
+        <!-- Mode Toggle -->
+        <div class="mode-toggle-wrapper">
+          <button class="mode-btn active" id="mode-text">文字数・リクエスト数で試算</button>
+          <button class="mode-btn" id="mode-token">トークン数 (Tokens) で直接指定</button>
+        </div>
+
+        <!-- Dynamic Inputs Section -->
+        <div class="input-section" id="input-section-text">
+          <div class="slider-grid-2col">
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="monthly-text-length">
+                  月間 処理文字数 (Total Characters)
+                  <span class="tooltip-icon" data-tooltip="プロンプトとAI応答文字数の合計">?</span>
+                </label>
+                <span class="value-badge" id="val-text-length">100,000 文字</span>
+              </div>
+              <input type="range" id="monthly-text-length" min="10000" max="5000000" step="10000" value="100000">
+              <div class="slider-hint" id="hint-text-length">原稿用紙 約250枚分 / チャット約100往復</div>
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="monthly-requests">月間 リクエスト回数 (Requests)</label>
+                <span class="value-badge" id="val-requests">200 回</span>
+              </div>
+              <input type="range" id="monthly-requests" min="10" max="10000" step="10" value="200">
+              <div class="slider-hint">AI APIへリクエストを送信する月間回数</div>
+            </div>
+          </div>
+
+          <div class="ratio-box">
+            <div class="slider-header">
+              <label for="io-ratio-slider">
+                プロンプト対応答の比率 (Input ↔ Output Ratio)
+                <span class="tooltip-icon" data-tooltip="InputトークンとOutputトークンの想定比率">?</span>
+              </label>
+              <span class="value-badge" id="val-io-ratio">Input 40% : Output 60%</span>
+            </div>
+            <input type="range" id="io-ratio-slider" min="10" max="90" step="5" value="40">
+            <div class="slider-hint">要約・質問は「Input多め」、コード・記事生成は「Output多め」が目安</div>
+          </div>
+        </div>
+
+        <div class="input-section hidden" id="input-section-token">
+          <div class="slider-grid-2col">
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="input-tokens">Input Tokens (入力トークン)</label>
+                <span class="value-badge" id="val-input-tokens">100,000 tokens</span>
+              </div>
+              <input type="range" id="input-tokens" min="10000" max="10000000" step="10000" value="100000">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="output-tokens">Output Tokens (出力トークン)</label>
+                <span class="value-badge" id="val-output-tokens">200,000 tokens</span>
+              </div>
+              <input type="range" id="output-tokens" min="10000" max="10000000" step="10000" value="200000">
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="panel-label" style="margin-top:1.25rem;">表示対象モデルの絞り込み:</div>
+        <div class="filter-bar">
+          <button class="filter-chip active" data-filter="all">すべて (All)</button>
+          <button class="filter-chip" data-filter="llm">LLM テキスト</button>
+          <button class="filter-chip" data-filter="reasoning">高度推論 (o1 / o3-mini / R1)</button>
+          <button class="filter-chip" data-filter="image">画像生成 (Image AI)</button>
+          <button class="filter-chip" data-filter="openai">OpenAI</button>
+          <button class="filter-chip" data-filter="anthropic">Anthropic</button>
+          <button class="filter-chip" data-filter="google">Google</button>
+          <button class="filter-chip" data-filter="deepseek">DeepSeek</button>
+        </div>
+
+        <!-- Advanced Discount Toggles & Currency -->
+        <div class="settings-row">
+          <div class="toggles-group">
+            <label class="toggle-switch-label">
+              <input type="checkbox" id="chk-cache">
+              <span>Prompt Caching適用</span>
+            </label>
+            <label class="toggle-switch-label">
+              <input type="checkbox" id="chk-batch">
+              <span>Batch API利用 (全体 50% OFF)</span>
+            </label>
+          </div>
+
+          <!-- Pro Feature: Cache Hit Ratio Slider -->
+          <div class="cache-ratio-slider-box" id="cache-ratio-box" style="width:100%; margin-top:0.75rem; background:#f8fafc; border:1px solid var(--border-color); padding:0.75rem 1rem; border-radius:var(--radius-md);">
+            <div class="slider-header" style="display:flex; justify-content:space-between; align-items:center;">
+              <label for="cache-hit-slider" style="font-weight:800; font-size:0.85rem;">
+                Prompt Caching キャッシュヒット率 (Cache Hit Ratio)
+                <span class="tooltip-icon" data-tooltip="再利用するシステムプロンプトやコンテキストの割合">?</span>
+              </label>
+              <span class="value-badge" id="val-cache-hit" style="background:#ecfdf5; color:var(--accent-emerald); border-color:#a7f3d0;">Hit率 50% (50% OFF換算)</span>
+            </div>
+            <input type="range" id="cache-hit-slider" min="0" max="100" step="5" value="50" style="width:100%; margin-top:0.35rem;">
+            <div class="slider-hint" style="font-size:0.75rem; color:var(--text-muted); margin-top:0.25rem;">RAGや固定プロンプトの連続送信では高Hit率(70%〜90%)が目安です。</div>
+          </div>
+
+          <div class="currency-group">
+            <div class="setting-item">
+              <label for="rate-select">為替レート:</label>
+              <select id="rate-select">
+                <option value="150" selected>1$＝150円</option>
+                <option value="155">1$＝155円</option>
+                <option value="160">1$＝160円</option>
+                <option value="145">1$＝145円</option>
+                <option value="custom">カスタム直接指定</option>
+              </select>
+              <input type="number" id="custom-rate-input" placeholder="例: 153.5" step="0.1" value="150" style="display:none; width:85px; padding:0.3rem; margin-left:0.4rem; border-radius:var(--radius-sm); border:1px solid var(--border-color); font-weight:800;">
+            </div>
+            <div class="curr-toggle">
+              <button class="currency-btn active" id="curr-jpy">円 (¥)</button>
+              <button class="currency-btn" id="curr-usd">USD ($)</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 2: Diagnostic Winner & Cost Bar Chart Section -->
+  <section class="step-section step-2-section" id="step-2">
+    <div class="section-container">
+      <div class="step-header">
+        <span class="step-badge green">STEP 2</span>
+        <h2>最安推奨モデル ＆ 月額費用ランキング</h2>
+        <p class="step-sub">設定されたパラメータにおける各モデルの想定月額コスト一括対比です。</p>
+      </div>
+
+      <!-- Feature Highlight Winner Card -->
+      <div class="winner-hero-card">
+        <div class="winner-left">
+          <div class="winner-status-tag">MOST COST-EFFECTIVE</div>
+          <h3 class="winner-title-text" id="winner-name">DeepSeek V3</h3>
+          <p class="winner-desc-text" id="winner-desc">圧倒的な低価格！超軽量かつ高速処理が可能な次世代標準モデル。</p>
+        </div>
+        <div class="winner-right">
+          <div class="winner-price-label">想定月額コスト</div>
+          <div class="winner-big-price" id="winner-price">
+            <span class="currency-unit">¥</span>
+            <span class="price-num">4</span>
+            <span class="per-month">/ 月</span>
+          </div>
+          <div class="winner-sub-stats">
+            <span>1回単価: <strong id="winner-per-req">¥ 0.02</strong></span>
+            <span>年間想定: <strong id="winner-year">¥ 48</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pro Feature: 2-Model Pinning Comparison Card -->
+      <div class="compare-pin-panel" id="compare-pin-panel">
+        <div class="compare-pin-header">
+          <div class="compare-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 3h5v5"></path><path d="M8 21H3v-5"></path><path d="M21 3l-7.5 7.5"></path><path d="M3 21l7.5-7.5"></path></svg>
+            2モデル直接対比ピン留め (Direct Comparison Pinning)
+          </div>
+          <span class="compare-sub">2つのモデルを選んで月額・年間差額と性能差を即座にシミュレーション</span>
+        </div>
+        <div class="compare-selectors">
+          <div class="selector-box">
+            <label>比較モデル A:</label>
+            <select id="select-model-a"></select>
+          </div>
+          <div class="vs-badge">VS</div>
+          <div class="selector-box">
+            <label>比較モデル B:</label>
+            <select id="select-model-b"></select>
+          </div>
+        </div>
+        <div class="compare-result-box" id="compare-result-box">
+          <!-- Dynamically populated by JS -->
+        </div>
+      </div>
+
+      <!-- Bar Chart Component -->
+      <div class="chart-panel-card" style="margin-top: 2rem;">
+        <div class="panel-card-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="header-icon"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          <h3>モデル別 月額費用比較バーチャート</h3>
+        </div>
+        <div class="chart-container" id="chart-container">
+          <!-- Dynamic Bars -->
+        </div>
+      </div>
+
+      <!-- Pro Feature: Product Growth Scaling Calculator -->
+      <div class="growth-scaling-card" style="margin-top: 2rem; background:#ffffff; border:1px solid var(--border-color); padding:1.25rem 1.5rem; border-radius:var(--radius-lg); box-shadow:var(--shadow-sm);">
+        <div class="growth-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:1rem;">
+          <div>
+            <h3 style="margin:0; font-size:1.1rem; font-weight:800; display:flex; align-items:center; gap:0.5rem;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+              プロダクト成長時の将来費用推移シミュレーター (Growth Scaling)
+            </h3>
+            <span style="font-size:0.8rem; color:var(--text-muted); font-weight:700;">ユーザー数・API利用数が毎月成長した場合の将来インフラ予算を予測</span>
+          </div>
+          <div class="growth-selector-group" style="display:flex; align-items:center; gap:0.5rem;">
+            <label style="font-size:0.85rem; font-weight:800;">毎月の成長率:</label>
+            <select id="growth-rate-select" style="padding:0.4rem 0.65rem; border-radius:var(--radius-sm); border:1px solid var(--border-color); font-weight:800;">
+              <option value="0.10">毎月 +10% 成長</option>
+              <option value="0.20" selected>毎月 +20% 成長 (標準)</option>
+              <option value="0.30">毎月 +30% 急成長 (スタートアップ)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="growth-projection-grid" id="growth-projection-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:1rem; margin-top:0.5rem;">
+          <!-- Dynamically populated by JS -->
+        </div>
+      </div>
+
+      <!-- Pro Feature: Multi-Model Routing Hybrid Advisor -->
+      <div class="routing-advisor-card" style="margin-top: 2rem; background:linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border:1px solid #334155; padding:1.25rem 1.5rem; border-radius:var(--radius-lg); color:#ffffff;">
+        <div class="advisor-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.85rem;">
+          <h3 style="margin:0; font-size:1.1rem; font-weight:900; color:#f8fafc; display:flex; align-items:center; gap:0.5rem;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>
+            推奨ハイブリッド構成 (Multi-Model Routing Advisor)
+          </h3>
+          <span style="font-size:0.75rem; font-weight:800; background:#0284c7; color:#ffffff; padding:0.2rem 0.6rem; border-radius:4px;">最適コスト＆最高品質</span>
+        </div>
+        <div class="routing-result-box" id="routing-result-box" style="font-size:0.9rem; line-height:1.6; color:#cbd5e1;">
+          <!-- Dynamically populated by JS -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 3: Detailed Table & Spec Comparison Section -->
+  <section class="step-section step-3-section" id="step-3">
+    <div class="section-container">
+      <div class="step-header">
+        <span class="step-badge blue">STEP 3</span>
+        <h2>料金 ＆ 性能ベンチマーク（100点満点）比較表</h2>
+        <p class="step-sub">1M Tokensあたりの公式単価（USD）、総合性能スコア、Context Window、得意分野一覧。</p>
+      </div>
+
+      <div class="table-card-panel">
+        <div class="panel-card-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="header-icon"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+          <h3>詳細スペック ＆ 性能ベンチマーク指標</h3>
+          <span class="table-scroll-hint">← 左右スクロールで全項目を表示 →</span>
+        </div>
+        <div class="table-wrapper">
+          <table class="cost-table" id="cost-table">
+            <thead>
+              <tr>
+                <th>モデル名 / Provider</th>
+                <th>性能スコア</th>
+                <th>生成速度 (tok/s)</th>
+                <th>月額想定コスト</th>
+                <th>1回あたり単価</th>
+                <th>Input単価 (1M tok)</th>
+                <th>Output単価 (1M tok)</th>
+                <th>Context / 最適用途</th>
+              </tr>
+            </thead>
+            <tbody id="table-body">
+              <!-- Rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 4: Export & Share Actions Section -->
+  <section class="step-section step-4-section" id="step-4">
+    <div class="section-container">
+      <div class="step-header">
+        <span class="step-badge purple">STEP 4</span>
+        <h2>データの保存 ＆ SNS共有</h2>
+        <p class="step-sub">試算結果をX（Twitter）で共有したり、CSV / JSON形式で保存できます。</p>
+      </div>
+
+      <div class="share-panel-card">
+        <p class="share-desc">試算結果サマリーのコピーやデータのダウンロードが可能です。</p>
+        <div class="share-actions-grid">
+          <button class="share-btn twitter" id="btn-share-x">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            Xで診断結果を共有
+          </button>
+          <button class="share-btn copy" id="btn-copy-result">サマリーコピー</button>
+          <button class="share-btn export" id="btn-export-csv">CSV保存 (Excel対応)</button>
+          <button class="share-btn export" id="btn-export-json">JSON出力</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Guide & FAQ Sections -->
+  <section class="info-section" id="guide">
+    <div class="section-container">
+      <h2 class="section-main-heading">AIモデル別コスト最適化＆アーキテクチャ選定ガイド</h2>
+      <div class="faq-grid" style="grid-template-columns: 1fr;">
+        <div class="faq-item">
+          <h3>1. モデルクラス（フラッグシップ vs 軽量モデル）の使い分け</h3>
+          <p>フラッグシップモデル（<strong>GPT-4o</strong>, <strong>Claude 3.5 Sonnet</strong>）は1M Inputトークンあたり$2.50〜$3.00かかります。一方、軽量高速モデル（<strong>DeepSeek V3</strong> $0.14, <strong>Gemini 2.0 Flash</strong> $0.10, <strong>GPT-4o-mini</strong> $0.15）へルーティングすると、同等の自然言語理解処理を<strong>約1/20〜1/30の超低コスト</strong>で実行可能です。</p>
+        </div>
+        <div class="faq-item">
+          <h3>2. Prompt Caching（プロンプトキャッシュ）による入力コスト削滅</h3>
+          <p>OpenAI, Anthropic, DeepSeekでは、長文コンテキストや固定システムプロンプトを再利用するPrompt Cachingが提供されています。一度キャッシュされた文脈に対する入力料金は通常料金の10%〜50%に大幅割引されるため、RAGシステムやAIチャットボット開発では必須の設計です。</p>
+        </div>
+        <div class="faq-item">
+          <h3>3. CoT（Chain of Thought）高度推論モデルのトークン消費特性</h3>
+          <p>思考プロセスを出力するReasoningモデル（<strong>o1</strong>, <strong>o3-mini</strong>, <strong>DeepSeek R1</strong>）は、回答生成時に内部で思考トークンを大量消費するため、Output料金が膨らみやすくなります。日常会話ではなく数学・論理パズル・複雑なコード生成に限定して選択するのが最適です。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="info-section alt-bg" id="faq">
+    <div class="section-container">
+      <h2 class="section-main-heading">よくある質問 (FAQ)</h2>
+      <div class="faq-grid">
+        <div class="faq-item">
+          <h3>Q. トークン (Token) の定義と日本語の換算率は？</h3>
+          <p>AIが文章を処理する最小単価です。英語は1 word ≒ 1.3 tokensですが、日本語はUTF-8構造上、1文字あたり約1〜1.5トークンを消費します。当ツールでは「1文字 ＝ 1.3 tokens」として精密換算しています。</p>
+        </div>
+        <div class="faq-item">
+          <h3>Q. Input TokensとOutput Tokensの価格差について</h3>
+          <p>AIモデルの計算負荷は、プロンプトを読み込む「Input」よりも、1文字ずつ推論・生成する「Output」の方が大きいため、Output料金が約3.3倍〜5倍高価に設定されています。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Major Japanese Professional Multi-Column Footer -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <div class="footer-grid">
+        <div class="footer-col brand-col">
+          <div class="footer-logo">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="logo-svg"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            <span>AI Cost Lab</span>
+          </div>
+          <p class="footer-tagline">生成AIモデル・APIの運用コストをリアルタイムで試算・最適化するプロ向けWebシミュレーター。</p>
+          <div class="footer-org">運営: Corner Neighbor</div>
+        </div>
+
+        <div class="footer-col">
+          <h4 class="footer-heading">提供ツール・シミュレーター</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">AI Cost Lab (AI料金比較)</a></li>
+            <li><a href="../subsc-calculator/index.html">SubscCut (固定費・サブスク診断)</a></li>
+            <li><a href="../minigames.html">Webゲーム広場</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4 class="footer-heading">コスト最適化ガイド</h4>
+          <ul class="footer-links">
+            <li><a href="#guide">AIモデル単価比較表</a></li>
+            <li><a href="#guide">プロンプトキャッシュ活用法</a></li>
+            <li><a href="#faq">日本語トークン数換算について</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4 class="footer-heading">サークル情報・法的事項</h4>
+          <ul class="footer-links">
+            <li><a href="../aboutus.html">サークル Corner Neighbor について</a></li>
+            <li><a href="../privacy-policy.html">プライバシーポリシー</a></li>
+            <li><a href="../terms-of-service.html">利用規約</a></li>
+            <li><a href="../contact.php">お問い合わせ</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2024-2026 Corner Neighbor / AI Cost Lab. All rights reserved.</p>
+        <p class="disclaimer">※ 表示されるコストは各社公表のAPI単価および為替レートに基づく試算値です。実際の請求額は利用条件やプロンプトキャッシュ等により変動する場合があります。</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Simple & Clean Top Button -->
+  <button class="back-to-top-btn" id="btn-float-top" title="ページ上部へ">▲ TOP</button>
+
+  <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW reg error:', err));
+      });
+    }
+  </script>
+</body>
+</html>
