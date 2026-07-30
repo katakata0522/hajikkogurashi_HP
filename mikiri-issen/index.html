@@ -1416,7 +1416,7 @@
       </div>
     </div>
 
-    <footer class="footer-note">MIKIRI ISSEN v0.7.1</footer>
+    <footer class="footer-note">MIKIRI ISSEN v0.7.2</footer>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite">コピーしました</div>
@@ -1425,7 +1425,7 @@
     (() => {
       'use strict';
 
-      const VERSION = '0.7.1';
+      const VERSION = '0.7.2';
       const STORAGE_KEY = 'mikiri-issen-record-v6';
       const RESULT_DELAY_MS = 940;
 
@@ -1887,42 +1887,50 @@
 
       function showResult(result) {
         game.state = 'result';
-        elements.resultCard.classList.toggle('is-lose', !result.win && !result.early);
-        elements.resultCard.classList.toggle('is-early', result.early);
-        elements.judgeLabel.textContent = result.judgeLabel;
+        if (elements.resultCard) {
+          elements.resultCard.classList.toggle('is-lose', !result.win && !result.early);
+          elements.resultCard.classList.toggle('is-early', result.early);
+        }
+        if (elements.judgeLabel) elements.judgeLabel.textContent = result.judgeLabel;
 
         if (result.early) {
-          elements.reactionHelp.style.display = 'none';
-          elements.resultTime.innerHTML = '合図前<small></small>';
+          if (elements.reactionHelp) elements.reactionHelp.style.display = 'none';
+          if (elements.resultTime) elements.resultTime.innerHTML = '合図前<small></small>';
         } else {
-          elements.reactionHelp.style.display = 'block';
-          elements.resultTime.innerHTML = result.reactionMs !== null
-            ? `${formatReaction(result.reactionMs)}<small>反応値</small>`
-            : 'MISS<small></small>';
+          if (elements.reactionHelp) elements.reactionHelp.style.display = 'block';
+          if (elements.resultTime) {
+            elements.resultTime.innerHTML = result.reactionMs !== null
+              ? `${formatReaction(result.reactionMs)}<small>反応値</small>`
+              : 'MISS<small></small>';
+          }
         }
 
-        elements.enemyResultLabel.textContent = `敵：${result.enemyName}`;
-        elements.enemyRankResultLabel.textContent = result.enemyRank;
-        elements.enemySpeedLabel.textContent = `敵の反応値：${formatReaction(result.enemyReactionMs)}`;
-        elements.waitTimeLabel.textContent = `待機：${formatSeconds(result.waitMs)}`;
+        if (elements.enemyResultLabel) elements.enemyResultLabel.textContent = `敵：${result.enemyName}`;
+        if (elements.enemyRankResultLabel) elements.enemyRankResultLabel.textContent = result.enemyRank;
+        if (elements.enemySpeedLabel) elements.enemySpeedLabel.textContent = `敵の反応値：${formatReaction(result.enemyReactionMs)}`;
+        if (elements.waitTimeLabel) elements.waitTimeLabel.textContent = `待機：${formatSeconds(result.waitMs)}`;
 
-        if (result.diffMs === null) {
-          elements.differenceLabel.textContent = result.early ? 'もう一回いける' : '合図前に動いた';
-        } else if (result.diffMs >= 0) {
-          elements.differenceLabel.textContent = `敵より ${formatReactionDiff(result.diffMs)} 早い`;
-        } else {
-          elements.differenceLabel.textContent = `あと ${formatReactionDiff(Math.abs(result.diffMs))} 足りない`;
+        if (elements.differenceLabel) {
+          if (result.diffMs === null) {
+            elements.differenceLabel.textContent = result.early ? 'もう一回いける' : '合図前に動いた';
+          } else if (result.diffMs >= 0) {
+            elements.differenceLabel.textContent = `敵より ${formatReactionDiff(result.diffMs)} 早い`;
+          } else {
+            elements.differenceLabel.textContent = `あと ${formatReactionDiff(Math.abs(result.diffMs))} 足りない`;
+          }
         }
 
-        elements.resultComment.textContent = result.comment;
-        elements.resultBest.textContent = formatReaction(game.record.bestMs);
-        elements.resultStreak.textContent = `${result.streak} 人`;
-        elements.resultMaxStreak.textContent = `${game.record.maxStreak} 人`;
-        elements.resultTotalWins.textContent = `${game.record.totalWins} 勝`;
-        elements.nextEnemyLabel.textContent = result.win ? getNextEnemyName() : enemies[0].name;
-        elements.retryButton.textContent = result.win
-          ? (isLastEnemy() ? '最初から' : (isNormalFinalEnemy() ? '隠しボスへ' : '次の相手へ'))
-          : 'もう一回';
+        if (elements.resultComment) elements.resultComment.textContent = result.comment;
+        if (elements.resultBest) elements.resultBest.textContent = formatReaction(game.record.bestMs);
+        if (elements.resultStreak) elements.resultStreak.textContent = `${result.streak} 人`;
+        if (elements.resultMaxStreak) elements.resultMaxStreak.textContent = `${game.record.maxStreak} 人`;
+        if (elements.resultTotalWins) elements.resultTotalWins.textContent = `${game.record.totalWins} 勝`;
+        if (elements.nextEnemyLabel) elements.nextEnemyLabel.textContent = result.win ? getNextEnemyName() : enemies[0].name;
+        if (elements.retryButton) {
+          elements.retryButton.textContent = result.win
+            ? (isLastEnemy() ? '最初から' : (isNormalFinalEnemy() ? '隠しボスへ' : '次の相手へ'))
+            : 'もう一回';
+        }
         showScreen('result');
       }
 
