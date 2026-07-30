@@ -1450,6 +1450,7 @@
         waitMs: 0,
         streak: 0,
         currentEnemyIndex: 0,
+        earlyFoulCount: 0,
         lastResult: null,
         soundEnabled: true,
         audioContext: null,
@@ -1653,12 +1654,14 @@
       }
 
       function startRun() {
+        game.earlyFoulCount = 0;
         game.streak = 0;
         game.currentEnemyIndex = 0;
         startRound();
       }
 
       function startNextRound() {
+        game.earlyFoulCount = 0;
         if (!game.lastResult || !game.lastResult.win || isLastEnemy()) {
           startRun();
           return;
@@ -1819,8 +1822,10 @@
         elements.judgeLabel.textContent = result.judgeLabel;
 
         if (result.early) {
+          elements.reactionHelp.style.display = 'none';
           elements.resultTime.innerHTML = '合図前<small></small>';
         } else {
+          elements.reactionHelp.style.display = 'block';
           elements.resultTime.innerHTML = result.reactionMs !== null
             ? `${formatReaction(result.reactionMs)}<small>反応値</small>`
             : 'MISS<small></small>';
