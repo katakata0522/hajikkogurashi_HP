@@ -1685,15 +1685,7 @@
           startRound();
         }
       }
-      function _oldStartNextRound() {
-        game.earlyFoulCount = 0;
-        if (!game.lastResult || !game.lastResult.win || isLastEnemy()) {
-          startRun();
-          return;
-        }
-        game.currentEnemyIndex = Math.min(game.currentEnemyIndex + 1, enemies.length - 1);
-        startRound();
-      }
+      
 
       function startRound() {
         const foulBadge = document.getElementById('foulBadge');
@@ -1998,7 +1990,7 @@
             if (game.lastResult && game.lastResult.win && !isLastEnemy()) {
               startNextRound();
             } else {
-              startRun(); // 敗北時、または最終敵討伐後は最初から
+              startNextRound(); // 勝利時は次の敵へ、敗北時は同じ敵と再戦！
             }
           } else if (game.state === 'waiting' || game.state === 'signal') {
             handleAction();
