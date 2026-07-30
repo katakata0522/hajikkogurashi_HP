@@ -1240,6 +1240,34 @@
       box-shadow: 0 0 8px var(--aura) !important;
     }
 
+  
+    /* ★ 画面左上用 お手つき警告バッジ ★ */
+    .foul-badge-topleft {
+      position: absolute;
+      top: 16px;
+      left: 18px;
+      z-index: 25;
+      display: none;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border: 2px solid #ff3b30;
+      border-radius: 12px;
+      background: rgba(40, 10, 8, 0.85);
+      color: #ff654a;
+      font-weight: 900;
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+      box-shadow: 0 0 16px rgba(255, 59, 48, 0.4), inset 0 0 8px rgba(255, 59, 48, 0.2);
+      animation: foulPulse 1.5s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes foulPulse {
+      0%, 100% { transform: scale(1); opacity: 0.9; }
+      50% { transform: scale(1.05); opacity: 1; box-shadow: 0 0 24px rgba(255, 59, 48, 0.7); }
+    }
+
   </style>
   <!-- Google Fonts: Flashレトロ＆和風プロロゴフォント -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1249,6 +1277,7 @@
 <body>
   <div class="app">
     <main class="shell">
+      <div class="foul-badge-topleft" id="topleftFoulBadge">❌ お手つき 1/1</div>
       <button class="sound-button" type="button" id="soundButton" aria-pressed="true">音 ON</button>
 
       <section class="screen title-screen is-active" id="titleScreen" aria-label="タイトル画面">
@@ -1288,18 +1317,18 @@
             <div class="record-chip"><span>WINS</span><strong id="titleTotalWinsLabel">0 勝</strong></div>
           </div>
 
-          <div class="howto-panel" id="howtoPanel">
-            <div class="howto-card">
-              <h3 style="margin-top:0; color:var(--gold); font-family:'Dela Gothic One',serif; font-size:1.4rem;">⚔️ あそびかた</h3>
-              <p><strong>基本ルール</strong><br>画面中央に「！」が出た瞬間にタップ（またはSpace/Enter）してください。敵より速く斬れば勝利です。</p>
-              <p><strong>お手つきルール</strong><br>合図「！」の前に押すと「お手つき」になります。1回目のお手つきは❌印がつき、<strong>同じ敵と仕切り直し</strong>になります。2回目のお手つきで敗北となります。</p>
-              <p><strong>反応値について</strong><br>数値が小さいほど速い記録です（1目盛り ≒ 10ms）。</p>
-              <hr style="border:0; border-top:1px solid rgba(255,211,106,0.2); margin:16px 0;">
-              <button class="main-button" type="button" id="closeHowtoButton" style="width:100%; min-height:44px; padding:8px;">閉じる</button>
-              <div style="text-align:center; margin-top:12px;">
-                <button class="text-button" type="button" id="resetRecordButton" style="color:#ff654a;">※戦績記録をリセット</button>
+          <div class="howto-panel" id="howtoPanel" aria-hidden="true">
+            <div class="howto-card" role="dialog" aria-modal="true" aria-label="あそびかた">
+              <h3 style="margin-top:0; color:var(--gold); font-family:'Dela Gothic One', 'Shippori Mincho', serif; font-size:1.5rem; text-shadow:0 2px 8px rgba(0,0,0,0.8);">⚔️ あそびかた</h3>
+              <p style="margin-bottom:12px;"><strong>【基本ルール】</strong><br>画面中央に「！」が出た瞬間に画面をタップ（またはSpace/Enterキー）してください。敵より早く斬れば勝利となり、次の強敵が現れます。</p>
+              <p style="margin-bottom:12px;"><strong>【お手つきルール（1回救済）】</strong><br>合図「！」が出る前に押すと「お手つき」になります。<br>・<strong>1回目</strong>: 画面左上に❌印がつき、<strong>同じ敵のまま仕切り直し</strong>（再戦）できます。<br>・<strong>2回目</strong>: お手つき失格となり敗北します。</p>
+              <p style="margin-bottom:16px;"><strong>【反応値について】</strong><br>数値が小さいほど速い記録です（例：334ms ➔ 反応値33）。</p>
+              <button class="main-button" type="button" id="closeHowtoButton" style="width:100%; min-height:48px; padding:10px; font-size:1.05rem;">閉じる</button>
+              <div style="text-align:center; margin-top:14px;">
+                <button class="text-button" type="button" id="resetRecordButton" style="color:#ff654a; text-decoration:underline;">※戦績記録をリセット</button>
               </div>
             </div>
+          </div>
             <strong>ルール</strong><br>
             待機中に押すと失敗です。画面中央に「！」が出た瞬間にタップしてください。敵ごとに反応値・見た目・待機時間が変わり、あなたの反応値が敵より小さければ勝利です。<br>
             <strong>反応値</strong>：小さいほど速い数値です。1目盛りは約10msです。例：334ms → 33。
@@ -1320,7 +1349,7 @@
           <div class="stage-floor" aria-hidden="true"></div>
 
           <div class="mini-status" aria-hidden="true">
-            <span id="enemyTitleLabel">一人目</span><small id="enemyRankLabel">★☆☆☆☆</small><span id="enemyNameLabel">町の剣士</span><span id="foulBadge" style="margin-left:8px; color:#ff3b30; font-weight:bold; display:none;">❌ お手つき1</span>
+            <span id="enemyTitleLabel">一人目</span><small id="enemyRankLabel">★☆☆☆☆</small><span id="enemyNameLabel">町の剣士</span>
           </div>
 
           <div class="state-center">
@@ -1381,7 +1410,7 @@
       </section>
     </main>
 
-    <footer class="footer-note">MIKIRI ISSEN v0.6.7</footer>
+    <footer class="footer-note">MIKIRI ISSEN v0.6.8</footer>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite">コピーしました</div>
@@ -1390,7 +1419,7 @@
     (() => {
       'use strict';
 
-      const VERSION = '0.6.7';
+      const VERSION = '0.6.8';
       const STORAGE_KEY = 'mikiri-issen-record-v6';
       const RESULT_DELAY_MS = 940;
 
@@ -1688,8 +1717,8 @@
       
 
       function startRound() {
-        const foulBadge = document.getElementById('foulBadge');
-        if (foulBadge) foulBadge.style.display = (game.earlyFoulCount > 0) ? 'inline' : 'none';
+        const foulBadge = document.getElementById('topleftFoulBadge');
+        if (foulBadge) foulBadge.style.display = (game.earlyFoulCount > 0) ? 'inline-flex' : 'none';
         clearTimers();
         prepareAudio();
         const enemy = getCurrentEnemy();
@@ -1804,8 +1833,8 @@
           game.state = 'restarting';
           clearTimers();
           playTone('fail');
-          const foulBadge = document.getElementById('foulBadge');
-          if (foulBadge) foulBadge.style.display = 'inline';
+          const foulBadge = document.getElementById('topleftFoulBadge');
+          if (foulBadge) foulBadge.style.display = 'inline-flex';
           elements.stateLabel.textContent = 'フライング！';
           elements.instructionText.textContent = '❌ お手つき1回！同じ敵と仕切り直し';
           elements.impactText.textContent = '待て';
@@ -1983,6 +2012,9 @@
       elements.howtoButton.addEventListener('click', toggleHowto);
       const closeHowtoBtn = document.getElementById('closeHowtoButton');
       if (closeHowtoBtn) closeHowtoBtn.addEventListener('click', toggleHowto);
+      elements.howtoPanel.addEventListener('click', (e) => {
+        if (e.target === elements.howtoPanel) toggleHowto();
+      });
 
       // スマホのゴーストタップと、画面外タッチ時の無反応を防ぐため window 全体で監視
       window.addEventListener('pointerdown', (event) => {
