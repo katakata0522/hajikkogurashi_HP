@@ -1381,7 +1381,7 @@
       </section>
     </main>
 
-    <footer class="footer-note">MIKIRI ISSEN v0.6.5</footer>
+    <footer class="footer-note">MIKIRI ISSEN v0.6.7</footer>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite">コピーしました</div>
@@ -1390,7 +1390,7 @@
     (() => {
       'use strict';
 
-      const VERSION = '0.6.5';
+      const VERSION = '0.6.7';
       const STORAGE_KEY = 'mikiri-issen-record-v6';
       const RESULT_DELAY_MS = 940;
 
@@ -1798,6 +1798,21 @@
       }
 
       function resolveEarlyFail(reason) {
+        if (game.state === 'resolved' || game.state === 'failed' || game.state === 'restarting') return;
+        if (reason === 'early' && game.earlyFoulCount < 1) {
+          game.earlyFoulCount += 1;
+          game.state = 'restarting';
+          clearTimers();
+          playTone('fail');
+          const foulBadge = document.getElementById('foulBadge');
+          if (foulBadge) foulBadge.style.display = 'inline';
+          elements.stateLabel.textContent = 'フライング！';
+          elements.instructionText.textContent = '❌ お手つき1回！同じ敵と仕切り直し';
+          elements.impactText.textContent = '待て';
+          elements.arena.classList.add('is-failed');
+          window.setTimeout(() => { if (game.state === 'restarting') startRound(); }, 900);
+          return;
+        }
         if (game.state === 'resolved' || game.state === 'failed') return;
         const enemy = getCurrentEnemy();
         clearTimers();
