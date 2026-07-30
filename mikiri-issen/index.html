@@ -1329,13 +1329,6 @@
               </div>
             </div>
           </div>
-            <strong>ルール</strong><br>
-            待機中に押すと失敗です。画面中央に「！」が出た瞬間にタップしてください。敵ごとに反応値・見た目・待機時間が変わり、あなたの反応値が敵より小さければ勝利です。<br>
-            <strong>反応値</strong>：小さいほど速い数値です。1目盛りは約10msです。例：334ms → 33。
-            <br>
-            <button class="text-button" type="button" id="resetRecordButton">記録をリセット</button>
-          </div>
-        </div>
 
         <div class="press-start">画面タップ または SPACEキー で開始</div>
       </section>
@@ -1396,7 +1389,7 @@
             <div class="result-box"><span>MAX</span><strong id="resultMaxStreak">0 人</strong></div>
             <div class="result-box result-optional"><span>TOTAL WINS</span><strong id="resultTotalWins">0 勝</strong></div>
             <div class="result-box result-optional"><span>NEXT</span><strong id="nextEnemyLabel">道場破り</strong></div>
-            <div class="result-box result-optional"><span>VERSION</span><strong>v0.6.5</strong></div>
+            <div class="result-box result-optional"><span>VERSION</span><strong>v0.6.9</strong></div>
           </div>
 
           <div class="result-actions">
@@ -1466,6 +1459,7 @@
         resultCard: document.getElementById('resultCard'),
         judgeLabel: document.getElementById('judgeLabel'),
         resultTime: document.getElementById('resultTime'),
+        reactionHelp: document.getElementById('reactionHelp'),
         differenceLabel: document.getElementById('differenceLabel'),
         enemyResultLabel: document.getElementById('enemyResultLabel'),
         enemyRankResultLabel: document.getElementById('enemyRankResultLabel'),
