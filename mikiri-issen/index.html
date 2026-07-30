@@ -1289,6 +1289,17 @@
           </div>
 
           <div class="howto-panel" id="howtoPanel">
+            <div class="howto-card">
+              <h3 style="margin-top:0; color:var(--gold); font-family:'Dela Gothic One',serif; font-size:1.4rem;">⚔️ あそびかた</h3>
+              <p><strong>基本ルール</strong><br>画面中央に「！」が出た瞬間にタップ（またはSpace/Enter）してください。敵より速く斬れば勝利です。</p>
+              <p><strong>お手つきルール</strong><br>合図「！」の前に押すと「お手つき」になります。1回目のお手つきは❌印がつき、<strong>同じ敵と仕切り直し</strong>になります。2回目のお手つきで敗北となります。</p>
+              <p><strong>反応値について</strong><br>数値が小さいほど速い記録です（1目盛り ≒ 10ms）。</p>
+              <hr style="border:0; border-top:1px solid rgba(255,211,106,0.2); margin:16px 0;">
+              <button class="main-button" type="button" id="closeHowtoButton" style="width:100%; min-height:44px; padding:8px;">閉じる</button>
+              <div style="text-align:center; margin-top:12px;">
+                <button class="text-button" type="button" id="resetRecordButton" style="color:#ff654a;">※戦績記録をリセット</button>
+              </div>
+            </div>
             <strong>ルール</strong><br>
             待機中に押すと失敗です。画面中央に「！」が出た瞬間にタップしてください。敵ごとに反応値・見た目・待機時間が変わり、あなたの反応値が敵より小さければ勝利です。<br>
             <strong>反応値</strong>：小さいほど速い数値です。1目盛りは約10msです。例：334ms → 33。
@@ -1297,7 +1308,7 @@
           </div>
         </div>
 
-        <div class="press-start">PRESS START</div>
+        <div class="press-start">画面タップ または SPACEキー で開始</div>
       </section>
 
       <section class="screen play-screen" id="playScreen" aria-label="プレイ画面">
@@ -1309,7 +1320,7 @@
           <div class="stage-floor" aria-hidden="true"></div>
 
           <div class="mini-status" aria-hidden="true">
-            <span id="enemyTitleLabel">一人目</span><small id="enemyRankLabel">★☆☆☆☆</small><span id="enemyNameLabel">町の剣士</span>
+            <span id="enemyTitleLabel">一人目</span><small id="enemyRankLabel">★☆☆☆☆</small><span id="enemyNameLabel">町の剣士</span><span id="foulBadge" style="margin-left:8px; color:#ff3b30; font-weight:bold; display:none;">❌ お手つき1</span>
           </div>
 
           <div class="state-center">
@@ -1662,6 +1673,20 @@
 
       function startNextRound() {
         game.earlyFoulCount = 0;
+        if (game.lastResult && game.lastResult.win) {
+          if (isLastEnemy()) {
+            startRun();
+          } else {
+            game.currentEnemyIndex = Math.min(game.currentEnemyIndex + 1, enemies.length - 1);
+            startRound();
+          }
+        } else {
+          // 敗北時は現在の敵と再戦！(1人目に戻らない)
+          startRound();
+        }
+      }
+      function _oldStartNextRound() {
+        game.earlyFoulCount = 0;
         if (!game.lastResult || !game.lastResult.win || isLastEnemy()) {
           startRun();
           return;
@@ -1671,6 +1696,8 @@
       }
 
       function startRound() {
+        const foulBadge = document.getElementById('foulBadge');
+        if (foulBadge) foulBadge.style.display = (game.earlyFoulCount > 0) ? 'inline' : 'none';
         clearTimers();
         prepareAudio();
         const enemy = getCurrentEnemy();
@@ -1947,6 +1974,8 @@
       elements.resetRecordButton.addEventListener('click', resetRecord);
       elements.soundButton.addEventListener('click', toggleSound);
       elements.howtoButton.addEventListener('click', toggleHowto);
+      const closeHowtoBtn = document.getElementById('closeHowtoButton');
+      if (closeHowtoBtn) closeHowtoBtn.addEventListener('click', toggleHowto);
 
       // スマホのゴーストタップと、画面外タッチ時の無反応を防ぐため window 全体で監視
       window.addEventListener('pointerdown', (event) => {
