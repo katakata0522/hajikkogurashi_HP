@@ -14,12 +14,12 @@
     <meta property="og:title" content="見切り一閃 | Corner Neighbor">
     <meta property="og:description" content="タイミングを見極めて一閃を決める、Corner Neighbor制作のブラウザミニゲームです。">
     <meta property="og:url" content="https://hajikkoroom.xsrv.jp/mikiri-issen/">
-    <meta property="og:image" content="https://hajikkoroom.xsrv.jp//assets/images/banner.webp">
+    <meta property="og:image" content="https://hajikkoroom.xsrv.jp/assets/images/banner.webp">
     <meta property="og:image:alt" content="見切り一閃 | Corner Neighbor">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="見切り一閃 | Corner Neighbor">
     <meta name="twitter:description" content="タイミングを見極めて一閃を決める、Corner Neighbor制作のブラウザミニゲームです。">
-    <meta name="twitter:image" content="https://hajikkoroom.xsrv.jp//assets/images/banner.webp">
+    <meta name="twitter:image" content="https://hajikkoroom.xsrv.jp/assets/images/banner.webp">
     <!-- /SEO: hajikkogurashi-minigame -->
   <style>
     /*
@@ -225,8 +225,11 @@
     }
 
     h1 {
+      font-family: "Dela Gothic One", "Shippori Mincho", serif;
+      letter-spacing: 0.08em;
+      filter: drop-shadow(0 8px 16px rgba(0,0,0,0.8));
       margin: 0;
-      font-family: var(--font-serif);
+      font-family: "Shippori Mincho", "Dela Gothic One", serif;
       font-size: clamp(3.8rem, 7.2vw, 6.6rem);
       line-height: 1.02;
       letter-spacing: 0.035em;
@@ -841,7 +844,7 @@
       transform: translate(-50%, -50%) scale(0.7);
       background: radial-gradient(circle, #fff8df 0 20%, var(--gold) 21% 58%, rgba(245, 182, 65, 0) 61%);
       color: #2a190c;
-      font-family: var(--font-serif);
+      font-family: "Shippori Mincho", "Dela Gothic One", serif;
       font-size: clamp(5rem, 10vw, 8.8rem);
       font-weight: 1000;
       opacity: 0;
@@ -897,7 +900,7 @@
       top: 50%;
       transform: translate(-50%, -50%) scale(0.9);
       color: var(--paper);
-      font-family: var(--font-serif);
+      font-family: "Shippori Mincho", "Dela Gothic One", serif;
       font-size: clamp(3rem, 10vw, 8rem);
       font-weight: 1000;
       letter-spacing: 0.08em;
@@ -1003,7 +1006,7 @@
     .judge {
       margin: 0;
       color: var(--gold);
-      font-family: var(--font-serif);
+      font-family: "Shippori Mincho", "Dela Gothic One", serif;
       font-size: clamp(2.1rem, 4.2vw, 4rem);
       line-height: 1;
       letter-spacing: 0.05em;
@@ -1218,7 +1221,30 @@
         transition-duration: 1ms !important;
       }
     }
+  
+    /* ★ Flash黄金期名作・スタイリッシュ和風影絵剣士シルエット ★ */
+    .fighter .head {
+      border: 2px solid var(--accent) !important;
+      box-shadow: 0 0 14px var(--aura), inset 0 -4px 0 rgba(0,0,0,0.6) !important;
+    }
+    .fighter .head::after {
+      content: "" !important;
+      position: absolute !important;
+      right: -8px !important;
+      top: 14px !important;
+      width: 16px !important;
+      height: 6px !important;
+      background: var(--accent) !important;
+      border-radius: 2px !important;
+      transform: rotate(15deg) !important;
+      box-shadow: 0 0 8px var(--aura) !important;
+    }
+
   </style>
+  <!-- Google Fonts: Flashレトロ＆和風プロロゴフォント -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Shippori+Mincho:wght@700;800&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="app">
@@ -1584,6 +1610,13 @@
         const gain = context.createGain();
         oscillator.connect(gain);
         gain.connect(context.destination);
+
+        oscillator.onended = () => {
+          try {
+            oscillator.disconnect();
+            gain.disconnect();
+          } catch (e) {}
+        };
 
         if (type === 'signal') {
           oscillator.type = 'triangle';
