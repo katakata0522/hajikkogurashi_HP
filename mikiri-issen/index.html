@@ -358,20 +358,37 @@
 
     .howto-panel {
       display: none;
-      margin: clamp(10px, 1.8vh, 20px) auto 0;
-      width: min(660px, 100%);
-      border: 2px solid rgba(255, 211, 106, 0.14);
-      border-radius: 18px;
-      padding: 15px;
-      background: rgba(0, 0, 0, 0.34);
-      color: rgba(255, 244, 214, 0.78);
-      line-height: 1.75;
-      text-align: left;
-      box-shadow: inset 0 0 0 1px rgba(255, 244, 214, 0.05), 0 6px 0 rgba(0, 0, 0, 0.22);
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 20px;
+      align-items: center;
+      justify-content: center;
     }
 
-    .howto-panel.is-open { display: block; }
-    .howto-panel strong { color: var(--paper); }
+    .howto-panel.is-open {
+      display: flex !important;
+    }
+
+    .howto-card {
+      width: min(520px, 92vw);
+      max-height: 85vh;
+      overflow-y: auto;
+      background: #12100e;
+      border: 2px solid var(--gold);
+      border-radius: 20px;
+      padding: clamp(18px, 3.5vw, 26px);
+      box-shadow: 0 16px 50px rgba(0, 0, 0, 0.9);
+      color: rgba(255, 244, 214, 0.88);
+      line-height: 1.75;
+      text-align: left;
+    }
+
+    .howto-card p { margin: 10px 0; font-size: 0.94rem; }
+    .howto-card strong { color: var(--paper); }
 
     .text-button {
       margin-top: 12px;
@@ -1315,20 +1332,7 @@
             <div class="record-chip"><span>BEST</span><strong id="titleBestLabel">--</strong></div>
             <div class="record-chip"><span>MAX</span><strong id="titleMaxStreakLabel">0 人</strong></div>
             <div class="record-chip"><span>WINS</span><strong id="titleTotalWinsLabel">0 勝</strong></div>
-          </div>
-
-          <div class="howto-panel" id="howtoPanel" aria-hidden="true">
-            <div class="howto-card" role="dialog" aria-modal="true" aria-label="あそびかた">
-              <h3 style="margin-top:0; color:var(--gold); font-family:'Dela Gothic One', 'Shippori Mincho', serif; font-size:1.5rem; text-shadow:0 2px 8px rgba(0,0,0,0.8);">⚔️ あそびかた</h3>
-              <p style="margin-bottom:12px;"><strong>【基本ルール】</strong><br>画面中央に「！」が出た瞬間に画面をタップ（またはSpace/Enterキー）してください。敵より早く斬れば勝利となり、次の強敵が現れます。</p>
-              <p style="margin-bottom:12px;"><strong>【お手つきルール（1回救済）】</strong><br>合図「！」が出る前に押すと「お手つき」になります。<br>・<strong>1回目</strong>: 画面左上に❌印がつき、<strong>同じ敵のまま仕切り直し</strong>（再戦）できます。<br>・<strong>2回目</strong>: お手つき失格となり敗北します。</p>
-              <p style="margin-bottom:16px;"><strong>【反応値について】</strong><br>数値が小さいほど速い記録です（例：334ms ➔ 反応値33）。</p>
-              <button class="main-button" type="button" id="closeHowtoButton" style="width:100%; min-height:48px; padding:10px; font-size:1.05rem;">閉じる</button>
-              <div style="text-align:center; margin-top:14px;">
-                <button class="text-button" type="button" id="resetRecordButton" style="color:#ff654a; text-decoration:underline;">※戦績記録をリセット</button>
-              </div>
-            </div>
-          </div>
+        </div>
 
         <div class="press-start">画面タップ または SPACEキー で開始</div>
       </section>
@@ -1373,37 +1377,46 @@
         <div class="result-card" id="resultCard">
           <p class="judge" id="judgeLabel">勝利</p>
           <div class="time-result" id="resultTime">00<small>反応値</small></div>
-          <div class="reaction-help" id="reactionHelp">小さいほど速い</div>
           <div class="difference-label" id="differenceLabel">敵より 00 早い</div>
+
           <div class="versus-detail" aria-label="対決詳細">
             <span class="versus-pill" id="enemyResultLabel">敵：町の剣士</span>
-            <span class="versus-pill result-optional" id="enemyRankResultLabel">★☆☆☆☆</span>
-            <span class="versus-pill result-optional" id="enemySpeedLabel">敵の反応値：36</span>
-            <span class="versus-pill result-optional" id="waitTimeLabel">待機：-- 秒</span>
+            <span class="versus-pill result-optional" id="enemyRankResultLabel" style="display:none;"></span>
+            <span class="versus-pill result-optional" id="enemySpeedLabel" style="display:none;"></span>
+            <span class="versus-pill result-optional" id="waitTimeLabel" style="display:none;"></span>
           </div>
-          <p class="result-comment" id="resultComment">見事な一閃。</p>
+
+          <p class="result-comment" id="resultComment" style="display:none;"></p>
 
           <div class="result-grid">
             <div class="result-box"><span>BEST</span><strong id="resultBest">--</strong></div>
             <div class="result-box"><span>STREAK</span><strong id="resultStreak">0 人</strong></div>
             <div class="result-box"><span>MAX</span><strong id="resultMaxStreak">0 人</strong></div>
-            <div class="result-box result-optional"><span>TOTAL WINS</span><strong id="resultTotalWins">0 勝</strong></div>
-            <div class="result-box result-optional"><span>NEXT</span><strong id="nextEnemyLabel">道場破り</strong></div>
-            <div class="result-box result-optional"><span>VERSION</span><strong>v0.6.9</strong></div>
           </div>
 
           <div class="result-actions">
             <button class="main-button" type="button" id="retryButton">次の相手へ</button>
-            <button class="sub-button" type="button" id="restartButton">最初から</button>
             <button class="sub-button" type="button" id="shareButton">結果を共有</button>
             <button class="sub-button" type="button" id="backTitleButton">タイトルへ</button>
-            <a class="sub-button" href="/minigames.html" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">広場へ戻る</a>
           </div>
         </div>
       </section>
     </main>
 
-    <footer class="footer-note">MIKIRI ISSEN v0.6.8</footer>
+    <div class="howto-panel" id="howtoPanel" aria-hidden="true">
+      <div class="howto-card" role="dialog" aria-modal="true" aria-label="あそびかた">
+        <h3 style="margin-top:0; color:var(--gold); font-family:'Dela Gothic One', 'Shippori Mincho', serif; font-size:1.5rem; text-shadow:0 2px 8px rgba(0,0,0,0.8); text-align:center;">⚔️ あそびかた</h3>
+        <p style="margin-bottom:12px;"><strong>【基本ルール】</strong><br>画面中央に「！」が出た瞬間に画面をタップ（またはSpace/Enterキー）してください。敵より早く斬れば勝利となり、次の強敵が現れます。</p>
+        <p style="margin-bottom:12px;"><strong>【お手つきルール（1回救済）】</strong><br>合図「！」が出る前に押すと「お手つき」になります。<br>・<strong>1回目</strong>: 画面左上に ❌ 印がつき、<strong>同じ敵のまま仕切り直し</strong>（再戦）できます。<br>・<strong>2回目</strong>: お手つき失格となり敗北します。</p>
+        <p style="margin-bottom:16px;"><strong>【反応値について】</strong><br>数値が小さいほど速い記録です（例：334ms ➔ 反応値33）。</p>
+        <button class="main-button" type="button" id="closeHowtoButton" style="width:100%; min-height:48px; padding:10px; font-size:1.05rem;">閉じる</button>
+        <div style="text-align:center; margin-top:14px;">
+          <button class="text-button" type="button" id="resetRecordButton" style="color:#ff654a; text-decoration:underline;">※戦績記録をリセット</button>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer-note">MIKIRI ISSEN v0.7.0</footer>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite">コピーしました</div>
@@ -1998,7 +2011,7 @@
 
       elements.startButton.addEventListener('click', startRun);
       elements.retryButton.addEventListener('click', startNextRound);
-      elements.restartButton.addEventListener('click', startRun);
+      if (elements.restartButton) elements.restartButton.addEventListener('click', startRun);
       elements.backTitleButton.addEventListener('click', backToTitle);
       elements.shareButton.addEventListener('click', shareResult);
       elements.resetRecordButton.addEventListener('click', resetRecord);
