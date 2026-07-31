@@ -1048,6 +1048,48 @@
       letter-spacing: 0.04em;
     }
 
+    .new-best-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 4px;
+      margin-bottom: 2px;
+      padding: 4px 14px;
+      background: linear-gradient(135deg, #ffe57f, #ffb300);
+      color: #3e2723;
+      font-size: 0.82rem;
+      font-weight: 950;
+      border-radius: 999px;
+      box-shadow: 0 0 16px rgba(255, 215, 0, 0.6), 0 4px 10px rgba(0, 0, 0, 0.4);
+      animation: badgePulse 1.2s ease-in-out infinite alternate;
+    }
+    @keyframes badgePulse {
+      0% { transform: scale(0.95); box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
+      100% { transform: scale(1.05); box-shadow: 0 0 24px rgba(255, 215, 0, 0.9); }
+    }
+
+    .rank-badge {
+      display: inline-block;
+      margin-top: 4px;
+      padding: 3px 12px;
+      background: rgba(255, 211, 106, 0.15);
+      border: 1px solid rgba(255, 211, 106, 0.35);
+      border-radius: 999px;
+      color: var(--gold);
+      font-size: 0.78rem;
+      font-weight: 900;
+      letter-spacing: 0.05em;
+    }
+
+    .master-comment {
+      margin-top: 8px;
+      font-size: 0.84rem;
+      color: rgba(255, 244, 214, 0.85);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
     .reaction-help {
       margin-top: 4px;
       color: rgba(255, 244, 214, 0.56);
@@ -1375,9 +1417,12 @@
 
       <section class="screen result-screen" id="resultScreen" aria-label="結果画面">
         <div class="result-card" id="resultCard">
+          <div class="new-best-badge" id="newBestBadge" style="display:none;">✨ 最高記録更新! ✨</div>
           <p class="judge" id="judgeLabel">勝利</p>
+          <div class="rank-badge" id="rankBadge">⚔️ 剣豪</div>
           <div class="time-result" id="resultTime">00<small>反応値</small></div>
           <div class="difference-label" id="differenceLabel">敵より 00 早い</div>
+          <p class="master-comment" id="masterComment">「目にも止まらぬ太刀筋！」</p>
 
           <div class="versus-detail" aria-label="対決詳細">
             <span class="versus-pill" id="enemyResultLabel">敵：町の剣士</span>
@@ -1416,7 +1461,7 @@
       </div>
     </div>
 
-    <footer class="footer-note">MIKIRI ISSEN v0.7.3</footer>
+    <footer class="footer-note">MIKIRI ISSEN v0.8.0</footer>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite">コピーしました</div>
@@ -1425,7 +1470,7 @@
     (() => {
       'use strict';
 
-      const VERSION = '0.7.3';
+      const VERSION = '0.8.0';
       const STORAGE_KEY = 'mikiri-issen-record-v6';
       const RESULT_DELAY_MS = 940;
 
@@ -1486,8 +1531,11 @@
         nextEnemyLabel: document.getElementById('nextEnemyLabel'),
         titleBestLabel: document.getElementById('titleBestLabel'),
         titleMaxStreakLabel: document.getElementById('titleMaxStreakLabel'),
-        titleTotalWinsLabel: document.getElementById('titleTotalWinsLabel'),
         toast: document.getElementById('toast'),
+        newBestBadge: document.getElementById('newBestBadge'),
+        rankBadge: document.getElementById('rankBadge'),
+        masterComment: document.getElementById('masterComment'),
+        topleftFoulBadge: document.getElementById('topleftFoulBadge'),
       };
 
       const game = {
@@ -1652,8 +1700,76 @@
       function playTone(type) {
         const context = prepareAudio();
         if (!context) return;
-
         const now = context.currentTime;
+
+        if (type === 'click') {
+          const osc = context.createOscillator();
+          const gain = context.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(650, now);
+          osc.frequency.exponentialRampToValueAtTime(1100, now + 0.025);
+          gain.gain.setValueAtTime(0.1, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
+          osc.connect(gain);
+          gain.connect(context.destination);
+          osc.start(now);
+          osc.stop(now + 0.04);
+          return;
+        }
+
+        if (type === 'victory_fanfare') {
+          const notes = [523.25, 659.25, 783.99, 1046.50];
+          notes.forEach((freq, i) => {
+            const osc = context.createOscillator();
+            const gain = context.createGain();
+            const noteTime = now + i * 0.085;
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, noteTime);
+            gain.gain.setValueAtTime(0.0001, noteTime);
+            gain.gain.exponentialRampToValueAtTime(0.18, noteTime + 0.015);
+            gain.gain.exponentialRampToValueAtTime(0.0001, noteTime + 0.38);
+            osc.connect(gain);
+            gain.connect(context.destination);
+            osc.start(noteTime);
+            osc.stop(noteTime + 0.4);
+          });
+          return;
+        }
+
+        if (type === 'new_best') {
+          const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
+          notes.forEach((freq, i) => {
+            const osc = context.createOscillator();
+            const gain = context.createGain();
+            const noteTime = now + i * 0.07;
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, noteTime);
+            gain.gain.setValueAtTime(0.0001, noteTime);
+            gain.gain.exponentialRampToValueAtTime(0.22, noteTime + 0.015);
+            gain.gain.exponentialRampToValueAtTime(0.0001, noteTime + 0.48);
+            osc.connect(gain);
+            gain.connect(context.destination);
+            osc.start(noteTime);
+            osc.stop(noteTime + 0.5);
+          });
+          return;
+        }
+
+        if (type === 'defeat_gong') {
+          const osc = context.createOscillator();
+          const gain = context.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(150, now);
+          osc.frequency.exponentialRampToValueAtTime(38, now + 0.45);
+          gain.gain.setValueAtTime(0.32, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+          osc.connect(gain);
+          gain.connect(context.destination);
+          osc.start(now);
+          osc.stop(now + 0.51);
+          return;
+        }
+
         const oscillator = context.createOscillator();
         const gain = context.createGain();
         oscillator.connect(gain);
@@ -1885,6 +2001,16 @@
         window.setTimeout(() => showResult(game.lastResult), 420);
       }
 
+      function getRankInfo(result) {
+        if (result.early) return { rank: '⚠️ お手つきフライング', comment: '静寂の中に機あり…「！」を待つべし。' };
+        if (!result.win) return { rank: '🩸 間一髪・無念', comment: '惜しい！相手の居合いが一歩上回った…再戦あるのみ！' };
+        const val = toReactionValue(result.reactionMs);
+        if (val !== null && val <= 20) return { rank: '👑 神速・天下無双', comment: 'もはや神の領域…目にも止まらぬ神速の一閃！' };
+        if (val !== null && val <= 28) return { rank: '🎖️ 達人・居合い極致', comment: '相手の気配を完全に捉えた見事な立ち回り！' };
+        if (val !== null && val <= 35) return { rank: '⚔️ 剣豪・一撃必殺', comment: '鋭い集中力！敵の隙を見事に切り裂いた！' };
+        return { rank: '🗡️ 勝利・見切り完遂', comment: '相手の動きを見切り、見事勝利を収めた！' };
+      }
+
       function showResult(result) {
         game.state = 'result';
         if (elements.resultCard) {
@@ -1892,6 +2018,18 @@
           elements.resultCard.classList.toggle('is-early', result.early);
         }
         if (elements.judgeLabel) elements.judgeLabel.textContent = result.judgeLabel;
+
+        if (elements.newBestBadge) {
+          elements.newBestBadge.style.display = result.isNewBest ? 'inline-flex' : 'none';
+        }
+
+        const rankInfo = getRankInfo(result);
+        if (elements.rankBadge) {
+          elements.rankBadge.textContent = rankInfo.rank;
+        }
+        if (elements.masterComment) {
+          elements.masterComment.textContent = `「${rankInfo.comment}」`;
+        }
 
         if (result.early) {
           if (elements.reactionHelp) elements.reactionHelp.style.display = 'none';
@@ -1931,6 +2069,15 @@
             ? (isLastEnemy() ? '最初から' : (isNormalFinalEnemy() ? '隠しボスへ' : '次の相手へ'))
             : 'もう一回';
         }
+
+        if (result.isNewBest) {
+          playTone('new_best');
+        } else if (result.win) {
+          playTone('victory_fanfare');
+        } else {
+          playTone('defeat_gong');
+        }
+
         showScreen('result');
       }
 
@@ -2019,16 +2166,16 @@
         elements.howtoPanel.setAttribute('aria-hidden', String(!isOpen));
       }
 
-      elements.startButton.addEventListener('click', startRun);
-      elements.retryButton.addEventListener('click', startNextRound);
-      if (elements.restartButton) elements.restartButton.addEventListener('click', startRun);
-      elements.backTitleButton.addEventListener('click', backToTitle);
-      elements.shareButton.addEventListener('click', shareResult);
-      elements.resetRecordButton.addEventListener('click', resetRecord);
+      elements.startButton.addEventListener('click', () => { playTone('click'); startRun(); });
+      elements.retryButton.addEventListener('click', () => { playTone('click'); startNextRound(); });
+      if (elements.restartButton) elements.restartButton.addEventListener('click', () => { playTone('click'); startRun(); });
+      elements.backTitleButton.addEventListener('click', () => { playTone('click'); backToTitle(); });
+      elements.shareButton.addEventListener('click', () => { playTone('click'); shareResult(); });
+      elements.resetRecordButton.addEventListener('click', () => { playTone('click'); resetRecord(); });
       elements.soundButton.addEventListener('click', toggleSound);
-      elements.howtoButton.addEventListener('click', toggleHowto);
+      elements.howtoButton.addEventListener('click', () => { playTone('click'); toggleHowto(); });
       const closeHowtoBtn = document.getElementById('closeHowtoButton');
-      if (closeHowtoBtn) closeHowtoBtn.addEventListener('click', toggleHowto);
+      if (closeHowtoBtn) closeHowtoBtn.addEventListener('click', () => { playTone('click'); toggleHowto(); });
       elements.howtoPanel.addEventListener('click', (e) => {
         if (e.target === elements.howtoPanel) toggleHowto();
       });
