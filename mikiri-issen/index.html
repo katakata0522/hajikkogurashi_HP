@@ -23,7 +23,7 @@
     <!-- /SEO: hajikkogurashi-minigame -->
   <style>
     /*
-      みきり一閃 v0.6.5
+      みきり一閃 v1.2.0
       - タイトル画面から英字ラベルを削除し、日本語タイトルを主役化
       - 月を上へ移動し、タイトルの背景として自然に配置
       - 「みきり / 一閃」の縦幅を少し広げて看板感を強化
@@ -178,11 +178,44 @@
       background: rgba(255, 244, 214, 0.1);
     }
 
-    .quick-restart-button {
+    .hud-topleft {
       position: absolute;
       top: 16px;
-      left: 140px;
-      z-index: 20;
+      left: 18px;
+      z-index: 25;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .foul-badge-topleft,
+    .quick-restart-button {
+      pointer-events: auto;
+    }
+
+    .foul-badge-topleft {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      min-height: 36px;
+      border: 2px solid rgba(255, 101, 74, 0.42);
+      border-radius: 12px;
+      padding: 6px 12px;
+      color: #ffd2c9;
+      background: linear-gradient(135deg, rgba(80, 15, 10, 0.88), rgba(30, 8, 5, 0.92));
+      box-shadow: 0 0 16px rgba(255, 101, 74, 0.35), 0 4px 8px rgba(0, 0, 0, 0.4);
+      font-size: 0.82rem;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      animation: foulPulse 1.4s ease-in-out infinite alternate;
+    }
+    @keyframes foulPulse {
+      0% { transform: scale(0.96); box-shadow: 0 0 10px rgba(255, 101, 74, 0.3); }
+      100% { transform: scale(1.04); box-shadow: 0 0 20px rgba(255, 101, 74, 0.75); }
+    }
+
+    .quick-restart-button {
       display: none;
       align-items: center;
       gap: 4px;
@@ -256,11 +289,9 @@
     }
 
     h1 {
-      font-family: "Dela Gothic One", "Shippori Mincho", serif;
-      letter-spacing: 0.08em;
-      filter: drop-shadow(0 8px 16px rgba(0,0,0,0.8));
-      margin: 0;
       font-family: "Shippori Mincho", "Dela Gothic One", serif;
+      margin: 0;
+      filter: drop-shadow(0 8px 16px rgba(0,0,0,0.8));
       font-size: clamp(3.8rem, 7.2vw, 6.6rem);
       line-height: 1.02;
       letter-spacing: 0.035em;
@@ -1144,31 +1175,6 @@
       letter-spacing: 0.04em;
     }
 
-    .foul-badge-topleft {
-      position: absolute;
-      top: 16px;
-      left: 18px;
-      z-index: 20;
-      display: none;
-      align-items: center;
-      gap: 6px;
-      min-height: 36px;
-      border: 2px solid rgba(255, 101, 74, 0.42);
-      border-radius: 12px;
-      padding: 6px 12px;
-      color: #ffd2c9;
-      background: linear-gradient(135deg, rgba(80, 15, 10, 0.88), rgba(30, 8, 5, 0.92));
-      box-shadow: 0 0 16px rgba(255, 101, 74, 0.35), 0 4px 8px rgba(0, 0, 0, 0.4);
-      font-size: 0.82rem;
-      font-weight: 900;
-      letter-spacing: 0.04em;
-      animation: foulPulse 1.4s ease-in-out infinite alternate;
-    }
-    @keyframes foulPulse {
-      0% { transform: scale(0.96); box-shadow: 0 0 10px rgba(255, 101, 74, 0.3); }
-      100% { transform: scale(1.04); box-shadow: 0 0 20px rgba(255, 101, 74, 0.75); }
-    }
-
     .touch-ripple {
       position: fixed;
       width: 48px;
@@ -1402,33 +1408,6 @@
     }
 
   
-    /* ★ 画面左上用 お手つき警告バッジ ★ */
-    .foul-badge-topleft {
-      position: absolute;
-      top: 16px;
-      left: 18px;
-      z-index: 25;
-      display: none;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      border: 2px solid #ff3b30;
-      border-radius: 12px;
-      background: rgba(40, 10, 8, 0.85);
-      color: #ff654a;
-      font-weight: 900;
-      font-size: 0.85rem;
-      letter-spacing: 0.05em;
-      box-shadow: 0 0 16px rgba(255, 59, 48, 0.4), inset 0 0 8px rgba(255, 59, 48, 0.2);
-      animation: foulPulse 1.5s ease-in-out infinite;
-      pointer-events: none;
-    }
-
-    @keyframes foulPulse {
-      0%, 100% { transform: scale(1); opacity: 0.9; }
-      50% { transform: scale(1.05); opacity: 1; box-shadow: 0 0 24px rgba(255, 59, 48, 0.7); }
-    }
-
   </style>
   <!-- Google Fonts: Flashレトロ＆和風プロロゴフォント -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1438,8 +1417,10 @@
 <body>
   <div class="app">
     <main class="shell">
-      <div class="foul-badge-topleft" id="topleftFoulBadge">❌ お手つき 1/1</div>
-      <button class="quick-restart-button" type="button" id="quickRestartButton" style="display:none;">↻ 最初から</button>
+      <div class="hud-topleft" id="hudTopleft">
+        <div class="foul-badge-topleft" id="topleftFoulBadge">❌ お手つき 1/1</div>
+        <button class="quick-restart-button" type="button" id="quickRestartButton" style="display:none;">↻ 最初から</button>
+      </div>
       <button class="sound-button" type="button" id="soundButton" aria-pressed="true">音 ON</button>
 
       <section class="screen title-screen is-active" id="titleScreen" aria-label="タイトル画面">
@@ -1567,7 +1548,7 @@
       </div>
     </div>
 
-    <footer class="footer-note">MIKIRI ISSEN v1.1.0</footer>
+    <footer class="footer-note">MIKIRI ISSEN v1.2.0</footer>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite">コピーしました</div>
@@ -1576,7 +1557,7 @@
     (() => {
       'use strict';
 
-      const VERSION = '1.1.0';
+      const VERSION = '1.2.0';
       const STORAGE_KEY = 'mikiri-issen-record-v6';
       const RESULT_DELAY_MS = 940;
 
@@ -1953,8 +1934,7 @@
       
 
       function startRound() {
-        const foulBadge = document.getElementById('topleftFoulBadge');
-        if (foulBadge) foulBadge.style.display = (game.earlyFoulCount > 0) ? 'inline-flex' : 'none';
+        if (elements.topleftFoulBadge) elements.topleftFoulBadge.style.display = (game.earlyFoulCount > 0) ? 'inline-flex' : 'none';
         if (elements.quickRestartButton) elements.quickRestartButton.style.display = 'inline-flex';
         clearTimers();
         prepareAudio();
@@ -2071,8 +2051,7 @@
           game.state = 'restarting';
           clearTimers();
           playTone('fail');
-          const foulBadge = document.getElementById('topleftFoulBadge');
-          if (foulBadge) foulBadge.style.display = 'inline-flex';
+          if (elements.topleftFoulBadge) elements.topleftFoulBadge.style.display = 'inline-flex';
           elements.stateLabel.textContent = 'フライング！';
           elements.instructionText.textContent = '❌ お手つき1回！同じ敵と仕切り直し';
           elements.impactText.textContent = '待て';
