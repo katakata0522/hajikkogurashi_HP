@@ -1461,7 +1461,7 @@
       </div>
     </div>
 
-    <footer class="footer-note">MIKIRI ISSEN v0.8.0</footer>
+    <footer class="footer-note">MIKIRI ISSEN v0.8.5</footer>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite">コピーしました</div>
@@ -1470,7 +1470,7 @@
     (() => {
       'use strict';
 
-      const VERSION = '0.8.0';
+      const VERSION = '0.8.5';
       const STORAGE_KEY = 'mikiri-issen-record-v6';
       const RESULT_DELAY_MS = 940;
 
@@ -2002,13 +2002,28 @@
       }
 
       function getRankInfo(result) {
-        if (result.early) return { rank: '⚠️ お手つきフライング', comment: '静寂の中に機あり…「！」を待つべし。' };
-        if (!result.win) return { rank: '🩸 間一髪・無念', comment: '惜しい！相手の居合いが一歩上回った…再戦あるのみ！' };
-        const val = toReactionValue(result.reactionMs);
-        if (val !== null && val <= 20) return { rank: '👑 神速・天下無双', comment: 'もはや神の領域…目にも止まらぬ神速の一閃！' };
-        if (val !== null && val <= 28) return { rank: '🎖️ 達人・居合い極致', comment: '相手の気配を完全に捉えた見事な立ち回り！' };
-        if (val !== null && val <= 35) return { rank: '⚔️ 剣豪・一撃必殺', comment: '鋭い集中力！敵の隙を見事に切り裂いた！' };
-        return { rank: '🗡️ 勝利・見切り完遂', comment: '相手の動きを見切り、見事勝利を収めた！' };
+        if (result.early) {
+          return { rank: '⚠️ お手つきフライング', comment: '静寂の中に機あり…「！」をじっと待つべし。' };
+        }
+        const streak = result.streak || 0;
+
+        if (!result.win) {
+          if (streak === 0) return { rank: '🛡️ 新米剣士', comment: '初戦敗北…道は遠し！一瞬の集中力を研ぎ澄ませ！' };
+          if (streak === 1) return { rank: '🗡️ 一刀流の使手', comment: '1人撃破で無念の無言…次こそ連勝を伸ばせ！' };
+          if (streak === 2) return { rank: '⚔️ 道場主級の剣豪', comment: '2人撃破！猛者たちの壁は厚いが再戦あるのみ！' };
+          if (streak === 3) return { rank: '🥷 影を斬る風刃', comment: '3人撃破！疾風の如き忍びを制した腕前！' };
+          if (streak === 4) return { rank: '🛡️ 鉄壁の破砕者', comment: '4人撃破！巨漢の鉄壁を打ち破った猛者！' };
+          if (streak === 5) return { rank: '🎖️ 免許皆伝の師範代', comment: '5人撃破！極みの領域まであと一歩だった…！' };
+          return { rank: '👹 鬼神に挑みし猛者', comment: '6人破るも鬼に散る…だがその剣閃は本物だ！' };
+        }
+
+        if (streak === 1) return { rank: '🗡️ 【1人抜き】一刀流の使手', comment: '一人目を討ち取ったり！まだ序の口に過ぎぬ！' };
+        if (streak === 2) return { rank: '⚔️ 【2人抜き】道場主級の剣豪', comment: '二人目を破ったり！道場の猛者を制した！' };
+        if (streak === 3) return { rank: '🥷 【3人抜き】影を斬る風刃', comment: '三人目を破ったり！忍びの疾風を斬り伏せた！' };
+        if (streak === 4) return { rank: '🛡️ 【4人抜き】鉄壁の破砕者', comment: '四人目を破ったり！巨漢の鉄壁を打ち破った！' };
+        if (streak === 5) return { rank: '🎖️ 【5人抜き】免許皆伝の師範代', comment: '五人目を破ったり！もはや師範代クラスの領域！' };
+        if (streak === 6) return { rank: '👹 【6人抜き】鬼神殺しの英雄', comment: '六人全斬り！ついに刹那の鬼を討ち取った！' };
+        return { rank: '👑 【全関門踏破】天下無双の剣聖', comment: '全隠しボス完全踏破！歴史に名を刻む伝説の剣聖！' };
       }
 
       function showResult(result) {
