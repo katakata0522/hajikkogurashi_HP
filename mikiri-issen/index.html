@@ -1113,6 +1113,77 @@
       letter-spacing: 0.04em;
     }
 
+    .foul-badge-topleft {
+      position: absolute;
+      top: 16px;
+      left: 18px;
+      z-index: 20;
+      display: none;
+      align-items: center;
+      gap: 6px;
+      min-height: 36px;
+      border: 2px solid rgba(255, 101, 74, 0.42);
+      border-radius: 12px;
+      padding: 6px 12px;
+      color: #ffd2c9;
+      background: linear-gradient(135deg, rgba(80, 15, 10, 0.88), rgba(30, 8, 5, 0.92));
+      box-shadow: 0 0 16px rgba(255, 101, 74, 0.35), 0 4px 8px rgba(0, 0, 0, 0.4);
+      font-size: 0.82rem;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      animation: foulPulse 1.4s ease-in-out infinite alternate;
+    }
+    @keyframes foulPulse {
+      0% { transform: scale(0.96); box-shadow: 0 0 10px rgba(255, 101, 74, 0.3); }
+      100% { transform: scale(1.04); box-shadow: 0 0 20px rgba(255, 101, 74, 0.75); }
+    }
+
+    .touch-ripple {
+      position: fixed;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 244, 214, 0.9);
+      background: radial-gradient(circle, rgba(255, 244, 214, 0.4), transparent 70%);
+      transform: translate(-50%, -50%) scale(0.2);
+      pointer-events: none;
+      z-index: 99999;
+      animation: rippleExpand 320ms ease-out forwards;
+    }
+    @keyframes rippleExpand {
+      0% { transform: translate(-50%, -50%) scale(0.2); opacity: 1; }
+      100% { transform: translate(-50%, -50%) scale(2.4); opacity: 0; }
+    }
+
+    .next-enemy-preview {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin: 8px auto 0;
+      padding: 5px 14px;
+      background: rgba(255, 211, 106, 0.08);
+      border: 1px dashed rgba(255, 211, 106, 0.3);
+      border-radius: 12px;
+      color: rgba(255, 244, 214, 0.92);
+      font-size: 0.82rem;
+      font-weight: 850;
+      letter-spacing: 0.04em;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .arena.is-signal .signal-mark,
+      .slash,
+      .enemy-slash,
+      .new-best-badge,
+      .foul-badge-topleft,
+      .touch-ripple {
+        animation: none !important;
+        transition: none !important;
+      }
+      .screen-flash { display: none !important; }
+    }
+
     .result-card.is-lose .difference-label {
       background: rgba(255, 101, 74, 0.12);
       border-color: rgba(255, 101, 74, 0.2);
@@ -1440,6 +1511,8 @@
             <div class="result-box"><span>MAX</span><strong id="resultMaxStreak">0 人</strong></div>
           </div>
 
+          <div class="next-enemy-preview" id="nextEnemyPreview" style="display:none;"></div>
+
           <div class="result-actions">
             <button class="main-button" type="button" id="retryButton">次の相手へ</button>
             <button class="sub-button" type="button" id="shareButton">結果を共有</button>
@@ -1462,7 +1535,7 @@
       </div>
     </div>
 
-    <footer class="footer-note">MIKIRI ISSEN v0.9.0</footer>
+    <footer class="footer-note">MIKIRI ISSEN v1.0.0</footer>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite">コピーしました</div>
@@ -1471,7 +1544,7 @@
     (() => {
       'use strict';
 
-      const VERSION = '0.9.0';
+      const VERSION = '1.0.0';
       const STORAGE_KEY = 'mikiri-issen-record-v6';
       const RESULT_DELAY_MS = 940;
 
@@ -1537,6 +1610,7 @@
         rankBadge: document.getElementById('rankBadge'),
         masterComment: document.getElementById('masterComment'),
         topleftFoulBadge: document.getElementById('topleftFoulBadge'),
+        nextEnemyPreview: document.getElementById('nextEnemyPreview'),
       };
 
       const game = {
@@ -2108,6 +2182,18 @@
             : 'もう一回';
         }
 
+        if (elements.nextEnemyPreview) {
+          if (result.win) {
+            elements.nextEnemyPreview.style.display = 'inline-flex';
+            elements.nextEnemyPreview.textContent = isLastEnemy()
+              ? '⚔️ 全関門制覇！最初から再挑戦'
+              : `次戦：${enemies[Math.min(game.currentEnemyIndex + 1, enemies.length - 1)].name} (${enemies[Math.min(game.currentEnemyIndex + 1, enemies.length - 1)].rank})`;
+          } else {
+            elements.nextEnemyPreview.style.display = 'inline-flex';
+            elements.nextEnemyPreview.textContent = `リベンジ：${enemies[game.currentEnemyIndex].name} と再戦`;
+          }
+        }
+
         if (result.isNewBest) {
           playTone('new_best');
         } else if (result.win) {
@@ -2177,6 +2263,20 @@
         showScreen('title');
       }
 
+      function triggerTouchRipple(x, y) {
+        if (typeof x !== 'number' || typeof y !== 'number' || x <= 0 || y <= 0) return;
+        try {
+          const ripple = document.createElement('div');
+          ripple.className = 'touch-ripple';
+          ripple.style.left = `${x}px`;
+          ripple.style.top = `${y}px`;
+          document.body.appendChild(ripple);
+          window.setTimeout(() => {
+            try { ripple.remove(); } catch (e) {}
+          }, 340);
+        } catch (e) {}
+      }
+
       function resetRecord() {
         if (!window.confirm('記録をリセットしますか？')) return;
         game.record.bestMs = null;
@@ -2187,6 +2287,9 @@
         game.lastResult = null;
         saveRecord();
         updateRecordView();
+        if (elements.howtoPanel && elements.howtoPanel.classList.contains('is-open')) {
+          toggleHowto();
+        }
         showToast('記録をリセットしました');
       }
 
@@ -2225,6 +2328,7 @@
 
       // スマホのゴーストタップと、画面外タッチ時の無反応を防ぐため window 全体で監視
       window.addEventListener('pointerdown', (event) => {
+        triggerTouchRipple(event.clientX, event.clientY);
         if (elements.howtoPanel && elements.howtoPanel.classList.contains('is-open')) return;
         if (game.state !== 'waiting' && game.state !== 'signal') return;
         if (event.target.tagName === 'BUTTON' || event.target.closest('button')) return; // ボタン操作は妨害しない
