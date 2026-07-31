@@ -60,6 +60,8 @@
     body {
       width: 100%;
       height: 100%;
+      height: 100svh;
+      height: 100dvh;
       margin: 0;
       color: var(--paper);
       background:
@@ -69,7 +71,7 @@
       font-family: var(--font-base);
       overflow: hidden;
       overscroll-behavior: none;
-      touch-action: none;
+      touch-action: manipulation;
     }
 
     body::before {
@@ -89,7 +91,9 @@
 
     .app {
       width: min(1180px, calc(100% - 18px));
+      height: 100%;
       height: 100svh;
+      height: 100dvh;
       margin: 0 auto;
       padding: max(10px, env(safe-area-inset-top)) 0 max(10px, env(safe-area-inset-bottom));
       display: grid;
@@ -172,6 +176,33 @@
     .sound-button:hover {
       outline: none;
       background: rgba(255, 244, 214, 0.1);
+    }
+
+    .quick-restart-button {
+      position: absolute;
+      top: 16px;
+      left: 140px;
+      z-index: 20;
+      display: none;
+      align-items: center;
+      gap: 4px;
+      min-height: 36px;
+      border: 2px solid rgba(255, 244, 214, 0.14);
+      border-radius: 12px;
+      padding: 6px 12px;
+      color: rgba(255, 244, 214, 0.88);
+      background: rgba(0, 0, 0, 0.38);
+      box-shadow: inset 0 0 0 1px rgba(255, 244, 214, 0.05), 0 4px 0 rgba(0, 0, 0, 0.28);
+      font-size: 0.8rem;
+      font-weight: 800;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .quick-restart-button:focus-visible,
+    .quick-restart-button:hover {
+      outline: none;
+      background: rgba(255, 244, 214, 0.14);
     }
 
     .title-screen {
@@ -1408,6 +1439,7 @@
   <div class="app">
     <main class="shell">
       <div class="foul-badge-topleft" id="topleftFoulBadge">❌ お手つき 1/1</div>
+      <button class="quick-restart-button" type="button" id="quickRestartButton" style="display:none;">↻ 最初から</button>
       <button class="sound-button" type="button" id="soundButton" aria-pressed="true">音 ON</button>
 
       <section class="screen title-screen is-active" id="titleScreen" aria-label="タイトル画面">
@@ -1535,7 +1567,7 @@
       </div>
     </div>
 
-    <footer class="footer-note">MIKIRI ISSEN v1.0.0</footer>
+    <footer class="footer-note">MIKIRI ISSEN v1.1.0</footer>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite">コピーしました</div>
@@ -1544,7 +1576,7 @@
     (() => {
       'use strict';
 
-      const VERSION = '1.0.0';
+      const VERSION = '1.1.0';
       const STORAGE_KEY = 'mikiri-issen-record-v6';
       const RESULT_DELAY_MS = 940;
 
@@ -1611,12 +1643,14 @@
         masterComment: document.getElementById('masterComment'),
         topleftFoulBadge: document.getElementById('topleftFoulBadge'),
         nextEnemyPreview: document.getElementById('nextEnemyPreview'),
+        quickRestartButton: document.getElementById('quickRestartButton'),
       };
 
       const game = {
         state: 'title',
         waitTimer: null,
         signalAt: 0,
+        roundStartedAt: 0,
         waitMs: 0,
         streak: 0,
         currentEnemyIndex: 0,
@@ -1921,11 +1955,13 @@
       function startRound() {
         const foulBadge = document.getElementById('topleftFoulBadge');
         if (foulBadge) foulBadge.style.display = (game.earlyFoulCount > 0) ? 'inline-flex' : 'none';
+        if (elements.quickRestartButton) elements.quickRestartButton.style.display = 'inline-flex';
         clearTimers();
         prepareAudio();
         const enemy = getCurrentEnemy();
         game.state = 'waiting';
         game.signalAt = 0;
+        game.roundStartedAt = performance.now();
         game.waitMs = randomWait(enemy);
 
         resetArenaClasses();
@@ -2202,11 +2238,13 @@
           playTone('defeat_gong');
         }
 
+        if (elements.quickRestartButton) elements.quickRestartButton.style.display = 'none';
         showScreen('result');
       }
 
       function handleAction() {
         if (game.state === 'waiting') {
+          if (performance.now() - game.roundStartedAt < 220) return;
           resolveEarlyFail('early');
           return;
         }
@@ -2258,6 +2296,7 @@
       function backToTitle() {
         clearTimers();
         game.state = 'title';
+        if (elements.quickRestartButton) elements.quickRestartButton.style.display = 'none';
         resetArenaClasses();
         updateRecordView();
         showScreen('title');
@@ -2322,6 +2361,13 @@
       elements.howtoButton.addEventListener('click', () => safeCall(toggleHowto));
       const closeHowtoBtn = document.getElementById('closeHowtoButton');
       if (closeHowtoBtn) closeHowtoBtn.addEventListener('click', () => safeCall(toggleHowto));
+      if (elements.quickRestartButton) {
+        elements.quickRestartButton.addEventListener('click', () => {
+          safeCall(() => {
+            if (window.confirm('最初（一人目）からやり直しますか？')) startRun();
+          });
+        });
+      }
       elements.howtoPanel.addEventListener('click', (e) => {
         if (e.target === elements.howtoPanel) toggleHowto();
       });
@@ -2336,9 +2382,14 @@
         handleAction();
       }, { passive: false });
 
-      // スペースキー/Enterキーでタイトル画面やリザルト画面からもシームレスに進行可能に
+      // スペースキー/Enterキーでタイトル画面やリザルト画面からもシームレスに進行可能に（Escapeでモーダル閉じ）
       window.addEventListener('keydown', (event) => {
-        if (elements.howtoPanel && elements.howtoPanel.classList.contains('is-open')) return;
+        if (elements.howtoPanel && elements.howtoPanel.classList.contains('is-open')) {
+          if (event.key === 'Escape') {
+            safeCall(toggleHowto);
+          }
+          return;
+        }
         if (event.key === ' ' || event.key === 'Enter') {
           if (event.repeat) return;
           if (document.activeElement && (document.activeElement.tagName === 'BUTTON' || document.activeElement.tagName === 'A')) return; // ボタン・リンクフォーカス時は標準動作優先
