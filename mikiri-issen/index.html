@@ -1374,6 +1374,7 @@
             <div class="record-chip"><span>BEST</span><strong id="titleBestLabel">--</strong></div>
             <div class="record-chip"><span>MAX</span><strong id="titleMaxStreakLabel">0 人</strong></div>
             <div class="record-chip"><span>WINS</span><strong id="titleTotalWinsLabel">0 勝</strong></div>
+          </div>
         </div>
 
         <div class="press-start">画面タップ または SPACEキー で開始</div>
@@ -2218,7 +2219,7 @@
         if (elements.howtoPanel && elements.howtoPanel.classList.contains('is-open')) return;
         if (event.key === ' ' || event.key === 'Enter') {
           if (event.repeat) return;
-          if (document.activeElement && document.activeElement.tagName === 'BUTTON') return; // ボタンフォーカス時は標準動作優先
+          if (document.activeElement && (document.activeElement.tagName === 'BUTTON' || document.activeElement.tagName === 'A')) return; // ボタン・リンクフォーカス時は標準動作優先
           event.preventDefault(); // 画面スクロール防止
           
           if (game.state === 'title') {
