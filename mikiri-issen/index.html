@@ -2222,9 +2222,9 @@
           event.preventDefault(); // 画面スクロール防止
           
           if (game.state === 'title') {
-            startRun();
+            safeCall(startRun);
           } else if (game.state === 'result') {
-            startNextRound();
+            safeCall(startNextRound);
           } else if (game.state === 'waiting' || game.state === 'signal') {
             handleAction();
           }
