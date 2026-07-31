@@ -1462,7 +1462,7 @@
       </div>
     </div>
 
-    <footer class="footer-note">MIKIRI ISSEN v0.8.6</footer>
+    <footer class="footer-note">MIKIRI ISSEN v0.9.0</footer>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite">コピーしました</div>
@@ -1471,7 +1471,7 @@
     (() => {
       'use strict';
 
-      const VERSION = '0.8.6';
+      const VERSION = '0.9.0';
       const STORAGE_KEY = 'mikiri-issen-record-v6';
       const RESULT_DELAY_MS = 940;
 
@@ -1898,7 +1898,7 @@
         const reactionMs = Math.max(0, Math.round(performance.now() - game.signalAt));
         const diffMs = enemy.reactionMs - reactionMs;
         const win = diffMs >= 0;
-        const isNewBest = game.record.bestMs === null || reactionMs < game.record.bestMs;
+        const isNewBest = win && (game.record.bestMs === null || reactionMs < game.record.bestMs);
         const judge = judgeReaction(reactionMs, enemy);
 
         if (isNewBest) game.record.bestMs = reactionMs;
@@ -2057,9 +2057,27 @@
         } else {
           if (elements.reactionHelp) elements.reactionHelp.style.display = 'block';
           if (elements.resultTime) {
-            elements.resultTime.innerHTML = result.reactionMs !== null
-              ? `${formatReaction(result.reactionMs)}<small>反応値</small>`
-              : 'MISS<small></small>';
+            if (result.reactionMs !== null) {
+              const targetVal = toReactionValue(result.reactionMs);
+              const duration = 240;
+              const startTime = performance.now();
+              function animateCount(now) {
+                const elapsed = now - startTime;
+                const progress = Math.min(1, elapsed / duration);
+                const currentVal = Math.floor(progress * targetVal);
+                if (elements.resultTime) {
+                  elements.resultTime.innerHTML = `${String(currentVal).padStart(2, '0')}<small>反応値</small>`;
+                }
+                if (progress < 1) {
+                  requestAnimationFrame(animateCount);
+                } else if (elements.resultTime) {
+                  elements.resultTime.innerHTML = `${formatReaction(result.reactionMs)}<small>反応値</small>`;
+                }
+              }
+              requestAnimationFrame(animateCount);
+            } else {
+              elements.resultTime.innerHTML = 'MISS<small></small>';
+            }
           }
         }
 
