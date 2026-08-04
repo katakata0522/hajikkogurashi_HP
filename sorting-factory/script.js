@@ -561,7 +561,13 @@ class GameController {
 
             this.particles.spawn(targetItem.x, targetItem.y, targetItem.color);
             
-            this.score++;
+            this.comboCount = (this.comboCount || 0) + 1;
+            let addedPoints = 1;
+            if (this.comboCount % 10 === 0) {
+                addedPoints += 5; // 10連コンボごとのフィーバーボーナス！
+                this.particles.spawn(targetItem.x, targetItem.y, '#ffd700');
+            }
+            this.score += addedPoints;
             
             this.fallSpeed = Math.min(this.fallSpeed + 8, 1200); // 最大スピードも抑えめに
             this.spawnIntervalTime = Math.max(this.spawnIntervalTime - 0.02, 0.5);
@@ -574,6 +580,7 @@ class GameController {
 
             this.ui.updateScore(this.score);
         } else {
+            this.comboCount = 0;
             this.triggerGameOver();
         }
     }

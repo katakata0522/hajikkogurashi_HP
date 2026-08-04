@@ -445,7 +445,7 @@ function update() {
     
     for (let p of platforms) {
         if (player.vy >= 0 && player.x < p.x + p.width && player.x + player.width > p.x &&
-            player.y + player.height >= p.y && player.y + player.height - player.vy <= p.y + 0.1) {
+            player.y + player.height >= p.y && player.y + player.height - player.vy <= p.y + 12) {
             
             if (!player.wasGrounded && player.vy > 2) {
                 player.scaleX = 1.5;

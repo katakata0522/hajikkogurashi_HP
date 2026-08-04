@@ -563,8 +563,21 @@ class GameController {
 
         // --- Stress Update ---
         if (this.isSlacking) {
+            const oldStress = this.stress;
             this.stress -= this.reliefRate * dt;
-            if (this.stress < 0) this.stress = 0;
+            if (this.stress <= 0) {
+                this.stress = 0;
+                if (oldStress > 0) {
+                    this.audio.playEffect('coin');
+                    this.floatingTexts.push({
+                        x: CONFIG.LOGICAL_WIDTH / 2,
+                        y: CONFIG.LOGICAL_HEIGHT * 0.7 - 70,
+                        life: 1.0,
+                        text: '✨ REFRESHED!!',
+                        scale: 1.6
+                    });
+                }
+            }
         } else {
             const stressRate = this.safeSlackingTimer > 0 ? 0 : this.stressRate;
             this.stress += stressRate * dt;
