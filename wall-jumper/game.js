@@ -505,6 +505,7 @@ function update() {
         // Milestone
         if (maxDistance >= nextMilestone) {
             milestoneDisplay.innerText = nextMilestone + "m 突破!!";
+            playSound('walljump');
             milestoneDisplay.style.display = 'block';
             milestoneDisplay.style.animation = 'none';
             void milestoneDisplay.offsetWidth;

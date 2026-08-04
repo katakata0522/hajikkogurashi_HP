@@ -914,6 +914,7 @@ class GameController {
             }
         });
 
+        this.screenShake = Math.min(18, 4 + caught * 3);
         this.audio.playEffect('blackhole');
 
         // チュートリアル敵を吸い込んだ場合の本番移行プロセス

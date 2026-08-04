@@ -651,6 +651,14 @@ function bindEvents() {
 
   window.addEventListener('keydown', (event) => {
     if (event.repeat) return;
+    if (event.key === ' ' || event.key === 'Enter') {
+      if (document.activeElement && document.activeElement.tagName === 'BUTTON') return;
+      if (state.mode === 'result' || !elements.playScreen.classList.contains('active')) {
+        event.preventDefault();
+        startGame();
+        return;
+      }
+    }
     const keyMap = {
       ArrowUp: 'up',
       w: 'up',
