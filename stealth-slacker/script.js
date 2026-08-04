@@ -396,6 +396,8 @@ class GameController {
         this.container.addEventListener('touchstart', handleDown, {passive: false});
         window.addEventListener('touchend', (e) => { handleUp(e); handleDoubleTap(); }, {passive: false});
         window.addEventListener('touchcancel', handleUp, {passive: false});
+        window.addEventListener('pointerleave', handleUp, {passive: false});
+        window.addEventListener('pointerout', handleUp, {passive: false});
         
         this.container.addEventListener('contextmenu', (e) => {
             if (this.gameState === STATE.PLAYING) e.preventDefault();

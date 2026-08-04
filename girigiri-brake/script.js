@@ -623,6 +623,10 @@ class GameController {
 
         if (distanceMeter < 5.0) {
             this.audio.playSuccess();
+            this.screenShake = 15;
+            for (let i = 0; i < 24; i++) {
+                this.particles.addSpark(this.player.x + this.player.width + (Math.random() * 20 - 10), this.player.y + this.player.height);
+            }
         }
 
         // _setRankTextに直接距離(m)を渡して詳細な評価判定を行わせる

@@ -363,6 +363,7 @@ class GameController {
         };
 
         window.addEventListener('keydown', (e) => {
+            if (e.repeat) return; // Ignore OS auto-repeat for clean single inputs
             if (this.state === STATE.PLAYING) {
                 if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
                     e.preventDefault();

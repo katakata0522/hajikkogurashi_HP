@@ -845,8 +845,8 @@ class GameController {
         const p3 = this.points[len-2];
         const p4 = this.points[len-1];
 
-        // 誤爆防止の遊び：直近10フレーム分（約0.15秒分）の線は交差判定の対象から除外する
-        const safetyMargin = 10;
+        // 誤爆防止の遊び：直近4ポイント分の線は交差判定の対象から除外する（小回りの利く素早いループに対応）
+        const safetyMargin = 4;
         if (len - safetyMargin <= 0) return;
 
         // Check against older segments

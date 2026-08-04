@@ -329,8 +329,8 @@ function jump() {
         }
     }
     
-    if (player.x <= 0) isWallLeft = true;
-    if (player.x + player.width >= canvas.width) isWallRight = true;
+    if (player.x <= 4) isWallLeft = true;
+    if (player.x + player.width >= canvas.width - 4) isWallRight = true;
     
     if (isGrounded) {
         player.vy = JUMP_FORCE;
