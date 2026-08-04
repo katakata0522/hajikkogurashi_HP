@@ -1,5 +1,5 @@
 // Kanji Slicer & Merge (漢字スライサー・マージ)
-// Version: v1.6.0
+// Version: v1.7.0
 // Core Game Logic
 
 // Virtual coordinate space (maintains consistency across all screens)
@@ -341,28 +341,29 @@ class SoundSynth {
             osc.stop(now + 0.1);
         }
         else if (type === 'slice_hard') {
-            // Metallic clink
-            const osc1 = this.ctx.createOscillator();
-            const osc2 = this.ctx.createOscillator();
+            // Heavy sword blade / wooden impact sound
+            const osc = this.ctx.createOscillator();
             const gain = this.ctx.createGain();
+            const filter = this.ctx.createBiquadFilter();
             
-            osc1.type = 'triangle';
-            osc2.type = 'sine';
-            
-            osc1.connect(gain);
-            osc2.connect(gain);
+            osc.type = 'sawtooth';
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(600, now);
+            filter.frequency.exponentialRampToValueAtTime(120, now + 0.08);
+
+            osc.connect(filter);
+            filter.connect(gain);
             gain.connect(dest);
 
-            osc1.frequency.setValueAtTime(900, now);
-            osc2.frequency.setValueAtTime(1400, now);
+            const pitch = 220 + (Math.random() - 0.5) * 40;
+            osc.frequency.setValueAtTime(pitch, now);
+            osc.frequency.exponentialRampToValueAtTime(80, now + 0.08);
 
-            gain.gain.setValueAtTime(0.08, now);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+            gain.gain.setValueAtTime(0.1, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
 
-            osc1.start(now);
-            osc2.start(now);
-            osc1.stop(now + 0.12);
-            osc2.stop(now + 0.12);
+            osc.start(now);
+            osc.stop(now + 0.09);
         }
         else if (type === 'slice_split') {
             // Whoosh slash + glass ring
@@ -486,6 +487,9 @@ let slashTrail = [];
 let floatingTexts = [];
 let shockwaves = [];
 let shakeIntensity = 0;
+let flashAlpha = 0;
+let touchStartX = 0;
+let touchStartY = 0;
 let lastMergeTime = 0;
 let chainCount = 0;
 let slicesInSwipe = 0;
@@ -743,6 +747,7 @@ function checkMerge(c1, c2) {
             const basePoints = 120;
             const finalPoints = basePoints * chainCount;
             
+            flashAlpha = 0.35; // Screen flash burst
             soundSynth.play('mission_clear');
             spawnParticles(midX, midY, '#ffd700', 36, true); // Golden sparks
             addScore(finalPoints);
@@ -966,9 +971,12 @@ function handleStart(e) {
     soundSynth.init(); // Initialize audio context on first tap
     
     const coords = getVirtualCoords(e);
+    touchStartX = coords.x;
+    touchStartY = coords.y;
     
-    if (coords.y <= DEAD_LINE - 25) {
-        // Drop zone interaction
+    // Only initiate drag preview if tap is near previewX and in upper zone
+    const distToPreview = Math.abs(coords.x - previewX);
+    if (coords.y <= DEAD_LINE - 10 && distToPreview < 65) {
         if (dropCooldown === 0) {
             isDraggingPreview = true;
             previewX = Math.max(WALL_MARGIN + getRadiusForTier(1), Math.min(V_WIDTH - WALL_MARGIN - getRadiusForTier(1), coords.x));
@@ -987,6 +995,15 @@ function handleMove(e) {
     const coords = getVirtualCoords(e);
     
     if (isDraggingPreview) {
+        // Dynamic switch: If user drags rapidly beyond preview grab threshold, convert to slicing mode
+        const dragDist = Math.sqrt((coords.x - touchStartX)**2 + (coords.y - touchStartY)**2);
+        if (dragDist > 20 && Math.abs(coords.y - touchStartY) > 12) {
+            isDraggingPreview = false;
+            isSlicing = true;
+            slicesInSwipe = 0;
+            slashTrail = [{ x: coords.x, y: coords.y, age: 0 }];
+            return;
+        }
         previewX = Math.max(WALL_MARGIN + getRadiusForTier(1), Math.min(V_WIDTH - WALL_MARGIN - getRadiusForTier(1), coords.x));
     } else if (isSlicing) {
         const lastPt = slashTrail[slashTrail.length - 1];
@@ -1594,6 +1611,14 @@ function draw() {
         }
         ctx.restore();
     }
+    // Flash overlay for mission clear & combos
+    if (flashAlpha > 0.01) {
+        ctx.save();
+        ctx.fillStyle = `rgba(255, 215, 0, ${flashAlpha})`;
+        ctx.fillRect(0, 0, V_WIDTH, V_HEIGHT);
+        ctx.restore();
+    }
+
     ctx.restore(); // Restore screen shake save
 }
 
@@ -1606,6 +1631,13 @@ function update() {
         checkGameOver();
     }
     
+    // Decay flash overlay
+    if (flashAlpha > 0.005) {
+        flashAlpha *= 0.86;
+    } else {
+        flashAlpha = 0;
+    }
+
     // Decay screen shake
     if (shakeIntensity > 0.05) {
         shakeIntensity *= 0.88;
@@ -1640,7 +1672,7 @@ function update() {
     for (let pt of slashTrail) {
         pt.age++;
     }
-    slashTrail = slashTrail.filter(pt => pt.age < 12);
+    slashTrail = slashTrail.filter(pt => pt.age < 8);
     
     if (dropCooldown > 0) dropCooldown--;
 }
@@ -1651,6 +1683,13 @@ function tick() {
     draw();
     requestAnimationFrame(tick);
 }
+
+// Tab Visibility Auto-Resume for Web Audio API
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && soundSynth && soundSynth.enabled) {
+        soundSynth.resume();
+    }
+});
 
 // Start Game Setup
 chooseNewMission();

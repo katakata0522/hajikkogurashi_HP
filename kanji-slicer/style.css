@@ -1,5 +1,5 @@
 /* Kanji Slicer & Merge (漢字スライサー・マージ) */
-/* Version: v1.5.0 */
+/* Version: v1.7.0 */
 
 /* Reset & Base styles */
 *, *::before, *::after {
@@ -279,9 +279,11 @@ body {
     background: #16181f;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
-    padding: 30px;
-    width: 85%;
+    padding: 24px 20px;
+    width: 90%;
     max-width: 360px;
+    max-height: 90vh;
+    overflow-y: auto;
     text-align: center;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     animation: modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -333,6 +335,7 @@ body {
     transition: all 0.2s;
     border: none;
     text-align: center;
+    touch-action: manipulation;
 }
 
 .btn-primary {
@@ -368,7 +371,9 @@ body {
 .pause-content {
     max-width: 440px !important;
     width: 90% !important;
-    padding: 20px 15px !important;
+    max-height: 88vh !important;
+    overflow-y: auto !important;
+    padding: 18px 14px !important;
 }
 
 .modal-title-pause {
