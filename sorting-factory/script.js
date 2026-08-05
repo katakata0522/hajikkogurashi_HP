@@ -478,6 +478,11 @@ class GameController {
 
         window.addEventListener('keydown', (e) => {
             if (e.repeat) return;
+            if (e.key === 'r' || e.key === 'R') {
+                e.preventDefault();
+                this.startGame();
+                return;
+            }
             if (this.state === STATE.PLAYING) {
                 if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
                     e.preventDefault();

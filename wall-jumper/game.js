@@ -773,6 +773,23 @@ const handleJump = (e) => {
         if (e.code === 'Space') {
             e.preventDefault();
             jump();
+        } else if (e.code === 'KeyR') {
+            e.preventDefault();
+            initGame();
+            gameState = 'playing';
+            hud.style.display = 'flex';
+            pauseBtn.style.display = 'flex';
+            pauseScreen.style.display = 'none';
+        } else if (e.code === 'KeyP' || e.code === 'Escape') {
+            if (gameState === 'playing') {
+                e.preventDefault();
+                gameState = 'paused';
+                pauseScreen.style.display = 'flex';
+            } else if (gameState === 'paused') {
+                e.preventDefault();
+                gameState = 'playing';
+                pauseScreen.style.display = 'none';
+            }
         }
     } else {
         // マウス・タッチ操作
@@ -781,8 +798,6 @@ const handleJump = (e) => {
     }
 };
 
-// 重複発火を防ぐため、pointerdownを使用（モダンブラウザ対応）
-// pointerdown がサポートされていない環境のフォールバックとして mousedown/touchstart を使い分ける
 if (window.PointerEvent) {
     canvas.addEventListener('pointerdown', handleJump);
 } else {
