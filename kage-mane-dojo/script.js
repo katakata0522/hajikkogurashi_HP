@@ -279,6 +279,8 @@ function clearTimers() {
 function setInputEnabled(enabled) {
   elements.dirButtons.forEach((button) => {
     button.disabled = !enabled;
+    button.style.opacity = enabled ? '1.0' : '0.45';
+    button.style.filter = enabled ? 'none' : 'grayscale(0.5)';
   });
 }
 

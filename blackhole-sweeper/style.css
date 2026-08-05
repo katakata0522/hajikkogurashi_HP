@@ -35,12 +35,8 @@ body {
     height: 100%;
     max-width: 600px;
     background-color: var(--bg-color);
-    background-image: 
-        linear-gradient(rgba(0, 229, 255, 0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 229, 255, 0.05) 1px, transparent 1px);
-    background-size: 20px 20px;
     overflow: hidden;
-    touch-action: none; /* スマホでのスクロール無効化 */
+    touch-action: none;
 }
 
 #game-canvas {

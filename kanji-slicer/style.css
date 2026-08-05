@@ -39,8 +39,8 @@ body {
 
 /* Game Header styling with glassmorphism */
 #game-header {
-    height: 110px;
-    padding: 10px 15px;
+    height: 76px;
+    padding: 6px 12px;
     display: grid;
     grid-template-columns: 1.2fr 1fr 1fr;
     align-items: center;
@@ -237,21 +237,9 @@ body {
     100% { transform: translate(-50%, 0) scale(1.05); }
 }
 
-/* Game Footer */
+/* Game Footer (Hidden for maximum physics area) */
 #game-footer {
-    height: 45px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #090a0d;
-    border-top: 1px solid rgba(255, 255, 255, 0.03);
-    padding: 0 10px;
-}
-
-.instruction {
-    font-size: 0.65em;
-    color: #718096;
-    text-align: center;
+    display: none;
 }
 
 /* Modal Overlay & Screens */
