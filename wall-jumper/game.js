@@ -265,10 +265,11 @@ function generateLevel(targetY) {
         lastPlatform = platform;
 
         if (currentY < canvas.height - 280 && Math.random() < difficulty.spikeChance) {
-            let isLeft = Math.random() > 0.5;
+            // Place spike on wall opposite to platform edge for fair reaction space
+            let isLeft = platform.x > canvas.width / 2;
             const spikeHeight = 44 + Math.random() * 16;
             let sx = isLeft ? 0 : canvas.width - 14;
-            spikes.push({ x: sx, y: currentY - spikeHeight - 12, width: 14, height: spikeHeight });
+            spikes.push({ x: sx, y: currentY - spikeHeight - 45, width: 14, height: spikeHeight });
         }
     }
 }
