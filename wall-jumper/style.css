@@ -231,32 +231,42 @@ button.secondary {
 
 .back-link {
     margin-top: 20px;
+    from { opacity: 0.5; }
+    to { opacity: 1; }
+}
+
+.back-link {
+    margin-top: 20px;
     color: rgba(255,255,255,0.4);
     text-decoration: none;
     font-size: 12px;
 }
 
-/* Popups */
+/* Popups (Positioned at top so jump view is never blocked) */
 #milestone-display, #in-game-new-record {
     position: absolute;
-    top: 35%;
+    top: 70px;
     left: 50%;
-    width: 100%;
+    width: auto;
+    padding: 6px 20px;
+    background: rgba(0, 0, 0, 0.75);
+    border: 1px solid var(--accent-color);
+    border-radius: 20px;
     text-align: center;
     pointer-events: none;
     display: none;
     transform: translateX(-50%);
-    font-size: 40px;
+    font-size: 22px;
     color: var(--accent-color);
     font-weight: 900;
-    text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000;
-    z-index: 10;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    z-index: 15;
 }
 
 #in-game-new-record {
     color: var(--primary-color);
-    font-size: 36px;
-    text-shadow: 2px 2px 0 #fff, -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff;
+    border-color: var(--primary-color);
+    font-size: 22px;
 }
 
 #run-flash {

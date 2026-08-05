@@ -1743,14 +1743,7 @@ function draw() {
         }
         ctx.restore();
     }
-    // Flash overlay for mission clear & combos
-    if (flashAlpha > 0.01) {
-        ctx.save();
-        ctx.fillStyle = `rgba(255, 215, 0, ${flashAlpha})`;
-        ctx.fillRect(0, 0, V_WIDTH, V_HEIGHT);
-        ctx.restore();
-    }
-
+    // Clean floating text & particle rendering (No blinding full-screen flashes)
     ctx.restore(); // Restore screen shake save
 }
 
