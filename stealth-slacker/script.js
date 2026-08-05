@@ -1,5 +1,5 @@
 /**
- * 限界！ステルスサボタージュ - Refactored Main Script
+ * 限界！ステルスサボタージュ - Audited & Refactored Precision Script
  */
 
 const CONFIG = {
@@ -15,122 +15,151 @@ const CONFIG = {
 
 const STATE = { START: 0, PLAYING: 1, GAMEOVER: 2 };
 const BOSS = { AWAY: 0, WARNING: 1, LOOKING: 2 };
-const EMOJIS = {
-    BOSS_AWAY: '🧑‍💼',
-    BOSS_LOOK: '👺',
-    PLAYER_WORK: '🧑‍💻',
-    PLAYER_PLAY: '🎮',
-    WARNING: '❗',
-    SWEAT: '💦'
-};
+
+// Best score state with in-memory fallback
+let memoryBestScore = null;
 
 function readBestScore() {
     try {
         const rawScore = localStorage.getItem('stealth_best_score');
+        if (rawScore === null) return memoryBestScore;
         const bestScore = Number.parseInt(rawScore, 10);
-        return Number.isFinite(bestScore) && bestScore > 0 ? bestScore : null;
+        const valid = Number.isFinite(bestScore) && bestScore > 0 ? bestScore : null;
+        if (valid !== null) memoryBestScore = valid;
+        return memoryBestScore;
     } catch (error) {
-        return null;
+        console.warn('ベストスコアの読み込みに失敗しました。インメモリにフォールバックします。', error);
+        return memoryBestScore;
     }
 }
 
 function writeBestScore(score) {
+    memoryBestScore = score;
     try {
         localStorage.setItem('stealth_best_score', String(score));
         return true;
     } catch (error) {
+        console.warn('ベストスコアの保存に失敗しました。インメモリで維持します。', error);
         return false;
     }
 }
 
 // ==========================================
-// AudioManager
+// AudioManager (Synced with Game Loop & Master Gain)
 // ==========================================
 class AudioManager {
     constructor() {
         this.audioCtx = null;
-        this.workSoundInterval = null;
-        this.playSoundInterval = null;
+        this.masterGain = null;
         this.isWorking = false;
         this.isSlacking = false;
         this.isMuted = localStorage.getItem('katakata-minigames-mute') === 'true';
+        this.soundTimer = 0;
     }
 
     setMuted(muted) {
         this.isMuted = muted;
-        localStorage.setItem('katakata-minigames-mute', String(muted));
+        try {
+            localStorage.setItem('katakata-minigames-mute', String(muted));
+        } catch (e) {
+            /* ignore storage block */
+        }
     }
 
     init() {
         if (!this.audioCtx) {
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            this.audioCtx = new AudioContext();
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (AudioContextClass) {
+                this.audioCtx = new AudioContextClass();
+                this.masterGain = this.audioCtx.createGain();
+                this.masterGain.gain.setValueAtTime(0.3, this.audioCtx.currentTime);
+                this.masterGain.connect(this.audioCtx.destination);
+            }
         }
-        if (this.audioCtx.state === 'suspended') {
+        if (this.audioCtx && this.audioCtx.state === 'suspended') {
             this.audioCtx.resume();
         }
     }
 
     _createOscillator(type, freq) {
-        if (!this.audioCtx) return null;
-        const osc = this.audioCtx.createOscillator();
-        const gain = this.audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(this.audioCtx.destination);
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, this.audioCtx.currentTime);
-        return { osc, gain };
+        if (this.isMuted || !this.audioCtx) return null;
+        try {
+            const osc = this.audioCtx.createOscillator();
+            const gain = this.audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(this.masterGain);
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, this.audioCtx.currentTime);
+            return { osc, gain };
+        } catch (e) {
+            return null;
+        }
     }
 
     playEffect(type) {
-        if (this.isMuted) return;
-        if (!this.audioCtx) return;
+        if (this.isMuted || !this.audioCtx) return;
         const now = this.audioCtx.currentTime;
 
         if (type === 'warning') {
-            const { osc, gain } = this._createOscillator('square', 880);
+            const audioNode = this._createOscillator('square', 880);
+            if (!audioNode) return;
+            const { osc, gain } = audioNode;
             osc.frequency.setValueAtTime(1760, now + 0.1);
             gain.gain.setValueAtTime(0.1, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
             osc.start(now);
             osc.stop(now + 0.3);
         } else if (type === 'look') {
-            const { osc, gain } = this._createOscillator('triangle', 100);
+            const audioNode = this._createOscillator('triangle', 100);
+            if (!audioNode) return;
+            const { osc, gain } = audioNode;
             osc.frequency.exponentialRampToValueAtTime(40, now + 0.2);
             gain.gain.setValueAtTime(0.3, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
             osc.start(now);
             osc.stop(now + 0.2);
         } else if (type === 'gameover') {
-            const { osc, gain } = this._createOscillator('sawtooth', 100);
+            const audioNode = this._createOscillator('sawtooth', 100);
+            if (!audioNode) return;
+            const { osc, gain } = audioNode;
             osc.frequency.exponentialRampToValueAtTime(10, now + 1.0);
             gain.gain.setValueAtTime(0.5, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + 1.0);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 1.0);
             osc.start(now);
             osc.stop(now + 1.0);
         } else if (type === 'type') {
-            const { osc, gain } = this._createOscillator('square', 1200 + Math.random() * 400);
+            const audioNode = this._createOscillator('square', 1200 + Math.random() * 400);
+            if (!audioNode) return;
+            const { osc, gain } = audioNode;
             gain.gain.setValueAtTime(0.05, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
             osc.start(now);
             osc.stop(now + 0.05);
         } else if (type === 'coin') {
-            const { osc, gain } = this._createOscillator('sine', 1200 + Math.random() * 200);
+            const audioNode = this._createOscillator('sine', 1200 + Math.random() * 200);
+            if (!audioNode) return;
+            const { osc, gain } = audioNode;
             gain.gain.setValueAtTime(0.05, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
             osc.start(now);
             osc.stop(now + 0.1);
         }
     }
 
-    startEnvironmentSounds() {
-        this.stopEnvironmentSounds();
-        this.workSoundInterval = setInterval(() => {
-            if (this.isWorking) this.playEffect('type');
-        }, 150);
-        this.playSoundInterval = setInterval(() => {
-            if (this.isSlacking) this.playEffect('coin');
-        }, 100);
+    updateAudio(dt) {
+        if (this.isMuted) return;
+        this.soundTimer += dt;
+        if (this.isSlacking) {
+            if (this.soundTimer >= 0.1) {
+                this.playEffect('coin');
+                this.soundTimer = 0;
+            }
+        } else if (this.isWorking) {
+            if (this.soundTimer >= 0.15) {
+                this.playEffect('type');
+                this.soundTimer = 0;
+            }
+        }
     }
 
     setPlayerState(isSlacking, isBossLooking, isGameOver) {
@@ -141,13 +170,6 @@ class AudioManager {
             this.isSlacking = isSlacking;
             this.isWorking = !isSlacking && !isBossLooking;
         }
-    }
-
-    stopEnvironmentSounds() {
-        clearInterval(this.workSoundInterval);
-        clearInterval(this.playSoundInterval);
-        this.isWorking = false;
-        this.isSlacking = false;
     }
 }
 
@@ -175,7 +197,16 @@ class UIManager {
 
         this.darkModeToggle = document.getElementById('dark-mode-toggle');
         this.darkModeLabel = document.querySelector('.dark-mode-label');
+
+        this.initDarkMode();
+    }
+
+    initDarkMode() {
+        const savedDark = localStorage.getItem('stealth-slacker-darkmode') === 'true';
         if (this.darkModeToggle) {
+            this.darkModeToggle.checked = savedDark;
+            this.applyDarkMode(savedDark);
+            
             if (this.darkModeLabel) {
                 this.darkModeLabel.addEventListener('click', (e) => {
                     e.preventDefault();
@@ -191,60 +222,77 @@ class UIManager {
 
     applyDarkMode(isDark) {
         document.body.classList.toggle('dark-mode', isDark);
+        try {
+            localStorage.setItem('stealth-slacker-darkmode', String(isDark));
+        } catch (e) {
+            /* ignore storage block */
+        }
     }
 
     startGameUI() {
-        this.startScreen.classList.remove('active');
-        this.resultScreen.classList.remove('active');
-        this.scoreHud.classList.remove('hidden');
-        this.stressHud.classList.remove('hidden');
-        this.hintText.classList.remove('hidden');
-        this.scoreValueEl.innerText = '0';
-        this.scoreValueEl.style.transform = 'scale(1)';
-        this.scoreValueEl.style.color = 'var(--border-color)';
-        this.bgFever.style.animationDuration = '10s';
+        if (this.startScreen) this.startScreen.classList.remove('active');
+        if (this.resultScreen) this.resultScreen.classList.remove('active');
+        if (this.scoreHud) this.scoreHud.classList.remove('hidden');
+        if (this.stressHud) this.stressHud.classList.remove('hidden');
+        if (this.hintText) this.hintText.classList.remove('hidden');
+        if (this.scoreValueEl) {
+            this.scoreValueEl.innerText = '0';
+            this.scoreValueEl.style.transform = 'scale(1)';
+            this.scoreValueEl.style.color = 'var(--border-color)';
+        }
+        if (this.bgFever) this.bgFever.style.animationDuration = '10s';
         this.updateStress(0);
     }
 
     setSlacking(isSlacking) {
+        if (!this.bgFever) return;
         if (isSlacking) {
             this.bgFever.classList.add('active');
-            this.hintText.classList.add('hidden');
+            if (this.hintText) this.hintText.classList.add('hidden');
         } else {
             this.bgFever.classList.remove('active');
         }
     }
 
     updateScore(score) {
-        this.scoreValueEl.innerText = Math.floor(score);
+        if (!this.scoreValueEl) return;
+        const currentVal = Math.floor(score);
+        this.scoreValueEl.innerText = currentVal;
         
-        // カオス演出
         if (score > 10000) {
             const chaosLevel = Math.min((score - 10000) / 100000, 1);
             const scale = 1 + (chaosLevel * 0.5);
             const red = Math.floor(chaosLevel * 255);
-            this.scoreValueEl.style.transform = `scale(${scale}) rotate(${(Math.random()-0.5)*10*chaosLevel}deg)`;
+            this.scoreValueEl.style.transform = `scale(${scale}) rotate(${(Math.random() - 0.5) * 10 * chaosLevel}deg)`;
             this.scoreValueEl.style.color = `rgb(${red}, 0, 0)`;
             
-            const duration = Math.max(1, 10 - (chaosLevel * 9));
-            this.bgFever.style.animationDuration = `${duration}s`;
+            if (this.bgFever) {
+                const duration = Math.max(1, 10 - (chaosLevel * 9));
+                this.bgFever.style.animationDuration = `${duration}s`;
+            }
         }
     }
 
     updateStress(stress) {
-        this.stressBarFill.style.width = `${Math.min(100, Math.max(0, stress))}%`;
-        if (stress >= 80) {
-            this.stressBarFill.classList.add('danger');
-        } else {
-            this.stressBarFill.classList.remove('danger');
+        const value = Math.min(100, Math.max(0, stress));
+        if (this.stressBarFill) {
+            this.stressBarFill.style.width = `${value}%`;
+            if (value >= 80) {
+                this.stressBarFill.classList.add('danger');
+            } else {
+                this.stressBarFill.classList.remove('danger');
+            }
+        }
+        if (this.stressHud) {
+            this.stressHud.setAttribute('aria-valuenow', Math.floor(value));
         }
     }
 
     showGameOver(score, bestScore, isNewRecord, reason) {
-        this.bgFever.classList.remove('active');
-        this.hintText.classList.add('hidden');
-        this.scoreHud.classList.add('hidden');
-        this.stressHud.classList.add('hidden');
+        if (this.bgFever) this.bgFever.classList.remove('active');
+        if (this.hintText) this.hintText.classList.add('hidden');
+        if (this.scoreHud) this.scoreHud.classList.add('hidden');
+        if (this.stressHud) this.stressHud.classList.add('hidden');
         
         let rank = "";
         if (score < 1000) rank = "模範的社畜";
@@ -258,24 +306,32 @@ class UIManager {
         else if (score < 150000) rank = "社長より偉い平社員";
         else rank = "会社を裏で牛耳る者";
 
-        const titleEl = this.resultScreen.querySelector('.result-title');
-        if (reason === 'karoushi') {
-            titleEl.innerHTML = "GAME OVER<br><span class=\"sub-title\">（過労で倒れた！）</span>";
-        } else {
-            titleEl.innerHTML = "YOU'RE FIRED!!<br><span class=\"sub-title\">（見つかった！）</span>";
+        if (this.resultScreen) {
+            const titleEl = this.resultScreen.querySelector('.result-title');
+            if (titleEl) {
+                if (reason === 'karoushi') {
+                    titleEl.innerHTML = "GAME OVER<br><span class=\"sub-title\">（過労で倒れた！）</span>";
+                } else {
+                    titleEl.innerHTML = "YOU'RE FIRED!!<br><span class=\"sub-title\">（見つかった！）</span>";
+                }
+            }
         }
 
-        this.finalScoreEl.innerText = Math.floor(score);
-        this.rankTextEl.innerText = rank;
-        this.bestScoreValueEl.innerText = bestScore !== null ? Math.floor(bestScore) : '--';
+        if (this.finalScoreEl) this.finalScoreEl.innerText = Math.floor(score);
+        if (this.rankTextEl) this.rankTextEl.innerText = rank;
+        if (this.bestScoreValueEl) this.bestScoreValueEl.innerText = bestScore !== null ? Math.floor(bestScore) : '--';
         
-        if (isNewRecord) {
-            this.newRecordBadge.classList.remove('hidden');
-        } else {
-            this.newRecordBadge.classList.add('hidden');
+        if (this.newRecordBadge) {
+            if (isNewRecord) {
+                this.newRecordBadge.classList.remove('hidden');
+            } else {
+                this.newRecordBadge.classList.add('hidden');
+            }
         }
 
-        setTimeout(() => { this.resultScreen.classList.add('active'); }, 1000);
+        setTimeout(() => {
+            if (this.resultScreen) this.resultScreen.classList.add('active');
+        }, 300);
     }
 
     showShareFeedback(message = 'コピーしました！') {
@@ -298,7 +354,7 @@ class UIManager {
 class GameController {
     constructor() {
         this.canvas = document.getElementById('game-canvas');
-        this.ctx = this.canvas.getContext('2d');
+        this.ctx = this.canvas ? this.canvas.getContext('2d') : null;
         this.container = document.getElementById('game-container');
         
         this.audio = new AudioManager();
@@ -316,35 +372,40 @@ class GameController {
         
         this.isSlacking = false;
         this.score = 0;
-        this.stress = 0; // 0 to 100
-        this.stressRate = 16; // Increase per second when working
-        this.reliefRate = 40; // Decrease per second when slacking
+        this.stress = 0;
+        this.stressRate = 16;
+        this.reliefRate = 40;
 
         this.animationId = null;
         this.lastTime = 0;
         this.floatingTexts = [];
+        this.sweatParticles = [];
         this.screenShake = 0;
+        this.gameOverTime = 0;
+        this.dpr = 1;
 
-        this.initCanvas();
-        this.bindEvents();
-        this.draw();
+        if (this.canvas) {
+            this.initCanvas();
+            this.bindEvents();
+            this.draw();
+        }
     }
 
     initCanvas() {
-        this.canvas.width = CONFIG.LOGICAL_WIDTH;
-        this.canvas.height = CONFIG.LOGICAL_HEIGHT;
         window.addEventListener('resize', () => this.resizeCanvas());
         this.resizeCanvas();
     }
 
     resizeCanvas() {
+        if (!this.container || !this.canvas || !this.ctx) return;
         const width = this.container.clientWidth;
         const height = this.container.clientHeight;
 
+        this.dpr = Math.min(window.devicePixelRatio || 1, 2);
         CONFIG.LOGICAL_HEIGHT = CONFIG.LOGICAL_WIDTH * (height / width);
 
-        this.canvas.width = CONFIG.LOGICAL_WIDTH;
-        this.canvas.height = CONFIG.LOGICAL_HEIGHT;
+        this.canvas.width = CONFIG.LOGICAL_WIDTH * this.dpr;
+        this.canvas.height = CONFIG.LOGICAL_HEIGHT * this.dpr;
 
         const styles = {
             width: width + 'px',
@@ -357,7 +418,7 @@ class GameController {
 
         Object.assign(this.canvas.style, styles);
         const uiLayer = document.getElementById('ui-layer');
-        Object.assign(uiLayer.style, styles);
+        if (uiLayer) Object.assign(uiLayer.style, styles);
     }
 
     getRandomInt(min, max) {
@@ -365,18 +426,18 @@ class GameController {
     }
 
     bindEvents() {
-        const isUiControlEvent = (e) => e?.target?.closest?.('button, .dark-mode-container');
+        const isUiControlEvent = (e) => e?.target?.closest?.('button, .dark-mode-container, .sound-mute-container, a, input, label');
 
         const handleDown = (e) => {
             if (isUiControlEvent(e)) return;
-            if (e) { e.stopPropagation(); e.preventDefault(); }
+            if (e && e.cancelable) e.preventDefault();
             if (this.gameState !== STATE.PLAYING) return;
             this.startSlacking();
         };
 
         const handleUp = (e) => {
             if (isUiControlEvent(e)) return;
-            if (e) { e.stopPropagation(); e.preventDefault(); }
+            if (e && e.cancelable) e.preventDefault();
             this.stopSlacking();
         };
 
@@ -384,41 +445,46 @@ class GameController {
         const handleDoubleTap = () => {
             if (this.gameState === STATE.GAMEOVER) {
                 const now = Date.now();
-                if (now - lastTapTime < 300) {
+                // 400ms buffer after game over before double tap is allowed
+                if (now - this.gameOverTime > 400 && now - lastTapTime < 300) {
                     this.startGame();
                 }
                 lastTapTime = now;
             }
         };
 
-        this.container.addEventListener('mousedown', handleDown);
-        window.addEventListener('mouseup', (e) => { handleUp(e); handleDoubleTap(); });
-        this.container.addEventListener('touchstart', handleDown, {passive: false});
-        window.addEventListener('touchend', (e) => { handleUp(e); handleDoubleTap(); }, {passive: false});
-        window.addEventListener('touchcancel', handleUp, {passive: false});
-        window.addEventListener('pointerleave', handleUp, {passive: false});
-        window.addEventListener('pointerout', handleUp, {passive: false});
-        
-        this.container.addEventListener('contextmenu', (e) => {
-            if (this.gameState === STATE.PLAYING) e.preventDefault();
-        });
+        if (this.container) {
+            this.container.addEventListener('mousedown', handleDown);
+            this.container.addEventListener('touchstart', handleDown, { passive: false });
+            this.container.addEventListener('contextmenu', (e) => {
+                if (this.gameState === STATE.PLAYING && e.cancelable) e.preventDefault();
+            });
+        }
 
-        // スペースキー対応
+        window.addEventListener('mouseup', (e) => { handleUp(e); handleDoubleTap(); });
+        window.addEventListener('touchend', (e) => { handleUp(e); handleDoubleTap(); }, { passive: false });
+        window.addEventListener('touchcancel', handleUp, { passive: false });
+        window.addEventListener('pointerleave', handleUp, { passive: false });
+        window.addEventListener('pointerout', handleUp, { passive: false });
+
         window.addEventListener('keydown', (e) => {
             if (e.code === 'Space') {
-                if (e.target.tagName !== 'BUTTON') e.preventDefault();
+                if (e.target.tagName !== 'BUTTON') {
+                    if (e.cancelable) e.preventDefault();
+                }
                 if (this.gameState !== STATE.PLAYING) return;
                 if (!e.repeat) this.startSlacking();
             }
         });
         window.addEventListener('keyup', (e) => {
             if (e.code === 'Space') {
-                if (e.target.tagName !== 'BUTTON') e.preventDefault();
+                if (e.target.tagName !== 'BUTTON') {
+                    if (e.cancelable) e.preventDefault();
+                }
                 this.stopSlacking();
             }
         });
 
-        // フォーカス喪失時（別タブ移動や別ウィンドウクリック等）に強制的に仕事状態に戻す
         window.addEventListener('blur', () => {
             if (this.gameState === STATE.PLAYING) {
                 this.stopSlacking();
@@ -438,25 +504,39 @@ class GameController {
         const muteToggle = document.getElementById('sound-mute-toggle');
         const muteLabel = document.getElementById('sound-mute-label');
 
-        const startWrapper = (e) => { e.stopPropagation(); e.preventDefault(); this.startGame(); };
-        startBtn.addEventListener('click', startWrapper);
-        startBtn.addEventListener('touchstart', startWrapper);
-        retryBtn.addEventListener('click', startWrapper);
-        retryBtn.addEventListener('touchstart', startWrapper);
+        const startWrapper = (e) => {
+            e.stopPropagation();
+            if (e.cancelable) e.preventDefault();
+            this.startGame();
+        };
 
-        shareBtn.addEventListener('click', (e) => this.shareResult(e));
-        shareBtn.addEventListener('touchstart', (e) => this.shareResult(e));
-        
-        const goMenu = (e) => { e.stopPropagation(); window.location.href = '/minigames.html'; };
-        menuBtn.addEventListener('click', goMenu);
-        menuBtn.addEventListener('touchstart', goMenu);
-
-        if (menuBtnTitle) {
-            menuBtnTitle.addEventListener('click', goMenu);
-            menuBtnTitle.addEventListener('touchstart', goMenu);
+        if (startBtn) {
+            startBtn.addEventListener('click', startWrapper);
+            startBtn.addEventListener('touchstart', startWrapper, { passive: false });
+        }
+        if (retryBtn) {
+            retryBtn.addEventListener('click', startWrapper);
+            retryBtn.addEventListener('touchstart', startWrapper, { passive: false });
         }
 
-        // ミュート状態の初期反映とバインド
+        if (shareBtn) {
+            shareBtn.addEventListener('click', (e) => this.shareResult(e));
+            shareBtn.addEventListener('touchstart', (e) => this.shareResult(e), { passive: false });
+        }
+        
+        const goMenu = (e) => {
+            e.stopPropagation();
+            window.location.href = '/minigames.html';
+        };
+        if (menuBtn) {
+            menuBtn.addEventListener('click', goMenu);
+            menuBtn.addEventListener('touchstart', goMenu, { passive: false });
+        }
+        if (menuBtnTitle) {
+            menuBtnTitle.addEventListener('click', goMenu);
+            menuBtnTitle.addEventListener('touchstart', goMenu, { passive: false });
+        }
+
         if (muteToggle) {
             muteToggle.checked = this.audio.isMuted;
             if (muteLabel) {
@@ -508,32 +588,28 @@ class GameController {
         this.bossTimer = this.getRandomInt(2000, 4000); 
         this.isSlacking = false;
         this.floatingTexts = [];
+        this.sweatParticles = [];
         this.lastTime = 0;
         this.screenShake = 0;
         
         this.ui.startGameUI();
-        this.audio.startEnvironmentSounds();
         this.audio.setPlayerState(false, false, false);
 
-        if(this.animationId) cancelAnimationFrame(this.animationId);
+        if (this.animationId) cancelAnimationFrame(this.animationId);
         this.animationId = requestAnimationFrame((t) => this.loop(t));
     }
 
     triggerGameOver(reason = 'found') {
         this.gameState = STATE.GAMEOVER;
-        this.audio.stopEnvironmentSounds();
+        this.gameOverTime = Date.now();
+        this.audio.setPlayerState(false, false, true);
         this.audio.playEffect('gameover');
         this.screenShake = 30;
         this.deathReason = reason;
         
-        // Vibrate if supported
         if (navigator.vibrate) {
-            navigator.vibrate([200, 100, 200]);
+            try { navigator.vibrate([200, 100, 200]); } catch (e) { /* ignore */ }
         }
-        
-        // Flash Red
-        this.ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
-        this.ctx.fillRect(0, 0, CONFIG.LOGICAL_WIDTH, CONFIG.LOGICAL_HEIGHT);
         
         const finalScore = Math.floor(this.score);
         let isNewRecord = false;
@@ -552,6 +628,7 @@ class GameController {
 
     update(dt) {
         const dtMs = dt * 1000;
+        this.audio.updateAudio(dt);
 
         if (this.screenShake > 0) {
             this.screenShake -= 50 * dt;
@@ -569,13 +646,7 @@ class GameController {
                 this.stress = 0;
                 if (oldStress > 0) {
                     this.audio.playEffect('coin');
-                    this.floatingTexts.push({
-                        x: CONFIG.LOGICAL_WIDTH / 2,
-                        y: CONFIG.LOGICAL_HEIGHT * 0.7 - 70,
-                        life: 1.0,
-                        text: '✨ REFRESHED!!',
-                        scale: 1.6
-                    });
+                    this.addFloatingText(CONFIG.LOGICAL_WIDTH / 2, CONFIG.LOGICAL_HEIGHT * 0.7 - 70, '✨ REFRESHED!!', 1.6);
                 }
             }
         } else {
@@ -588,23 +659,39 @@ class GameController {
         }
         this.ui.updateStress(this.stress);
 
+        // --- Sweat Particles when Stress > 50 ---
+        if (this.stress > 50 || (this.bossState === BOSS.WARNING && !this.isSlacking)) {
+            if (Math.random() < 0.2) {
+                this.sweatParticles.push({
+                    x: CONFIG.LOGICAL_WIDTH / 2 + (Math.random() * 40 - 20),
+                    y: CONFIG.LOGICAL_HEIGHT * 0.75 - 20,
+                    vy: Math.random() * 80 + 40,
+                    life: 0.6
+                });
+            }
+        }
+
+        for (let i = this.sweatParticles.length - 1; i >= 0; i--) {
+            this.sweatParticles[i].y += this.sweatParticles[i].vy * dt;
+            this.sweatParticles[i].life -= dt;
+            if (this.sweatParticles[i].life <= 0) this.sweatParticles.splice(i, 1);
+        }
+
         // --- Score & Chaos & Risk/Reward ---
         if (this.isSlacking) {
             let multiplier = 1;
             
-            // 見切りボーナス：上司が『！』を出している間はスコア爆増
             if (this.bossState === BOSS.WARNING) {
-                const factor = 1 - (this.bossTimer / this.currentWarningTime); // 0 to 1
-                multiplier = 2 + (factor * 8); // 2倍〜10倍！
+                const factor = 1 - (this.bossTimer / this.currentWarningTime);
+                multiplier = 2 + (factor * 8);
                 
                 if (Math.random() < 0.1) {
-                    this.floatingTexts.push({
-                        x: CONFIG.LOGICAL_WIDTH / 2 + (Math.random() * 200 - 100),
-                        y: CONFIG.LOGICAL_HEIGHT * 0.7 - 50,
-                        life: 1.0,
-                        text: `x${Math.floor(multiplier)}!`,
-                        scale: 1.5
-                    });
+                    this.addFloatingText(
+                        CONFIG.LOGICAL_WIDTH / 2 + (Math.random() * 200 - 100),
+                        CONFIG.LOGICAL_HEIGHT * 0.7 - 50,
+                        `x${Math.floor(multiplier)}!`,
+                        1.5
+                    );
                 }
             }
 
@@ -612,16 +699,14 @@ class GameController {
             this.score += scorePerSec * multiplier * dt;
             this.ui.updateScore(this.score);
             
-            // Chaos texts
             const chaosMultiplier = Math.max(1, this.score / 10000);
             if (Math.random() < 0.3 * (dtMs / 16.6) * chaosMultiplier) {
-                this.floatingTexts.push({
-                    x: CONFIG.LOGICAL_WIDTH / 2 + (Math.random() * 200 - 100),
-                    y: CONFIG.LOGICAL_HEIGHT * 0.7 + (Math.random() * 100 - 50),
-                    life: 1.0,
-                    text: 'ﾌヒﾋw',
-                    scale: 1 + Math.random() * chaosMultiplier * 0.5
-                });
+                this.addFloatingText(
+                    CONFIG.LOGICAL_WIDTH / 2 + (Math.random() * 200 - 100),
+                    CONFIG.LOGICAL_HEIGHT * 0.7 + (Math.random() * 100 - 50),
+                    'ﾌヒﾋw',
+                    1 + Math.random() * chaosMultiplier * 0.5
+                );
             }
             if (this.score > 10000) {
                 this.screenShake = Math.min((this.score / 10000) * 2, 10);
@@ -633,10 +718,9 @@ class GameController {
         
         if (this.bossState === BOSS.AWAY) {
             if (this.bossTimer <= 0) {
-                const difficulty = Math.min(this.score / 50000, 1); // 0 to 1
+                const difficulty = Math.min(this.score / 50000, 1);
 
                 if (this.doubleTurnPending) {
-                    // 二段振り向き発動。短すぎる即死ではなく、読める強攻撃にする。
                     this.isFeint = false;
                     this.bossState = BOSS.WARNING;
                     this.currentWarningTime = this.getRandomInt(CONFIG.DOUBLE_TURN_WARNING_MIN, CONFIG.DOUBLE_TURN_WARNING_MAX);
@@ -646,14 +730,12 @@ class GameController {
                 } else {
                     const rand = Math.random();
                     if (rand < 0.15 + (difficulty * 0.15)) {
-                        // フェイント
                         this.isFeint = true;
                         this.bossState = BOSS.WARNING;
                         this.currentWarningTime = Math.max(CONFIG.MIN_WARNING_TIME, 800 - (difficulty * 300));
                         this.bossTimer = this.currentWarningTime;
                         this.audio.playEffect('warning');
                     } else if (rand < 0.3 + (difficulty * 0.15) && difficulty > 0.1) {
-                        // 二段振り向きの布石（最初は普通に振り向く）
                         this.isFeint = false;
                         this.doubleTurnSetup = true;
                         this.bossState = BOSS.WARNING;
@@ -661,7 +743,6 @@ class GameController {
                         this.bossTimer = this.currentWarningTime;
                         this.audio.playEffect('warning');
                     } else {
-                        // 通常振り向き（緩急あり）
                         this.isFeint = false;
                         const isFast = Math.random() < difficulty; 
                         this.bossState = BOSS.WARNING;
@@ -702,10 +783,8 @@ class GameController {
             }
         }
 
-        // Audio state update
         this.audio.setPlayerState(this.isSlacking, this.bossState === BOSS.LOOKING, false);
 
-        // Floating texts
         for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
             this.floatingTexts[i].y -= 120 * dt;
             this.floatingTexts[i].life -= 1.2 * dt;
@@ -713,10 +792,19 @@ class GameController {
         }
     }
 
+    addFloatingText(x, y, text, scale = 1.0) {
+        if (this.floatingTexts.length >= 25) {
+            this.floatingTexts.shift();
+        }
+        this.floatingTexts.push({ x, y, text, scale, life: 1.0 });
+    }
+
     draw() {
+        if (!this.ctx) return;
+        this.ctx.save();
+        this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
         this.ctx.clearRect(0, 0, CONFIG.LOGICAL_WIDTH, CONFIG.LOGICAL_HEIGHT);
 
-        this.ctx.save();
         if (this.screenShake > 0) {
             this.ctx.translate((Math.random() - 0.5) * this.screenShake, (Math.random() - 0.5) * this.screenShake);
         }
@@ -727,7 +815,7 @@ class GameController {
         this.ctx.fillStyle = 'rgba(0,0,0,0.2)';
         this.ctx.fillRect(0, horizon, CONFIG.LOGICAL_WIDTH, CONFIG.LOGICAL_HEIGHT - horizon);
 
-        // --- Boss (図形描画でスタイリッシュに) ---
+        // --- Boss ---
         const bossX = CONFIG.LOGICAL_WIDTH / 2;
         const bossY = horizon - 50;
 
@@ -738,41 +826,47 @@ class GameController {
         this.ctx.fillRect(bossX - 110, bossY + 45, 220, 10);
 
         if (this.bossState === BOSS.AWAY) {
-            // 後ろ姿
             this.ctx.fillStyle = '#555';
-            this.ctx.beginPath(); this.ctx.arc(bossX, bossY, 40, 0, Math.PI*2); this.ctx.fill();
-            this.ctx.beginPath(); this.ctx.roundRect(bossX - 55, bossY + 40, 110, 80, 10); this.ctx.fill();
+            this.ctx.beginPath(); this.ctx.arc(bossX, bossY, 40, 0, Math.PI * 2); this.ctx.fill();
+            if (typeof this.ctx.roundRect === 'function') {
+                this.ctx.beginPath(); this.ctx.roundRect(bossX - 55, bossY + 40, 110, 80, 10); this.ctx.fill();
+            } else {
+                this.ctx.fillRect(bossX - 55, bossY + 40, 110, 80);
+            }
         } else if (this.bossState === BOSS.WARNING) {
-            // 警戒（少し振り向く気配）
             this.ctx.fillStyle = '#555';
-            this.ctx.beginPath(); this.ctx.arc(bossX, bossY, 40, 0, Math.PI*2); this.ctx.fill();
-            this.ctx.beginPath(); this.ctx.roundRect(bossX - 55, bossY + 40, 110, 80, 10); this.ctx.fill();
+            this.ctx.beginPath(); this.ctx.arc(bossX, bossY, 40, 0, Math.PI * 2); this.ctx.fill();
+            if (typeof this.ctx.roundRect === 'function') {
+                this.ctx.beginPath(); this.ctx.roundRect(bossX - 55, bossY + 40, 110, 80, 10); this.ctx.fill();
+            } else {
+                this.ctx.fillRect(bossX - 55, bossY + 40, 110, 80);
+            }
             
-            // ! マーク
             const warningScale = 1 + Math.min(this.score / 20000, 1);
-            this.ctx.fillStyle = '#ff3366'; // 背景の黄色と被らないように赤に変更
+            this.ctx.fillStyle = '#ff3366';
             this.ctx.shadowBlur = 20;
             this.ctx.shadowColor = '#ff3366';
-            this.ctx.font = `bold ${80 * warningScale}px "M PLUS Rounded 1c"`;
+            this.ctx.font = `bold ${Math.floor(80 * warningScale)}px "M PLUS Rounded 1c"`;
             this.ctx.textAlign = 'center';
             this.ctx.textBaseline = 'middle';
             this.ctx.fillText('!', bossX + 60, bossY - 40);
             this.ctx.shadowBlur = 0;
         } else if (this.bossState === BOSS.LOOKING) {
-            // 振り向いた！
-            this.ctx.fillStyle = '#111'; // シルエット化
-            this.ctx.beginPath(); this.ctx.arc(bossX, bossY, 40, 0, Math.PI*2); this.ctx.fill();
-            this.ctx.beginPath(); this.ctx.roundRect(bossX - 55, bossY + 40, 110, 80, 10); this.ctx.fill();
+            this.ctx.fillStyle = '#111';
+            this.ctx.beginPath(); this.ctx.arc(bossX, bossY, 40, 0, Math.PI * 2); this.ctx.fill();
+            if (typeof this.ctx.roundRect === 'function') {
+                this.ctx.beginPath(); this.ctx.roundRect(bossX - 55, bossY + 40, 110, 80, 10); this.ctx.fill();
+            } else {
+                this.ctx.fillRect(bossX - 55, bossY + 40, 110, 80);
+            }
 
-            // 鋭い赤い目
             this.ctx.fillStyle = '#ff3366';
             this.ctx.shadowBlur = 20;
             this.ctx.shadowColor = '#ff3366';
-            this.ctx.beginPath(); this.ctx.ellipse(bossX - 15, bossY - 5, 12, 6, 0.2, 0, Math.PI*2); this.ctx.fill();
-            this.ctx.beginPath(); this.ctx.ellipse(bossX + 15, bossY - 5, 12, 6, -0.2, 0, Math.PI*2); this.ctx.fill();
+            this.ctx.beginPath(); this.ctx.ellipse(bossX - 15, bossY - 5, 12, 6, 0.2, 0, Math.PI * 2); this.ctx.fill();
+            this.ctx.beginPath(); this.ctx.ellipse(bossX + 15, bossY - 5, 12, 6, -0.2, 0, Math.PI * 2); this.ctx.fill();
             this.ctx.shadowBlur = 0;
 
-            // 視線のレーザー（スポットライト）
             const alpha = this.gameState === STATE.GAMEOVER ? 0.6 : 0.2;
             this.ctx.fillStyle = `rgba(255, 51, 102, ${alpha})`;
             this.ctx.beginPath();
@@ -781,7 +875,6 @@ class GameController {
             this.ctx.lineTo(bossX + 400, CONFIG.LOGICAL_HEIGHT);
             this.ctx.fill();
 
-            // ゲームオーバー時の画面全体フラッシュ
             if (this.gameState === STATE.GAMEOVER) {
                 this.ctx.fillStyle = 'rgba(255, 51, 102, 0.3)';
                 this.ctx.fillRect(0, 0, CONFIG.LOGICAL_WIDTH, CONFIG.LOGICAL_HEIGHT);
@@ -794,49 +887,58 @@ class GameController {
 
         // Player Desk
         this.ctx.fillStyle = '#1a1a1a';
-        this.ctx.beginPath(); this.ctx.roundRect(playerX - 180, playerY + 50, 360, 150, 10); this.ctx.fill();
+        if (typeof this.ctx.roundRect === 'function') {
+            this.ctx.beginPath(); this.ctx.roundRect(playerX - 180, playerY + 50, 360, 150, 10); this.ctx.fill();
+        } else {
+            this.ctx.fillRect(playerX - 180, playerY + 50, 360, 150);
+        }
         this.ctx.fillStyle = '#33ccff';
-        this.ctx.fillRect(playerX - 180, playerY + 50, 360, 5); // デスクのフチ
+        this.ctx.fillRect(playerX - 180, playerY + 50, 360, 5);
 
         if (this.isSlacking) {
-            // サボり中（のけぞってスマホ/ゲーム機）
-            this.ctx.fillStyle = '#ff3366'; // アクティブな色
-            this.ctx.beginPath(); this.ctx.arc(playerX, playerY, 35, 0, Math.PI*2); this.ctx.fill(); // 頭
-            this.ctx.beginPath(); this.ctx.roundRect(playerX - 45, playerY + 30, 90, 80, 15); this.ctx.fill(); // 体
+            this.ctx.fillStyle = '#ff3366';
+            this.ctx.beginPath(); this.ctx.arc(playerX, playerY, 35, 0, Math.PI * 2); this.ctx.fill();
+            if (typeof this.ctx.roundRect === 'function') {
+                this.ctx.beginPath(); this.ctx.roundRect(playerX - 45, playerY + 30, 90, 80, 15); this.ctx.fill();
+            } else {
+                this.ctx.fillRect(playerX - 45, playerY + 30, 90, 80);
+            }
             
-            // ニヤケ顔 (^ ^)
             this.ctx.strokeStyle = '#fff';
             this.ctx.lineWidth = 3;
-            this.ctx.beginPath(); this.ctx.arc(playerX - 12, playerY - 5, 6, Math.PI, Math.PI*2); this.ctx.stroke();
-            this.ctx.beginPath(); this.ctx.arc(playerX + 12, playerY - 5, 6, Math.PI, Math.PI*2); this.ctx.stroke();
+            this.ctx.beginPath(); this.ctx.arc(playerX - 12, playerY - 5, 6, Math.PI, Math.PI * 2); this.ctx.stroke();
+            this.ctx.beginPath(); this.ctx.arc(playerX + 12, playerY - 5, 6, Math.PI, Math.PI * 2); this.ctx.stroke();
             this.ctx.fillStyle = '#fff';
-            this.ctx.beginPath(); this.ctx.arc(playerX, playerY + 8, 8, 0, Math.PI); this.ctx.fill(); // 口
+            this.ctx.beginPath(); this.ctx.arc(playerX, playerY + 8, 8, 0, Math.PI); this.ctx.fill();
             
-            // ゲーム機
             this.ctx.fillStyle = '#fff';
-            this.ctx.beginPath(); this.ctx.roundRect(playerX - 35, playerY + 15, 70, 35, 10); this.ctx.fill();
+            if (typeof this.ctx.roundRect === 'function') {
+                this.ctx.beginPath(); this.ctx.roundRect(playerX - 35, playerY + 15, 70, 35, 10); this.ctx.fill();
+            } else {
+                this.ctx.fillRect(playerX - 35, playerY + 15, 70, 35);
+            }
             this.ctx.fillStyle = '#111';
             this.ctx.fillRect(playerX - 25, playerY + 20, 50, 25);
             
-            // 音符（♪）がフワフワ
             if (Date.now() % 1000 < 500) {
                 this.ctx.fillStyle = '#ff3366';
                 this.ctx.font = '24px Arial';
                 this.ctx.fillText('♪', playerX + 45, playerY - 20);
             }
             
-            // オーラ
             this.ctx.strokeStyle = 'rgba(255, 51, 102, 0.5)';
             this.ctx.lineWidth = 4;
-            this.ctx.beginPath(); this.ctx.arc(playerX, playerY + 20, 80 + Math.random()*10, 0, Math.PI*2); this.ctx.stroke();
+            this.ctx.beginPath(); this.ctx.arc(playerX, playerY + 20, 80 + Math.random() * 10, 0, Math.PI * 2); this.ctx.stroke();
 
         } else {
-            // 仕事中（PCに向かっている前傾姿勢）
             this.ctx.fillStyle = '#777'; 
-            this.ctx.beginPath(); this.ctx.arc(playerX, playerY + 10, 35, 0, Math.PI*2); this.ctx.fill(); // 頭が下がっている
-            this.ctx.beginPath(); this.ctx.roundRect(playerX - 45, playerY + 30, 90, 80, 15); this.ctx.fill(); // 体
+            this.ctx.beginPath(); this.ctx.arc(playerX, playerY + 10, 35, 0, Math.PI * 2); this.ctx.fill();
+            if (typeof this.ctx.roundRect === 'function') {
+                this.ctx.beginPath(); this.ctx.roundRect(playerX - 45, playerY + 30, 90, 80, 15); this.ctx.fill();
+            } else {
+                this.ctx.fillRect(playerX - 45, playerY + 30, 90, 80);
+            }
             
-            // ノートPC
             this.ctx.fillStyle = '#ddd';
             this.ctx.beginPath();
             this.ctx.moveTo(playerX - 50, playerY + 30);
@@ -845,7 +947,6 @@ class GameController {
             this.ctx.lineTo(playerX - 70, playerY + 80);
             this.ctx.fill();
             
-            // 画面の光
             this.ctx.fillStyle = 'rgba(51, 204, 255, 0.15)';
             this.ctx.beginPath();
             this.ctx.moveTo(playerX - 40, playerY + 30);
@@ -853,25 +954,39 @@ class GameController {
             this.ctx.lineTo(playerX + 40, playerY + 30);
             this.ctx.fill();
 
-            // 汗（ボスの視線がある時、またはストレスが高い時）
             if ((this.bossState === BOSS.LOOKING && this.gameState !== STATE.GAMEOVER) || this.stress > 50) {
                 this.ctx.fillStyle = '#33ccff';
                 this.ctx.beginPath();
-                this.ctx.ellipse(playerX + 45, playerY - 10, 6, 10, Math.PI/4, 0, Math.PI*2);
+                this.ctx.ellipse(playerX + 45, playerY - 10, 6, 10, Math.PI / 4, 0, Math.PI * 2);
                 this.ctx.fill();
             }
         }
 
-        // Floating texts (サボり中の「ﾌヒﾋw」等)
+        // Sweat drops
+        this.ctx.fillStyle = '#33ccff';
+        for (let sp of this.sweatParticles) {
+            this.ctx.beginPath();
+            this.ctx.arc(sp.x, sp.y, 4, 0, Math.PI * 2);
+            this.ctx.fill();
+        }
+
+        // Floating texts
         this.ctx.fillStyle = '#fff';
         this.ctx.textAlign = 'center';
         this.ctx.textBaseline = 'middle';
         for (let ft of this.floatingTexts) {
             this.ctx.globalAlpha = Math.max(0, ft.life);
-            this.ctx.font = `bold ${24 * ft.scale}px "M PLUS Rounded 1c"`;
+            this.ctx.font = `bold ${Math.floor(24 * ft.scale)}px "M PLUS Rounded 1c"`;
             this.ctx.fillText(ft.text, ft.x, ft.y);
         }
         this.ctx.globalAlpha = 1.0;
+
+        // High stress red vignette overlay
+        if (this.stress > 75 && this.gameState === STATE.PLAYING) {
+            const stressAlpha = ((this.stress - 75) / 25) * 0.25;
+            this.ctx.fillStyle = `rgba(255, 0, 0, ${stressAlpha})`;
+            this.ctx.fillRect(0, 0, CONFIG.LOGICAL_WIDTH, CONFIG.LOGICAL_HEIGHT);
+        }
 
         this.ctx.restore();
     }
@@ -892,7 +1007,7 @@ class GameController {
     async shareResult(e) {
         if (e) {
             e.stopPropagation();
-            e.preventDefault();
+            if (e.cancelable) e.preventDefault();
         }
         
         let reasonText = "";
@@ -907,12 +1022,13 @@ class GameController {
                 "「瞑想による生産性向上のアプローチです！」",
                 "「画面のバグをデバッグしていただけです！」",
                 "「気絶していました。」",
-                "「息を止めて気配を消したつもりでした…」"
+                "「息を止めて気気配を消したつもりでした…」"
             ];
             reasonText = "言い訳：" + excuses[Math.floor(Math.random() * excuses.length)];
         }
 
-        const text = `上司の目を盗んで【${Math.floor(this.score)}】サボりました。バレてクビになりました。 称号：[${this.ui.rankTextEl.innerText}]\n${reasonText}`;
+        const rankName = this.ui.rankTextEl ? this.ui.rankTextEl.innerText : '社畜';
+        const text = `上司の目を盗んで【${Math.floor(this.score)}】サボりました。バレてクビになりました。 称号：[${rankName}]\n${reasonText}`;
         const url = "https://hajikkoroom.xsrv.jp/stealth-slacker/";
         const hashtags = "限界ステルスサボタージュ,CornerNeighbor";
         const shareText = `${text}\n${url}\n#限界ステルスサボタージュ #CornerNeighbor`;
@@ -933,7 +1049,7 @@ class GameController {
                 this.ui.showShareFeedback();
                 return;
             } catch (error) {
-                // Fall through to the tweet intent when clipboard access is blocked.
+                /* fallback to tweet window */
             }
         }
 

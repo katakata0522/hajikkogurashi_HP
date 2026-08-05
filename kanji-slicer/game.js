@@ -269,10 +269,27 @@ function drawEnsoCircle(ctx, r, color) {
 class SoundSynth {
     constructor() {
         this.ctx = null;
-        const globalMute = localStorage.getItem('katakata-minigames-mute') === 'true';
+        const globalMute = safeStorage.getItem('katakata-minigames-mute', 'false') === 'true';
         this.enabled = !globalMute;
         this.compressor = null;
         this.lastPlayTimes = {};
+
+        // Cross-tab / cross-window audio mute synchronization
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'katakata-minigames-mute') {
+                this.enabled = (e.newValue !== 'true');
+                this.updateButtonUI();
+            }
+        });
+    }
+
+    updateButtonUI() {
+        const btnSound = document.getElementById('btn-sound');
+        if (btnSound) {
+            btnSound.textContent = this.enabled ? '🔊' : '🔇';
+            btnSound.setAttribute('aria-label', `音声を切替 (現在: ${this.enabled ? 'ON' : 'OFF'})`);
+            btnSound.setAttribute('aria-pressed', String(this.enabled));
+        }
     }
 
     suspend() {
@@ -307,7 +324,8 @@ class SoundSynth {
 
     toggle() {
         this.enabled = !this.enabled;
-        localStorage.setItem('katakata-minigames-mute', String(!this.enabled));
+        safeStorage.setItem('katakata-minigames-mute', String(!this.enabled));
+        this.updateButtonUI();
         return this.enabled;
     }
 
@@ -541,7 +559,15 @@ function spawnIdiomFloatingText(x, y, text, color) {
 }
 
 // Discovered Kanji tracking (Encyclopedia)
-let discoveredKanji = JSON.parse(localStorage.getItem('kanjislicer_discovered') || '[]');
+let discoveredKanji = [];
+try {
+    const raw = safeStorage.getItem('kanjislicer_discovered', '[]');
+    discoveredKanji = JSON.parse(raw);
+    if (!Array.isArray(discoveredKanji)) discoveredKanji = [];
+} catch (e) {
+    discoveredKanji = [];
+}
+
 const VALID_IDIOMS = [
     '森林', '山林', '明日', '明月', '休日', '門人', 
     '人間', '岩石', '岩山', '火炎', '炎山', '好日', 
@@ -549,13 +575,13 @@ const VALID_IDIOMS = [
     '水田', '里山', '山水', '土木', '里人', '土石', '田口'
 ];
 discoveredKanji = discoveredKanji.filter(k => VALID_IDIOMS.includes(k));
-localStorage.setItem('kanjislicer_discovered', JSON.stringify(discoveredKanji));
+safeStorage.setItem('kanjislicer_discovered', JSON.stringify(discoveredKanji));
 
 let hasUnsavedDiscoveries = false;
 
 function saveDiscoveredKanji() {
     if (!hasUnsavedDiscoveries) return;
-    localStorage.setItem('kanjislicer_discovered', JSON.stringify(discoveredKanji));
+    safeStorage.setItem('kanjislicer_discovered', JSON.stringify(discoveredKanji));
     hasUnsavedDiscoveries = false;
 }
 
@@ -593,20 +619,31 @@ const finalScoreEl = document.getElementById('final-score');
 const btnRestart = document.getElementById('btn-restart');
 
 // Load Best Score
-bestScore = parseInt(localStorage.getItem('kanjislicer_best') || '0', 10);
+bestScore = parseInt(safeStorage.getItem('kanjislicer_best', '0'), 10) || 0;
 bestScoreEl.textContent = bestScore;
 
-// Canvas Sizing and high-DPI scaling
+// Canvas Sizing and high-DPI uniform scaling
+let canvasScale = 1;
+let canvasOffsetX = 0;
+let canvasOffsetY = 0;
+
 function resize() {
     const rect = canvas.parentElement.getBoundingClientRect();
-    canvas.width = rect.width * (window.devicePixelRatio || 1);
-    canvas.height = rect.height * (window.devicePixelRatio || 1);
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
     
-    // Reset context transforms to identity
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     
-    // Scale virtual space coordinates (V_WIDTH, V_HEIGHT) to match screen DPI
-    ctx.scale(canvas.width / V_WIDTH, canvas.height / V_HEIGHT);
+    const scaleX = canvas.width / V_WIDTH;
+    const scaleY = canvas.height / V_HEIGHT;
+    // Uniform scale prevents shape distortion (oval circles)
+    canvasScale = Math.min(scaleX, scaleY);
+    canvasOffsetX = (canvas.width - V_WIDTH * canvasScale) / 2;
+    canvasOffsetY = (canvas.height - V_HEIGHT * canvasScale) / 2;
+    
+    ctx.translate(canvasOffsetX, canvasOffsetY);
+    ctx.scale(canvasScale, canvasScale);
 }
 window.addEventListener('resize', resize);
 resize();
@@ -976,12 +1013,16 @@ function sliceBody(body, p1, p2) {
 // Input Helpers
 function getVirtualCoords(e) {
     const rect = canvas.getBoundingClientRect();
-    const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
-    const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+    const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+    const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
     
-    // Scale client coordinate to virtual coordinate space
-    const x = ((clientX - rect.left) / rect.width) * V_WIDTH;
-    const y = ((clientY - rect.top) / rect.height) * V_HEIGHT;
+    // Convert DOM client coordinates to High-DPI physical canvas space
+    const canvasPxX = (clientX - rect.left) * (canvas.width / rect.width);
+    const canvasPxY = (clientY - rect.top) * (canvas.height / rect.height);
+    
+    // Transform physical canvas pixels into virtual resolution space (V_WIDTH x V_HEIGHT)
+    const x = (canvasPxX - canvasOffsetX) / canvasScale;
+    const y = (canvasPxY - canvasOffsetY) / canvasScale;
     return { x, y };
 }
 
@@ -990,6 +1031,12 @@ function handleStart(e) {
     if (isGameOver || isPaused) return;
     if (e.cancelable) e.preventDefault();
     soundSynth.init(); // Initialize audio context on first tap
+    soundSynth.resume();
+
+    // Lock pointer stream to canvas for ultra-smooth responsiveness
+    if (e.target && e.target.setPointerCapture && e.pointerId !== undefined) {
+        try { e.target.setPointerCapture(e.pointerId); } catch (err) {}
+    }
     
     const coords = getVirtualCoords(e);
     touchStartX = coords.x;
@@ -1086,10 +1133,18 @@ function handleEnd(e) {
     isSlicing = false;
 }
 
+function handleCancel() {
+    isDraggingPreview = false;
+    isSlicing = false;
+    slashTrail = [];
+}
+
 if (window.PointerEvent) {
     canvas.addEventListener('pointerdown', handleStart);
     canvas.addEventListener('pointermove', handleMove);
     window.addEventListener('pointerup', handleEnd);
+    canvas.addEventListener('pointercancel', handleCancel);
+    canvas.addEventListener('lostpointercapture', handleCancel);
 } else {
     canvas.addEventListener('mousedown', handleStart);
     canvas.addEventListener('mousemove', handleMove);
@@ -1098,11 +1153,32 @@ if (window.PointerEvent) {
     canvas.addEventListener('touchstart', handleStart, { passive: false });
     canvas.addEventListener('touchmove', handleMove, { passive: false });
     window.addEventListener('touchend', handleEnd);
+    canvas.addEventListener('touchcancel', handleCancel);
 }
-window.addEventListener('blur', () => {
-    isDraggingPreview = false;
-    isSlicing = false;
-    slashTrail = [];
+
+window.addEventListener('blur', handleCancel);
+
+// Keyboard Accessibility & Shortcuts
+window.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    
+    if (e.code === 'Space' || e.code === 'KeyP') {
+        e.preventDefault();
+        btnPause.click();
+    } else if (e.code === 'KeyR') {
+        e.preventDefault();
+        if (isGameOver) {
+            btnRestart.click();
+        } else if (isPaused) {
+            btnPauseRestart.click();
+        } else {
+            restartGame();
+        }
+    } else if (e.code === 'Escape') {
+        if (isPaused) {
+            btnResume.click();
+        }
+    }
 });
 
 // Sound Button toggle
@@ -1195,9 +1271,18 @@ function initDictionarySkeleton() {
     isDictInitialized = true;
 }
 
-// Efficiently update dictionary card attributes instead of destroying and recreating DOM nodes
+// Efficiently update dictionary card attributes and progress bar
 function updateDictionaryUI() {
     initDictionarySkeleton();
+    
+    const unlockedCount = discoveredKanji.length;
+    const totalCount = VALID_IDIOMS.length;
+    const percent = Math.round((unlockedCount / totalCount) * 100);
+    
+    const progressTextEl = document.getElementById('dict-progress-text');
+    const progressFillEl = document.getElementById('dict-progress-fill');
+    if (progressTextEl) progressTextEl.textContent = `${unlockedCount} / ${totalCount} (${percent}%)`;
+    if (progressFillEl) progressFillEl.style.width = `${percent}%`;
     
     const cards = dictGrid.querySelectorAll('.recipe-card');
     cards.forEach(card => {
@@ -1240,6 +1325,13 @@ function updatePhysics() {
         body.vy += GRAVITY;
         body.vx *= AIR_RESISTANCE;
         body.vy *= AIR_RESISTANCE;
+        
+        // Speed cap guard against physical tunneling
+        const speed = Math.hypot(body.vx, body.vy);
+        if (speed > MAX_VELOCITY) {
+            body.vx = (body.vx / speed) * MAX_VELOCITY;
+            body.vy = (body.vy / speed) * MAX_VELOCITY;
+        }
         
         body.x += body.vx;
         body.y += body.vy;
@@ -1373,13 +1465,30 @@ function checkGameOver() {
     if (overLimit) {
         gameOverCounter++;
         deadLineAlert.classList.add('active');
+        const remainingSec = Math.max(0, Math.ceil((180 - gameOverCounter) / 60));
+        deadLineAlert.textContent = `警告：溢れそう！ (${remainingSec}秒)`;
+        deadLineAlert.style.backgroundColor = `rgba(220, 38, 38, ${0.75 + (gameOverCounter / 180) * 0.25})`;
         if (gameOverCounter > 180) { // 3 seconds at 60fps
             triggerGameOver();
         }
     } else {
         gameOverCounter = 0;
         deadLineAlert.classList.remove('active');
+        deadLineAlert.textContent = '警告：溢れそう！';
+        deadLineAlert.style.backgroundColor = '';
     }
+}
+
+// In-place array pruning helper to prevent 60 FPS GC garbage collection spikes
+function pruneInPlace(arr, predicate) {
+    let writeIndex = 0;
+    for (let readIndex = 0; readIndex < arr.length; readIndex++) {
+        const item = arr[readIndex];
+        if (predicate(item)) {
+            arr[writeIndex++] = item;
+        }
+    }
+    arr.length = writeIndex;
 }
 
 function triggerGameOver() {
@@ -1406,6 +1515,8 @@ function restartGame() {
     isGameOver = false;
     dropCooldown = 0;
     deadLineAlert.classList.remove('active');
+    deadLineAlert.textContent = '警告：溢れそう！';
+    deadLineAlert.style.backgroundColor = '';
     gameoverModal.classList.add('hidden');
     chooseNewMission();
 }
@@ -1582,16 +1693,16 @@ function draw() {
     if (slashTrail.length > 1) {
         ctx.save();
         ctx.shadowColor = KANJI_DATA[currentMission].color;
-        ctx.shadowBlur = 8;
+        ctx.shadowBlur = 10;
         
-        // Draw connected line segments with decreasing widths
+        // Multi-layered glowing neon slash stroke
         for (let i = 1; i < slashTrail.length; i++) {
             const p1 = slashTrail[i - 1];
             const p2 = slashTrail[i];
             const ratio = i / slashTrail.length;
             
-            ctx.strokeStyle = `rgba(255, 255, 255, ${ratio * 0.9})`;
-            ctx.lineWidth = ratio * 5;
+            ctx.strokeStyle = `rgba(255, 255, 255, ${ratio * 0.95})`;
+            ctx.lineWidth = ratio * 6;
             ctx.lineCap = 'round';
             ctx.beginPath();
             ctx.moveTo(p1.x, p1.y);
@@ -1671,7 +1782,7 @@ function update() {
         sw.r += sw.speed;
         sw.alpha -= 0.035;
     }
-    shockwaves = shockwaves.filter(sw => sw.alpha > 0);
+    pruneInPlace(shockwaves, sw => sw.alpha > 0);
     
     // Update particles positions
     for (let p of particles) {
@@ -1680,20 +1791,20 @@ function update() {
         p.y += p.vy;
         p.alpha -= p.decay;
     }
-    particles = particles.filter(p => p.alpha > 0);
+    pruneInPlace(particles, p => p.alpha > 0);
     
     // Update floating texts positions
     for (let ft of floatingTexts) {
         ft.y += ft.vy;
         ft.alpha -= ft.decay;
     }
-    floatingTexts = floatingTexts.filter(ft => ft.alpha > 0);
+    pruneInPlace(floatingTexts, ft => ft.alpha > 0);
     
     // Update slash trail aging
     for (let pt of slashTrail) {
         pt.age++;
     }
-    slashTrail = slashTrail.filter(pt => pt.age < 8);
+    pruneInPlace(slashTrail, pt => pt.age < 8);
     
     if (dropCooldown > 0) dropCooldown--;
 }
