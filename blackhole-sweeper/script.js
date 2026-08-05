@@ -33,6 +33,28 @@ function getRank(score) {
     return rank;
 }
 
+// Centralized Safe Storage Manager to prevent crashes in private modes or restricted webviews
+const StorageManager = {
+    memoryStore: {},
+    getItem(key, fallback = null) {
+        try {
+            const val = localStorage.getItem(key);
+            return val !== null ? val : (this.memoryStore[key] ?? fallback);
+        } catch (e) {
+            return this.memoryStore[key] ?? fallback;
+        }
+    },
+    setItem(key, value) {
+        try {
+            localStorage.setItem(key, String(value));
+            return true;
+        } catch (e) {
+            this.memoryStore[key] = String(value);
+            return false;
+        }
+    }
+};
+
 function getDefaultAchievementStats() {
     return { bestScore: 0, maxCombo: 0, maxAreaBonus: 0, noDamageClear: false };
 }
@@ -40,7 +62,7 @@ function getDefaultAchievementStats() {
 function readAchievementStats() {
     const stats = getDefaultAchievementStats();
     try {
-        const rawStats = JSON.parse(localStorage.getItem('blackhole_achievement_stats') || '{}');
+        const rawStats = JSON.parse(StorageManager.getItem('blackhole_achievement_stats', '{}'));
         return {
             bestScore: Math.max(stats.bestScore, Number(rawStats.bestScore) || 0, readBestScore() || 0),
             maxCombo: Math.max(stats.maxCombo, Number(rawStats.maxCombo) || 0),
@@ -54,28 +76,15 @@ function readAchievementStats() {
 }
 
 function writeAchievementStats(stats) {
-    try {
-        localStorage.setItem('blackhole_achievement_stats', JSON.stringify(stats));
-        return true;
-    } catch (error) {
-        return false;
-    }
+    return StorageManager.setItem('blackhole_achievement_stats', JSON.stringify(stats));
 }
 
 function hasSeenTutorial() {
-    try {
-        return localStorage.getItem('blackhole_tutorial_seen') === '1';
-    } catch (error) {
-        return false;
-    }
+    return StorageManager.getItem('blackhole_tutorial_seen', '0') === '1';
 }
 
 function markTutorialSeen() {
-    try {
-        localStorage.setItem('blackhole_tutorial_seen', '1');
-    } catch (error) {
-        // Tutorial state is optional.
-    }
+    StorageManager.setItem('blackhole_tutorial_seen', '1');
 }
 
 function mergeAchievementStats(previous, run) {
@@ -108,22 +117,13 @@ function getNextAchievement(stats) {
 }
 
 function readBestScore() {
-    try {
-        const rawScore = localStorage.getItem('blackhole_best_score');
-        const bestScore = Number.parseInt(rawScore, 10);
-        return Number.isFinite(bestScore) && bestScore > 0 ? bestScore : null;
-    } catch (error) {
-        return null;
-    }
+    const rawScore = StorageManager.getItem('blackhole_best_score', null);
+    const bestScore = Number.parseInt(rawScore, 10);
+    return Number.isFinite(bestScore) && bestScore > 0 ? bestScore : null;
 }
 
 function writeBestScore(score) {
-    try {
-        localStorage.setItem('blackhole_best_score', String(score));
-        return true;
-    } catch (error) {
-        return false;
-    }
+    return StorageManager.setItem('blackhole_best_score', String(score));
 }
 
 // ==========================================
@@ -175,6 +175,18 @@ function getPolygonArea(points) {
     return Math.abs(area / 2);
 }
 
+// In-place array pruning helper to prevent 60 FPS GC garbage collection spikes
+function pruneInPlace(arr, predicate) {
+    let writeIndex = 0;
+    for (let readIndex = 0; readIndex < arr.length; readIndex++) {
+        const item = arr[readIndex];
+        if (predicate(item)) {
+            arr[writeIndex++] = item;
+        }
+    }
+    arr.length = writeIndex;
+}
+
 // ==========================================
 // AudioManager
 // ==========================================
@@ -183,12 +195,21 @@ class AudioManager {
         this.ctx = null;
         this.masterGain = null;
         this.initialized = false;
-        this.isMuted = localStorage.getItem('katakata-minigames-mute') === 'true';
+        this.isMuted = StorageManager.getItem('katakata-minigames-mute', 'false') === 'true';
+
+        // Cross-tab / cross-window audio mute synchronization
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'katakata-minigames-mute') {
+                this.isMuted = (e.newValue === 'true');
+                const muteToggle = document.getElementById('sound-mute-toggle');
+                if (muteToggle) muteToggle.checked = this.isMuted;
+            }
+        });
     }
 
     setMute(muted) {
         this.isMuted = muted;
-        localStorage.setItem('katakata-minigames-mute', String(muted));
+        StorageManager.setItem('katakata-minigames-mute', String(muted));
     }
 
     init() {
@@ -616,8 +637,11 @@ class GameController {
         const width = this.container.clientWidth;
         const height = this.container.clientHeight;
         CONFIG.LOGICAL_HEIGHT = CONFIG.LOGICAL_WIDTH * (height / width);
-        this.canvas.width = CONFIG.LOGICAL_WIDTH;
-        this.canvas.height = CONFIG.LOGICAL_HEIGHT;
+        
+        const dpr = window.devicePixelRatio || 1;
+        this.canvas.width = CONFIG.LOGICAL_WIDTH * dpr;
+        this.canvas.height = CONFIG.LOGICAL_HEIGHT * dpr;
+        this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
     bindEvents() {
@@ -636,10 +660,12 @@ class GameController {
 
             // 新機能：スマホのタッチ操作の時だけ、指で画面が隠れないように描画先端を45px上にオフセットする
             const offsetY = isTouch ? -45 : 0;
+            const rawX = ((clientX - rect.left) / rect.width) * CONFIG.LOGICAL_WIDTH;
+            const rawY = (((clientY - rect.top) / rect.height) * CONFIG.LOGICAL_HEIGHT) + offsetY;
             
             return {
-                x: (clientX - rect.left) / rect.width * CONFIG.LOGICAL_WIDTH,
-                y: ((clientY - rect.top) / rect.height * CONFIG.LOGICAL_HEIGHT) + offsetY
+                x: Math.max(0, Math.min(CONFIG.LOGICAL_WIDTH, rawX)),
+                y: Math.max(0, Math.min(CONFIG.LOGICAL_HEIGHT, rawY))
             };
         };
 
@@ -729,6 +755,35 @@ class GameController {
 
         document.getElementById('trophy-btn').addEventListener('click', () => this.ui.openAchievements(readAchievementStats()));
         document.getElementById('close-modal-btn').addEventListener('click', () => this.ui.closeAchievements());
+
+        // Keyboard Accessibility & Shortcuts
+        window.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            
+            if (e.code === 'Space' || e.code === 'Enter') {
+                if (this.gameState === STATE.START) {
+                    e.preventDefault();
+                    document.getElementById('start-btn').click();
+                } else if (this.gameState === STATE.GAMEOVER) {
+                    e.preventDefault();
+                    document.getElementById('retry-btn').click();
+                }
+            } else if (e.code === 'KeyR') {
+                if (this.gameState === STATE.GAMEOVER || this.gameState === STATE.PLAYING) {
+                    e.preventDefault();
+                    this.startGame();
+                }
+            } else if (e.code === 'KeyM') {
+                e.preventDefault();
+                const muteToggleEl = document.getElementById('sound-mute-toggle');
+                if (muteToggleEl) {
+                    muteToggleEl.checked = !muteToggleEl.checked;
+                    this.audio.setMute(muteToggleEl.checked);
+                }
+            } else if (e.code === 'Escape') {
+                this.ui.closeAchievements();
+            }
+        });
     }
 
     startGame() {
@@ -845,12 +900,23 @@ class GameController {
         const p3 = this.points[len-2];
         const p4 = this.points[len-1];
 
-        // 誤爆防止の遊び：直近4ポイント分の線は交差判定の対象から除外する（小回りの利く素早いループに対応）
-        const safetyMargin = 4;
-        if (len - safetyMargin <= 0) return;
+        // Spatial path length safety margin: require at least 35px path distance from p4 backwards
+        let accumDist = 0;
+        let safeCutoffIdx = len - 2;
+        for (let k = len - 2; k >= 1; k--) {
+            const dx = this.points[k].x - this.points[k+1].x;
+            const dy = this.points[k].y - this.points[k+1].y;
+            accumDist += Math.hypot(dx, dy);
+            if (accumDist >= 35) {
+                safeCutoffIdx = k;
+                break;
+            }
+        }
+
+        if (safeCutoffIdx <= 0) return;
 
         // Check against older segments
-        for (let i = 0; i < len - safetyMargin; i++) {
+        for (let i = 0; i < safeCutoffIdx; i++) {
             const p1 = this.points[i];
             const p2 = this.points[i+1];
             
@@ -1143,39 +1209,39 @@ class GameController {
             }
         });
 
-        // 敵の更新（死んだ敵や自然消滅した敵を配列から除外）
-        for (let i = this.enemies.length - 1; i >= 0; i--) {
-            const e = this.enemies[i];
-            e.update(dt, tx, ty, this.isDrawing);
-            if (e.isDead) {
-                this.enemies.splice(i, 1);
-            }
+        // 敵の更新
+        for (let i = 0; i < this.enemies.length; i++) {
+            this.enemies[i].update(dt, tx, ty, this.isDrawing);
         }
+        pruneInPlace(this.enemies, e => !e.isDead);
 
         this.checkDamage();
 
         // Particles
-        for (let i = this.particles.length - 1; i >= 0; i--) {
+        for (let i = 0; i < this.particles.length; i++) {
             const p = this.particles[i];
             p.x += p.vx * dt;
             p.y += p.vy * dt;
             p.life -= 2 * dt;
-            if (p.life <= 0) this.particles.splice(i, 1);
         }
+        pruneInPlace(this.particles, p => p.life > 0);
 
         // Blackholes
-        for (let i = this.blackholes.length - 1; i >= 0; i--) {
-            this.blackholes[i].life -= 1.5 * dt;
-            if (this.blackholes[i].life <= 0) this.blackholes.splice(i, 1);
+        for (let i = 0; i < this.blackholes.length; i++) {
+            const bh = this.blackholes[i];
+            bh.life -= 1.5 * dt;
+            if (bh.textY === undefined) bh.textY = bh.y - 30;
+            bh.textY -= 35 * dt; // Float text upward smoothly
         }
+        pruneInPlace(this.blackholes, bh => bh.life > 0);
 
         // Empty-loop miss feedback
-        for (let i = this.missEffects.length - 1; i >= 0; i--) {
+        for (let i = 0; i < this.missEffects.length; i++) {
             const miss = this.missEffects[i];
             miss.life -= 2.5 * dt;
             miss.radius += 220 * dt;
-            if (miss.life <= 0) this.missEffects.splice(i, 1);
         }
+        pruneInPlace(this.missEffects, miss => miss.life > 0);
     }
 
     draw() {
@@ -1186,31 +1252,54 @@ class GameController {
             this.ctx.translate((Math.random() - 0.5) * this.screenShake, (Math.random() - 0.5) * this.screenShake);
         }
 
-        // Blackholes (Effect)
+        // Blackholes (Sci-fi Accretion Disk & Event Horizon Visuals)
         for (const bh of this.blackholes) {
-            this.ctx.globalAlpha = bh.life;
-            this.ctx.fillStyle = '#00ffff';
+            this.ctx.save();
+            this.ctx.globalAlpha = Math.max(0, bh.life);
+            
+            const currentRadius = (1 - bh.life) * 110;
+            
+            // Accretion disk neon swirl gradient
+            const grad = this.ctx.createRadialGradient(bh.x, bh.y, 4, bh.x, bh.y, Math.max(10, currentRadius));
+            grad.addColorStop(0, '#000000');
+            grad.addColorStop(0.35, '#001b2e');
+            grad.addColorStop(0.75, '#00e5ff');
+            grad.addColorStop(1, 'rgba(0, 229, 255, 0)');
+            
+            this.ctx.fillStyle = grad;
             this.ctx.beginPath();
-            this.ctx.arc(bh.x, bh.y, (1 - bh.life) * 100, 0, Math.PI*2);
+            this.ctx.arc(bh.x, bh.y, Math.max(10, currentRadius), 0, Math.PI * 2);
             this.ctx.fill();
             
-            // Text
+            // Event Horizon core
+            this.ctx.fillStyle = '#000';
+            this.ctx.shadowBlur = 15;
+            this.ctx.shadowColor = '#00e5ff';
+            this.ctx.beginPath();
+            this.ctx.arc(bh.x, bh.y, Math.max(4, currentRadius * 0.4), 0, Math.PI * 2);
+            this.ctx.fill();
+            this.ctx.restore();
+            
+            // Text Popup
+            this.ctx.save();
+            this.ctx.globalAlpha = Math.max(0, bh.life);
             this.ctx.fillStyle = '#fff';
             this.ctx.font = 'bold 24px "M PLUS Rounded 1c"';
             this.ctx.textAlign = 'center';
             this.ctx.textBaseline = 'middle';
             
-            // コンボと面積ボーナスを綺麗に表示
+            const textY = bh.textY !== undefined ? bh.textY : (bh.y - 30);
             if (bh.areaBonus > 50) {
-                this.ctx.fillText(`+${bh.pts} (AREA:+${bh.areaBonus})`, bh.x, bh.y - 30);
+                this.ctx.fillText(`+${bh.pts} (AREA:+${bh.areaBonus})`, bh.x, textY);
             } else {
-                this.ctx.fillText(`+${bh.pts}`, bh.x, bh.y - 30);
+                this.ctx.fillText(`+${bh.pts}`, bh.x, textY);
             }
 
             if (bh.caught > 1) {
                 this.ctx.fillStyle = '#ff3366';
-                this.ctx.fillText(`${bh.caught} COMBO!`, bh.x, bh.y + 10);
+                this.ctx.fillText(`${bh.caught} COMBO!`, bh.x, textY + 30);
             }
+            this.ctx.restore();
         }
         this.ctx.globalAlpha = 1.0;
 

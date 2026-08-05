@@ -27,19 +27,19 @@
 <body>
     <div id="game-container">
         <!-- キャンバス -->
-        <canvas id="game-canvas"></canvas>
+        <canvas id="game-canvas" aria-label="ブラックホール・スイーパー ゲーム画面"></canvas>
 
         <!-- UIレイヤー -->
         <div id="ui-layer">
             <!-- HUD -->
-            <div id="hud" class="hidden">
+            <div id="hud" class="hidden" role="region" aria-label="スコアとライフ情報">
                 <div class="hud-left">
                     <span class="hud-label">SCORE</span>
                     <span id="score-value">0</span>
                 </div>
                 <div class="hud-right">
                     <span class="hud-label">LIFE</span>
-                    <div id="life-container">
+                    <div id="life-container" aria-label="残りライフ3">
                         <span class="heart active">❤️</span>
                         <span class="heart active">❤️</span>
                         <span class="heart active">❤️</span>
@@ -48,7 +48,7 @@
             </div>
 
             <!-- 操作ヒント -->
-            <div id="hint-text" class="hint-text hidden">画面をなぞってターゲットを囲め！</div>
+            <div id="hint-text" class="hint-text hidden" role="status">画面をなぞってターゲットを囲め！</div>
             <div id="tutorial-overlay" class="tutorial-overlay hidden">
                 <div class="tutorial-loop">
                     <span class="tutorial-dot"></span>
@@ -56,7 +56,7 @@
             </div>
 
             <!-- スタート画面 -->
-            <div id="start-screen" class="screen active cyber-panel">
+            <div id="start-screen" class="screen active cyber-panel" role="region" aria-label="スタートメニュー">
                 <div class="title-container">
                     <h1 class="main-title">BLACKHOLE<br><span class="highlight">SWEEPER</span></h1>
                 </div>
@@ -69,20 +69,20 @@
                 <div class="sound-mute-container" style="margin-top: 15px; margin-bottom: 15px; text-align: center; width: 100%;">
                     <label class="mute-label" style="cursor: pointer; font-size: 1.1rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
                         <input type="checkbox" id="sound-mute-toggle" style="width: 18px; height: 18px; cursor: pointer;">
-                        <span class="mute-text" style="font-weight: bold; color: #00ffcc; font-family: 'M PLUS Rounded 1c', sans-serif;">🔇 消音 (ミュート)</span>
+                        <span class="mute-text" style="font-weight: bold; color: #00ffcc; font-family: 'M PLUS Rounded 1c', sans-serif;">🔇 消音 (ミュート) [M]</span>
                     </label>
                 </div>
                 <div class="menu-buttons-vertical">
-                    <button id="start-btn" class="cyber-btn">SWEEP START</button>
+                    <button id="start-btn" class="cyber-btn">SWEEP START [Space/Enter]</button>
                     <button id="trophy-btn" class="cyber-btn secondary">🏆 称号図鑑</button>
                     <button id="menu-btn-title" class="cyber-btn secondary" style="margin-top: 10px;">広場に戻る</button>
                 </div>
             </div>
 
             <!-- リザルト画面 -->
-            <div id="result-screen" class="screen result-panel">
+            <div id="result-screen" class="screen result-panel" role="dialog" aria-modal="true" aria-labelledby="result-title">
                 <div class="result-box">
-                    <h2 class="result-title">GAME OVER<br><span class="sub-title">（シールド大破）</span></h2>
+                    <h2 id="result-title" class="result-title">GAME OVER<br><span class="sub-title">（シールド大破）</span></h2>
                     
                     <div class="score-container">
                         <p class="score-label">スコア</p>
@@ -98,7 +98,7 @@
                     </div>
 
                     <div class="btn-group">
-                        <button id="retry-btn" class="cyber-btn primary">再挑戦 (RETRY)</button>
+                        <button id="retry-btn" class="cyber-btn primary">再挑戦 (RETRY) [Space/R]</button>
                         <button id="share-btn" class="cyber-btn x-share">𝕏 結果をシェア</button>
                         <button id="menu-btn" class="cyber-btn secondary">メニューへ戻る</button>
                     </div>
@@ -106,18 +106,18 @@
             </div>
 
             <!-- 称号図鑑モーダル -->
-            <div id="achievements-modal" class="modal hidden">
+            <div id="achievements-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
                 <div class="modal-content cyber-panel">
-                    <h2 class="modal-title">🏆 SWEEPER 称号図鑑</h2>
+                    <h2 id="modal-title" class="modal-title">🏆 SWEEPER 称号図鑑</h2>
                     <div class="achievements-list" id="achievements-list">
                         <!-- 動的に称号プレートが生成されます -->
                     </div>
-                    <button id="close-modal-btn" class="cyber-btn">閉じる</button>
+                    <button id="close-modal-btn" class="cyber-btn">閉じる [Esc]</button>
                 </div>
             </div>
 
             <!-- 称号獲得リアルタイムトースト -->
-            <div id="toast-container" class="toast-container"></div>
+            <div id="toast-container" class="toast-container" role="status" aria-live="polite"></div>
         </div>
     </div>
     
