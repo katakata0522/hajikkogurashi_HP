@@ -62,6 +62,64 @@
                 <div class="instruction-card">
                     <h3>【遊び方】</h3>
                     <p>落ちてくるアイテムを左右に仕分けろ！</p>
+    <!-- SEO: hajikkogurashi-minigame -->
+    <meta name="description" content="迫り来るアイテムを左右に仕分ける、ルール変化が楽しいスマホ対応の脳トレパニックゲームです。">
+    <meta name="robots" content="index,follow">
+    <link rel="canonical" href="https://hajikkoroom.xsrv.jp/sorting-factory/">
+    <meta property="og:locale" content="ja_JP">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Corner Neighbor">
+    <meta property="og:title" content="超絶！仕分け工場 | Corner Neighbor">
+    <meta property="og:description" content="迫り来るアイテムを左右に仕分ける、ルール変化が楽しいスマホ対応の脳トレパニックゲームです。">
+    <meta property="og:url" content="https://hajikkoroom.xsrv.jp/sorting-factory/">
+    <meta property="og:image" content="https://hajikkoroom.xsrv.jp//assets/images/sorting_factory_thumbnail_1779165097756.png">
+    <meta property="og:image:alt" content="超絶！仕分け工場 | Corner Neighbor">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="超絶！仕分け工場 | Corner Neighbor">
+    <meta name="twitter:description" content="迫り来るアイテムを左右に仕分ける、ルール変化が楽しいスマホ対応の脳トレパニックゲームです。">
+    <meta name="twitter:image" content="https://hajikkoroom.xsrv.jp//assets/images/sorting_factory_thumbnail_1779165097756.png">
+    <!-- /SEO: hajikkogurashi-minigame -->
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;900&family=Teko:wght@600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="game-container">
+        <!-- 背景エフェクトレイヤー -->
+        <div id="bg-effect" class="bg-effect"></div>
+
+        <!-- Canvas -->
+        <canvas id="game-canvas"></canvas>
+
+        <!-- UIレイヤー -->
+        <div id="ui-layer">
+            
+            <!-- スコアとミッション表示（プレイ中） -->
+            <div id="score-hud" class="score-hud hidden">
+                <div class="score-box">
+                    <span class="score-label">SCORE</span>
+                    <span id="score-value" class="score-value">0</span>
+                </div>
+                <div id="rule-display" class="rule-display">
+                    <span class="rule-label">MISSION</span>
+                    <span id="current-rule-text" class="rule-text">色</span>
+                </div>
+            </div>
+
+            <!-- ルール変更アラート -->
+            <div id="rule-alert" class="rule-alert hidden">
+                <span class="alert-warning">SYSTEM OVERRIDE</span>
+                <span id="alert-text" class="alert-text">形</span>
+            </div>
+
+            <!-- スタート画面 -->
+            <div id="start-screen" class="screen active">
+                <div class="title-container">
+                    <h1 class="main-title">SORTING<br>FACTORY</h1>
+                    <p class="subtitle">超絶！仕分け工場</p>
+                </div>
+                <div class="instruction-card">
+                    <h3>【遊び方】</h3>
+                    <p>落ちてくるアイテムを左右に仕分けろ！</p>
                     <div class="how-to-flex">
                         <div class="how-to-box left-box">左タップ<br>(←キー)</div>
                         <div class="how-to-box right-box">右タップ<br>(→キー)</div>
@@ -70,17 +128,17 @@
                 </div>
                 <div class="sound-mute-container" style="margin-top: 15px; margin-bottom: 15px;">
                     <label class="mute-label" style="cursor: pointer; font-size: 1.1rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
-                        <input type="checkbox" id="sound-mute-toggle" style="width: 18px; height: 18px; cursor: pointer;">
+                        <input type="checkbox" id="sound-mute-toggle" aria-label="効果音の消音切り替え" style="width: 18px; height: 18px; cursor: pointer;">
                         <span class="mute-text" style="font-weight: bold; color: #fff; font-family: 'M PLUS Rounded 1c', sans-serif;">🔇 消音 (ミュート)</span>
                     </label>
                 </div>
-                <button id="start-btn" class="action-btn">業務開始</button>
-                <button id="menu-btn-title" class="action-btn tertiary" style="margin-top: 12px; background: rgba(255, 255, 255, 0.1); border: 2px solid rgba(255, 255, 255, 0.2);">広場に戻る</button>
+                <button id="start-btn" class="action-btn" aria-label="業務開始（ゲームスタート）">業務開始</button>
+                <button id="menu-btn-title" class="action-btn tertiary" aria-label="広場に戻る" style="margin-top: 12px; background: rgba(255, 255, 255, 0.1); border: 2px solid rgba(255, 255, 255, 0.2);">広場に戻る</button>
             </div>
 
             <!-- リザルト画面 -->
-            <div id="result-screen" class="screen glass-panel">
-                <h2 class="result-title">業務終了</h2>
+            <div id="result-screen" class="screen glass-panel" role="dialog" aria-modal="true" aria-labelledby="result-title">
+                <h2 id="result-title" class="result-title">業務終了</h2>
                 
                 <div class="result-stats">
                     <div class="stat-item">
@@ -101,15 +159,15 @@
                 </div>
 
                 <div class="action-buttons">
-                    <button id="retry-btn" class="action-btn primary">再挑戦</button>
-                    <button id="share-btn" class="action-btn secondary">結果をポスト</button>
-                    <button id="menu-btn" class="action-btn tertiary">広場に戻る</button>
+                    <button id="retry-btn" class="action-btn primary" aria-label="もう一度プレイする">再挑戦</button>
+                    <button id="share-btn" class="action-btn secondary" aria-label="結果をXに投稿する">結果をポスト</button>
+                    <button id="menu-btn" class="action-btn tertiary" aria-label="ミニゲーム広場へ戻る">広場に戻る</button>
                 </div>
             </div>
             
             <!-- タップ領域オーバーレイ（スマホ用・不可視） -->
-            <div id="touch-left" class="touch-zone hidden"></div>
-            <div id="touch-right" class="touch-zone hidden"></div>
+            <div id="touch-left" class="touch-zone hidden" role="button" aria-label="左側へ仕分ける"></div>
+            <div id="touch-right" class="touch-zone hidden" role="button" aria-label="右側へ仕分ける"></div>
         </div>
     </div>
     <script src="script.js"></script>

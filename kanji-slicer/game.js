@@ -17,6 +17,27 @@ const GRAVITY = 0.35;
 const AIR_RESISTANCE = 0.99;
 const RESTITUTION = 0.15; // Bounce bounce factor (low for stability)
 const FLOOR_FRICTION = 0.95;
+const MAX_VELOCITY = 16.0; // Speed cap guard against physical tunneling
+
+// Robust LocalStorage Wrapper to prevent crashes in private mode or webviews
+const safeStorage = {
+    getItem(key, fallback = null) {
+        try {
+            const val = localStorage.getItem(key);
+            return val !== null ? val : fallback;
+        } catch (e) {
+            return fallback;
+        }
+    },
+    setItem(key, value) {
+        try {
+            localStorage.setItem(key, String(value));
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+};
 
 // Kanji Database (Tiers, Colors, Glows)
 const KANJI_DATA = {

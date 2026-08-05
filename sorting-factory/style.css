@@ -39,6 +39,15 @@ body {
     background: #111118;
     box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
     overflow: hidden;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.action-btn:focus-visible,
+button:focus-visible,
+input:focus-visible {
+    outline: 3px solid #ffd700;
+    outline-offset: 3px;
 }
 
 .bg-effect {

@@ -151,7 +151,9 @@ const player = {
     canDoubleJump: true,
     scaleX: 1.0, 
     scaleY: 1.0,
-    wasGrounded: false
+    wasGrounded: false,
+    coyoteTimer: 0,
+    jumpBufferTimer: 0
 };
 
 let platforms = [];
@@ -332,8 +334,9 @@ function jump() {
     if (player.x <= 4) isWallLeft = true;
     if (player.x + player.width >= canvas.width - 4) isWallRight = true;
     
-    if (isGrounded) {
+    if (isGrounded || player.coyoteTimer > 0) {
         player.vy = JUMP_FORCE;
+        player.coyoteTimer = 0;
         player.canDoubleJump = true;
         player.scaleX = 0.5;
         player.scaleY = 1.5;

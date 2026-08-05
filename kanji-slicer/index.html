@@ -47,6 +47,48 @@
             
             <div class="header-center">
                 <div class="mission-box">
+    <meta name="description" content="落ちてくる漢字をスワイプで斬り、部首を合体させてお題をクリアするスマホ対応の物理スライスアクションです。">
+    <meta name="robots" content="index,follow">
+    <link rel="canonical" href="https://hajikkoroom.xsrv.jp/kanji-slicer/">
+    <meta property="og:locale" content="ja_JP">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Corner Neighbor">
+    <meta property="og:title" content="漢字スライサー・マージ | Corner Neighbor">
+    <meta property="og:description" content="落ちてくる漢字をスワイプで斬り、部首を合体させてお題をクリアするスマホ対応の物理スライスアクションです。">
+    <meta property="og:url" content="https://hajikkoroom.xsrv.jp/kanji-slicer/">
+    <meta property="og:image" content="https://hajikkoroom.xsrv.jp//assets/images/kanji_slicer_thumbnail.png">
+    <meta property="og:image:alt" content="漢字スライサー・マージ | Corner Neighbor">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="漢字スライサー・マージ | Corner Neighbor">
+    <meta name="twitter:description" content="落ちてくる漢字をスワイプで斬り、部首を合体させてお題をクリアするスマホ対応の物理スライスアクションです。">
+    <meta name="twitter:image" content="https://hajikkoroom.xsrv.jp//assets/images/kanji_slicer_thumbnail.png">
+    <!-- /SEO: hajikkogurashi-minigame -->
+    
+    <!-- Google Fonts for premium Japanese typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kaisei+Decol:wght@500;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <!-- Header: Score and Targets -->
+        <header id="game-header">
+            <div class="header-left">
+                <a href="/minigames.html" class="btn-back">← 戻る</a>
+                <div class="score-box">
+                    <span class="label">得点</span>
+                    <span id="score">0</span>
+                </div>
+                <div class="best-box">
+                    <span class="label">最高記録</span>
+                    <span id="best-score">0</span>
+                </div>
+            </div>
+            
+            <div class="header-center">
+                <div class="mission-box">
                     <span class="mission-title">現在のお題</span>
                     <div id="mission-kanji">炎</div>
                     <span id="mission-reading" class="mission-desc">合体させてお題をクリアせよ！</span>
@@ -56,33 +98,42 @@
             <div class="header-right">
                 <div class="next-box">
                     <span class="label">次の一手</span>
-                    <div id="next-preview">木</div>
+                    <div id="next-preview" aria-label="次に出現する漢字">木</div>
                 </div>
                 <div class="header-actions">
-                    <button id="btn-sound" class="btn-icon" aria-label="音声を切替">🔊</button>
-                    <button id="btn-pause" class="btn-icon" aria-label="一時停止">⏸️</button>
+                    <button id="btn-sound" class="btn-icon" aria-label="音声を切替 (現在: ON)" aria-pressed="true">🔊</button>
+                    <button id="btn-pause" class="btn-icon" aria-label="一時停止と図鑑を開く" aria-expanded="false" aria-controls="pause-modal">⏸️</button>
                 </div>
             </div>
         </header>
 
         <!-- Main Workspace (Canvas & Overlays) -->
         <main id="game-canvas-wrapper">
-            <canvas id="game-canvas"></canvas>
-            <div id="dead-line-alert">警告：溢れそう！</div>
+            <canvas id="game-canvas" aria-label="漢字スライサーゲーム画面"></canvas>
+            <div id="dead-line-alert" role="alert" aria-live="assertive">警告：溢れそう！</div>
         </main>
 
         <!-- Footer / Instructions -->
         <footer id="game-footer">
-            <p class="instruction">【操作方法】タップ/クリックで落下位置を指定 | スワイプ/ドラッグで漢字を斬る！</p>
+            <p class="instruction">【操作方法】タップ/ドラッグで落とす | スワイプで切る | [Space]一時停止 [R]リトライ</p>
         </footer>
     </div>
 
     <!-- Pause / Guide Modal -->
-    <div id="pause-modal" class="modal-overlay hidden">
+    <div id="pause-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="pause-modal-title">
         <div class="modal-content pause-content">
-            <h2 class="modal-title-pause">一時停止 ＆ 漢字図鑑</h2>
+            <h2 id="pause-modal-title" class="modal-title-pause">一時停止 ＆ 漢字図鑑</h2>
             <div class="dictionary-container">
-                <p class="dictionary-desc">合体させて漢字を解放し、図鑑を埋めよう！</p>
+                <div class="dictionary-progress-box">
+                    <div class="progress-labels">
+                        <span class="progress-title">熟語解放度</span>
+                        <span id="dict-progress-text" class="progress-text">0 / 25 (0%)</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div id="dict-progress-fill" class="progress-bar-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+                <p class="dictionary-desc">合体させて熟語を解放し、図鑑を埋めよう！</p>
                 <div id="dictionary-grid" class="dictionary-grid">
                     <!-- Spawns dynamically via JS -->
                 </div>
@@ -95,12 +146,12 @@
     </div>
 
     <!-- Game Over Modal -->
-    <div id="gameover-modal" class="modal-overlay hidden">
+    <div id="gameover-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="gameover-modal-title">
         <div class="modal-content">
-            <h2 class="modal-title">満杯（ゲームオーバー）</h2>
+            <h2 id="gameover-modal-title" class="modal-title">満杯（ゲームオーバー）</h2>
             <p class="final-score-text">最終得点: <span id="final-score">0</span></p>
             <div class="modal-buttons">
-                <button id="btn-restart" class="btn-primary">もう一度挑む</button>
+                <button id="btn-restart" class="btn-primary">もう一度挑む (R)</button>
                 <a href="/minigames.html" class="btn-secondary">ミニゲーム広場へ</a>
             </div>
         </div>
