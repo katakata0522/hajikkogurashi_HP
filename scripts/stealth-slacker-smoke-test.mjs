@@ -9,7 +9,10 @@ const html = readFileSync(resolve(root, 'stealth-slacker', 'index.html'), 'utf8'
 const script = readFileSync(resolve(root, 'stealth-slacker', 'script.js'), 'utf8');
 const style = readFileSync(resolve(root, 'stealth-slacker', 'style.css'), 'utf8');
 
-assert.match(html, /<canvas id="game-canvas"><\/canvas>/, 'game canvas should be present');
+assert.match(html, /<canvas\b[^>]*\bid="game-canvas"[^>]*><\/canvas>/, 'game canvas should be present');
+assert.match(html, /id="start-screen"/, 'start screen should be present');
+assert.match(html, /id="result-screen"/, 'result screen should be present');
+assert.equal(html.includes('hajikkoroom.xsrv.jp//assets/'), false, 'social image URLs should not contain a double slash after host');
 assert.doesNotThrow(() => new vm.Script(script), 'stealth-slacker script must be valid JavaScript');
 
 assert.match(

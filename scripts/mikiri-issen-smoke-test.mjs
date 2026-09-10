@@ -48,10 +48,15 @@ assert.match(
   'secondary enemy details should stay out of the compact result card'
 );
 
+assert.doesNotMatch(
+  html,
+  /<div class="result-box"[^>]*>[\s\S]*?<span>TOTAL WINS<\/span>/,
+  'total wins should stay out of the compact result grid'
+);
 assert.match(
   html,
-  /class="result-box result-optional"><span>TOTAL WINS<\/span>/,
-  'secondary record details should stay out of the compact result card'
+  /id="titleTotalWinsLabel"/,
+  'total wins should remain available on the title record summary'
 );
 
 assert.match(
@@ -66,16 +71,21 @@ assert.match(
   'desktop result card should use a compact width'
 );
 
+const enemyBlock = script.match(/const\s+enemies\s*=\s*\[([\s\S]*?)\n\s*\];/)?.[1] ?? '';
+assert.ok(enemyBlock, 'enemy configuration should be present');
+const regularReactionTimes = [...enemyBlock.matchAll(/reactionMs:\s*(\d+)[^\n]*?(?!hidden:\s*true)/g)].map((match) => Number(match[1]));
+const allReactionTimes = [...enemyBlock.matchAll(/reactionMs:\s*(\d+)/g)].map((match) => Number(match[1]));
+assert.ok(allReactionTimes.length >= 7, 'regular enemies plus a hidden boss should be configured');
+for (let i = 1; i < allReactionTimes.length; i += 1) {
+  assert.ok(
+    allReactionTimes[i] < allReactionTimes[i - 1],
+    `enemy reaction targets should get strictly faster (${allReactionTimes.join(' > ')})`
+  );
+}
 assert.match(
-  script,
-  /name:\s*'無口な達人'[\s\S]*?reactionMs:\s*285[\s\S]*?name:\s*'影の剣豪'[\s\S]*?reactionMs:\s*270[\s\S]*?name:\s*'刹那の鬼'[\s\S]*?reactionMs:\s*260/,
-  'late-game enemy speeds should climb smoothly into the regular final boss'
-);
-
-assert.match(
-  script,
-  /name:\s*'刹那の鬼・真'[\s\S]*?reactionMs:\s*235[\s\S]*?hidden:\s*true/,
-  '235ms challenge should remain as a hidden boss'
+  enemyBlock,
+  /name:\s*'刹那の鬼・真'[^\n]*hidden:\s*true/,
+  'the final challenge should remain a hidden boss'
 );
 
 assert.match(

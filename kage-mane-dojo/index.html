@@ -4,26 +4,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>影まね道場 | Corner Neighbor</title>
-    <!-- SEO: hajikkogurashi-minigame -->
-    <meta name="description" content="お題の影や形を見極めて遊ぶ、Corner Neighbor制作のブラウザミニゲームです。">
-    <meta name="robots" content="index,follow">
-    <link rel="canonical" href="https://hajikkoroom.xsrv.jp/kage-mane-dojo/">
-    <meta property="og:locale" content="ja_JP">
-    <meta property="og:type" content="website">
-    <meta property="og:site_name" content="Corner Neighbor">
-    <meta property="og:title" content="影まね道場 | Corner Neighbor">
-    <meta property="og:description" content="お題の影や形を見極めて遊ぶ、Corner Neighbor制作のブラウザミニゲームです。">
-    <meta property="og:url" content="https://hajikkoroom.xsrv.jp/kage-mane-dojo/">
-    <meta property="og:image" content="https://hajikkoroom.xsrv.jp//assets/images/banner.webp">
-    <meta property="og:image:alt" content="影まね道場 | Corner Neighbor">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="影まね道場 | Corner Neighbor">
-    <meta name="twitter:description" content="お題の影や形を見極めて遊ぶ、Corner Neighbor制作のブラウザミニゲームです。">
-    <meta name="twitter:image" content="https://hajikkoroom.xsrv.jp//assets/images/banner.webp">
-    <!-- /SEO: hajikkogurashi-minigame -->
+  <!-- SEO: hajikkogurashi-minigame -->
   <meta name="description" content="師範の型を覚えて同じ順番で入力する、記憶と集中のミニゲーム。">
   <meta name="robots" content="index,follow">
   <link rel="canonical" href="https://hajikkoroom.xsrv.jp/kage-mane-dojo/">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Corner Neighbor">
+  <meta property="og:title" content="影まね道場 | Corner Neighbor">
+  <meta property="og:description" content="師範の型を覚えて同じ順番で入力する、記憶と集中のミニゲーム。">
+  <meta property="og:url" content="https://hajikkoroom.xsrv.jp/kage-mane-dojo/">
+  <meta property="og:image" content="https://hajikkoroom.xsrv.jp/assets/images/banner.webp">
+  <meta property="og:image:alt" content="影まね道場 | Corner Neighbor">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="影まね道場 | Corner Neighbor">
+  <meta name="twitter:description" content="師範の型を覚えて同じ順番で入力する、記憶と集中のミニゲーム。">
+  <meta name="twitter:image" content="https://hajikkoroom.xsrv.jp/assets/images/banner.webp">
+  <!-- /SEO: hajikkogurashi-minigame -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700;800&family=Yuji+Syuku&display=swap" rel="stylesheet">
@@ -47,8 +44,7 @@
 
     <section class="screen title-screen active" id="titleScreen" aria-label="タイトル画面">
       <div class="moon" aria-hidden="true"></div>
-      
-      <!-- 果たし状バナー (挑戦モード時に動的に表示) -->
+
       <div class="challenge-banner" id="challengeBanner">
         <span>✉ 果たし状が届いています</span>
       </div>
@@ -57,15 +53,12 @@
         <h1>影まね<br>道場<span class="title-seal" aria-hidden="true">影</span></h1>
       </div>
       <p class="title-desc">師範の型を覚え、弟子として同じ順に打ち返せ。</p>
-      
-      <!-- 門下生設定エリア (縦幅節約フレックスラッパー) -->
+
       <div class="title-setup-row">
-        <!-- 門下生お名前入力 (セキュリティ・堅牢性を意識した文字数制限つき) -->
         <div class="name-input-group">
           <input type="text" id="usernameInput" class="name-input" placeholder="門下生のお名前 (8文字)" maxlength="8" autocomplete="off">
         </div>
 
-        <!-- 難易度選択 (初級・中級・上級) -->
         <div class="difficulty-select" id="difficultySelect">
           <button type="button" class="diff-btn" data-diff="easy">初級</button>
           <button type="button" class="diff-btn active" data-diff="normal">中級</button>
@@ -82,18 +75,14 @@
     </section>
 
     <section class="screen play-screen" id="playScreen" aria-label="稽古画面">
-      <!-- 巨大なHUDカード群を完全に削除し、道場シーン内へ統合（引き算の美学） -->
-
       <div class="dojo-scene" id="dojoScene">
         <div class="dojo-moon" aria-hidden="true"></div>
         <div class="dojo-bamboo" aria-hidden="true"></div>
-        <!-- 吊るされた身代わり木札 (ライフ残機表示) -->
         <div class="dojo-lives" id="dojoLives" aria-label="身代わり木札（残機）">
           <span class="life-talisman active" data-index="0">札</span>
           <span class="life-talisman active" data-index="1">札</span>
           <span class="life-talisman active" data-index="2">札</span>
         </div>
-        <!-- 道場内統合ミニHUD (引き算の美学) -->
         <div class="dojo-hud" aria-label="修行状況">
           <div class="dojo-hud-item"><span class="label">稽古</span><strong id="lessonLabel">1</strong></div>
           <div class="dojo-hud-item"><span class="label">型</span><strong id="progressLabel">0/2</strong></div>

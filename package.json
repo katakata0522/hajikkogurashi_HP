@@ -1,0 +1,14 @@
+{
+  "name": "corner-neighbor-minigames",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Regression test tooling for Corner Neighbor browser minigames.",
+  "scripts": {
+    "test:minigames:smoke": "node scripts/run-minigame-tests.mjs smoke",
+    "test:minigames:browser": "node scripts/run-minigame-tests.mjs browser",
+    "test:minigames": "node scripts/run-minigame-tests.mjs all"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}

@@ -11,6 +11,9 @@ on:
       - '.gitattributes'
       - '.github/**'
 
+permissions:
+  contents: read
+
 concurrency:
   group: deploy-hajikkogurashi-hp-main
   cancel-in-progress: true
@@ -58,6 +61,14 @@ jobs:
           pwsh -File ./scripts/home-asset-smoke-test.ps1
           pwsh -File ./scripts/structure-smoke-test.ps1
           pwsh -File ./scripts/local-reference-check.ps1
+
+      - name: Setup Node.js for minigame smoke tests
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+
+      - name: Validate minigame logic before deploy
+        run: npm run test:minigames:smoke
 
       - name: Generate sitemap.xml
         run: pwsh -File ./scripts/generate-sitemap.ps1

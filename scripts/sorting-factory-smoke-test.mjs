@@ -12,6 +12,15 @@ const script = readFileSync(scriptPath, 'utf8');
 const style = readFileSync(resolve(root, 'sorting-factory', 'style.css'), 'utf8');
 
 assert.match(html, /<canvas id="game-canvas"><\/canvas>/, 'game canvas should be present');
+assert.equal((html.match(/<body\b/gi) || []).length, 1, 'page must contain exactly one body');
+assert.equal((html.match(/id="game-container"/g) || []).length, 1, 'game container must not be duplicated');
+assert.equal((html.match(/id="start-screen"/g) || []).length, 1, 'start screen must not be duplicated');
+assert.equal((html.match(/id="game-canvas"/g) || []).length, 1, 'game canvas must not be duplicated');
+const bodyStart = html.indexOf('<body');
+assert.ok(bodyStart >= 0, 'body should exist');
+assert.equal(/<meta\b/i.test(html.slice(bodyStart)), false, 'SEO metadata must stay in head');
+assert.equal(html.includes('hajikkoroom.xsrv.jp//assets/'), false, 'social image URLs must not contain a double slash after host');
+assert.match(html, /minigame-storage-guard\.js[\s\S]*script\.js/, 'storage guard must load before game script');
 assert.doesNotThrow(() => new vm.Script(script), 'sorting-factory script must be valid JavaScript');
 
 assert.match(
@@ -32,18 +41,8 @@ assert.match(
   'game over should always reach the result UI after best-score handling'
 );
 
-assert.match(
-  script,
-  /navigator\.share/,
-  'sharing should use the native Web Share API when available'
-);
-
-assert.match(
-  script,
-  /navigator\.clipboard\.writeText/,
-  'sharing should fall back to copying the result text'
-);
-
+assert.match(script, /navigator\.share/, 'sharing should use the native Web Share API when available');
+assert.match(script, /navigator\.clipboard\.writeText/, 'sharing should fall back to copying the result text');
 assert.match(
   script,
   /window\.open\([^)]*'_blank',\s*'noopener,noreferrer'\)/,
@@ -85,15 +84,5 @@ assert.match(
   /SIZES:\s*\{\s*SMALL:\s*64,\s*LARGE:\s*164\s*\}/,
   'size rule should use a larger visual gap for fast recognition'
 );
-
-assert.match(
-  script,
-  /drawSizeGuides\(/,
-  'size rule should draw visual reference guides in the bins'
-);
-
-assert.match(
-  script,
-  /1\s+3\s+5[\s\S]*2\s+4\s+6/,
-  'number rule should show example digits, not only odd/even text'
-);
+assert.match(script, /drawSizeGuides\(/, 'size rule should draw visual reference guides in the bins');
+assert.match(script, /1\s+3\s+5[\s\S]*2\s+4\s+6/, 'number rule should show example digits, not only odd/even text');

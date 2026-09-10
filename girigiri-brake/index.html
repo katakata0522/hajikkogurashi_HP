@@ -14,32 +14,28 @@
     <meta property="og:title" content="ギリギリ・ブレーキ！ | Corner Neighbor">
     <meta property="og:description" content="猛スピードから急ブレーキして崖ギリギリを狙う、スマホ対応のチキンレース系ミニゲームです。">
     <meta property="og:url" content="https://hajikkoroom.xsrv.jp/girigiri-brake/">
-    <meta property="og:image" content="https://hajikkoroom.xsrv.jp//assets/images/girigiri_brake_thumbnail_1779165077904.png">
+    <meta property="og:image" content="https://hajikkoroom.xsrv.jp/assets/images/girigiri_brake_thumbnail_1779165077904.png">
     <meta property="og:image:alt" content="ギリギリ・ブレーキ！ | Corner Neighbor">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="ギリギリ・ブレーキ！ | Corner Neighbor">
     <meta name="twitter:description" content="猛スピードから急ブレーキして崖ギリギリを狙う、スマホ対応のチキンレース系ミニゲームです。">
-    <meta name="twitter:image" content="https://hajikkoroom.xsrv.jp//assets/images/girigiri_brake_thumbnail_1779165077904.png">
+    <meta name="twitter:image" content="https://hajikkoroom.xsrv.jp/assets/images/girigiri_brake_thumbnail_1779165077904.png">
     <!-- /SEO: hajikkogurashi-minigame -->
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;900&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 </head>
 <body>
     <div id="game-container">
-        <!-- 背景の装飾要素 -->
         <div class="background-grid"></div>
-        
         <canvas id="game-canvas"></canvas>
 
-        <!-- UIレイヤー -->
         <div id="ui-layer">
-            <!-- スタート画面 -->
             <div id="start-screen" class="screen active">
                 <div class="logo-container">
                     <h1 class="glow-text main-title">GIRIGIRI<br>BRAKE!</h1>
                     <p class="subtitle">ギリギリ・ブレーキ！</p>
                 </div>
-                
+
                 <div class="sound-mute-container">
                     <input type="checkbox" id="sound-mute-toggle" class="sound-mute-checkbox">
                     <label for="sound-mute-toggle" id="sound-mute-label" class="sound-mute-label">音 ON 🔊</label>
@@ -62,7 +58,6 @@
                 <button id="menu-btn-title" class="cyber-btn tertiary" style="margin-top: 10px; width: min(100%, 520px); font-size: 1.1rem; padding: 0.6rem;">広場に戻る</button>
             </div>
 
-            <!-- プレイ中のHUD -->
             <div id="hud" class="screen">
                 <div class="hud-top">
                     <div class="weather-box">
@@ -80,26 +75,21 @@
                 </div>
             </div>
 
-            <!-- リザルト画面 -->
             <div id="result-screen" class="screen glass-panel">
                 <h2 id="result-title" class="result-title glow-text">RESULT</h2>
-                
                 <div class="score-container">
                     <p class="score-label">崖までの残り距離</p>
                     <div class="score-value-wrapper">
                         <span id="score-value" class="score-value">0.00</span>
                         <span class="score-unit">m</span>
                     </div>
-                    <!-- 自己ベスト表示 -->
                     <p class="best-score-label">BEST: <span id="best-score-value">--</span> m</p>
                     <p id="new-record-badge" class="new-record blink hidden">NEW RECORD!!</p>
                 </div>
-
                 <div class="rank-container">
                     <p class="rank-label">評価</p>
                     <p id="rank-text" class="rank-text">チキン野郎</p>
                 </div>
-
                 <div class="action-buttons">
                     <button id="retry-btn" class="cyber-btn primary">もう一度挑戦</button>
                     <div class="sub-actions">
@@ -115,7 +105,8 @@
             </div>
         </div>
     </div>
-    
+
+    <script src="/assets/js/minigame-storage-guard.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
