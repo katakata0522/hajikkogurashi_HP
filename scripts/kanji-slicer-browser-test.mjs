@@ -76,6 +76,49 @@ try {
 
   if (errors.length) throw new Error(`kanji-slicer interaction errors: ${errors.join(' | ')}`);
 
+  const blockedPage = await browser.newPage({
+    viewport: { width: 390, height: 844 },
+    isMobile: true,
+    hasTouch: true,
+  });
+  const blockedErrors = [];
+  blockedPage.on('pageerror', (error) => blockedErrors.push(error.message));
+  await blockedPage.addInitScript(() => {
+    for (const method of ['getItem', 'setItem', 'removeItem', 'clear']) {
+      Object.defineProperty(Storage.prototype, method, {
+        configurable: true,
+        value() { throw new Error(`blocked ${method}`); },
+      });
+    }
+  });
+
+  await blockedPage.goto(`http://127.0.0.1:${port}/kanji-slicer/`, { waitUntil: 'networkidle' });
+  await blockedPage.waitForTimeout(150);
+  const blockedResult = await blockedPage.evaluate(() => {
+    let storageActuallyBlocked = false;
+    try {
+      localStorage.setItem('probe', '1');
+    } catch (_) {
+      storageActuallyBlocked = true;
+    }
+    const callable = typeof addScore === 'function';
+    if (callable) addScore(10);
+    return {
+      storageActuallyBlocked,
+      callable,
+      score: document.querySelector('#score')?.textContent,
+      best: document.querySelector('#best-score')?.textContent,
+    };
+  });
+
+  if (!blockedResult.storageActuallyBlocked) throw new Error('blocked-storage fixture did not block localStorage');
+  if (!blockedResult.callable) throw new Error('addScore must remain callable for regression coverage');
+  if (blockedResult.score !== '10' || blockedResult.best !== '10') {
+    throw new Error(`blocked-storage best update failed: ${JSON.stringify(blockedResult)}`);
+  }
+  if (blockedErrors.length) throw new Error(`kanji-slicer blocked-storage errors: ${blockedErrors.join(' | ')}`);
+
+  await blockedPage.close();
   await page.close();
   await browser.close();
   console.log('kanji-slicer browser test passed');

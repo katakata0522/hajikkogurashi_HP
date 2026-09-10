@@ -116,18 +116,22 @@ for (const recipe of IDIOM_RECIPES) {
     );
 }
 
-const reversibleMergePairs = RECIPES.filter((recipe) => recipe.a !== recipe.b).length;
 const uniqueMergePairs = mergePairs.size;
-const reversibleIdiomPairs = IDIOM_RECIPES.filter((recipe) => recipe.a !== recipe.b).length;
 const uniqueIdiomPairs = idiomPairs.size;
 
-assert.ok(uniqueMergePairs < RECIPES.length, 'Merge recipes should currently contain reversible duplicates before normalization');
-assert.ok(uniqueIdiomPairs < IDIOM_RECIPES.length, 'Idiom recipes should currently contain reversible duplicates before normalization');
+assert.equal(uniqueMergePairs, RECIPES.length, 'Merge recipes must use one row per unordered pair');
+assert.equal(uniqueIdiomPairs, IDIOM_RECIPES.length, 'Idiom recipes must use one row per unordered pair');
+assert.ok(source.includes('const IDIOM_RECIPE_MAP = new Map('), 'Idiom collision lookup must use a precomputed Map');
+assert.ok(source.includes('const MERGE_RECIPE_MAP = new Map('), 'Merge collision lookup must use a precomputed Map');
+assert.ok(source.includes('const IDIOM_RECIPE_BY_RESULT = new Map();'), 'Representative idiom lookup must use a result Map');
+assert.equal(/\bIDIOM_RECIPES\.find\s*\(/.test(source), false, 'Idiom lookup must not fall back to linear find');
+assert.equal(/\bRECIPES\.find\s*\(/.test(source), false, 'Merge lookup must not fall back to linear find');
+assert.ok(source.includes("safeStorage.setItem('kanjislicer_best', bestScore);"), 'Best score must use safeStorage');
+assert.equal(source.includes("localStorage.setItem('kanjislicer_best', bestScore);"), false, 'Best score must not bypass safeStorage');
 
 console.log(
     `kanji data integrity passed: ${Object.keys(KANJI_DATA).length} entries, ` +
-    `${uniqueMergePairs}/${RECIPES.length} unique merge pairs, ` +
-    `${uniqueIdiomPairs}/${IDIOM_RECIPES.length} unique idiom pairs, ` +
-    `${VALID_IDIOMS.length} reachable missions ` +
-    `(reversible rows: merge ${reversibleMergePairs}, idiom ${reversibleIdiomPairs})`
+    `${RECIPES.length} unique merge pairs, ` +
+    `${IDIOM_RECIPES.length} unique idiom pairs, ` +
+    `${VALID_IDIOMS.length} reachable missions`
 );

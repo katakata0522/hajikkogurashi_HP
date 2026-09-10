@@ -112,91 +112,53 @@ const TIER2_KANJI = ['林', '明', '休', '好', '岩', '間', '問', '炎', '�
 // Idiom Recipes (A + B collisions erase instantly. Avoids overlap with RECIPES)
 const IDIOM_RECIPES = [
     { a: '木', b: '森', result: '森林' },
-    { a: '森', b: '木', result: '森林' },
     { a: '林', b: '森', result: '森林' },
-    { a: '森', b: '林', result: '森林' },
     { a: '山', b: '林', result: '山林' },
-    { a: '林', b: '山', result: '山林' },
     { a: '明', b: '日', result: '明日' },
-    { a: '日', b: '明', result: '明日' },
     { a: '明', b: '月', result: '明月' },
-    { a: '月', b: '明', result: '明月' },
     { a: '休', b: '日', result: '休日' },
-    { a: '日', b: '休', result: '休日' },
     { a: '門', b: '人', result: '門人' },
-    { a: '人', b: '門', result: '門人' },
     { a: '人', b: '間', result: '人間' },
-    { a: '間', b: '人', result: '人間' },
     { a: '岩', b: '石', result: '岩石' },
-    { a: '石', b: '岩', result: '岩石' },
     { a: '岩', b: '山', result: '岩山' },
-    { a: '山', b: '岩', result: '岩山' },
     { a: '火', b: '炎', result: '火炎' },
-    { a: '炎', b: '火', result: '火炎' },
     { a: '炎', b: '山', result: '炎山' },
-    { a: '山', b: '炎', result: '炎山' },
     { a: '好', b: '日', result: '好日' },
-    { a: '日', b: '好', result: '好日' },
     { a: '好', b: '人', result: '好人' },
-    { a: '人', b: '好', result: '好人' },
     { a: '人', b: '口', result: '人口' },
-    { a: '口', b: '人', result: '人口' },
     { a: '火', b: '口', result: '火口' },
-    { a: '口', b: '火', result: '火口' },
     { a: '火', b: '山', result: '火山' },
-    { a: '山', b: '火', result: '火山' },
     { a: '消', b: '火', result: '消火' },
-    { a: '火', b: '消', result: '消火' },
     { a: '淡', b: '水', result: '淡水' },
-    { a: '水', b: '淡', result: '淡水' },
     { a: '水', b: '田', result: '水田' },
-    { a: '田', b: '水', result: '水田' },
     { a: '里', b: '山', result: '里山' },
-    { a: '山', b: '里', result: '里山' },
     { a: '山', b: '水', result: '山水' },
-    { a: '水', b: '山', result: '山水' },
     { a: '土', b: '木', result: '土木' },
-    { a: '木', b: '土', result: '土木' },
     { a: '里', b: '人', result: '里人' },
-    { a: '人', b: '里', result: '里人' },
     { a: '土', b: '石', result: '土石' },
-    { a: '石', b: '土', result: '土石' },
     { a: '田', b: '口', result: '田口' },
-    { a: '口', b: '田', result: '田口' }
 ];
 
 // Merge Recipes
 const RECIPES = [
     { a: '木', b: '木', result: '林', tier: 2 },
     { a: '林', b: '木', result: '森', tier: 3 },
-    { a: '木', b: '林', result: '森', tier: 3 },
     { a: '日', b: '月', result: '明', tier: 2 },
-    { a: '月', b: '日', result: '明', tier: 2 },
     { a: '人', b: '木', result: '休', tier: 2 },
-    { a: '木', b: '人', result: '休', tier: 2 },
     { a: '女', b: '子', result: '好', tier: 2 },
-    { a: '子', b: '女', result: '好', tier: 2 },
     { a: '山', b: '石', result: '岩', tier: 2 },
-    { a: '石', b: '山', result: '岩', tier: 2 },
     { a: '門', b: '日', result: '間', tier: 2 },
-    { a: '日', b: '門', result: '間', tier: 2 },
     { a: '門', b: '口', result: '問', tier: 2 },
-    { a: '口', b: '門', result: '問', tier: 2 },
     { a: '火', b: '火', result: '炎', tier: 2 },
     { a: '口', b: '口', result: '回', tier: 2 },
     { a: '月', b: '月', result: '朋', tier: 2 },
     
     // Package A & B
     { a: '小', b: '月', result: '肖', tier: 2 },
-    { a: '月', b: '小', result: '肖', tier: 2 },
     { a: '田', b: '土', result: '里', tier: 2 },
-    { a: '土', b: '田', result: '里', tier: 2 },
     { a: '木', b: '田', result: '果', tier: 2 },
-    { a: '田', b: '木', result: '果', tier: 2 },
     { a: '水', b: '肖', result: '消', tier: 3 },
-    { a: '肖', b: '水', result: '消', tier: 3 },
     { a: '水', b: '炎', result: '淡', tier: 3 },
-    { a: '炎', b: '水', result: '淡', tier: 3 }
 ];
 
 // Decomposition mappings for Slicing
@@ -226,6 +188,24 @@ function getRadiusForTier(tier) {
     if (tier === 1) return 24;
     if (tier === 2) return 38;
     return 54; // Tier 3
+}
+
+// Canonical recipe indexes: collision order does not change the result.
+function recipePairKey(a, b) {
+    return a <= b ? `${a}\u0000${b}` : `${b}\u0000${a}`;
+}
+
+const IDIOM_RECIPE_MAP = new Map(
+    IDIOM_RECIPES.map((recipe) => [recipePairKey(recipe.a, recipe.b), recipe])
+);
+const MERGE_RECIPE_MAP = new Map(
+    RECIPES.map((recipe) => [recipePairKey(recipe.a, recipe.b), recipe])
+);
+const IDIOM_RECIPE_BY_RESULT = new Map();
+for (const recipe of IDIOM_RECIPES) {
+    if (!IDIOM_RECIPE_BY_RESULT.has(recipe.result)) {
+        IDIOM_RECIPE_BY_RESULT.set(recipe.result, recipe);
+    }
 }
 
 // Sketchy Zen-style brush circle (円相 Enso)
@@ -692,7 +672,7 @@ function chooseNewMission() {
     
     // Render Rubies for accessibility and educational aids
     const read = KANJI_DATA[currentMission].read;
-    const recipe = IDIOM_RECIPES.find(r => r.result === currentMission);
+    const recipe = IDIOM_RECIPE_BY_RESULT.get(currentMission);
     let formulaStr = '';
     if (recipe) {
         formulaStr = ` | ${recipe.a} ＋ ${recipe.b} で作ろう！`;
@@ -722,7 +702,7 @@ function addScore(pts) {
     if (score > bestScore) {
         bestScore = score;
         bestScoreEl.textContent = bestScore;
-        localStorage.setItem('kanjislicer_best', bestScore);
+        safeStorage.setItem('kanjislicer_best', bestScore);
     }
 }
 
@@ -751,10 +731,7 @@ function checkMerge(c1, c2) {
     if (c1.toDelete || c2.toDelete) return;
     
     // 1. Idiom Recipes check (Priority 1: Erase on match)
-    const idiomRecipe = IDIOM_RECIPES.find(r => 
-        (r.a === c1.kanji && r.b === c2.kanji) || 
-        (r.a === c2.kanji && r.b === c1.kanji)
-    );
+    const idiomRecipe = IDIOM_RECIPE_MAP.get(recipePairKey(c1.kanji, c2.kanji));
     
     if (idiomRecipe) {
         c1.toDelete = true;
@@ -834,10 +811,7 @@ function checkMerge(c1, c2) {
     }
     
     // 2. Normal Merge Recipes check (Priority 2: Merge into higher tier circle)
-    const recipe = RECIPES.find(r => 
-        (r.a === c1.kanji && r.b === c2.kanji) || 
-        (r.a === c2.kanji && r.b === c1.kanji)
-    );
+    const recipe = MERGE_RECIPE_MAP.get(recipePairKey(c1.kanji, c2.kanji));
     
     if (recipe) {
         c1.toDelete = true;
@@ -1226,7 +1200,7 @@ btnPauseRestart.addEventListener('click', () => {
 
 // Get formula text for dictionary UI (Idiom style)
 function getFormulaText(kanji) {
-    const recipe = IDIOM_RECIPES.find(r => r.result === kanji);
+    const recipe = IDIOM_RECIPE_BY_RESULT.get(kanji);
     if (!recipe) return '';
     return `${recipe.a} + ${recipe.b}`;
 }
