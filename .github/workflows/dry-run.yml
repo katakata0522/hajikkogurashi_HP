@@ -28,6 +28,7 @@ jobs:
           pwsh -File ./scripts/home-asset-smoke-test.ps1
           pwsh -File ./scripts/structure-smoke-test.ps1
           pwsh -File ./scripts/local-reference-check.ps1
+          pwsh -File ./scripts/workflow-action-pin-smoke-test.ps1
 
   minigame-check:
     runs-on: ubuntu-latest
