@@ -38,10 +38,56 @@ try {
     executablePath: process.env.CHROME_PATH || 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
   });
 
+  async function captureSeededPlatforms(seed) {
+    const seededPage = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    const seededErrors = [];
+    seededPage.on('pageerror', (error) => seededErrors.push(error.message));
+    await seededPage.goto(`http://127.0.0.1:${port}/wall-jumper/?seed=${seed}`, { waitUntil: 'networkidle' });
+    const exposedSeed = await seededPage.evaluate(() => window.__CORNER_NEIGHBOR_GAME_SEED__);
+    if (exposedSeed !== seed) {
+      throw new Error(`seed bootstrap mismatch: expected ${seed}, got ${exposedSeed}`);
+    }
+    await seededPage.click('#start-btn');
+    await seededPage.waitForTimeout(100);
+    const sample = await seededPage.evaluate(() => eval(`platforms.slice(0, 12).map((p) => ({
+      x: Number(p.x.toFixed(4)),
+      y: Number(p.y.toFixed(4)),
+      width: Number(p.width.toFixed(4)),
+      height: Number(p.height.toFixed(4))
+    }))`));
+    const currentUrl = seededPage.url();
+    await seededPage.close();
+    if (seededErrors.length) {
+      throw new Error(`seeded run page errors: ${JSON.stringify(seededErrors)}`);
+    }
+    return { sample, currentUrl };
+  }
+
+  const seededA = await captureSeededPlatforms(424242);
+  const seededB = await captureSeededPlatforms(424242);
+  const seededC = await captureSeededPlatforms(424243);
+  if (JSON.stringify(seededA.sample) !== JSON.stringify(seededB.sample)) {
+    throw new Error('same Wall Jumper seed did not reproduce the same platform layout');
+  }
+  if (JSON.stringify(seededA.sample) === JSON.stringify(seededC.sample)) {
+    throw new Error('different Wall Jumper seeds unexpectedly produced the same platform sample');
+  }
+  if (!seededA.currentUrl.includes('seed=424242')) {
+    throw new Error(`seed was not preserved in the run URL: ${seededA.currentUrl}`);
+  }
+
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto(`http://127.0.0.1:${port}/wall-jumper/`, { waitUntil: 'networkidle' });
+  const generatedSeedState = await page.evaluate(() => ({
+    seed: window.__CORNER_NEIGHBOR_GAME_SEED__,
+    url: window.location.href,
+  }));
+  if (!Number.isInteger(generatedSeedState.seed) || generatedSeedState.seed <= 0 || !generatedSeedState.url.includes('seed=')) {
+    throw new Error(`automatic run seed was not exposed/persisted: ${JSON.stringify(generatedSeedState)}`);
+  }
+
   const initial = await page.evaluate(() => ({
     state: eval('gameState'),
     hud: getComputedStyle(document.querySelector('#hud')).display,
