@@ -31,9 +31,10 @@ function serveFile(req, res) {
 const server = createServer(serveFile);
 await new Promise((resolveListen) => server.listen(0, '127.0.0.1', resolveListen));
 const { port } = server.address();
+let browser = null;
 
 try {
-  const browser = await chromium.launch({
+  browser = await chromium.launch({
     headless: true,
     executablePath: process.env.CHROME_PATH || chromium.executablePath(),
   });
@@ -66,7 +67,6 @@ try {
     throw new Error(`mikiri result is incomplete: ${JSON.stringify(result)}`);
   }
   if (errors.length) throw new Error(`mikiri browser errors: ${errors.join(' | ')}`);
-
   await page.close();
 
   const storagePage = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
@@ -88,8 +88,8 @@ try {
   if (storageErrors.length) throw new Error(`blocked storage should not break mikiri: ${storageErrors.join(' | ')}`);
   await storagePage.close();
 
-  await browser.close();
   console.log('mikiri-issen browser test passed');
 } finally {
+  if (browser) await browser.close().catch(() => {});
   await new Promise((resolveClose) => server.close(resolveClose));
 }
