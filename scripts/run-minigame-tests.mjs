@@ -7,6 +7,7 @@ const mode = process.argv[2] || 'all';
 
 const smokeTests = [
     'scripts/minigame-html-quality-smoke-test.mjs',
+    'scripts/minigame-published-coverage-smoke-test.mjs',
     'scripts/blackhole-sweeper-smoke-test.mjs',
     'scripts/girigiri-brake-smoke-test.mjs',
     'scripts/kage-mane-dojo-smoke-test.mjs',
