@@ -110,10 +110,21 @@ try {
   }
 
   const wallKick = await page.evaluate(() => eval(`(() => {
+    // Isolate the wall-kick unit from procedural geometry and the user-input debounce.
+    // Keep one non-overlapping platform because update() relies on a non-empty platform list.
+    platforms.splice(0, platforms.length, {
+      x: 140,
+      y: canvas.height - 40,
+      width: 120,
+      height: 10
+    });
+    lastJumpTime = -Infinity;
+    wallKickLockFrames = 0;
     player.x = 0;
     player.y = 300;
     player.vx = -1;
     player.vy = 2;
+    player.coyoteTimer = 0;
     player.wasGrounded = false;
     player.canDoubleJump = false;
     jump();

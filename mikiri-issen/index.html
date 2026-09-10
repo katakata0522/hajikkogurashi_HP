@@ -1630,6 +1630,7 @@
         nextEnemyLabel: document.getElementById('nextEnemyLabel'),
         titleBestLabel: document.getElementById('titleBestLabel'),
         titleMaxStreakLabel: document.getElementById('titleMaxStreakLabel'),
+        titleTotalWinsLabel: document.getElementById('titleTotalWinsLabel'),
         toast: document.getElementById('toast'),
         newBestBadge: document.getElementById('newBestBadge'),
         rankBadge: document.getElementById('rankBadge'),
@@ -2351,6 +2352,19 @@
         const isOpen = elements.howtoPanel.classList.toggle('is-open');
         if (elements.howtoButton) elements.howtoButton.setAttribute('aria-expanded', String(isOpen));
         elements.howtoPanel.setAttribute('aria-hidden', String(!isOpen));
+      }
+
+      function safeCall(handler) {
+        try {
+          const result = handler();
+          if (result && typeof result.catch === 'function') {
+            result.catch((error) => console.error('Mikiri action failed:', error));
+          }
+          return result;
+        } catch (error) {
+          console.error('Mikiri action failed:', error);
+          return undefined;
+        }
       }
 
       function bindButton(element, handler) {
