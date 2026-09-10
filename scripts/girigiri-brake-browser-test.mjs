@@ -148,10 +148,26 @@ try {
   });
 
   await storagePage.goto(`http://127.0.0.1:${port}/girigiri-brake/`, { waitUntil: 'networkidle' });
-  await storagePage.click('#start-btn');
-  await storagePage.waitForTimeout(100);
   await storagePage.click('#sound-mute-label');
   await storagePage.waitForTimeout(50);
+
+  const titleMuteState = await storagePage.evaluate(() => ({
+    startActive: document.querySelector('#start-screen')?.classList.contains('active') ?? false,
+    muteChecked: document.querySelector('#sound-mute-toggle')?.checked ?? false,
+    muteLabel: document.querySelector('#sound-mute-label')?.textContent?.trim() ?? null,
+  }));
+
+  if (
+    storageErrors.length ||
+    !titleMuteState.startActive ||
+    !titleMuteState.muteChecked ||
+    titleMuteState.muteLabel !== '音 OFF 🔇'
+  ) {
+    throw new Error(`blocked storage mute toggle failed on title: ${JSON.stringify({ titleMuteState, storageErrors })}`);
+  }
+
+  await storagePage.click('#start-btn');
+  await storagePage.waitForTimeout(100);
 
   const storageState = await storagePage.evaluate(() => ({
     startActive: document.querySelector('#start-screen')?.classList.contains('active') ?? false,
