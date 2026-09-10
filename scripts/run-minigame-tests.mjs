@@ -11,6 +11,7 @@ const smokeTests = [
     'scripts/girigiri-brake-smoke-test.mjs',
     'scripts/kage-mane-dojo-smoke-test.mjs',
     'scripts/kanji-slicer-smoke-test.mjs',
+    'scripts/kanji-slicer-data-integrity-smoke-test.mjs',
     'scripts/lumen-mirror-smoke-test.mjs',
     'scripts/mikiri-issen-smoke-test.mjs',
     'scripts/sorting-factory-smoke-test.mjs',
