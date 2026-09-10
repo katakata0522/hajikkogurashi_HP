@@ -28,6 +28,14 @@ function serveFile(req, res) {
   createReadStream(filePath).pipe(res);
 }
 
+async function primaryPointerDown(page, selector) {
+  await page.dispatchEvent(selector, 'pointerdown', {
+    pointerType: 'mouse',
+    button: 0,
+    isPrimary: true,
+  });
+}
+
 const server = createServer(serveFile);
 await new Promise((resolveListen) => server.listen(0, '127.0.0.1', resolveListen));
 const { port } = server.address();
@@ -54,17 +62,31 @@ try {
     throw new Error(`initial Mikiri screen is wrong: ${JSON.stringify({ initial, errors })}`);
   }
 
-  await page.click('#howtoButton');
+  // The app intentionally reacts on pointerdown for low-latency touch input.
+  // Dispatch that event directly so the modal opening itself does not cause Playwright's
+  // synthetic click action to retry against the newly opened overlay.
+  await primaryPointerDown(page, '#howtoButton');
+  await page.waitForTimeout(20);
   const howtoOpen = await page.evaluate(() => ({
     open: document.querySelector('#howtoPanel')?.classList.contains('is-open') === true,
     ariaHidden: document.querySelector('#howtoPanel')?.getAttribute('aria-hidden'),
   }));
-  if (!howtoOpen.open || howtoOpen.ariaHidden !== 'false') {
-    throw new Error(`how-to panel did not open correctly: ${JSON.stringify(howtoOpen)}`);
+  if (!howtoOpen.open || howtoOpen.ariaHidden !== 'false' || errors.length) {
+    throw new Error(`how-to panel did not open correctly: ${JSON.stringify({ howtoOpen, errors })}`);
   }
-  await page.click('#closeHowtoButton');
 
-  await page.click('#startButton');
+  // Escape is the documented keyboard-safe close route while the panel is open.
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(20);
+  const howtoClosed = await page.evaluate(() => ({
+    open: document.querySelector('#howtoPanel')?.classList.contains('is-open') === true,
+    ariaHidden: document.querySelector('#howtoPanel')?.getAttribute('aria-hidden'),
+  }));
+  if (howtoClosed.open || howtoClosed.ariaHidden !== 'true' || errors.length) {
+    throw new Error(`how-to panel did not close correctly: ${JSON.stringify({ howtoClosed, errors })}`);
+  }
+
+  await primaryPointerDown(page, '#startButton');
   await page.waitForTimeout(120);
   const playing = await page.evaluate(() => ({
     titleActive: document.querySelector('#titleScreen')?.classList.contains('is-active') === true,
@@ -79,7 +101,7 @@ try {
   // The first 220ms are intentionally ignored to avoid accidental double-triggering from the start action.
   // After that guard window, an input before the signal must exercise the foul/restart path without crashing.
   await page.waitForTimeout(180);
-  await page.locator('#arena').click({ position: { x: 195, y: 360 } });
+  await primaryPointerDown(page, '#arena');
   await page.waitForTimeout(250);
   const foul = await page.evaluate(() => ({
     badgeVisible: getComputedStyle(document.querySelector('#topleftFoulBadge')).display !== 'none',
@@ -113,7 +135,7 @@ try {
   if (storageErrors.length || !storageState.titleActive) {
     throw new Error(`Mikiri blocked-storage startup failed: ${JSON.stringify({ storageErrors, storageState })}`);
   }
-  await storagePage.click('#startButton');
+  await primaryPointerDown(storagePage, '#startButton');
   await storagePage.waitForTimeout(100);
   const storagePlay = await storagePage.evaluate(() => document.querySelector('#playScreen')?.classList.contains('is-active') === true);
   if (!storagePlay || storageErrors.length) {
