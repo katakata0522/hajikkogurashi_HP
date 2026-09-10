@@ -57,6 +57,10 @@ try {
 
   await page.tap('#start-btn');
   await page.waitForFunction(() => !document.querySelector('#score-hud').classList.contains('hidden'));
+  const initialRuleLabel = (await page.locator('#current-rule-text').textContent())?.trim();
+  if (initialRuleLabel !== '色') {
+    throw new Error(`initial rule label changed after ID separation: ${initialRuleLabel}`);
+  }
   await page.waitForTimeout(1700);
 
   const normalHitTarget = await page.evaluate(() => ({

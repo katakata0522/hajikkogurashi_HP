@@ -86,3 +86,25 @@ assert.match(
 );
 assert.match(script, /drawSizeGuides\(/, 'size rule should draw visual reference guides in the bins');
 assert.match(script, /1\s+3\s+5[\s\S]*2\s+4\s+6/, 'number rule should show example digits, not only odd/even text');
+
+
+assert.match(
+  script,
+  /RULES:\s*\{\s*COLOR:\s*'color',\s*SHAPE:\s*'shape',\s*SIZE:\s*'size',\s*NUMBER:\s*'number'\s*\}/,
+  'rule logic should use stable language-neutral IDs'
+);
+assert.match(
+  script,
+  /RULE_LABELS:\s*\{\s*color:\s*'色',\s*shape:\s*'形',\s*size:\s*'大きさ',\s*number:\s*'数字'\s*\}/,
+  'Japanese display labels should be separate from rule IDs'
+);
+assert.match(
+  script,
+  /const ruleLabel = CONFIG\.RULE_LABELS\[ruleId\] \?\? ruleId;/,
+  'UI should translate rule IDs only at the display boundary'
+);
+assert.doesNotMatch(
+  script,
+  /RULES:\s*\{[^}]*COLOR:\s*'色'/,
+  'display wording must not be used as game-logic identity'
+);
