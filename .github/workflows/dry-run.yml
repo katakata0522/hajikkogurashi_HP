@@ -43,8 +43,17 @@ jobs:
         run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Run minigame smoke tests
         run: npm run test:minigames:smoke
+      - name: Restore Playwright browser cache
+        id: playwright-cache
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - name: Install Playwright system dependencies
+        run: npx playwright install-deps chromium
       - name: Install Playwright Chromium
-        run: npx playwright install --with-deps chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install chromium
       - name: Resolve Playwright Chromium path
         shell: bash
         run: |
