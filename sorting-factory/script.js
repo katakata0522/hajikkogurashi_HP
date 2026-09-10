@@ -8,7 +8,8 @@ const CONFIG = {
     COLORS: { RED: '#ff3366', BLUE: '#00c3ff' },
     SHAPES: { CIRCLE: 0, SQUARE: 1 },
     SIZES: { SMALL: 64, LARGE: 164 },
-    RULES: { COLOR: '色', SHAPE: '形', SIZE: '大きさ', NUMBER: '数字' }
+    RULES: { COLOR: 'color', SHAPE: 'shape', SIZE: 'size', NUMBER: 'number' },
+    RULE_LABELS: { color: '色', shape: '形', size: '大きさ', number: '数字' }
 };
 
 const STATE = { START: 0, PLAYING: 1, GAMEOVER: 2 };
@@ -169,18 +170,20 @@ class UIManager {
         this.updateScore(0);
     }
 
-    setRule(ruleName) {
+    setRule(ruleId) {
         if (!this.currentRuleText || !this.ruleDisplay) return;
-        this.currentRuleText.innerText = ruleName;
+        const ruleLabel = CONFIG.RULE_LABELS[ruleId] ?? ruleId;
+        this.currentRuleText.innerText = ruleLabel;
         this.ruleDisplay.classList.add('changed');
         setTimeout(() => {
             if (this.ruleDisplay) this.ruleDisplay.classList.remove('changed');
         }, 300);
     }
 
-    showRuleAlert(ruleName) {
+    showRuleAlert(ruleId) {
         if (!this.alertText || !this.ruleAlert) return;
-        this.alertText.innerText = ruleName;
+        const ruleLabel = CONFIG.RULE_LABELS[ruleId] ?? ruleId;
+        this.alertText.innerText = ruleLabel;
         this.ruleAlert.classList.remove('hidden');
     }
 
@@ -655,7 +658,7 @@ class GameController {
             this.audio.playSiren();
             this.freezeTimer = 1.0;
             this.ui.showRuleAlert(newRule);
-            this.floatingTexts.push(new FloatingText(CONFIG.LOGICAL_WIDTH / 2, 400, `RULE: ${newRule}`, '#ff3366', 1.8));
+            this.floatingTexts.push(new FloatingText(CONFIG.LOGICAL_WIDTH / 2, 400, `RULE: ${CONFIG.RULE_LABELS[newRule] ?? newRule}`, '#ff3366', 1.8));
         }
         this.currentRule = newRule;
         this.ui.setRule(this.currentRule);
