@@ -1,0 +1,42 @@
+name: Mikiri Split One Shot
+
+on:
+  push:
+    branches:
+      - refactor/mikiri-split-20260911
+    paths:
+      - '.github/workflows/mikiri-split-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          ref: refactor/mikiri-split-20260911
+      - name: Verify exact source blobs
+        shell: bash
+        run: |
+          test "$(git hash-object mikiri-issen/index.html)" = "f9260afd8e89b70fefc8dcf6adad524f32301698"
+          test "$(git hash-object scripts/mikiri-issen-smoke-test.mjs)" = "79fafb05e71b4c3bf172cb4c5a76ef123d5ffa62"
+          test ! -e mikiri-issen/style.css
+          test ! -e mikiri-issen/game.js
+      - name: Extract CSS and game JS without behavior changes
+        run: node scripts/apply-mikiri-split.mjs
+      - name: Run smoke suite before commit
+        run: npm run test:minigames:smoke
+      - name: Remove one-shot helpers and commit result
+        shell: bash
+        run: |
+          rm scripts/apply-mikiri-split.mjs
+          rm .github/workflows/mikiri-split-once.yml
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "refactor: split Mikiri HTML CSS and game JS"
+          git push origin HEAD:refactor/mikiri-split-20260911
