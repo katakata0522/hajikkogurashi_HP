@@ -2354,6 +2354,19 @@
         elements.howtoPanel.setAttribute('aria-hidden', String(!isOpen));
       }
 
+      function safeCall(handler) {
+        try {
+          const result = handler();
+          if (result && typeof result.catch === 'function') {
+            result.catch((error) => console.error('Mikiri action failed:', error));
+          }
+          return result;
+        } catch (error) {
+          console.error('Mikiri action failed:', error);
+          return undefined;
+        }
+      }
+
       function bindButton(element, handler) {
         if (!element) return;
         let lastTrigger = 0;
