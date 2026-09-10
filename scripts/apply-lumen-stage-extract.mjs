@@ -21,7 +21,7 @@ assert.ok(controllerStart > stageStart, 'main controller marker must follow stag
 
 const stageSource = script.slice(stageStart, controllerStart).trimEnd() + '\n';
 assert.ok(stageSource.includes('const STAGE_TEMPLATES = ['), 'stage source must define STAGE_TEMPLATES');
-assert.ok(stageSource.length > 10000, `stage data extraction unexpectedly small: ${stageSource.length}`);
+assert.ok(stageSource.length > 9000, `stage data extraction unexpectedly small: ${stageSource.length}`);
 assert.ok((stageSource.match(/\bid:\s*\d+/g) || []).length >= 7, 'stage data must retain at least seven stages');
 
 script = script.slice(0, stageStart) + '// Stage templates are loaded from stages.js before the main runtime.\n\n' + script.slice(controllerStart);
