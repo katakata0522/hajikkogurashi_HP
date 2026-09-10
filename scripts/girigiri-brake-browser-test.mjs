@@ -150,7 +150,7 @@ try {
   await storagePage.goto(`http://127.0.0.1:${port}/girigiri-brake/`, { waitUntil: 'networkidle' });
   await storagePage.click('#start-btn');
   await storagePage.waitForTimeout(100);
-  await storagePage.locator('#sound-mute-toggle').check();
+  await storagePage.click('#sound-mute-label');
   await storagePage.waitForTimeout(50);
 
   const storageState = await storagePage.evaluate(() => ({
