@@ -10,7 +10,6 @@ permissions:
 
 jobs:
   patch:
-    if: ${{ !contains(github.event.head_commit.message, '[mikiri-safecall-fixed]') }}
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
@@ -41,10 +40,13 @@ jobs:
 
 """
 
-          if text.count(old) != 1:
-              raise SystemExit(f'expected exactly one bindButton target, found {text.count(old)}')
           if 'function safeCall(handler)' in text:
-              raise SystemExit('safeCall already exists')
+              print('safeCall already present; no patch needed')
+              raise SystemExit(0)
+
+          count = text.count(old)
+          if count != 1:
+              raise SystemExit(f'expected exactly one bindButton target, found {count}')
 
           patched = text.replace(old, helper + old, 1)
           if patched.count('function safeCall(handler)') != 1:
@@ -52,9 +54,13 @@ jobs:
 
           path.write_text(patched, encoding='utf-8')
           PY
-      - name: Commit exact repair
+      - name: Commit exact repair when needed
         shell: bash
         run: |
+          if git diff --quiet -- mikiri-issen/index.html; then
+            echo 'No patch required.'
+            exit 0
+          fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add mikiri-issen/index.html
