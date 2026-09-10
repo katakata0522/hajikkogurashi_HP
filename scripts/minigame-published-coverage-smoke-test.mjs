@@ -9,10 +9,28 @@ const runnerPath = resolve(root, 'scripts/run-minigame-tests.mjs');
 const catalog = readFileSync(catalogPath, 'utf8');
 const runner = readFileSync(runnerPath, 'utf8');
 
-const cardPattern = /<div\s+class="game-card"[^>]*>[\s\S]*?<a\s+href="\/([a-z0-9-]+)\/"\s+class="image-link">/g;
-const published = [...catalog.matchAll(cardPattern)].map((match) => match[1]);
+function extractPublishedSlugs(markup) {
+    const imageLinkPattern = /<a\b(?=[^>]*\bclass="[^"]*\bimage-link\b[^"]*")(?=[^>]*\bhref="\/([a-z0-9-]+)\/")[^>]*>/g;
+    return [...markup.matchAll(imageLinkPattern)].map((match) => match[1]);
+}
 
-assert.ok(published.length > 0, 'minigames.html must publish at least one .game-card');
+function countGameCards(markup) {
+    return (markup.match(/\bclass="[^"]*\bgame-card\b[^"]*"/g) || []).length;
+}
+
+const parserFixture = '<div class="featured game-card"><a aria-label="fixture" class="image-link extra" data-kind="game" href="/fixture-game/">';
+assert.deepEqual(extractPublishedSlugs(parserFixture), ['fixture-game'], 'published parser must ignore anchor attribute order and extra classes');
+assert.equal(countGameCards(parserFixture), 1, 'game-card counter must support additional classes');
+
+const published = extractPublishedSlugs(catalog);
+const gameCardCount = countGameCards(catalog);
+
+assert.ok(gameCardCount > 0, 'minigames.html must publish at least one .game-card');
+assert.equal(
+    published.length,
+    gameCardCount,
+    `every game-card must expose exactly one image-link game route (cards=${gameCardCount}, routes=${published.length})`
+);
 assert.equal(new Set(published).size, published.length, 'published minigame slugs must be unique');
 
 for (const slug of published) {
