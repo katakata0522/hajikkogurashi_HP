@@ -9,6 +9,9 @@ on:
       - '.gitignore'
       - '.gitattributes'
 
+permissions:
+  contents: read
+
 concurrency:
   group: static-check-pr-${{ github.ref }}
   cancel-in-progress: true
@@ -19,9 +22,30 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
-      - name: Run smoke tests
+      - name: Run site smoke tests
         run: |
           pwsh -File ./scripts/static-site-smoke-test.ps1
           pwsh -File ./scripts/home-asset-smoke-test.ps1
           pwsh -File ./scripts/structure-smoke-test.ps1
           pwsh -File ./scripts/local-reference-check.ps1
+
+  minigame-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+      - name: Install pinned test dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Run minigame smoke tests
+        run: npm run test:minigames:smoke
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Resolve Playwright Chromium path
+        shell: bash
+        run: echo "CHROME_PATH=$(node -e \"process.stdout.write(require('playwright').chromium.executablePath())\")" >> "$GITHUB_ENV"
+      - name: Run minigame browser tests
+        run: npm run test:minigames:browser
