@@ -25,20 +25,22 @@ jobs:
           path = Path('mikiri-issen/index.html')
           text = path.read_text(encoding='utf-8')
           old = "      function bindButton(element, handler) {\n"
-          helper = """      function safeCall(handler) {
-        try {
-          const result = handler();
-          if (result && typeof result.catch === 'function') {
-            result.catch((error) => console.error('Mikiri action failed:', error));
-          }
-          return result;
-        } catch (error) {
-          console.error('Mikiri action failed:', error);
-          return undefined;
-        }
-      }
-
-"""
+          helper = "\n".join([
+              "      function safeCall(handler) {",
+              "        try {",
+              "          const result = handler();",
+              "          if (result && typeof result.catch === 'function') {",
+              "            result.catch((error) => console.error('Mikiri action failed:', error));",
+              "          }",
+              "          return result;",
+              "        } catch (error) {",
+              "          console.error('Mikiri action failed:', error);",
+              "          return undefined;",
+              "        }",
+              "      }",
+              "",
+              "",
+          ])
 
           if 'function safeCall(handler)' in text:
               print('safeCall already present; no patch needed')
