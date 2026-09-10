@@ -46,6 +46,7 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Resolve Playwright Chromium path
         shell: bash
-        run: echo "CHROME_PATH=$(node -e \"process.stdout.write(require('playwright').chromium.executablePath())\")" >> "$GITHUB_ENV"
+        run: |
+          echo "CHROME_PATH=$(node -e 'process.stdout.write(require("playwright").chromium.executablePath())')" >> "$GITHUB_ENV"
       - name: Run minigame browser tests
         run: npm run test:minigames:browser
