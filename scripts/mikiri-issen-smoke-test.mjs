@@ -6,11 +6,17 @@ import vm from 'node:vm';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const htmlPath = resolve(root, 'mikiri-issen', 'index.html');
+const stylePath = resolve(root, 'mikiri-issen', 'style.css');
+const scriptPath = resolve(root, 'mikiri-issen', 'game.js');
 const html = readFileSync(htmlPath, 'utf8');
-const script = html.match(/<script>\s*([\s\S]*?)\s*<\/script>/)?.[1] ?? '';
+const style = readFileSync(stylePath, 'utf8');
+const script = readFileSync(scriptPath, 'utf8');
 
-assert.ok(script, 'inline script should be present');
-assert.doesNotThrow(() => new vm.Script(script), 'mikiri-issen inline script must be valid JavaScript');
+assert.match(html, /<link rel="stylesheet" href="style\.css">/, 'Mikiri styles should load from style.css');
+assert.match(html, /<script src="game\.js"><\/script>/, 'Mikiri game code should load from game.js');
+assert.doesNotMatch(html, /<style>[\s\S]*?<\/style>/, 'Mikiri should not keep the large inline style block');
+assert.doesNotMatch(html, /<script>[\s\S]*?<\/script>/, 'Mikiri should not keep the large inline game script');
+assert.doesNotThrow(() => new vm.Script(script), 'mikiri-issen game.js must be valid JavaScript');
 
 assert.doesNotMatch(
   html,
@@ -60,13 +66,13 @@ assert.match(
 );
 
 assert.match(
-  html,
+  style,
   /\.result-optional\s*\{\s*display:\s*none;\s*\}/,
   'optional result details should be visually hidden by default'
 );
 
 assert.match(
-  html,
+  style,
   /\.result-card\s*\{[\s\S]*?width:\s*min\(720px,\s*100%\);/,
   'desktop result card should use a compact width'
 );
