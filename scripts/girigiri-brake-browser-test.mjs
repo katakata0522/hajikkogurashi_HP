@@ -28,6 +28,11 @@ function serveFile(req, res) {
   createReadStream(filePath).pipe(res);
 }
 
+const server = createServer(serveFile);
+await new Promise((resolveListen) => server.listen(0, '127.0.0.1', resolveListen));
+const { port } = server.address();
+let browser = null;
+
 async function assertPlayable(page, errors) {
   await page.goto(`http://127.0.0.1:${port}/girigiri-brake/`, { waitUntil: 'networkidle' });
   await page.click('#start-btn');
@@ -69,12 +74,8 @@ async function assertPlayable(page, errors) {
   if (errors.length) throw new Error(`girigiri browser errors: ${errors.join(' | ')}`);
 }
 
-const server = createServer(serveFile);
-await new Promise((resolveListen) => server.listen(0, '127.0.0.1', resolveListen));
-const { port } = server.address();
-
 try {
-  const browser = await chromium.launch({
+  browser = await chromium.launch({
     headless: true,
     executablePath: process.env.CHROME_PATH || chromium.executablePath(),
   });
@@ -104,8 +105,8 @@ try {
   if (storageErrors.length) throw new Error(`blocked storage should not break girigiri: ${storageErrors.join(' | ')}`);
   await storagePage.close();
 
-  await browser.close();
   console.log('girigiri-brake browser test passed');
 } finally {
+  if (browser) await browser.close().catch(() => {});
   await new Promise((resolveClose) => server.close(resolveClose));
 }
