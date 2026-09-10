@@ -1,0 +1,62 @@
+name: Temporary Mikiri SafeCall Fix
+
+on:
+  push:
+    branches:
+      - test/mikiri-refactor-guard-20260910
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: ${{ !contains(github.event.head_commit.message, '[mikiri-safecall-fixed]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          ref: test/mikiri-refactor-guard-20260910
+      - name: Patch only the missing safeCall helper
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('mikiri-issen/index.html')
+          text = path.read_text(encoding='utf-8')
+          old = "      function bindButton(element, handler) {\n"
+          helper = """      function safeCall(handler) {
+        try {
+          const result = handler();
+          if (result && typeof result.catch === 'function') {
+            result.catch((error) => console.error('Mikiri action failed:', error));
+          }
+          return result;
+        } catch (error) {
+          console.error('Mikiri action failed:', error);
+          return undefined;
+        }
+      }
+
+"""
+
+          if text.count(old) != 1:
+              raise SystemExit(f'expected exactly one bindButton target, found {text.count(old)}')
+          if 'function safeCall(handler)' in text:
+              raise SystemExit('safeCall already exists')
+
+          patched = text.replace(old, helper + old, 1)
+          if patched.count('function safeCall(handler)') != 1:
+              raise SystemExit('safeCall insertion invariant failed')
+
+          path.write_text(patched, encoding='utf-8')
+          PY
+      - name: Commit exact repair
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add mikiri-issen/index.html
+          git commit -m 'fix: define Mikiri safe action boundary [mikiri-safecall-fixed]'
+          git push origin HEAD:test/mikiri-refactor-guard-20260910
