@@ -29,14 +29,23 @@ assert.match(script, /markTutorialSeen\(\)/, 'first input should persist tutoria
 
 assert.match(
   script,
-  /function\s+readBestScore\(\)\s*\{[\s\S]*?try\s*\{[\s\S]*?localStorage\.getItem\('blackhole_best_score'\)/,
-  'best-score loading should be isolated behind a safe helper'
+  /const\s+StorageManager\s*=\s*\{[\s\S]*?getItem\(key,[\s\S]*?localStorage\.getItem\(key\)[\s\S]*?catch/,
+  'storage reads should be isolated behind the safe storage manager'
 );
-
 assert.match(
   script,
-  /function\s+writeBestScore\(score\)\s*\{[\s\S]*?try\s*\{[\s\S]*?localStorage\.setItem\('blackhole_best_score',\s*String\(score\)\)/,
-  'best-score saving should be isolated behind a safe helper'
+  /const\s+StorageManager\s*=\s*\{[\s\S]*?setItem\(key,\s*value\)[\s\S]*?localStorage\.setItem\(key,\s*String\(value\)\)[\s\S]*?catch/,
+  'storage writes should be isolated behind the safe storage manager'
+);
+assert.match(
+  script,
+  /function\s+readBestScore\(\)\s*\{[\s\S]*?StorageManager\.getItem\('blackhole_best_score',\s*null\)/,
+  'best-score loading should use the safe storage manager'
+);
+assert.match(
+  script,
+  /function\s+writeBestScore\(score\)\s*\{[\s\S]*?StorageManager\.setItem\('blackhole_best_score',\s*String\(score\)\)/,
+  'best-score saving should use the safe storage manager'
 );
 
 assert.match(
