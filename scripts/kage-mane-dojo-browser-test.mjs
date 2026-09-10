@@ -80,12 +80,11 @@ try {
   const state = await page.evaluate(() => ({
     title: document.title,
     lesson: document.querySelector('#lessonLabel')?.textContent,
-    length: document.querySelector('#lengthLabel')?.textContent,
+    progress: document.querySelector('#progressLabel')?.textContent,
     enabledButtons: [...document.querySelectorAll('.dir-button')].filter((button) => !button.disabled).length,
-    cardImage: document.querySelector('img[src="/assets/images/kage_mane_dojo_thumbnail.svg"]') !== null,
   }));
 
-  if (state.title !== '影まね道場 | Corner Neighbor' || state.lesson !== '1' || state.length !== '3' || state.enabledButtons !== 4) {
+  if (state.title !== '影まね道場 | Corner Neighbor' || state.lesson !== '1' || state.progress !== '0/3' || state.enabledButtons !== 4) {
     throw new Error(`unexpected game state: ${JSON.stringify(state)}`);
   }
 
