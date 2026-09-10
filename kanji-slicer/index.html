@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Version: v1.7.0 -->
+<!-- Version: v1.7.1 -->
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
@@ -14,19 +14,19 @@
     <meta property="og:title" content="漢字スライサー・マージ | Corner Neighbor">
     <meta property="og:description" content="落ちてくる漢字をスワイプで斬り、部首を合体させてお題をクリアするスマホ対応の物理スライスアクションです。">
     <meta property="og:url" content="https://hajikkoroom.xsrv.jp/kanji-slicer/">
-    <meta property="og:image" content="https://hajikkoroom.xsrv.jp//assets/images/kanji_slicer_thumbnail.png">
+    <meta property="og:image" content="https://hajikkoroom.xsrv.jp/assets/images/kanji_slicer_thumbnail.png">
     <meta property="og:image:alt" content="漢字スライサー・マージ | Corner Neighbor">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="漢字スライサー・マージ | Corner Neighbor">
     <meta name="twitter:description" content="落ちてくる漢字をスワイプで斬り、部首を合体させてお題をクリアするスマホ対応の物理スライスアクションです。">
-    <meta name="twitter:image" content="https://hajikkoroom.xsrv.jp//assets/images/kanji_slicer_thumbnail.png">
+    <meta name="twitter:image" content="https://hajikkoroom.xsrv.jp/assets/images/kanji_slicer_thumbnail.png">
     <!-- /SEO: hajikkogurashi-minigame -->
-    
+
     <!-- Google Fonts for premium Japanese typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kaisei+Decol:wght@500;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
-    
+
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -44,49 +44,7 @@
                     <span id="best-score">0</span>
                 </div>
             </div>
-            
-            <div class="header-center">
-                <div class="mission-box">
-    <meta name="description" content="落ちてくる漢字をスワイプで斬り、部首を合体させてお題をクリアするスマホ対応の物理スライスアクションです。">
-    <meta name="robots" content="index,follow">
-    <link rel="canonical" href="https://hajikkoroom.xsrv.jp/kanji-slicer/">
-    <meta property="og:locale" content="ja_JP">
-    <meta property="og:type" content="website">
-    <meta property="og:site_name" content="Corner Neighbor">
-    <meta property="og:title" content="漢字スライサー・マージ | Corner Neighbor">
-    <meta property="og:description" content="落ちてくる漢字をスワイプで斬り、部首を合体させてお題をクリアするスマホ対応の物理スライスアクションです。">
-    <meta property="og:url" content="https://hajikkoroom.xsrv.jp/kanji-slicer/">
-    <meta property="og:image" content="https://hajikkoroom.xsrv.jp//assets/images/kanji_slicer_thumbnail.png">
-    <meta property="og:image:alt" content="漢字スライサー・マージ | Corner Neighbor">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="漢字スライサー・マージ | Corner Neighbor">
-    <meta name="twitter:description" content="落ちてくる漢字をスワイプで斬り、部首を合体させてお題をクリアするスマホ対応の物理スライスアクションです。">
-    <meta name="twitter:image" content="https://hajikkoroom.xsrv.jp//assets/images/kanji_slicer_thumbnail.png">
-    <!-- /SEO: hajikkogurashi-minigame -->
-    
-    <!-- Google Fonts for premium Japanese typography -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Kaisei+Decol:wght@500;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div id="game-container">
-        <!-- Header: Score and Targets -->
-        <header id="game-header">
-            <div class="header-left">
-                <a href="/minigames.html" class="btn-back">← 戻る</a>
-                <div class="score-box">
-                    <span class="label">得点</span>
-                    <span id="score">0</span>
-                </div>
-                <div class="best-box">
-                    <span class="label">最高記録</span>
-                    <span id="best-score">0</span>
-                </div>
-            </div>
-            
+
             <div class="header-center">
                 <div class="mission-box">
                     <span class="mission-title">現在のお題</span>
@@ -94,7 +52,7 @@
                     <span id="mission-reading" class="mission-desc">合体させてお題をクリアせよ！</span>
                 </div>
             </div>
-            
+
             <div class="header-right">
                 <div class="next-box">
                     <span class="label">次の一手</span>
@@ -157,6 +115,8 @@
         </div>
     </div>
 
+    <!-- Existing physics constants are calibrated for one 60 Hz simulation step. -->
+    <script src="fixed-step-raf.js"></script>
     <script src="game.js"></script>
 </body>
 </html>
