@@ -38,6 +38,7 @@ else {
     process.exit(2);
 }
 
+const timeoutMs = mode === 'smoke' ? 30000 : 60000;
 let failed = false;
 for (const relativePath of selectedTests) {
     const absolutePath = resolve(root, relativePath);
@@ -51,11 +52,14 @@ for (const relativePath of selectedTests) {
     const result = spawnSync(process.execPath, [absolutePath], {
         cwd: root,
         env: process.env,
-        stdio: 'inherit'
+        stdio: 'inherit',
+        timeout: timeoutMs,
+        killSignal: 'SIGKILL'
     });
 
     if (result.error) {
-        console.error(`[error] ${relativePath}: ${result.error.message}`);
+        const suffix = result.error.code === 'ETIMEDOUT' ? ` (timeout ${timeoutMs}ms)` : '';
+        console.error(`[error] ${relativePath}: ${result.error.message}${suffix}`);
         failed = true;
     } else if (result.status !== 0) {
         console.error(`[failed] ${relativePath}: exit ${result.status}`);
