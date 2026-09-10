@@ -6,6 +6,7 @@ const root = resolve(import.meta.dirname, '..');
 const mode = process.argv[2] || 'all';
 
 const smokeTests = [
+    'scripts/minigame-html-quality-smoke-test.mjs',
     'scripts/blackhole-sweeper-smoke-test.mjs',
     'scripts/girigiri-brake-smoke-test.mjs',
     'scripts/kage-mane-dojo-smoke-test.mjs',
@@ -22,6 +23,7 @@ const browserTests = [
     'scripts/kage-mane-dojo-browser-test.mjs',
     'scripts/kanji-slicer-browser-test.mjs',
     'scripts/lumen-mirror-browser-test.mjs',
+    'scripts/lumen-storage-browser-test.mjs',
     'scripts/sorting-factory-browser-test.mjs',
     'scripts/stealth-slacker-browser-test.mjs',
     'scripts/wall-jumper-browser-test.mjs'
