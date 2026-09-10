@@ -24,6 +24,7 @@ const browserTests = [
     'scripts/kanji-slicer-browser-test.mjs',
     'scripts/lumen-mirror-browser-test.mjs',
     'scripts/lumen-storage-browser-test.mjs',
+    'scripts/mikiri-issen-browser-test.mjs',
     'scripts/sorting-factory-browser-test.mjs',
     'scripts/stealth-slacker-browser-test.mjs',
     'scripts/wall-jumper-browser-test.mjs'
