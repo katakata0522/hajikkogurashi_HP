@@ -9,14 +9,13 @@ on:
       - '**.md'
       - '.gitignore'
       - '.gitattributes'
-      - '.github/**'
 
 permissions:
   contents: read
 
 concurrency:
   group: deploy-hajikkogurashi-hp-main
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy:
@@ -30,43 +29,64 @@ jobs:
           fetch-depth: 2
           persist-credentials: false
 
-      - name: Detect kanji-slicer changes
+      - name: Detect deployment impact
         id: changes
         shell: bash
         run: |
           set -euo pipefail
+
+          deploy_needed="true"
           kanji_slicer_changed="false"
+          changed_files=""
 
           if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
-            echo "Manual dispatch: deploying kanji-slicer as a fail-safe."
+            echo "Manual dispatch: production deploy is required as a fail-safe."
             kanji_slicer_changed="true"
-            changed_files=""
           else
-            changed_files="$(jq -r '[.commits[]? | (.added[]?, .modified[]?, .removed[]?)] | unique[]?' "$GITHUB_EVENT_PATH" 2>/dev/null || true)"
-            if [ -z "$changed_files" ] && git rev-parse "$GITHUB_SHA^1" >/dev/null 2>&1; then
-              changed_files="$(git diff --name-only "$GITHUB_SHA^1" "$GITHUB_SHA" 2>/dev/null || true)"
+            before_sha="$(jq -r '.before // empty' "$GITHUB_EVENT_PATH" 2>/dev/null || true)"
+            zero_sha="0000000000000000000000000000000000000000"
+
+            if [[ "$before_sha" =~ ^[0-9a-f]{40}$ ]] && [ "$before_sha" != "$zero_sha" ] && git cat-file -e "$before_sha^{commit}" 2>/dev/null; then
+              changed_files="$(git diff --name-only --no-renames "$before_sha" "$GITHUB_SHA" 2>/dev/null || true)"
+
+              if [ -n "$changed_files" ]; then
+                echo "Changed files:"
+                printf '%s\n' "$changed_files"
+
+                if impact_json="$(printf '%s\n' "$changed_files" | node .github/scripts/detect-deploy-impact.cjs)"; then
+                  printf '%s\n' "$impact_json" | jq .
+                  deploy_needed="$(jq -r '.deployNeeded' <<< "$impact_json")"
+                  if [ "$deploy_needed" != "true" ] && [ "$deploy_needed" != "false" ]; then
+                    echo "::warning::Deploy impact classifier returned an invalid value; deploying as a fail-safe."
+                    deploy_needed="true"
+                  fi
+                else
+                  echo "::warning::Deploy impact classifier failed; deploying as a fail-safe."
+                  deploy_needed="true"
+                fi
+
+                if printf '%s\n' "$changed_files" | grep -qE '^kanji-slicer/'; then
+                  kanji_slicer_changed="true"
+                fi
+              else
+                echo "::warning::No changed files were detected; deploying as a fail-safe."
+              fi
+            else
+              echo "::warning::Push base commit is unavailable in the checkout; deploying as a fail-safe."
             fi
           fi
 
-          echo "Changed files:"
-          if [ -n "$changed_files" ]; then
-            echo "$changed_files"
-          elif [ "$GITHUB_EVENT_NAME" != "workflow_dispatch" ]; then
-            echo "(none detected)"
-            echo "::warning::No changed files were detected for a push; deploying kanji-slicer as a fail-safe."
-            kanji_slicer_changed="true"
-          else
-            echo "(manual dispatch)"
-          fi
-
-          if [ -n "$changed_files" ] && echo "$changed_files" | grep -qE '^kanji-slicer/'; then
-            kanji_slicer_changed="true"
-          fi
-
+          echo "deploy_needed=$deploy_needed" >> "$GITHUB_OUTPUT"
           echo "kanji_slicer_changed=$kanji_slicer_changed" >> "$GITHUB_OUTPUT"
+          echo "Production deploy: $deploy_needed"
           echo "Kanji slicer extra deploy: $kanji_slicer_changed"
 
+      - name: Skip production deployment
+        if: steps.changes.outputs.deploy_needed != 'true'
+        run: echo "No public artifact or deploy-time build input changed; Xserver deployment is skipped."
+
       - name: Validate static site
+        if: steps.changes.outputs.deploy_needed == 'true'
         run: |
           pwsh -File ./scripts/static-site-smoke-test.ps1
           pwsh -File ./scripts/home-asset-smoke-test.ps1
@@ -75,21 +95,28 @@ jobs:
           pwsh -File ./scripts/deploy-public-artifact-smoke-test.ps1
           pwsh -File ./scripts/viewport-accessibility-smoke-test.ps1
           pwsh -File ./scripts/deploy-security-smoke-test.ps1
+          pwsh -File ./scripts/deploy-impact-smoke-test.ps1
           bash -n ./scripts/verify-deployment-marker.sh
+          bash -n ./.github/scripts/rsync-transient-retry.sh
+          node --check ./.github/scripts/detect-deploy-impact.cjs
           node --check ./scripts/verify-live-minigame-routes.mjs
 
       - name: Setup Node.js for minigame regression tests
+        if: steps.changes.outputs.deploy_needed == 'true'
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '22'
 
       - name: Install locked minigame test dependencies
+        if: steps.changes.outputs.deploy_needed == 'true'
         run: npm ci --ignore-scripts --no-audit --no-fund
 
       - name: Validate minigame logic before deploy
+        if: steps.changes.outputs.deploy_needed == 'true'
         run: npm run test:minigames:smoke
 
       - name: Resolve runner Chrome for predeploy regression
+        if: steps.changes.outputs.deploy_needed == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -102,16 +129,20 @@ jobs:
           echo "CHROME_PATH=$chrome_path" >> "$GITHUB_ENV"
 
       - name: Validate minigame browser behavior before deploy
+        if: steps.changes.outputs.deploy_needed == 'true'
         run: npm run test:minigames:browser
 
       - name: Generate sitemap.xml
+        if: steps.changes.outputs.deploy_needed == 'true'
         run: pwsh -File ./scripts/generate-sitemap.ps1
 
       - name: Stamp deployment version
+        if: steps.changes.outputs.deploy_needed == 'true'
         shell: bash
         run: printf '%s\n' "$GITHUB_SHA" > deploy-version.txt
 
       - name: Prepare public deployment artifact
+        if: steps.changes.outputs.deploy_needed == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -152,6 +183,7 @@ jobs:
           echo "PUBLIC_DIR=$PUBLIC_DIR" >> "$GITHUB_ENV"
 
       - name: Setup SSH
+        if: steps.changes.outputs.deploy_needed == 'true'
         env:
           XS_SSH_KEY: ${{ secrets.XS_SSH_KEY }}
           XS_HOST: ${{ secrets.XS_HOST }}
@@ -182,6 +214,7 @@ jobs:
           unset XS_SSH_KEY
 
       - name: Deploy to Xserver via Rsync
+        if: steps.changes.outputs.deploy_needed == 'true'
         env:
           XS_HOST: ${{ secrets.XS_HOST }}
           XS_PORT: ${{ secrets.XS_PORT }}
@@ -189,78 +222,44 @@ jobs:
           XS_REMOTE_DIR: ${{ secrets.XS_REMOTE_DIR }}
         run: |
           set -euo pipefail
+          source .github/scripts/rsync-transient-retry.sh
           ssh_opts="-p 10022 -i $HOME/.ssh/id_deploy -o BatchMode=yes -o IdentitiesOnly=yes -o PubkeyAuthentication=yes -o PreferredAuthentications=publickey -o PasswordAuthentication=no -o KbdInteractiveAuthentication=no -o ForwardAgent=no -o ClearAllForwardings=yes -o RequestTTY=no -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o LogLevel=ERROR -o ConnectTimeout=15 -o ServerAliveInterval=15 -o ServerAliveCountMax=2"
-
-          rsync_with_retry() {
-            local attempt status
-            for attempt in 1 2 3; do
-              if "$@"; then
-                return 0
-              else
-                status=$?
-              fi
-
-              if [ "$attempt" -eq 3 ]; then
-                return "$status"
-              fi
-
-              echo "::warning::rsync attempt $attempt failed with status $status; retrying..."
-              sleep $((attempt * 15))
-            done
-          }
 
           # Only the prepared public artifact is mirrored to the web root.
           # Preserve server-managed metadata that is intentionally outside the artifact.
-          rsync_with_retry rsync -avz --delete \
+          run_with_transient_retry "Main site rsync" 3 rsync -avz --delete \
             --exclude ".git/" \
             --exclude ".well-known/" \
             -e "ssh $ssh_opts" \
             "$PUBLIC_DIR/" $XS_USER@$XS_HOST:$XS_REMOTE_DIR
 
       - name: Deploy kanji-slicer to playpoint-sim.com
-        if: steps.changes.outputs.kanji_slicer_changed == 'true'
+        if: steps.changes.outputs.deploy_needed == 'true' && steps.changes.outputs.kanji_slicer_changed == 'true'
         env:
           XS_HOST: ${{ secrets.XS_HOST }}
           XS_PORT: ${{ secrets.XS_PORT }}
           XS_USER: ${{ secrets.XS_USER }}
         run: |
           set -euo pipefail
+          source .github/scripts/rsync-transient-retry.sh
           ssh_opts="-p 10022 -i $HOME/.ssh/id_deploy -o BatchMode=yes -o IdentitiesOnly=yes -o PubkeyAuthentication=yes -o PreferredAuthentications=publickey -o PasswordAuthentication=no -o KbdInteractiveAuthentication=no -o ForwardAgent=no -o ClearAllForwardings=yes -o RequestTTY=no -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o LogLevel=ERROR -o ConnectTimeout=15 -o ServerAliveInterval=15 -o ServerAliveCountMax=2"
 
-          rsync_with_retry() {
-            local attempt status
-            for attempt in 1 2 3; do
-              if "$@"; then
-                return 0
-              else
-                status=$?
-              fi
-
-              if [ "$attempt" -eq 3 ]; then
-                return "$status"
-              fi
-
-              echo "::warning::kanji-slicer rsync attempt $attempt failed with status $status; retrying..."
-              sleep $((attempt * 15))
-            done
-          }
-
-          rsync_with_retry rsync -avz --delete \
+          run_with_transient_retry "kanji-slicer rsync" 3 rsync -avz --delete \
             -e "ssh $ssh_opts" \
             ./kanji-slicer/ $XS_USER@$XS_HOST:/home/hajikkoroom/playpoint-sim.com/public_html/kanji-slicer/
 
       - name: Verify deployed commit
-        if: success()
+        if: success() && steps.changes.outputs.deploy_needed == 'true'
         shell: bash
         run: bash ./scripts/verify-deployment-marker.sh "https://hajikkoroom.xsrv.jp/deploy-version.txt" "$GITHUB_SHA"
 
       - name: Verify live minigame routes
-        if: success()
+        if: success() && steps.changes.outputs.deploy_needed == 'true'
         shell: bash
         run: node ./scripts/verify-live-minigame-routes.mjs "https://hajikkoroom.xsrv.jp/" "$GITHUB_SHA"
 
       - name: SEO deploy confirmation
-        if: success()
+        if: success() && steps.changes.outputs.deploy_needed == 'true'
         run: |
           echo "✅ デプロイ完了 + sitemap.xml 更新済み + commit marker / live minigame routes 検証済み"
           echo ""
@@ -270,6 +269,6 @@ jobs:
           echo "  - 参考: https://hajikkoroom.xsrv.jp/sitemap.xml"
 
       - name: Remove SSH material
-        if: always()
+        if: always() && steps.changes.outputs.deploy_needed == 'true'
         shell: bash
         run: rm -f ~/.ssh/id_deploy ~/.ssh/known_hosts
