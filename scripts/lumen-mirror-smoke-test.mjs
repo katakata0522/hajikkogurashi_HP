@@ -9,7 +9,8 @@ const html = readFileSync(resolve(root, 'lumen-mirror', 'index.html'), 'utf8');
 const core = readFileSync(resolve(root, 'lumen-mirror', 'core.js'), 'utf8');
 const stages = readFileSync(resolve(root, 'lumen-mirror', 'stages.js'), 'utf8');
 const runtime = readFileSync(resolve(root, 'lumen-mirror', 'script.js'), 'utf8');
-const script = `${core}\n${runtime}`;
+const editor = readFileSync(resolve(root, 'lumen-mirror', 'editor.js'), 'utf8');
+const script = `${core}\n${runtime}\n${editor}`;
 const style = readFileSync(resolve(root, 'lumen-mirror', 'style.css'), 'utf8');
 
 // ---- HTML Structure ----
@@ -25,13 +26,15 @@ assert.match(html, /id="stat-best"/, 'best rank stat display should exist');
 assert.match(html, /href="style\.css\?v=20260526-editor-review-fix"/, 'editor stylesheet should be cache-busted');
 assert.match(html, /src="core\.js\?v=20260911-core-split"/, 'core runtime dependencies should be loaded explicitly');
 assert.match(html, /src="stages\.js\?v=20260911-stage-data"/, 'stage data should be loaded explicitly');
-assert.match(html, /src="script\.js\?v=20260911-runtime-split"/, 'split runtime script should use a fresh cache key');
-assert.doesNotMatch(html, /script\.js\?v=20260526-editor-review-fix/, 'pre-split runtime cache key must not remain');
+assert.match(html, /src="script\.js\?v=20260911-editor-split"/, 'GameController runtime should use the editor-split cache key');
+assert.match(html, /src="editor\.js\?v=20260911-editor-split"/, 'Stage Editor extension should be loaded explicitly');
+assert.doesNotMatch(html, /script\.js\?v=(?:20260526-editor-review-fix|20260911-runtime-split)/, 'pre-editor-split runtime cache keys must not remain');
 const storageIndex = html.indexOf('src="/assets/js/minigame-storage-guard.js');
 const coreIndex = html.indexOf('src="core.js');
 const stagesIndex = html.indexOf('src="stages.js');
 const runtimeIndex = html.indexOf('src="script.js');
-assert.ok(storageIndex >= 0 && coreIndex > storageIndex && stagesIndex > coreIndex && runtimeIndex > stagesIndex, 'storage guard, core, stages, and main runtime must load in dependency order');
+const editorIndex = html.indexOf('src="editor.js');
+assert.ok(storageIndex >= 0 && coreIndex > storageIndex && stagesIndex > coreIndex && runtimeIndex > stagesIndex && editorIndex > runtimeIndex, 'storage guard, core, stages, GameController, and editor extension must load in dependency order');
 assert.match(html, /id="editor-undo-btn"/, 'editor should expose undo control');
 assert.match(html, /id="prop-title"/, 'editor should expose a stage title input');
 assert.match(html, /id="editor-share-status"/, 'editor should explain export readiness');
@@ -43,6 +46,7 @@ assert.doesNotMatch(html, /maximum-scale=1\.0|user-scalable=no/, 'mobile users s
 assert.doesNotThrow(() => new vm.Script(core), 'core.js must be valid JS');
 assert.doesNotThrow(() => new vm.Script(stages), 'stages.js must be valid JS');
 assert.doesNotThrow(() => new vm.Script(runtime), 'script.js must be valid JS');
+assert.doesNotThrow(() => new vm.Script(editor), 'editor.js must be valid JS');
 
 // ---- Core Classes ----
 assert.match(script, /class\s+AudioManager/, 'AudioManager should be implemented');
@@ -60,6 +64,16 @@ assert.match(core, /class\s+Mirror/, 'Mirror should live in core.js');
 assert.match(runtime, /class\s+GameController/, 'GameController should stay in script.js');
 assert.doesNotMatch(runtime, /class\s+(?:ScoreManager|AudioManager|Mirror|Emitter|Prism|BlackHole|Wormhole|ParticleSystem)\b/, 'core classes should not drift back into script.js');
 assert.doesNotMatch(core, /class\s+GameController/, 'GameController should not drift into core.js');
+assert.match(editor, /class\s+LumenEditorMethods/, 'Stage Editor methods should live in editor.js');
+assert.match(editor, /Object\.defineProperty\(\s*GameController\.prototype/, 'editor extension should attach method descriptors to GameController');
+assert.match(editor, /_sanitizeStageTitle\(title\)/, 'editor extension should own stage title sanitation');
+assert.match(editor, /initEditorEvents\(\)/, 'editor extension should own editor event bindings');
+assert.match(editor, /serializeStage\(\)/, 'editor extension should own stage serialization');
+assert.match(editor, /normalizeCustomStageData\(data\)/, 'editor extension should own stage schema normalization');
+assert.doesNotMatch(runtime, /STAGE EDITOR \(CREATIVE MODE\) METHODS/, 'editor method block should not drift back into script.js');
+assert.doesNotMatch(runtime, /\n\s{4}_sanitizeStageTitle\(title\)\s*\{/, 'editor method definitions should not drift back into GameController');
+assert.match(runtime, /this\.initEditorEvents\(\);/, 'GameController constructor should retain the extension hook');
+assert.match(runtime, /new GameController\(\)/, 'runtime should keep the existing GameController instance identity');
 
 // ---- Core Logic ----
 assert.match(script, /getIntersection\(/, 'Line intersection algorithm should exist');
