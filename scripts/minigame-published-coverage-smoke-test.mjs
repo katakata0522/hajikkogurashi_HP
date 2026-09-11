@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { countGameCards, extractPublishedSlugs } from './test-support/published-minigames.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 const catalogPath = resolve(root, 'minigames.html');
@@ -8,27 +9,6 @@ const runnerPath = resolve(root, 'scripts/run-minigame-tests.mjs');
 
 const catalog = readFileSync(catalogPath, 'utf8');
 const runner = readFileSync(runnerPath, 'utf8');
-
-function tagHasClass(tag, className) {
-    const classValue = tag.match(/\bclass="([^"]*)"/)?.[1] ?? '';
-    return classValue.split(/\s+/).filter(Boolean).includes(className);
-}
-
-function extractPublishedSlugs(markup) {
-    const anchors = markup.match(/<a\b[^>]*>/g) || [];
-    const slugs = [];
-    for (const anchor of anchors) {
-        if (!tagHasClass(anchor, 'image-link')) continue;
-        const slug = anchor.match(/\bhref="\/([a-z0-9-]+)\/"/)?.[1];
-        if (slug) slugs.push(slug);
-    }
-    return slugs;
-}
-
-function countGameCards(markup) {
-    const divs = markup.match(/<div\b[^>]*>/g) || [];
-    return divs.filter((tag) => tagHasClass(tag, 'game-card')).length;
-}
 
 const parserFixture = [
     '<div class="featured game-card">',
