@@ -32,6 +32,9 @@ jobs:
           pwsh -File ./scripts/deploy-public-artifact-smoke-test.ps1
           pwsh -File ./scripts/viewport-accessibility-smoke-test.ps1
           pwsh -File ./scripts/deploy-security-smoke-test.ps1
+          pwsh -File ./scripts/deploy-impact-smoke-test.ps1
+          bash -n ./.github/scripts/rsync-transient-retry.sh
+          node --check ./.github/scripts/detect-deploy-impact.cjs
 
   minigame-check:
     runs-on: ubuntu-latest
