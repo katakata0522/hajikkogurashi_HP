@@ -9,10 +9,44 @@ const runnerPath = resolve(root, 'scripts/run-minigame-tests.mjs');
 const catalog = readFileSync(catalogPath, 'utf8');
 const runner = readFileSync(runnerPath, 'utf8');
 
-const cardPattern = /<div\s+class="game-card"[^>]*>[\s\S]*?<a\s+href="\/([a-z0-9-]+)\/"\s+class="image-link">/g;
-const published = [...catalog.matchAll(cardPattern)].map((match) => match[1]);
+function tagHasClass(tag, className) {
+    const classValue = tag.match(/\bclass="([^"]*)"/)?.[1] ?? '';
+    return classValue.split(/\s+/).filter(Boolean).includes(className);
+}
 
-assert.ok(published.length > 0, 'minigames.html must publish at least one .game-card');
+function extractPublishedSlugs(markup) {
+    const anchors = markup.match(/<a\b[^>]*>/g) || [];
+    const slugs = [];
+    for (const anchor of anchors) {
+        if (!tagHasClass(anchor, 'image-link')) continue;
+        const slug = anchor.match(/\bhref="\/([a-z0-9-]+)\/"/)?.[1];
+        if (slug) slugs.push(slug);
+    }
+    return slugs;
+}
+
+function countGameCards(markup) {
+    const divs = markup.match(/<div\b[^>]*>/g) || [];
+    return divs.filter((tag) => tagHasClass(tag, 'game-card')).length;
+}
+
+const parserFixture = [
+    '<div class="featured game-card">',
+    '<div class="game-card-image"></div>',
+    '<a aria-label="fixture" class="image-link extra" data-kind="game" href="/fixture-game/">',
+].join('');
+assert.deepEqual(extractPublishedSlugs(parserFixture), ['fixture-game'], 'published parser must ignore anchor attribute order and extra classes');
+assert.equal(countGameCards(parserFixture), 1, 'game-card counter must match the exact class token, not prefixed classes');
+
+const published = extractPublishedSlugs(catalog);
+const gameCardCount = countGameCards(catalog);
+
+assert.ok(gameCardCount > 0, 'minigames.html must publish at least one .game-card');
+assert.equal(
+    published.length,
+    gameCardCount,
+    `every game-card must expose exactly one image-link game route (cards=${gameCardCount}, routes=${published.length})`
+);
 assert.equal(new Set(published).size, published.length, 'published minigame slugs must be unique');
 
 for (const slug of published) {
