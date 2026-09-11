@@ -287,18 +287,21 @@ class SoundSynth {
     init() {
         if (this.ctx) return;
         const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (AudioContext) {
-            this.ctx = new AudioContext();
-            
-            // Create dynamics compressor to prevent clipping spikes (audio overloading)
-            this.compressor = this.ctx.createDynamicsCompressor();
-            this.compressor.threshold.setValueAtTime(-15, this.ctx.currentTime);
-            this.compressor.knee.setValueAtTime(30, this.ctx.currentTime);
-            this.compressor.ratio.setValueAtTime(12, this.ctx.currentTime);
-            this.compressor.attack.setValueAtTime(0.003, this.ctx.currentTime);
-            this.compressor.release.setValueAtTime(0.25, this.ctx.currentTime);
-            
-            this.compressor.connect(this.ctx.destination);
+        if (!AudioContext) return;
+        try {
+            const ctx = new AudioContext();
+            const compressor = ctx.createDynamicsCompressor();
+            compressor.threshold.setValueAtTime(-15, ctx.currentTime);
+            compressor.knee.setValueAtTime(30, ctx.currentTime);
+            compressor.ratio.setValueAtTime(12, ctx.currentTime);
+            compressor.attack.setValueAtTime(0.003, ctx.currentTime);
+            compressor.release.setValueAtTime(0.25, ctx.currentTime);
+            compressor.connect(ctx.destination);
+            this.ctx = ctx;
+            this.compressor = compressor;
+        } catch (_) {
+            this.ctx = null;
+            this.compressor = null;
         }
     }
 

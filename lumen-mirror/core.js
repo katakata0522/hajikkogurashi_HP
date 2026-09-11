@@ -111,8 +111,16 @@ class AudioManager {
         if (this.ctx) return;
         const AC = window.AudioContext || window.webkitAudioContext;
         if (!AC) return;
-        this.ctx = new AC();
-        this._setupIceSynth();
+        try {
+            this.ctx = new AC();
+            this._setupIceSynth();
+        } catch (_) {
+            this.ctx = null;
+            this.iceGain = null;
+            this.iceFilter = null;
+            this.icePanner = null;
+            this.isPlayingIce = false;
+        }
     }
 
     _setupIceSynth() {

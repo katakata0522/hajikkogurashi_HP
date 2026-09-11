@@ -65,14 +65,29 @@ class AudioManager {
         if (!this.audioCtx) {
             const AudioContextClass = window.AudioContext || window.webkitAudioContext;
             if (AudioContextClass) {
-                this.audioCtx = new AudioContextClass();
-                this.masterGain = this.audioCtx.createGain();
-                this.masterGain.gain.setValueAtTime(0.3, this.audioCtx.currentTime);
-                this.masterGain.connect(this.audioCtx.destination);
+                try {
+                    const audioCtx = new AudioContextClass();
+                    const masterGain = audioCtx.createGain();
+                    masterGain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    masterGain.connect(audioCtx.destination);
+                    this.audioCtx = audioCtx;
+                    this.masterGain = masterGain;
+                } catch (_) {
+                    this.audioCtx = null;
+                    this.masterGain = null;
+                    return;
+                }
             }
         }
         if (this.audioCtx && this.audioCtx.state === 'suspended') {
-            this.audioCtx.resume();
+            try {
+                const resumeResult = this.audioCtx.resume();
+                if (resumeResult && typeof resumeResult.catch === 'function') {
+                    resumeResult.catch(() => {});
+                }
+            } catch (_) {
+                // Audio is optional; keep the game playable when resume is blocked.
+            }
         }
     }
 
