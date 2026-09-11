@@ -13,6 +13,9 @@ $requiredDeploySnippets = @(
     '--exclude "_codex_screens/"',
     '--exclude "package.json"',
     '--exclude "package-lock.json"',
+    '--exclude "assets/css/custom.dev.css"',
+    '--exclude "assets/css/components/"',
+    '--exclude "assets/js/ie/"',
     '--exclude "*.py"',
     '"$PUBLIC_DIR/" $XS_USER@$XS_HOST:$XS_REMOTE_DIR'
 )
@@ -55,6 +58,17 @@ if ($LASTEXITCODE -ne 0) {
 }
 if ($trackedScreens.Count -gt 0) {
     throw "_codex_screens must not be tracked in the active tree (found $($trackedScreens.Count) paths)"
+}
+
+$sourceOnlyFiles = @(
+    'assets/css/custom.dev.css',
+    'assets/css/components/global-ui.css',
+    'assets/js/ie/html5shiv.js'
+)
+foreach ($relativePath in $sourceOnlyFiles) {
+    if (-not (Test-Path (Join-Path $root $relativePath))) {
+        throw "Expected source-only asset is missing from repository: $relativePath"
+    }
 }
 
 Write-Host 'deploy public artifact smoke test: ok'
