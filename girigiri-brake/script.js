@@ -52,11 +52,22 @@ class AudioManager {
     init() {
         if (this.isMuted) return;
         if (!this.audioCtx) {
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            this.audioCtx = new AudioContext();
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContextClass) return;
+            try {
+                this.audioCtx = new AudioContextClass();
+            } catch (_) {
+                this.audioCtx = null;
+                return;
+            }
         }
         if (this.audioCtx.state === 'suspended') {
-            this.audioCtx.resume();
+            try {
+                const resumeResult = this.audioCtx.resume();
+                if (resumeResult && typeof resumeResult.catch === 'function') {
+                    resumeResult.catch(() => {});
+                }
+            } catch (_) {}
         }
     }
 
