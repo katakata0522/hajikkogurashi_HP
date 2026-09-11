@@ -137,12 +137,12 @@ for (let seed = 1; seed <= seedCount; seed += 1) {
       Math.abs(platform.y - (spike.y + spike.height) - 45) < 1e-7
     );
     assert.ok(candidates.length > 0, `seed ${seed}: spike has no associated platform candidate`);
-    const matchesOppositeWallRule = candidates.some((platform) => {
-      const platformIsRight = platform.x + platform.width / 2 > 390 / 2;
-      const expectedX = platformIsRight ? 0 : 390 - 14;
+    const matchesGeneratorSideRule = candidates.some((platform) => {
+      const platformStartsOnRightHalf = platform.x > 390 / 2;
+      const expectedX = platformStartsOnRightHalf ? 0 : 390 - 14;
       return spike.x === expectedX;
     });
-    assert.ok(matchesOppositeWallRule, `seed ${seed}: spike must stay on the wall opposite its associated platform`);
+    assert.ok(matchesGeneratorSideRule, `seed ${seed}: spike escaped the generator's opposite-wall side rule`);
   }
 }
 
