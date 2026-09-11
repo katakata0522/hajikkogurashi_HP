@@ -1,0 +1,37 @@
+name: One-shot viewport accessibility transform
+
+on:
+  push:
+    branches:
+      - fix/viewport-zoom-accessibility-20260911
+    paths:
+      - 'scripts/apply-viewport-accessibility.mjs'
+      - '.github/workflows/viewport-accessibility-transform.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  transform:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          ref: fix/viewport-zoom-accessibility-20260911
+          fetch-depth: 0
+      - name: Remove viewport zoom restrictions
+        run: node scripts/apply-viewport-accessibility.mjs
+      - name: Remove one-shot transformer
+        run: rm scripts/apply-viewport-accessibility.mjs .github/workflows/viewport-accessibility-transform.yml
+      - name: Validate and commit exact transformation
+        run: |
+          set -euo pipefail
+          pwsh -File ./scripts/viewport-accessibility-smoke-test.ps1
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git diff --cached --check
+          git diff --cached --quiet && { echo 'No transformation changes found'; exit 1; }
+          git commit -m 'fix: allow user zoom across site viewports'
+          git push origin HEAD:fix/viewport-zoom-accessibility-20260911
