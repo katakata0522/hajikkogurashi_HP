@@ -19,6 +19,7 @@ const smokeTests = [
     'scripts/mikiri-issen-smoke-test.mjs',
     'scripts/sorting-factory-smoke-test.mjs',
     'scripts/stealth-slacker-smoke-test.mjs',
+    'scripts/wall-jumper-generation-safety-smoke-test.mjs',
     'scripts/wall-jumper-smoke-test.mjs'
 ];
 
