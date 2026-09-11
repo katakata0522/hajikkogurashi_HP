@@ -189,6 +189,37 @@ try {
   }
 
   await storagePage.close();
+
+  const noAudioPage = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  const noAudioErrors = [];
+  noAudioPage.on('pageerror', (error) => noAudioErrors.push(error.message));
+  await noAudioPage.addInitScript(() => {
+    Object.defineProperties(window, {
+      AudioContext: { value: undefined, configurable: true },
+      webkitAudioContext: { value: undefined, configurable: true },
+    });
+  });
+
+  await noAudioPage.goto(`http://127.0.0.1:${port}/girigiri-brake/`, { waitUntil: 'networkidle' });
+  await noAudioPage.click('#start-btn');
+  await noAudioPage.waitForTimeout(100);
+
+  const noAudioState = await noAudioPage.evaluate(() => ({
+    startActive: document.querySelector('#start-screen')?.classList.contains('active') ?? false,
+    hudActive: document.querySelector('#hud')?.classList.contains('active') ?? false,
+    status: document.querySelector('#status-text')?.textContent?.trim() ?? null,
+  }));
+
+  if (
+    noAudioErrors.length ||
+    noAudioState.startActive ||
+    !noAudioState.hudActive ||
+    noAudioState.status !== 'TAP TO GO!'
+  ) {
+    throw new Error(`missing Web Audio API should not break Girigiri: ${JSON.stringify({ noAudioState, noAudioErrors })}`);
+  }
+
+  await noAudioPage.close();
   console.log('girigiri-brake browser test passed');
 } finally {
   if (browser) await browser.close();
