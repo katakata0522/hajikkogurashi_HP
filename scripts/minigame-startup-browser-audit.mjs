@@ -2,6 +2,7 @@ import { createReadStream, existsSync, readFileSync, statSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { createRequire } from 'node:module';
 import { extname, resolve, sep } from 'node:path';
+import { extractPublishedSlugs } from './test-support/published-minigames.mjs';
 
 const require = createRequire(import.meta.url);
 const { chromium } = require('playwright');
@@ -20,22 +21,6 @@ const mimeTypes = new Map([
   ['.jpg', 'image/jpeg'],
   ['.jpeg', 'image/jpeg'],
 ]);
-
-function tagHasClass(tag, className) {
-  const classValue = tag.match(/\bclass="([^"]*)"/)?.[1] ?? '';
-  return classValue.split(/\s+/).filter(Boolean).includes(className);
-}
-
-function extractPublishedSlugs(markup) {
-  const anchors = markup.match(/<a\b[^>]*>/g) || [];
-  const slugs = [];
-  for (const anchor of anchors) {
-    if (!tagHasClass(anchor, 'image-link')) continue;
-    const slug = anchor.match(/\bhref="\/([a-z0-9-]+)\/"/)?.[1];
-    if (slug) slugs.push(slug);
-  }
-  return [...new Set(slugs)];
-}
 
 function resolveRequestPath(requestUrl) {
   const url = new URL(requestUrl ?? '/', 'http://127.0.0.1');
