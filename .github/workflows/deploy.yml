@@ -178,7 +178,10 @@ jobs:
           }
 
           # Only the prepared public artifact is mirrored to the web root.
+          # Preserve server-managed metadata that is intentionally outside the artifact.
           rsync_with_retry rsync -avz --delete \
+            --exclude ".git/" \
+            --exclude ".well-known/" \
             -e "ssh $ssh_opts" \
             "$PUBLIC_DIR/" $XS_USER@$XS_HOST:$XS_REMOTE_DIR
 
