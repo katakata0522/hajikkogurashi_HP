@@ -10,6 +10,7 @@ const smokeTests = [
     'scripts/minigame-published-coverage-smoke-test.mjs',
     'scripts/minigame-storage-guard-smoke-test.mjs',
     'scripts/window-open-security-smoke-test.mjs',
+    'scripts/minigame-dangerous-api-smoke-test.mjs',
     'scripts/blackhole-sweeper-smoke-test.mjs',
     'scripts/girigiri-brake-smoke-test.mjs',
     'scripts/kage-mane-dojo-smoke-test.mjs',
