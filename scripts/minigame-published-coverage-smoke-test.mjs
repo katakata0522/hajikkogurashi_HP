@@ -9,18 +9,34 @@ const runnerPath = resolve(root, 'scripts/run-minigame-tests.mjs');
 const catalog = readFileSync(catalogPath, 'utf8');
 const runner = readFileSync(runnerPath, 'utf8');
 
+function tagHasClass(tag, className) {
+    const classValue = tag.match(/\bclass="([^"]*)"/)?.[1] ?? '';
+    return classValue.split(/\s+/).filter(Boolean).includes(className);
+}
+
 function extractPublishedSlugs(markup) {
-    const imageLinkPattern = /<a\b(?=[^>]*\bclass="[^"]*\bimage-link\b[^"]*")(?=[^>]*\bhref="\/([a-z0-9-]+)\/")[^>]*>/g;
-    return [...markup.matchAll(imageLinkPattern)].map((match) => match[1]);
+    const anchors = markup.match(/<a\b[^>]*>/g) || [];
+    const slugs = [];
+    for (const anchor of anchors) {
+        if (!tagHasClass(anchor, 'image-link')) continue;
+        const slug = anchor.match(/\bhref="\/([a-z0-9-]+)\/"/)?.[1];
+        if (slug) slugs.push(slug);
+    }
+    return slugs;
 }
 
 function countGameCards(markup) {
-    return (markup.match(/\bclass="[^"]*\bgame-card\b[^"]*"/g) || []).length;
+    const divs = markup.match(/<div\b[^>]*>/g) || [];
+    return divs.filter((tag) => tagHasClass(tag, 'game-card')).length;
 }
 
-const parserFixture = '<div class="featured game-card"><a aria-label="fixture" class="image-link extra" data-kind="game" href="/fixture-game/">';
+const parserFixture = [
+    '<div class="featured game-card">',
+    '<div class="game-card-image"></div>',
+    '<a aria-label="fixture" class="image-link extra" data-kind="game" href="/fixture-game/">',
+].join('');
 assert.deepEqual(extractPublishedSlugs(parserFixture), ['fixture-game'], 'published parser must ignore anchor attribute order and extra classes');
-assert.equal(countGameCards(parserFixture), 1, 'game-card counter must support additional classes');
+assert.equal(countGameCards(parserFixture), 1, 'game-card counter must match the exact class token, not prefixed classes');
 
 const published = extractPublishedSlugs(catalog);
 const gameCardCount = countGameCards(catalog);
