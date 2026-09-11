@@ -62,13 +62,27 @@ jobs:
           pwsh -File ./scripts/structure-smoke-test.ps1
           pwsh -File ./scripts/local-reference-check.ps1
 
-      - name: Setup Node.js for minigame smoke tests
+      - name: Setup Node.js for minigame regression tests
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '22'
 
+      - name: Install locked minigame test dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
       - name: Validate minigame logic before deploy
         run: npm run test:minigames:smoke
+
+      - name: Install Playwright Chromium for predeploy regression
+        run: npx playwright install --with-deps chromium
+
+      - name: Resolve Playwright Chromium path
+        shell: bash
+        run: |
+          echo "CHROME_PATH=$(node -e 'process.stdout.write(require("playwright").chromium.executablePath())')" >> "$GITHUB_ENV"
+
+      - name: Validate minigame browser behavior before deploy
+        run: npm run test:minigames:browser
 
       - name: Generate sitemap.xml
         run: pwsh -File ./scripts/generate-sitemap.ps1
