@@ -8,6 +8,7 @@ const { chromium } = require('playwright');
 const root = resolve(import.meta.dirname, '..');
 const site = await startStaticSiteServer(root);
 
+// Exercise the real first-interaction audio path; a passing test must actually call the injected constructor.
 const cases = [
   { slug: 'blackhole-sweeper', selector: '#start-btn' },
   { slug: 'girigiri-brake', selector: '#start-btn' },
