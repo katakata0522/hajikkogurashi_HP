@@ -87,7 +87,8 @@
 
 						setTimeout(function () {
 							if (link.getAttribute('target') === '_blank') {
-								window.open(href);
+								var opened = window.open(href, '_blank', 'noopener,noreferrer');
+								if (opened) opened.opener = null;
 							} else {
 								location.href = href;
 							}
