@@ -216,11 +216,19 @@ class AudioManager {
         if (this.initialized) return;
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         if (!AudioContext) return;
-        this.ctx = new AudioContext();
-        this.masterGain = this.ctx.createGain();
-        this.masterGain.gain.value = 0.3;
-        this.masterGain.connect(this.ctx.destination);
-        this.initialized = true;
+        try {
+            const ctx = new AudioContext();
+            const masterGain = ctx.createGain();
+            masterGain.gain.value = 0.3;
+            masterGain.connect(ctx.destination);
+            this.ctx = ctx;
+            this.masterGain = masterGain;
+            this.initialized = true;
+        } catch (_) {
+            this.ctx = null;
+            this.masterGain = null;
+            this.initialized = false;
+        }
     }
 
     playTone(freq, type, duration, vol = 1.0) {
