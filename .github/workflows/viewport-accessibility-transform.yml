@@ -6,6 +6,7 @@ on:
       - fix/viewport-zoom-accessibility-20260911
     paths:
       - 'scripts/apply-viewport-accessibility.mjs'
+      - 'scripts/viewport-accessibility-smoke-test.ps1'
       - '.github/workflows/viewport-accessibility-transform.yml'
 
 permissions:
