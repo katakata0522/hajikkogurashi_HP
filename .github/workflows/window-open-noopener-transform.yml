@@ -1,0 +1,36 @@
+name: One-shot window.open noopener transform
+
+on:
+  push:
+    branches:
+      - fix/window-open-noopener-20260911
+    paths:
+      - 'scripts/apply-window-open-noopener.mjs'
+      - '.github/workflows/window-open-noopener-transform.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  transform:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          ref: fix/window-open-noopener-20260911
+          fetch-depth: 0
+      - name: Apply noopener transformation
+        run: node scripts/apply-window-open-noopener.mjs
+      - name: Remove one-shot transformer
+        run: rm scripts/apply-window-open-noopener.mjs .github/workflows/window-open-noopener-transform.yml
+      - name: Commit exact transformation
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git diff --cached --check
+          git diff --cached --quiet && { echo 'No transformation changes found'; exit 1; }
+          git commit -m 'fix: isolate external windows from opener context'
+          git push origin HEAD:fix/window-open-noopener-20260911
