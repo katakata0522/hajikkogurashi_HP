@@ -1,0 +1,40 @@
+name: LUMEN Runtime Cache Key One Shot
+
+on:
+  push:
+    branches:
+      - fix/lumen-runtime-cache-key-20260911
+    paths:
+      - '.github/workflows/lumen-runtime-cache-key-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          ref: fix/lumen-runtime-cache-key-20260911
+      - name: Verify exact source blobs
+        shell: bash
+        run: |
+          test "$(git hash-object lumen-mirror/index.html)" = "664ed126b84215725e9a35878e91bab0dbb444a1"
+          test "$(git hash-object scripts/lumen-mirror-smoke-test.mjs)" = "0bbba12856c641125c961dae8ceef7496f9fae18"
+      - name: Update split-runtime cache key
+        run: node scripts/apply-lumen-runtime-cache-key.mjs
+      - name: Run smoke suite before commit
+        run: npm run test:minigames:smoke
+      - name: Remove one-shot helpers and commit result
+        shell: bash
+        run: |
+          rm scripts/apply-lumen-runtime-cache-key.mjs
+          rm .github/workflows/lumen-runtime-cache-key-once.yml
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix: refresh LUMEN runtime cache key after split"
+          git push origin HEAD:fix/lumen-runtime-cache-key-20260911
