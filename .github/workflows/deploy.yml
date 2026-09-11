@@ -74,6 +74,7 @@ jobs:
           pwsh -File ./scripts/deploy-public-artifact-smoke-test.ps1
           pwsh -File ./scripts/viewport-accessibility-smoke-test.ps1
           bash -n ./scripts/verify-deployment-marker.sh
+          node --check ./scripts/verify-live-minigame-routes.mjs
 
       - name: Setup Node.js for minigame regression tests
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -234,10 +235,15 @@ jobs:
         shell: bash
         run: bash ./scripts/verify-deployment-marker.sh "https://hajikkoroom.xsrv.jp/deploy-version.txt" "$GITHUB_SHA"
 
+      - name: Verify live minigame routes
+        if: success()
+        shell: bash
+        run: node ./scripts/verify-live-minigame-routes.mjs "https://hajikkoroom.xsrv.jp/" "$GITHUB_SHA"
+
       - name: SEO deploy confirmation
         if: success()
         run: |
-          echo "✅ デプロイ完了 + sitemap.xml 更新済み + commit marker 検証済み"
+          echo "✅ デプロイ完了 + sitemap.xml 更新済み + commit marker / live minigame routes 検証済み"
           echo ""
           echo "📋 SEO 状況:"
           echo "  - sitemap.xml がサーバーに配置されました"
