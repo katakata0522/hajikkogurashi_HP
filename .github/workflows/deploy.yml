@@ -71,6 +71,7 @@ jobs:
           pwsh -File ./scripts/home-asset-smoke-test.ps1
           pwsh -File ./scripts/structure-smoke-test.ps1
           pwsh -File ./scripts/local-reference-check.ps1
+          bash -n ./scripts/verify-deployment-marker.sh
 
       - name: Setup Node.js for minigame regression tests
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -96,6 +97,10 @@ jobs:
 
       - name: Generate sitemap.xml
         run: pwsh -File ./scripts/generate-sitemap.ps1
+
+      - name: Stamp deployment version
+        shell: bash
+        run: printf '%s\n' "$GITHUB_SHA" > deploy-version.txt
 
       - name: Setup SSH
         env:
@@ -181,10 +186,15 @@ jobs:
             -e "ssh $ssh_opts" \
             ./kanji-slicer/ $XS_USER@$XS_HOST:/home/hajikkoroom/playpoint-sim.com/public_html/kanji-slicer/
 
+      - name: Verify deployed commit
+        if: success()
+        shell: bash
+        run: bash ./scripts/verify-deployment-marker.sh "https://hajikkoroom.xsrv.jp/deploy-version.txt" "$GITHUB_SHA"
+
       - name: SEO deploy confirmation
         if: success()
         run: |
-          echo "✅ デプロイ完了 + sitemap.xml 更新済み"
+          echo "✅ デプロイ完了 + sitemap.xml 更新済み + commit marker 検証済み"
           echo ""
           echo "📋 SEO 状況:"
           echo "  - sitemap.xml がサーバーに配置されました"
