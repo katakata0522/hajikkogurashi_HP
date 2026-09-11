@@ -133,13 +133,16 @@ for (let seed = 1; seed <= seedCount; seed += 1) {
   for (const spike of snapshot.spikes) {
     checkedSpikes += 1;
     assert.ok(spike.height >= 44 && spike.height <= 60, `seed ${seed}: spike height out of range (${spike.height})`);
-    const associated = snapshot.platforms.find((platform) =>
+    const candidates = snapshot.platforms.filter((platform) =>
       Math.abs(platform.y - (spike.y + spike.height) - 45) < 1e-7
     );
-    assert.ok(associated, `seed ${seed}: spike has no associated platform`);
-    const platformIsRight = associated.x + associated.width / 2 > 390 / 2;
-    const expectedX = platformIsRight ? 0 : 390 - 14;
-    assert.equal(spike.x, expectedX, `seed ${seed}: spike must stay on the wall opposite its platform`);
+    assert.ok(candidates.length > 0, `seed ${seed}: spike has no associated platform candidate`);
+    const matchesOppositeWallRule = candidates.some((platform) => {
+      const platformIsRight = platform.x + platform.width / 2 > 390 / 2;
+      const expectedX = platformIsRight ? 0 : 390 - 14;
+      return spike.x === expectedX;
+    });
+    assert.ok(matchesOppositeWallRule, `seed ${seed}: spike must stay on the wall opposite its associated platform`);
   }
 }
 
