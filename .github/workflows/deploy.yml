@@ -26,6 +26,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          fetch-depth: 2
 
       - name: Detect kanji-slicer changes
         id: changes
@@ -34,18 +36,26 @@ jobs:
           set -euo pipefail
           kanji_slicer_changed="false"
 
-          changed_files="$(jq -r '[.commits[]? | (.added[]?, .modified[]?, .removed[]?)] | unique[]?' "$GITHUB_EVENT_PATH" 2>/dev/null || true)"
-          if [ -z "$changed_files" ]; then
-            changed_files="$(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA" 2>/dev/null || true)"
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            echo "Manual dispatch: deploying kanji-slicer as a fail-safe."
+            kanji_slicer_changed="true"
+            changed_files=""
+          else
+            changed_files="$(jq -r '[.commits[]? | (.added[]?, .modified[]?, .removed[]?)] | unique[]?' "$GITHUB_EVENT_PATH" 2>/dev/null || true)"
+            if [ -z "$changed_files" ] && git rev-parse "$GITHUB_SHA^1" >/dev/null 2>&1; then
+              changed_files="$(git diff --name-only "$GITHUB_SHA^1" "$GITHUB_SHA" 2>/dev/null || true)"
+            fi
           fi
 
           echo "Changed files:"
           if [ -n "$changed_files" ]; then
             echo "$changed_files"
-          else
+          elif [ "$GITHUB_EVENT_NAME" != "workflow_dispatch" ]; then
             echo "(none detected)"
-            echo "No changed files were detected, so deploying kanji-slicer as a fail-safe."
+            echo "::warning::No changed files were detected for a push; deploying kanji-slicer as a fail-safe."
             kanji_slicer_changed="true"
+          else
+            echo "(manual dispatch)"
           fi
 
           if [ -n "$changed_files" ] && echo "$changed_files" | grep -qE '^kanji-slicer/'; then
