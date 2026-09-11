@@ -1,14 +1,24 @@
 $ErrorActionPreference = 'Stop'
 
 $workflowPath = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../.github/workflows/deploy.yml'))
-if (-not (Test-Path -LiteralPath $workflowPath)) {
-    throw "Deploy workflow not found: $workflowPath"
+$retryHelperPath = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../.github/scripts/rsync-transient-retry.sh'))
+
+foreach ($path in @($workflowPath, $retryHelperPath)) {
+    if (-not (Test-Path -LiteralPath $path)) {
+        throw "Deploy security input not found: $path"
+    }
 }
 
 $content = Get-Content -LiteralPath $workflowPath -Raw
+$retryHelper = Get-Content -LiteralPath $retryHelperPath -Raw
 
 $requiredOnce = @(
     'persist-credentials: false',
+    'cancel-in-progress: false',
+    '- name: Detect deployment impact',
+    'deploy_needed=',
+    '- name: Skip production deployment',
+    'No public artifact or deploy-time build input changed; Xserver deployment is skipped.',
     'umask 077',
     'chmod 700 ~/.ssh',
     'chmod 600 ~/.ssh/id_deploy',
@@ -27,6 +37,7 @@ foreach ($pattern in $requiredOnce) {
 }
 
 $requiredForBothRsyncSteps = @(
+    'source .github/scripts/rsync-transient-retry.sh',
     'BatchMode=yes',
     'IdentitiesOnly=yes',
     'PubkeyAuthentication=yes',
@@ -48,16 +59,34 @@ foreach ($pattern in $requiredForBothRsyncSteps) {
     }
 }
 
-$forbidden = @(
-    'StrictHostKeyChecking=accept-new',
-    'ssh-keyscan',
-    '~/.ssh/id_rsa'
-)
+if (([regex]::Matches($content, [regex]::Escape("if: steps.changes.outputs.deploy_needed == 'true'"))).Count -lt 6) {
+    throw 'Production steps are not consistently gated by deploy impact.'
+}
 
-foreach ($pattern in $forbidden) {
-    if ($content.Contains($pattern)) {
-        throw "Forbidden legacy SSH behavior remains: $pattern"
+$retryRequirements = @(
+    '10|12|30|35|255',
+    'is_transient_network_exit_code',
+    'run_with_transient_retry',
+    'non-transient exit code',
+    'retrying in ${delay}s'
+)
+foreach ($pattern in $retryRequirements) {
+    if (-not $retryHelper.Contains($pattern)) {
+        throw "Transient-only retry guard is missing: $pattern"
     }
 }
 
-Write-Host 'Deploy SSH security smoke test passed.'
+$forbidden = @(
+    'StrictHostKeyChecking=accept-new',
+    'ssh-keyscan',
+    '~/.ssh/id_rsa',
+    'rsync attempt $attempt failed with status $status; retrying'
+)
+
+foreach ($pattern in $forbidden) {
+    if ($content.Contains($pattern) -or $retryHelper.Contains($pattern)) {
+        throw "Forbidden legacy deploy behavior remains: $pattern"
+    }
+}
+
+Write-Host 'Deploy SSH/security/impact smoke test passed.'
