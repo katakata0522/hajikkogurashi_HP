@@ -1,62 +1,21 @@
-import { createReadStream, existsSync, readFileSync, statSync } from 'node:fs';
-import { createServer } from 'node:http';
+import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { extname, resolve, sep } from 'node:path';
+import { resolve } from 'node:path';
 import { extractPublishedSlugs } from './test-support/published-minigames.mjs';
+import { startStaticSiteServer } from './test-support/static-site-server.mjs';
 
 const require = createRequire(import.meta.url);
 const { chromium } = require('playwright');
 
 const root = resolve(import.meta.dirname, '..');
 const catalog = readFileSync(resolve(root, 'minigames.html'), 'utf8');
-const mimeTypes = new Map([
-  ['.html', 'text/html; charset=utf-8'],
-  ['.js', 'text/javascript; charset=utf-8'],
-  ['.mjs', 'text/javascript; charset=utf-8'],
-  ['.css', 'text/css; charset=utf-8'],
-  ['.json', 'application/json; charset=utf-8'],
-  ['.svg', 'image/svg+xml'],
-  ['.png', 'image/png'],
-  ['.webp', 'image/webp'],
-  ['.jpg', 'image/jpeg'],
-  ['.jpeg', 'image/jpeg'],
-]);
-
-function resolveRequestPath(requestUrl) {
-  const url = new URL(requestUrl ?? '/', 'http://127.0.0.1');
-  let pathname = decodeURIComponent(url.pathname);
-  if (pathname.endsWith('/')) pathname += 'index.html';
-  const filePath = resolve(root, `.${pathname}`);
-  const rootPrefix = `${root}${sep}`;
-  if (filePath !== root && !filePath.startsWith(rootPrefix)) return null;
-  return filePath;
-}
-
-const server = createServer((req, res) => {
-  const filePath = resolveRequestPath(req.url);
-  if (!filePath || !existsSync(filePath) || !statSync(filePath).isFile()) {
-    res.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' });
-    res.end('Not found');
-    return;
-  }
-
-  res.writeHead(200, {
-    'content-type': mimeTypes.get(extname(filePath).toLowerCase()) ?? 'application/octet-stream',
-    'cache-control': 'no-store',
-  });
-  createReadStream(filePath).pipe(res);
-});
-
-await new Promise((resolveListen) => server.listen(0, '127.0.0.1', resolveListen));
-const address = server.address();
-if (!address || typeof address === 'string') throw new Error('failed to resolve startup-audit server port');
-const origin = `http://127.0.0.1:${address.port}`;
 const published = extractPublishedSlugs(catalog);
 
 if (!published.length) {
   throw new Error('no published minigames found in minigames.html');
 }
 
+const site = await startStaticSiteServer(root);
 let browser;
 try {
   browser = await chromium.launch({
@@ -82,19 +41,19 @@ try {
     });
     page.on('response', (response) => {
       const url = response.url();
-      if (url.startsWith(origin) && response.status() >= 400) {
-        localHttpErrors.push(`${response.status()} ${url.slice(origin.length)}`);
+      if (url.startsWith(site.origin) && response.status() >= 400) {
+        localHttpErrors.push(`${response.status()} ${url.slice(site.origin.length)}`);
       }
     });
     page.on('requestfailed', (request) => {
       const url = request.url();
-      if (url.startsWith(origin)) {
-        requestFailures.push(`${request.failure()?.errorText ?? 'request failed'} ${url.slice(origin.length)}`);
+      if (url.startsWith(site.origin)) {
+        requestFailures.push(`${request.failure()?.errorText ?? 'request failed'} ${url.slice(site.origin.length)}`);
       }
     });
 
     try {
-      const response = await page.goto(`${origin}/${slug}/`, {
+      const response = await page.goto(`${site.origin}/${slug}/`, {
         waitUntil: 'domcontentloaded',
         timeout: 20_000,
       });
@@ -131,5 +90,5 @@ try {
   console.log(`published minigame startup browser audit passed (${published.length} games: ${published.join(', ')})`);
 } finally {
   if (browser) await browser.close();
-  await new Promise((resolveClose) => server.close(resolveClose));
+  await site.close();
 }
