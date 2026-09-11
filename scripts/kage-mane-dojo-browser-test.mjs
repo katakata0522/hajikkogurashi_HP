@@ -45,7 +45,7 @@ await new Promise((resolveListen) => server.listen(0, host, resolveListen));
 const port = server.address().port;
 async function launchBrowser() {
   const attempts = [
-    () => chromium.launch({ headless: true }),
+    () => chromium.launch({ headless: true, executablePath: process.env.CHROME_PATH || undefined }),
     () => chromium.launch({ channel: 'chrome', headless: true }),
     () => chromium.launch({ channel: 'msedge', headless: true }),
   ];
@@ -73,6 +73,22 @@ try {
   });
 
   await page.goto(`http://${host}:${port}/kage-mane-dojo/`, { waitUntil: 'networkidle' });
+
+  await page.focus('.diff-btn[data-diff="hard"]');
+  await page.keyboard.press('Tab');
+  const focusState = await page.evaluate(() => {
+    const active = document.activeElement;
+    const style = active ? getComputedStyle(active) : null;
+    return {
+      id: active?.id || null,
+      outlineStyle: style?.outlineStyle || null,
+      outlineWidth: style?.outlineWidth || null,
+    };
+  });
+  if (focusState.id !== 'startButton' || focusState.outlineStyle === 'none' || focusState.outlineWidth === '0px') {
+    throw new Error(`keyboard focus indicator is not visible: ${JSON.stringify(focusState)}`);
+  }
+
   await page.click('#startButton');
   await page.waitForSelector('#playScreen.active');
   await page.waitForFunction(() => document.querySelector('#statusText')?.textContent === '同じ順に打つ', null, { timeout: 6000 });
