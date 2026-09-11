@@ -6,6 +6,7 @@ import vm from 'node:vm';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const html = readFileSync(resolve(root, 'lumen-mirror', 'index.html'), 'utf8');
+const stages = readFileSync(resolve(root, 'lumen-mirror', 'stages.js'), 'utf8');
 const script = readFileSync(resolve(root, 'lumen-mirror', 'script.js'), 'utf8');
 const style = readFileSync(resolve(root, 'lumen-mirror', 'style.css'), 'utf8');
 
@@ -20,7 +21,11 @@ assert.match(html, /id="select-btn"/, 'stage select button in overlay should exi
 assert.match(html, /id="best-banner"/, 'best rank banner should exist');
 assert.match(html, /id="stat-best"/, 'best rank stat display should exist');
 assert.match(html, /href="style\.css\?v=20260526-editor-review-fix"/, 'editor stylesheet should be cache-busted');
+assert.match(html, /src="stages\.js\?v=20260911-stage-data"/, 'stage data should be loaded explicitly');
 assert.match(html, /src="script\.js\?v=20260526-editor-review-fix"/, 'editor script should be cache-busted');
+const stagesIndex = html.indexOf('src="stages.js');
+const runtimeIndex = html.indexOf('src="script.js');
+assert.ok(stagesIndex >= 0 && runtimeIndex > stagesIndex, 'stage data must load before the main runtime');
 assert.match(html, /id="editor-undo-btn"/, 'editor should expose undo control');
 assert.match(html, /id="prop-title"/, 'editor should expose a stage title input');
 assert.match(html, /id="editor-share-status"/, 'editor should explain export readiness');
@@ -29,6 +34,7 @@ assert.match(html, /id="editor-modal"[^>]*role="dialog"/, 'share modal should id
 assert.doesNotMatch(html, /maximum-scale=1\.0|user-scalable=no/, 'mobile users should be allowed to zoom the editor');
 
 // ---- JavaScript Syntax ----
+assert.doesNotThrow(() => new vm.Script(stages), 'stages.js must be valid JS');
 assert.doesNotThrow(() => new vm.Script(script), 'script must be valid JS');
 
 // ---- Core Classes ----
@@ -45,7 +51,9 @@ assert.match(script, /class\s+GameController/, 'GameController should be impleme
 // ---- Core Logic ----
 assert.match(script, /getIntersection\(/, 'Line intersection algorithm should exist');
 assert.match(script, /localStorage/, 'localStorage usage should exist for score persistence');
-assert.match(script, /STAGE_TEMPLATES/, 'Stage database should be defined');
+assert.match(stages, /const\s+STAGE_TEMPLATES\s*=\s*\[/, 'Stage database should be defined in stages.js');
+assert.doesNotMatch(script, /const\s+STAGE_TEMPLATES\s*=\s*\[/, 'Stage database should not drift back into script.js');
+assert.match(script, /STAGE_TEMPLATES/, 'Main runtime should consume the external stage database');
 assert.match(script, /STAGE_SELECT/, 'STAGE_SELECT state should exist');
 assert.match(script, /playPortalWarp/, 'Portal warp sound should be implemented');
 assert.match(script, /playClearChord/, 'Clear chord sound should be implemented');
@@ -55,7 +63,7 @@ assert.match(script, /GRAVITY FIELD/, 'Gravity field label should be drawn');
 assert.match(script, /StereoPanner|createStereoPanner/, '3D stereo panning should be present');
 
 // ---- 7 Stages defined ----
-const stageMatches = (script.match(/id:\s*\d+/g) || []).length;
+const stageMatches = (stages.match(/id:\s*\d+/g) || []).length;
 assert.ok(stageMatches >= 7, `Expected at least 7 stages, found ${stageMatches}`);
 
 // ---- CSS Design Tokens ----
