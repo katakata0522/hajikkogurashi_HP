@@ -71,6 +71,7 @@ jobs:
           pwsh -File ./scripts/home-asset-smoke-test.ps1
           pwsh -File ./scripts/structure-smoke-test.ps1
           pwsh -File ./scripts/local-reference-check.ps1
+          pwsh -File ./scripts/deploy-public-artifact-smoke-test.ps1
           bash -n ./scripts/verify-deployment-marker.sh
 
       - name: Setup Node.js for minigame regression tests
@@ -101,6 +102,39 @@ jobs:
       - name: Stamp deployment version
         shell: bash
         run: printf '%s\n' "$GITHUB_SHA" > deploy-version.txt
+
+      - name: Prepare public deployment artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          PUBLIC_DIR="$RUNNER_TEMP/corner-neighbor-public"
+          rm -rf "$PUBLIC_DIR"
+          mkdir -p "$PUBLIC_DIR"
+
+          rsync -a \
+            --exclude ".git/" \
+            --exclude ".github/" \
+            --exclude "scripts/" \
+            --exclude "node_modules/" \
+            --exclude "_codex_screens/" \
+            --exclude "package.json" \
+            --exclude "package-lock.json" \
+            --exclude "playwright-report/" \
+            --exclude "test-results/" \
+            --exclude "*.py" \
+            --exclude "*.md" \
+            --exclude ".gitignore" \
+            --exclude ".gitattributes" \
+            --exclude ".gitlab-ci.yml" \
+            ./ "$PUBLIC_DIR/"
+
+          test -f "$PUBLIC_DIR/index.html"
+          test -f "$PUBLIC_DIR/deploy-version.txt"
+          test ! -e "$PUBLIC_DIR/node_modules"
+          test ! -e "$PUBLIC_DIR/_codex_screens"
+          test ! -e "$PUBLIC_DIR/package.json"
+          test ! -e "$PUBLIC_DIR/package-lock.json"
+          echo "PUBLIC_DIR=$PUBLIC_DIR" >> "$GITHUB_ENV"
 
       - name: Setup SSH
         env:
@@ -143,16 +177,10 @@ jobs:
             done
           }
 
-          # 静的ファイルだけを公開先へ同期する
+          # Only the prepared public artifact is mirrored to the web root.
           rsync_with_retry rsync -avz --delete \
-            --exclude ".git/" \
-            --exclude ".github/" \
-            --exclude "scripts/" \
-            --exclude "*.md" \
-            --exclude ".gitignore" \
-            --exclude ".gitlab-ci.yml" \
             -e "ssh $ssh_opts" \
-            ./ $XS_USER@$XS_HOST:$XS_REMOTE_DIR
+            "$PUBLIC_DIR/" $XS_USER@$XS_HOST:$XS_REMOTE_DIR
 
       - name: Deploy kanji-slicer to playpoint-sim.com
         if: steps.changes.outputs.kanji_slicer_changed == 'true'
