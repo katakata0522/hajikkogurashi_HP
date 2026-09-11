@@ -44,11 +44,16 @@ jobs:
         run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Run minigame smoke tests
         run: npm run test:minigames:smoke
-      - name: Install Playwright Chromium
-        run: npx playwright install --with-deps chromium
-      - name: Resolve Playwright Chromium path
+      - name: Resolve runner Chrome
         shell: bash
         run: |
-          echo "CHROME_PATH=$(node -e 'process.stdout.write(require("playwright").chromium.executablePath())')" >> "$GITHUB_ENV"
+          set -euo pipefail
+          chrome_path="$(command -v google-chrome || command -v google-chrome-stable || true)"
+          if [ -z "$chrome_path" ]; then
+            echo "::error::Google Chrome is not available on this GitHub-hosted runner image"
+            exit 1
+          fi
+          "$chrome_path" --version
+          echo "CHROME_PATH=$chrome_path" >> "$GITHUB_ENV"
       - name: Run minigame browser tests
         run: npm run test:minigames:browser
