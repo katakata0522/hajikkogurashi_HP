@@ -22,6 +22,7 @@ const smokeTests = [
 ];
 
 const browserTests = [
+    'scripts/minigame-startup-browser-audit.mjs',
     'scripts/blackhole-sweeper-browser-test.mjs',
     'scripts/girigiri-brake-browser-test.mjs',
     'scripts/kage-mane-dojo-browser-test.mjs',
