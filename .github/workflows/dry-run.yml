@@ -31,6 +31,7 @@ jobs:
           pwsh -File ./scripts/workflow-action-pin-smoke-test.ps1
           pwsh -File ./scripts/deploy-public-artifact-smoke-test.ps1
           pwsh -File ./scripts/viewport-accessibility-smoke-test.ps1
+          pwsh -File ./scripts/deploy-security-smoke-test.ps1
 
   minigame-check:
     runs-on: ubuntu-latest
