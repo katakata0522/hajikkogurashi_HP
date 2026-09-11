@@ -1067,7 +1067,8 @@ class GameController {
         }
         const url = "https://hajikkoroom.xsrv.jp/girigiri-brake/";
         const hashtags = "CornerNeighbor,ギリギリブレーキ";
-        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtags)}`);
+        const shareWindow = window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtags)}`, '_blank', 'noopener,noreferrer');
+        if (shareWindow) shareWindow.opener = null;
     }
 }
 
