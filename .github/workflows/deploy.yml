@@ -72,6 +72,7 @@ jobs:
           pwsh -File ./scripts/structure-smoke-test.ps1
           pwsh -File ./scripts/local-reference-check.ps1
           pwsh -File ./scripts/deploy-public-artifact-smoke-test.ps1
+          pwsh -File ./scripts/viewport-accessibility-smoke-test.ps1
           bash -n ./scripts/verify-deployment-marker.sh
 
       - name: Setup Node.js for minigame regression tests
