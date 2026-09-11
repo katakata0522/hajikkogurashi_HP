@@ -27,21 +27,27 @@
 
     function guardedGetItem(key) {
         const normalizedKey = String(key);
+        const memory = memoryFor(this);
+        // A previous setItem may have fallen back to memory even when native
+        // getItem still works (for example, QuotaExceededError on writes only).
+        if (memory.has(normalizedKey)) return memory.get(normalizedKey);
         try {
             return originalGetItem.call(this, normalizedKey);
         } catch (_) {
-            const memory = memoryFor(this);
-            return memory.has(normalizedKey) ? memory.get(normalizedKey) : null;
+            return null;
         }
     }
 
     function guardedSetItem(key, value) {
         const normalizedKey = String(key);
         const normalizedValue = String(value);
+        const memory = memoryFor(this);
         try {
             originalSetItem.call(this, normalizedKey, normalizedValue);
+            // Native storage is authoritative again after a successful write.
+            memory.delete(normalizedKey);
         } catch (_) {
-            memoryFor(this).set(normalizedKey, normalizedValue);
+            memory.set(normalizedKey, normalizedValue);
         }
     }
 
@@ -50,16 +56,19 @@
         try {
             originalRemoveItem.call(this, normalizedKey);
         } catch (_) {
-            memoryFor(this).delete(normalizedKey);
+            // Native removal may be blocked; the in-memory fallback is still
+            // cleared below so callers observe removeItem semantics.
         }
+        memoryFor(this).delete(normalizedKey);
     }
 
     function guardedClear() {
         try {
             originalClear.call(this);
         } catch (_) {
-            memoryFor(this).clear();
+            // Native clear may be blocked; always clear the fallback as well.
         }
+        memoryFor(this).clear();
     }
 
     try {
