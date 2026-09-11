@@ -25,10 +25,10 @@ foreach ($relativePath in $htmlFiles) {
         $checked++
         $tag = $match.Value
         if ($tag -match '(?i)user-scalable\s*=\s*no') {
-            $violations.Add("$relativePath: viewport disables user scaling")
+            $violations.Add("${relativePath}: viewport disables user scaling")
         }
         if ($tag -match '(?i)maximum-scale\s*=') {
-            $violations.Add("$relativePath: viewport caps maximum zoom")
+            $violations.Add("${relativePath}: viewport caps maximum zoom")
         }
     }
 }
