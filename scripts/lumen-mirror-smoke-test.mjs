@@ -6,8 +6,10 @@ import vm from 'node:vm';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const html = readFileSync(resolve(root, 'lumen-mirror', 'index.html'), 'utf8');
+const core = readFileSync(resolve(root, 'lumen-mirror', 'core.js'), 'utf8');
 const stages = readFileSync(resolve(root, 'lumen-mirror', 'stages.js'), 'utf8');
-const script = readFileSync(resolve(root, 'lumen-mirror', 'script.js'), 'utf8');
+const runtime = readFileSync(resolve(root, 'lumen-mirror', 'script.js'), 'utf8');
+const script = `${core}\n${runtime}`;
 const style = readFileSync(resolve(root, 'lumen-mirror', 'style.css'), 'utf8');
 
 // ---- HTML Structure ----
@@ -21,11 +23,14 @@ assert.match(html, /id="select-btn"/, 'stage select button in overlay should exi
 assert.match(html, /id="best-banner"/, 'best rank banner should exist');
 assert.match(html, /id="stat-best"/, 'best rank stat display should exist');
 assert.match(html, /href="style\.css\?v=20260526-editor-review-fix"/, 'editor stylesheet should be cache-busted');
+assert.match(html, /src="core\.js\?v=20260911-core-split"/, 'core runtime dependencies should be loaded explicitly');
 assert.match(html, /src="stages\.js\?v=20260911-stage-data"/, 'stage data should be loaded explicitly');
 assert.match(html, /src="script\.js\?v=20260526-editor-review-fix"/, 'editor script should be cache-busted');
+const storageIndex = html.indexOf('src="/assets/js/minigame-storage-guard.js');
+const coreIndex = html.indexOf('src="core.js');
 const stagesIndex = html.indexOf('src="stages.js');
 const runtimeIndex = html.indexOf('src="script.js');
-assert.ok(stagesIndex >= 0 && runtimeIndex > stagesIndex, 'stage data must load before the main runtime');
+assert.ok(storageIndex >= 0 && coreIndex > storageIndex && stagesIndex > coreIndex && runtimeIndex > stagesIndex, 'storage guard, core, stages, and main runtime must load in dependency order');
 assert.match(html, /id="editor-undo-btn"/, 'editor should expose undo control');
 assert.match(html, /id="prop-title"/, 'editor should expose a stage title input');
 assert.match(html, /id="editor-share-status"/, 'editor should explain export readiness');
@@ -34,8 +39,9 @@ assert.match(html, /id="editor-modal"[^>]*role="dialog"/, 'share modal should id
 assert.doesNotMatch(html, /maximum-scale=1\.0|user-scalable=no/, 'mobile users should be allowed to zoom the editor');
 
 // ---- JavaScript Syntax ----
+assert.doesNotThrow(() => new vm.Script(core), 'core.js must be valid JS');
 assert.doesNotThrow(() => new vm.Script(stages), 'stages.js must be valid JS');
-assert.doesNotThrow(() => new vm.Script(script), 'script must be valid JS');
+assert.doesNotThrow(() => new vm.Script(runtime), 'script.js must be valid JS');
 
 // ---- Core Classes ----
 assert.match(script, /class\s+AudioManager/, 'AudioManager should be implemented');
@@ -47,6 +53,12 @@ assert.match(script, /class\s+BlackHole/, 'BlackHole entity should be implemente
 assert.match(script, /class\s+Wormhole/, 'Wormhole portal entity should be implemented');
 assert.match(script, /class\s+ParticleSystem/, 'ParticleSystem should be implemented');
 assert.match(script, /class\s+GameController/, 'GameController should be implemented');
+assert.match(core, /class\s+AudioManager/, 'AudioManager should live in core.js');
+assert.match(core, /class\s+ScoreManager/, 'ScoreManager should live in core.js');
+assert.match(core, /class\s+Mirror/, 'Mirror should live in core.js');
+assert.match(runtime, /class\s+GameController/, 'GameController should stay in script.js');
+assert.doesNotMatch(runtime, /class\s+(?:ScoreManager|AudioManager|Mirror|Emitter|Prism|BlackHole|Wormhole|ParticleSystem)\b/, 'core classes should not drift back into script.js');
+assert.doesNotMatch(core, /class\s+GameController/, 'GameController should not drift into core.js');
 
 // ---- Core Logic ----
 assert.match(script, /getIntersection\(/, 'Line intersection algorithm should exist');
