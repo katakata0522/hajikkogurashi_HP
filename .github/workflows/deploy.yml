@@ -28,6 +28,7 @@ jobs:
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           fetch-depth: 2
+          persist-credentials: false
 
       - name: Detect kanji-slicer changes
         id: changes
@@ -73,6 +74,7 @@ jobs:
           pwsh -File ./scripts/local-reference-check.ps1
           pwsh -File ./scripts/deploy-public-artifact-smoke-test.ps1
           pwsh -File ./scripts/viewport-accessibility-smoke-test.ps1
+          pwsh -File ./scripts/deploy-security-smoke-test.ps1
           bash -n ./scripts/verify-deployment-marker.sh
           node --check ./scripts/verify-live-minigame-routes.mjs
 
@@ -156,11 +158,28 @@ jobs:
           XS_PORT: ${{ secrets.XS_PORT }}
         run: |
           set -euo pipefail
+          umask 077
+
+          : "${XS_SSH_KEY:?XS_SSH_KEY secret is required}"
+          : "${XS_HOST:?XS_HOST secret is required}"
+          : "${XS_PORT:?XS_PORT secret is required}"
+
+          if [ "$XS_HOST" != "hajikkoroom.xsrv.jp" ] || [ "$XS_PORT" != "10022" ]; then
+            echo "::error::Unexpected Xserver SSH endpoint; refusing to use an unpinned host."
+            exit 1
+          fi
+
           mkdir -p ~/.ssh
-          echo "$XS_SSH_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -p "$XS_PORT" -H "$XS_HOST" >> ~/.ssh/known_hosts 2>/dev/null || \
-            echo "::warning::ssh-keyscan failed; rsync will use StrictHostKeyChecking=accept-new"
+          chmod 700 ~/.ssh
+          printf '%s\n' "$XS_SSH_KEY" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          ssh-keygen -y -P '' -f ~/.ssh/id_deploy >/dev/null
+
+          cat > ~/.ssh/known_hosts <<'EOF'
+          [hajikkoroom.xsrv.jp]:10022 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEKKSe2ENjD1KRgSqCY7ji78s0zqCNCKBRNfRaxRV7sh
+          EOF
+          chmod 600 ~/.ssh/known_hosts
+          unset XS_SSH_KEY
 
       - name: Deploy to Xserver via Rsync
         env:
@@ -170,7 +189,7 @@ jobs:
           XS_REMOTE_DIR: ${{ secrets.XS_REMOTE_DIR }}
         run: |
           set -euo pipefail
-          ssh_opts="-p $XS_PORT -i ~/.ssh/id_rsa -o BatchMode=yes -o ConnectTimeout=30 -o ServerAliveInterval=15 -o ServerAliveCountMax=3 -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=~/.ssh/known_hosts"
+          ssh_opts="-p 10022 -i $HOME/.ssh/id_deploy -o BatchMode=yes -o IdentitiesOnly=yes -o PubkeyAuthentication=yes -o PreferredAuthentications=publickey -o PasswordAuthentication=no -o KbdInteractiveAuthentication=no -o ForwardAgent=no -o ClearAllForwardings=yes -o RequestTTY=no -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o LogLevel=ERROR -o ConnectTimeout=15 -o ServerAliveInterval=15 -o ServerAliveCountMax=2"
 
           rsync_with_retry() {
             local attempt status
@@ -196,7 +215,7 @@ jobs:
             --exclude ".git/" \
             --exclude ".well-known/" \
             -e "ssh $ssh_opts" \
-            "$PUBLIC_DIR/" $XS_USER@$XS_HOST:$XS_REMOTE_DIR
+            "$PUBLIC_DIR/" "$XS_USER@$XS_HOST:$XS_REMOTE_DIR"
 
       - name: Deploy kanji-slicer to playpoint-sim.com
         if: steps.changes.outputs.kanji_slicer_changed == 'true'
@@ -206,7 +225,7 @@ jobs:
           XS_USER: ${{ secrets.XS_USER }}
         run: |
           set -euo pipefail
-          ssh_opts="-p $XS_PORT -i ~/.ssh/id_rsa -o BatchMode=yes -o ConnectTimeout=30 -o ServerAliveInterval=15 -o ServerAliveCountMax=3 -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=~/.ssh/known_hosts"
+          ssh_opts="-p 10022 -i $HOME/.ssh/id_deploy -o BatchMode=yes -o IdentitiesOnly=yes -o PubkeyAuthentication=yes -o PreferredAuthentications=publickey -o PasswordAuthentication=no -o KbdInteractiveAuthentication=no -o ForwardAgent=no -o ClearAllForwardings=yes -o RequestTTY=no -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o LogLevel=ERROR -o ConnectTimeout=15 -o ServerAliveInterval=15 -o ServerAliveCountMax=2"
 
           rsync_with_retry() {
             local attempt status
@@ -228,7 +247,7 @@ jobs:
 
           rsync_with_retry rsync -avz --delete \
             -e "ssh $ssh_opts" \
-            ./kanji-slicer/ $XS_USER@$XS_HOST:/home/hajikkoroom/playpoint-sim.com/public_html/kanji-slicer/
+            ./kanji-slicer/ "$XS_USER@$XS_HOST:/home/hajikkoroom/playpoint-sim.com/public_html/kanji-slicer/"
 
       - name: Verify deployed commit
         if: success()
@@ -249,3 +268,8 @@ jobs:
           echo "  - sitemap.xml がサーバーに配置されました"
           echo "  - Google: Search Console に sitemap を登録済みであれば自動クロールされます"
           echo "  - 参考: https://hajikkoroom.xsrv.jp/sitemap.xml"
+
+      - name: Remove SSH material
+        if: always()
+        shell: bash
+        run: rm -f ~/.ssh/id_deploy ~/.ssh/known_hosts
