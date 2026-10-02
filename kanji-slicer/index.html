@@ -67,20 +67,26 @@
 
         <!-- Main Workspace (Canvas & Overlays) -->
         <main id="game-canvas-wrapper">
-            <canvas id="game-canvas" aria-label="漢字スライサーゲーム画面"></canvas>
-            <div id="dead-line-alert" role="alert" aria-live="assertive">警告：溢れそう！</div>
+            <canvas id="game-canvas" tabindex="0" aria-label="漢字スライサーゲーム画面。マウスまたはタッチで操作" aria-describedby="game-instructions"></canvas>
+            <div id="dead-line-alert" hidden role="alert" aria-live="assertive">警告：溢れそう！</div>
         </main>
 
         <!-- Footer / Instructions -->
         <footer id="game-footer">
-            <p class="instruction">【操作方法】タップ/ドラッグで落とす | スワイプで切る | [Space]一時停止 [R]リトライ</p>
+            <p id="game-instructions" class="instruction">上の漢字を左右に動かし、離して落とす<br>盤面をなぞって切る · ⏸で遊び方・図鑑</p>
         </footer>
     </div>
 
     <!-- Pause / Guide Modal -->
-    <div id="pause-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="pause-modal-title">
+    <div id="pause-modal" class="modal-overlay hidden" hidden role="dialog" aria-modal="true" aria-labelledby="pause-modal-title">
         <div class="modal-content pause-content">
             <h2 id="pause-modal-title" class="modal-title-pause">一時停止 ＆ 漢字図鑑</h2>
+            <div class="how-to-play">
+                <h3>遊び方</h3>
+                <p>上の漢字をつかみ、左右に動かして離すと落下します。盤面をなぞると、合体した漢字を分解できます。</p>
+                <p>漢字を合わせてお題の熟語を作ると高得点！ 赤い線を超えた状態が3秒続くと終了です。</p>
+                <p class="keyboard-help">PC: Space / Pで一時停止、Escで再開、Rで最初から</p>
+            </div>
             <div class="dictionary-container">
                 <div class="dictionary-progress-box">
                     <div class="progress-labels">
@@ -104,7 +110,7 @@
     </div>
 
     <!-- Game Over Modal -->
-    <div id="gameover-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="gameover-modal-title">
+    <div id="gameover-modal" class="modal-overlay hidden" hidden role="dialog" aria-modal="true" aria-labelledby="gameover-modal-title">
         <div class="modal-content">
             <h2 id="gameover-modal-title" class="modal-title">満杯（ゲームオーバー）</h2>
             <p class="final-score-text">最終得点: <span id="final-score">0</span></p>

@@ -76,3 +76,5 @@ const allTicks = [ticks30, ticks60, ticks120, ticks144];
 assert.ok(Math.max(...allTicks) - Math.min(...allTicks) <= 1, `simulation cadence diverged by refresh rate: ${allTicks.join(', ')}`);
 
 console.log(`kanji-slicer smoke test passed (30/60/120/144 Hz => ${allTicks.join('/')})`);
+
+await import('./kanji-slicer-lifecycle-smoke-test.mjs');

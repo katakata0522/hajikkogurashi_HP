@@ -557,15 +557,16 @@ const VALID_IDIOMS = [
     '好人', '人口', '火口', '火山', '消火', '淡水', 
     '水田', '里山', '山水', '土木', '里人', '土石', '田口'
 ];
-discoveredKanji = discoveredKanji.filter(k => VALID_IDIOMS.includes(k));
+discoveredKanji = [...new Set(discoveredKanji.filter(k => VALID_IDIOMS.includes(k)))];
 safeStorage.setItem('kanjislicer_discovered', JSON.stringify(discoveredKanji));
 
 let hasUnsavedDiscoveries = false;
 
 function saveDiscoveredKanji() {
     if (!hasUnsavedDiscoveries) return;
-    safeStorage.setItem('kanjislicer_discovered', JSON.stringify(discoveredKanji));
-    hasUnsavedDiscoveries = false;
+    if (safeStorage.setItem('kanjislicer_discovered', JSON.stringify(discoveredKanji))) {
+        hasUnsavedDiscoveries = false;
+    }
 }
 
 let score = 0;
@@ -581,6 +582,9 @@ let isSlicing = false;
 let isPaused = false;
 let gameOverCounter = 0;
 let isGameOver = false;
+let activePointerId = null;
+let lastPointerPoint = null;
+let modalReturnFocus = null;
 
 // Elements
 const canvas = document.getElementById('game-canvas');
@@ -611,6 +615,7 @@ let canvasOffsetX = 0;
 let canvasOffsetY = 0;
 
 function resize() {
+    handleCancel();
     const rect = canvas.parentElement.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
     canvas.width = rect.width * dpr;
@@ -990,8 +995,9 @@ function sliceBody(body, p1, p2) {
 // Input Helpers
 function getVirtualCoords(e) {
     const rect = canvas.getBoundingClientRect();
-    const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
-    const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+    const touch = e.touches && Array.from(e.touches).find(item => item.identifier === activePointerId);
+    const clientX = e.clientX !== undefined ? e.clientX : (touch ? touch.clientX : 0);
+    const clientY = e.clientY !== undefined ? e.clientY : (touch ? touch.clientY : 0);
     
     // Convert DOM client coordinates to High-DPI physical canvas space
     const canvasPxX = (clientX - rect.left) * (canvas.width / rect.width);
@@ -1003,10 +1009,24 @@ function getVirtualCoords(e) {
     return { x, y };
 }
 
+// Only the pointer that began a gesture may move, drop, or cancel it.
+function matchesActivePointer(e) {
+    if (activePointerId === null) return false;
+    if (e.pointerId !== undefined) return e.pointerId === activePointerId;
+    if (e.changedTouches) {
+        return Array.from(e.changedTouches).some(touch => touch.identifier === activePointerId);
+    }
+    return activePointerId === 'mouse';
+}
+
 // Mouse/Touch Listeners
 function handleStart(e) {
-    if (isGameOver || isPaused) return;
+    if (isGameOver || isPaused || activePointerId !== null) return;
+    if (e.isPrimary === false || (e.button !== undefined && e.button !== 0)) return;
+    activePointerId = e.pointerId !== undefined ? e.pointerId :
+        (e.changedTouches ? e.changedTouches[0].identifier : 'mouse');
     if (e.cancelable) e.preventDefault();
+    canvas.focus({ preventScroll: true });
     soundSynth.init(); // Initialize audio context on first tap
     soundSynth.resume();
 
@@ -1016,6 +1036,7 @@ function handleStart(e) {
     }
     
     const coords = getVirtualCoords(e);
+    lastPointerPoint = coords;
     touchStartX = coords.x;
     touchStartY = coords.y;
     
@@ -1035,7 +1056,7 @@ function handleStart(e) {
 }
 
 function handleMove(e) {
-    if (isGameOver || isPaused) return;
+    if (isGameOver || isPaused || !matchesActivePointer(e)) return;
     if (e.cancelable) e.preventDefault();
     const coords = getVirtualCoords(e);
     
@@ -1047,11 +1068,12 @@ function handleMove(e) {
             isSlicing = true;
             slicesInSwipe = 0;
             slashTrail = [{ x: coords.x, y: coords.y, age: 0 }];
+            lastPointerPoint = coords;
             return;
         }
         previewX = Math.max(WALL_MARGIN + getRadiusForTier(1), Math.min(V_WIDTH - WALL_MARGIN - getRadiusForTier(1), coords.x));
     } else if (isSlicing) {
-        const lastPt = slashTrail[slashTrail.length - 1];
+        const lastPt = lastPointerPoint;
         if (lastPt) {
             const dist = Math.sqrt((coords.x - lastPt.x)**2 + (coords.y - lastPt.y)**2);
             if (dist > 3) {
@@ -1066,15 +1088,16 @@ function handleMove(e) {
                 }
                 
                 slashTrail.push({ x: coords.x, y: coords.y, age: 0 });
+                lastPointerPoint = coords;
             }
         }
     }
 }
 
 function handleEnd(e) {
+    if (!matchesActivePointer(e)) return;
     if (isPaused || isGameOver) {
-        isDraggingPreview = false;
-        isSlicing = false;
+        handleCancel();
         return;
     }
     if (e && e.cancelable) e.preventDefault();
@@ -1106,11 +1129,13 @@ function handleEnd(e) {
         nextPreviewEl.textContent = nextKanji;
     }
     
-    isDraggingPreview = false;
-    isSlicing = false;
+    handleCancel();
 }
 
-function handleCancel() {
+function handleCancel(e) {
+    if (e && !matchesActivePointer(e)) return;
+    activePointerId = null;
+    lastPointerPoint = null;
     isDraggingPreview = false;
     isSlicing = false;
     slashTrail = [];
@@ -1133,73 +1158,88 @@ if (window.PointerEvent) {
     canvas.addEventListener('touchcancel', handleCancel);
 }
 
-window.addEventListener('blur', handleCancel);
-
-// Keyboard Accessibility & Shortcuts
-window.addEventListener('keydown', (e) => {
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-    
-    if (e.code === 'Space' || e.code === 'KeyP') {
-        e.preventDefault();
-        btnPause.click();
-    } else if (e.code === 'KeyR') {
-        e.preventDefault();
-        if (isGameOver) {
-            btnRestart.click();
-        } else if (isPaused) {
-            btnPauseRestart.click();
-        } else {
-            restartGame();
-        }
-    } else if (e.code === 'Escape') {
-        if (isPaused) {
-            btnResume.click();
-        }
-    }
+window.addEventListener('blur', () => {
+    handleCancel();
+    if (!isGameOver && !isPaused) pauseGame();
 });
 
-// Sound Button toggle
-btnSound.addEventListener('click', () => {
-    const isEnabled = soundSynth.toggle();
-    btnSound.textContent = isEnabled ? '🔊' : '🔇';
-});
-
-if (btnSound) {
-    btnSound.textContent = soundSynth.enabled ? '🔊' : '🔇';
+// Modal state is shared by mouse, touch, keyboard, and interrupted play.
+function showModal(modal, focusTarget) {
+    if (!modalReturnFocus) modalReturnFocus = document.activeElement;
+    modal.hidden = false;
+    modal.classList.remove('hidden');
+    document.getElementById('game-container').inert = true;
+    focusTarget.focus({ preventScroll: true });
 }
 
-// Pause button click
-btnPause.addEventListener('click', (e) => {
-    e.stopPropagation(); // Prevent canvas drop trigger if clicked fast
-    if (isGameOver) return;
+function hideModal(modal) {
+    modal.hidden = true;
+    modal.classList.add('hidden');
+    document.getElementById('game-container').inert = false;
+    const target = modalReturnFocus || canvas;
+    modalReturnFocus = null;
+    target.focus({ preventScroll: true });
+}
+
+function pauseGame() {
+    if (isGameOver || isPaused) return;
     isPaused = true;
-    
-    // Reset active dragging/slicing input states to avoid sticky previews on resume
-    isDraggingPreview = false;
-    isSlicing = false;
-    slashTrail = [];
-    
+    handleCancel();
     soundSynth.suspend();
     saveDiscoveredKanji();
     updateDictionaryUI();
-    
-    pauseModal.classList.remove('hidden');
+    btnPause.setAttribute('aria-expanded', 'true');
+    showModal(pauseModal, btnResume);
+}
+
+function resumeGame() {
+    if (!isPaused || isGameOver) return;
+    isPaused = false;
+    handleCancel();
+    btnPause.setAttribute('aria-expanded', 'false');
+    hideModal(pauseModal);
+    soundSynth.resume();
+}
+
+// Keep native Space/Enter activation on buttons and links, ignore held keys.
+window.addEventListener('keydown', (e) => {
+    const modal = isGameOver ? gameoverModal : (isPaused ? pauseModal : null);
+    if (modal && e.code === 'Tab') {
+        const controls = Array.from(modal.querySelectorAll('button, a[href], [tabindex="0"]'));
+        const first = controls[0];
+        const last = controls[controls.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+        }
+        return;
+    }
+    if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.target.closest('input, textarea, select, [contenteditable="true"]')) return;
+    if (e.code === 'Space' && e.target.closest('button, a[href]')) return;
+
+    if (e.code === 'Space' || e.code === 'KeyP') {
+        e.preventDefault();
+        if (isPaused) resumeGame();
+        else pauseGame();
+    } else if (e.code === 'KeyR') {
+        e.preventDefault();
+        restartGame();
+    } else if (e.code === 'Escape' && isPaused) {
+        e.preventDefault();
+        resumeGame();
+    }
 });
 
-// Resume button click
-btnResume.addEventListener('click', () => {
-    isPaused = false;
-    soundSynth.resume();
-    pauseModal.classList.add('hidden');
-});
+btnSound.addEventListener('click', () => soundSynth.toggle());
+soundSynth.updateButtonUI();
 
-// Restart button from pause menu
-btnPauseRestart.addEventListener('click', () => {
-    isPaused = false;
-    soundSynth.resume();
-    pauseModal.classList.add('hidden');
-    restartGame();
-});
+btnPause.addEventListener('click', pauseGame);
+btnResume.addEventListener('click', resumeGame);
+btnPauseRestart.addEventListener('click', restartGame);
 
 // Get formula text for dictionary UI (Idiom style)
 function getFormulaText(kanji) {
@@ -1441,17 +1481,19 @@ function checkGameOver() {
     
     if (overLimit) {
         gameOverCounter++;
+        deadLineAlert.hidden = false;
         deadLineAlert.classList.add('active');
         const remainingSec = Math.max(0, Math.ceil((180 - gameOverCounter) / 60));
-        deadLineAlert.textContent = `警告：溢れそう！ (${remainingSec}秒)`;
+        const warningText = `警告：溢れそう！ (${remainingSec}秒)`;
+        if (deadLineAlert.textContent !== warningText) deadLineAlert.textContent = warningText;
         deadLineAlert.style.backgroundColor = `rgba(220, 38, 38, ${0.75 + (gameOverCounter / 180) * 0.25})`;
         if (gameOverCounter > 180) { // 3 seconds at 60fps
             triggerGameOver();
         }
     } else {
         gameOverCounter = 0;
+        deadLineAlert.hidden = true;
         deadLineAlert.classList.remove('active');
-        deadLineAlert.textContent = '警告：溢れそう！';
         deadLineAlert.style.backgroundColor = '';
     }
 }
@@ -1469,15 +1511,29 @@ function pruneInPlace(arr, predicate) {
 }
 
 function triggerGameOver() {
+    if (isGameOver) return;
+    handleCancel();
     isGameOver = true;
     saveDiscoveredKanji(); // Ensure discoveries are saved to localStorage on game over
     soundSynth.play('gameover');
     finalScoreEl.textContent = score;
-    gameoverModal.classList.remove('hidden');
+    showModal(gameoverModal, btnRestart);
 }
 
 // Restart Game
 function restartGame() {
+    saveDiscoveredKanji();
+    handleCancel();
+    isPaused = false;
+    btnPause.setAttribute('aria-expanded', 'false');
+    pauseModal.hidden = true;
+    pauseModal.classList.add('hidden');
+    hideModal(gameoverModal);
+    soundSynth.resume();
+    bodiesToSpawn = [];
+    lastMergeTime = 0;
+    flashAlpha = 0;
+    previewX = V_WIDTH / 2;
     bodies = [];
     particles = [];
     slashTrail = [];
@@ -1491,8 +1547,8 @@ function restartGame() {
     gameOverCounter = 0;
     isGameOver = false;
     dropCooldown = 0;
+    deadLineAlert.hidden = true;
     deadLineAlert.classList.remove('active');
-    deadLineAlert.textContent = '警告：溢れそう！';
     deadLineAlert.style.backgroundColor = '';
     gameoverModal.classList.add('hidden');
     chooseNewMission();
@@ -1786,10 +1842,13 @@ function tick() {
     requestAnimationFrame(tick);
 }
 
-// Tab Visibility Auto-Resume for Web Audio API
+// Switching apps must not keep playing or resume audio behind a pause dialog.
 document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && soundSynth && soundSynth.enabled) {
-        soundSynth.resume();
+    if (document.hidden) {
+        handleCancel();
+        pauseGame();
+        saveDiscoveredKanji();
+        soundSynth.suspend();
     }
 });
 
