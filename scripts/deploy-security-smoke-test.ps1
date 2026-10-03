@@ -36,7 +36,7 @@ foreach ($pattern in $requiredOnce) {
     }
 }
 
-$requiredForBothRsyncSteps = @(
+$requiredForMainRsyncStep = @(
     'source .github/scripts/rsync-transient-retry.sh',
     'BatchMode=yes',
     'IdentitiesOnly=yes',
@@ -52,10 +52,10 @@ $requiredForBothRsyncSteps = @(
     'LogLevel=ERROR'
 )
 
-foreach ($pattern in $requiredForBothRsyncSteps) {
+foreach ($pattern in $requiredForMainRsyncStep) {
     $count = ([regex]::Matches($content, [regex]::Escape($pattern))).Count
-    if ($count -lt 2) {
-        throw "SSH hardening must cover both rsync paths: $pattern (found $count)"
+    if ($count -ne 1) {
+        throw "SSH hardening must cover the single main-site rsync path: $pattern (found $count)"
     }
 }
 
@@ -77,6 +77,8 @@ foreach ($pattern in $retryRequirements) {
 }
 
 $forbidden = @(
+    'playpoint-sim.com',
+    'kanji_slicer_changed',
     'StrictHostKeyChecking=accept-new',
     'ssh-keyscan',
     '~/.ssh/id_rsa',

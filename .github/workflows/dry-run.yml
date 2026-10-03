@@ -48,7 +48,9 @@ jobs:
       - name: Install locked test dependencies
         run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Run minigame smoke tests
-        run: npm run test:minigames:smoke
+        run: |
+          node scripts/minigame-screenshots-test.mjs
+          npm run test:minigames:smoke
       - name: Resolve runner Chrome
         shell: bash
         run: |
@@ -61,4 +63,17 @@ jobs:
           "$chrome_path" --version
           echo "CHROME_PATH=$chrome_path" >> "$GITHUB_ENV"
       - name: Run minigame browser tests
+        id: minigame-browser
+        env:
+          MINIGAME_SCREENSHOT_DIR: test-results/minigame-screenshots
         run: npm run test:minigames:browser
+      - name: Upload minigame screenshots
+        if: ${{ !cancelled() && steps.minigame-browser.outcome != 'skipped' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: minigame-screenshots-${{ github.run_id }}-${{ github.run_attempt }}
+          path: test-results/minigame-screenshots/*.png
+          if-no-files-found: warn
+          retention-days: 7
+          compression-level: 0
+          include-hidden-files: false

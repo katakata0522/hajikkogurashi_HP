@@ -31,6 +31,9 @@ function serveFile(req, res) {
 const server = createServer(serveFile);
 await new Promise((resolveListen) => server.listen(0, '127.0.0.1', resolveListen));
 const { port } = server.address();
+const screenshots = process.env.MINIGAME_SCREENSHOT_DIR?.trim()
+    ? (await import('./test-support/minigame-screenshots.mjs')).createMinigameScreenshots('kanji-slicer', `http://127.0.0.1:${port}`)
+    : null;
 
 try {
   const browser = await chromium.launch({
@@ -43,6 +46,7 @@ try {
     isMobile: true,
     hasTouch: true,
   });
+  if (screenshots?.enabled) screenshots.track(page);
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
 
@@ -68,6 +72,7 @@ try {
     throw new Error(`canvas is not visible: ${JSON.stringify(initial.canvas)}`);
   }
   if (initial.metaInsideBody) throw new Error('SEO metadata must not be emitted inside body');
+  if (screenshots?.enabled) await screenshots.capture(page, 'launch');
 
   const box = await page.locator('#game-canvas').boundingBox();
   if (!box) throw new Error('canvas bounding box is unavailable');
@@ -92,6 +97,7 @@ try {
   await page.locator('#btn-pause').click();
   if (await page.locator('#btn-pause').getAttribute('aria-expanded') !== 'true') throw new Error('pause accessibility state is stale');
   if (await page.evaluate(() => document.activeElement.id !== 'btn-resume')) throw new Error('pause did not focus Resume');
+  if (screenshots?.enabled) await screenshots.capture(page, 'pause-menu');
   await page.keyboard.press('Space');
   if (await page.evaluate(() => isPaused || document.activeElement.id !== 'btn-pause')) throw new Error('native Space/restore focus failed');
   await page.keyboard.press('Tab');
@@ -124,6 +130,7 @@ try {
       }
     }
     if (layout.instructions === 'none' || !layout.warningHidden) throw new Error('instructions/warning initial state incorrect');
+    if (screenshots?.enabled && [320, 667, 1280].includes(width)) await screenshots.capture(page, 'play-hud');
     await page.locator('#btn-pause').click();
     await page.locator('#btn-resume').scrollIntoViewIfNeeded();
     await page.locator('#btn-resume').click();
@@ -132,6 +139,7 @@ try {
 
   await page.evaluate(() => { addScore(25); triggerGameOver(); });
   if (!(await page.locator('#gameover-modal').isVisible())) throw new Error('gameover dialog missing');
+  if (screenshots?.enabled) await screenshots.capture(page, 'result');
   await page.keyboard.press('Space');
   if (await page.evaluate(() => isGameOver || bodies.length !== 0 || score !== 0)) throw new Error('keyboard gameover restart failed');
   if (errors.length) throw new Error(`kanji-slicer lifecycle errors: ${errors.join(' | ')}`);
@@ -141,6 +149,7 @@ try {
     isMobile: true,
     hasTouch: true,
   });
+  if (screenshots?.enabled) screenshots.track(blockedPage);
   const blockedErrors = [];
   blockedPage.on('pageerror', (error) => blockedErrors.push(error.message));
   await blockedPage.addInitScript(() => {
@@ -182,6 +191,9 @@ try {
   await page.close();
   await browser.close();
   console.log('kanji-slicer browser test passed');
+} catch (error) {
+  if (screenshots?.enabled) await screenshots.captureFailure();
+  throw error;
 } finally {
   await new Promise((resolveClose) => server.close(resolveClose));
 }
