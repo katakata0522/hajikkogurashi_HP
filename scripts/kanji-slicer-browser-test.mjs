@@ -97,6 +97,8 @@ try {
   await page.locator('#btn-pause').click();
   if (await page.locator('#btn-pause').getAttribute('aria-expanded') !== 'true') throw new Error('pause accessibility state is stale');
   if (await page.evaluate(() => document.activeElement.id !== 'btn-resume')) throw new Error('pause did not focus Resume');
+  if (!(await page.locator('#btn-resume').evaluate(el => getComputedStyle(el).fontFamily.includes('Noto Sans JP')))) throw new Error('Japanese button font must inherit the loaded family');
+  await page.locator('#pause-modal .modal-content').evaluate(el => Promise.all(el.getAnimations().map(animation => animation.finished)));
   if (screenshots?.enabled) await screenshots.capture(page, 'pause-menu');
   await page.keyboard.press('Space');
   if (await page.evaluate(() => isPaused || document.activeElement.id !== 'btn-pause')) throw new Error('native Space/restore focus failed');
@@ -121,7 +123,11 @@ try {
         warningHidden: document.querySelector('#dead-line-alert').hidden };
     });
     if (layout.scrollWidth > width + 1) throw new Error(`horizontal overflow at ${width}x${height}: ${JSON.stringify(layout)}`);
-    if (layout.canvas.height < 150 || layout.header.bottom > layout.canvas.y + 1 || layout.canvas.bottom > layout.footer.y + 1 || layout.footer.bottom > height + 1) {
+    const landscapeSidebar = width >= 600 && height <= 450;
+    const overlaps = landscapeSidebar
+      ? layout.header.right > layout.canvas.x + 1 || layout.footer.right > layout.canvas.x + 1 || layout.header.bottom > layout.footer.y + 1 || layout.canvas.height < height - 1
+      : layout.header.bottom > layout.canvas.y + 1 || layout.canvas.bottom > layout.footer.y + 1;
+    if (layout.canvas.height < 150 || overlaps || layout.footer.bottom > height + 1) {
       throw new Error(`overlapping or unusable layout at ${width}x${height}: ${JSON.stringify(layout)}`);
     }
     for (const control of [layout.pause, layout.sound]) {
@@ -139,6 +145,7 @@ try {
 
   await page.evaluate(() => { addScore(25); triggerGameOver(); });
   if (!(await page.locator('#gameover-modal').isVisible())) throw new Error('gameover dialog missing');
+  await page.locator('#gameover-modal .modal-content').evaluate(el => Promise.all(el.getAnimations().map(animation => animation.finished)));
   if (screenshots?.enabled) await screenshots.capture(page, 'result');
   await page.keyboard.press('Space');
   if (await page.evaluate(() => isGameOver || bodies.length !== 0 || score !== 0)) throw new Error('keyboard gameover restart failed');

@@ -333,6 +333,7 @@ body {
 }
 
 .btn-primary, .btn-secondary {
+    font-family: inherit;
     padding: 12px 20px;
     border-radius: 8px;
     font-weight: bold;
@@ -547,4 +548,29 @@ button:focus-visible, a:focus-visible, canvas:focus-visible {
 }
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* Give the unchanged 400×640 board the full height on short landscape screens. */
+@media (min-width: 600px) and (max-height: 450px) {
+    #game-container {
+        max-width: 900px;
+        display: grid;
+        grid-template-columns: 210px minmax(0, 1fr);
+        grid-template-rows: minmax(0, 1fr) auto;
+        grid-template-areas: "hud board" "help board";
+    }
+    #game-header {
+        grid-area: hud;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 8px;
+        padding: 8px 12px;
+        align-content: start;
+        min-height: 0;
+        overflow-y: auto;
+    }
+    .header-left { gap: 3px; }
+    .header-right { flex-direction: row; justify-content: space-between; gap: 4px; }
+    .next-box { flex-direction: column; gap: 0; padding: 3px; }
+    #game-canvas-wrapper { grid-area: board; height: 100%; min-width: 0; min-height: 0; }
+    #game-footer { grid-area: help; font-size: 11px; padding: 6px; }
 }
