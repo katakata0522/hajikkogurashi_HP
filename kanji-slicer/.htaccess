@@ -1,0 +1,8 @@
+# Revalidate the entry HTML so returning players receive current asset URLs.
+# Leave CSS/JS browser caching to the server's existing policy.
+<IfModule mod_headers.c>
+    <Files "index.html">
+        Header onsuccess unset Cache-Control
+        Header always set Cache-Control "no-cache"
+    </Files>
+</IfModule>
