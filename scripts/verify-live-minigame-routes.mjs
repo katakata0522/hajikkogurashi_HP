@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { extractPublishedSlugs } from './test-support/published-minigames.mjs';
+import { verifyLiveKanjiSlicerAssets } from './test-support/kanji-slicer-assets.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 const baseUrl = new URL(process.argv[2] || 'https://hajikkoroom.xsrv.jp/');
@@ -17,7 +18,9 @@ async function verifyRoute(slug) {
   let lastError;
 
   for (let attempt = 1; attempt <= 4; attempt += 1) {
-    url.searchParams.set('deploy_check', `${expectedSha}-${attempt}`);
+    // Check the player's actual entry URL for this cache regression, rather
+    // than a unique query URL that may bypass a stale server cache.
+    if (slug !== 'kanji-slicer') url.searchParams.set('deploy_check', `${expectedSha}-${attempt}`);
     try {
       const response = await fetch(url, {
         redirect: 'follow',
@@ -42,6 +45,10 @@ async function verifyRoute(slug) {
       }
       if (!/<body\b/i.test(body)) {
         throw new Error('HTML body element is missing');
+      }
+
+      if (slug === 'kanji-slicer') {
+        await verifyLiveKanjiSlicerAssets(response, body, file => readFileSync(resolve(root, 'kanji-slicer', file)));
       }
 
       console.log(`live route verified: ${slug} -> ${response.status} (${title})`);

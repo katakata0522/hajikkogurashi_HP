@@ -1,21 +1,15 @@
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import vm from 'node:vm';
+import { validateKanjiSlicerAssets } from './test-support/kanji-slicer-assets.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 const indexHtml = readFileSync(resolve(root, 'kanji-slicer/index.html'), 'utf8');
 const schedulerSource = readFileSync(resolve(root, 'kanji-slicer/fixed-step-raf.js'), 'utf8');
 
-const schedulerIndex = indexHtml.indexOf('src="fixed-step-raf.js"');
-const gameIndex = indexHtml.indexOf('src="game.js?');
-assert.ok(schedulerIndex >= 0, 'fixed-step scheduler must be loaded');
-assert.ok(gameIndex > schedulerIndex, 'fixed-step scheduler must load before game.js');
-for (const file of ['game.js', 'style.css']) {
-    const digest = createHash('sha256').update(readFileSync(resolve(root, 'kanji-slicer', file))).digest('hex').slice(0, 12);
-    assert.ok(indexHtml.includes(`${file}?v=${digest}`), `${file} must use its current content version so returning players do not load stale assets`);
-}
+validateKanjiSlicerAssets(indexHtml, file => readFileSync(resolve(root, 'kanji-slicer', file)));
+await import('./kanji-slicer-asset-version-smoke-test.mjs');
 
 const bodyStart = indexHtml.indexOf('<body>');
 assert.ok(bodyStart >= 0, 'body element must exist');
