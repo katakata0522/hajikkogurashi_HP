@@ -772,6 +772,8 @@ const handleJump = (e) => {
     if (e.type === 'keydown') {
         if (e.code === 'Space') {
             e.preventDefault();
+            // 押しっぱなしのキーリピートで連続ジャンプしないように（クリック・タップと同じ1回押し=1ジャンプ）
+            if (e.repeat) return;
             jump();
         } else if (e.code === 'KeyR') {
             e.preventDefault();

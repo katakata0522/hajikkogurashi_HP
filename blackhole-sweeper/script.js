@@ -767,6 +767,8 @@ class GameController {
         // Keyboard Accessibility & Shortcuts
         window.addEventListener('keydown', (e) => {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            // キーの押しっぱなし（リピート）で、ゲームオーバー画面が一瞬で飛ばされたり連続リトライしないように
+            if (e.repeat && (e.code === 'Space' || e.code === 'Enter' || e.code === 'KeyR')) return;
             
             if (e.code === 'Space' || e.code === 'Enter') {
                 if (this.gameState === STATE.START) {

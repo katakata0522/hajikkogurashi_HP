@@ -3071,6 +3071,8 @@
   // 💻 キーボード操作ショートカットハンドラ
   function handleKeyDown(e) {
     if (!gameStarted || isExecutingPath) return;
+    // ✅ キー押しっぱなし（リピート）で、クリア画面やショップ画面を意図せず連続で進めないように
+    if (e.repeat) return;
     
     const key = e.key;
 
