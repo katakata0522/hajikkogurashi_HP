@@ -639,6 +639,11 @@
     dom.victoryResetBtn = document.getElementById("victory-reset-btn");
 
     dom.startOverlay = document.getElementById("start-overlay");
+    // スタート画面が出ている間は、裏のゲーム画面をキーボード・読み上げの対象から外す（見た目は変わらない）
+    dom.mainLayoutWrapper = document.getElementById("main-layout-wrapper");
+    if (dom.mainLayoutWrapper && dom.startOverlay && dom.startOverlay.style.display !== "none") {
+      dom.mainLayoutWrapper.inert = true;
+    }
     dom.startPlayBtn = document.getElementById("start-play-btn");
     dom.dragGuideHand = document.getElementById("drag-guide-hand");
     dom.soundBtn = document.getElementById("sound-btn");
@@ -3391,6 +3396,7 @@
 
       gameStarted = true;
       dom.startOverlay.style.display = "none";
+      if (dom.mainLayoutWrapper) dom.mainLayoutWrapper.inert = false;
 
       recordInteraction();
       loadGame();
