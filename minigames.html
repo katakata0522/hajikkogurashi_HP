@@ -33,6 +33,7 @@
 	<link rel="stylesheet" href="/assets/css/main.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/css/main.css'); ?>" />
 	<link rel="stylesheet" href="/assets/css/custom.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/css/custom.css'); ?>" />
 	<link rel="stylesheet" href="/assets/css/site-theme.css?v=20261010-3" />
+    <link rel="stylesheet" href="/assets/css/theme-minigames.css?v=20261010-r2" />
 	<script type="application/ld+json">
 	{
 		"@context": "https://schema.org",
@@ -122,13 +123,15 @@
                         <!-- 漢字スライサー・マージ -->
                         <div class="game-card" style="--game-theme: #eb5e28; --game-theme-alpha: rgba(235, 94, 40, 0.3);">
                             <a href="/kanji-slicer/" class="image-link">
+                                <span class="game-card__no" aria-hidden="true"></span>
+                                <span class="game-card__devices" aria-hidden="true"><i class="dev-sp is-best"></i><i class="dev-pc"></i></span>
                                 <img src="/assets/images/kanji_slicer_thumbnail-640.webp" alt="漢字スライサー・マージ" width="640" height="640" loading="eager" decoding="async" />
                             </a>
                             <div class="game-card-content">
                                 <header class="major game-card-title">
                                     <h3><a href="/kanji-slicer/">漢字スライサー・マージ</a></h3>
                                 </header>
-                                <p class="game-card-desc"><strong class="game-badge">物理スライス / スマホ最適 (PC対応)</strong><br>落ちてくる漢字を合体させて、お題をクリアせよ。スワイプで一刀両断すれば、漢字が部首に分裂！爽快パズル。</p>
+                                <p class="game-card-desc"><strong class="game-badge"><span class="game-badge__genre">物理スライス</span><span class="game-badge__sep"> / </span><span class="game-badge__device">スマホ最適 (PC対応)</span></strong><br>落ちてくる漢字を合体させて、お題をクリアせよ。スワイプで一刀両断すれば、漢字が部首に分裂！爽快パズル。</p>
                                 <ul class="actions">
                                     <li><a href="/kanji-slicer/" class="button next">遊ぶ</a></li>
                                 </ul>
@@ -138,13 +141,15 @@
                         <!-- LUMEN_MIRROR -->
                         <div class="game-card" style="--game-theme: #00f3ff; --game-theme-alpha: rgba(0, 243, 255, 0.3);">
                             <a href="/lumen-mirror/" class="image-link">
+                                <span class="game-card__no" aria-hidden="true"></span>
+                                <span class="game-card__devices" aria-hidden="true"><i class="dev-pc is-best"></i></span>
                                 <img src="/assets/images/lumen_mirror_thumbnail-640.webp" alt="LUMEN_MIRROR - ルーメン・ミラー" width="640" height="640" loading="eager" decoding="async" />
                             </a>
                             <div class="game-card-content">
                                 <header class="major game-card-title">
                                     <h3><a href="/lumen-mirror/">LUMEN_MIRROR</a></h3>
                                 </header>
-                                <p class="game-card-desc"><strong class="game-badge">物理反射パズル / PC推奨 (マウス操作最適)</strong><br>漆黒の虚空に［鏡のライン］を紡ぎ、光をターゲットへと導け。硬派で洗練された幾何学の美学。</p>
+                                <p class="game-card-desc"><strong class="game-badge"><span class="game-badge__genre">物理反射パズル</span><span class="game-badge__sep"> / </span><span class="game-badge__device">PC推奨 (マウス操作最適)</span></strong><br>漆黒の虚空に［鏡のライン］を紡ぎ、光をターゲットへと導け。硬派で洗練された幾何学の美学。</p>
                                 <ul class="actions">
                                     <li><a href="/lumen-mirror/" class="button next">遊ぶ</a></li>
                                 </ul>
@@ -154,13 +159,15 @@
                         <!-- ブラックホール・スイーパー -->
                         <div class="game-card" style="--game-theme: #00e5ff; --game-theme-alpha: rgba(0, 229, 255, 0.3);">
                             <a href="/blackhole-sweeper/" class="image-link">
+                                <span class="game-card__no" aria-hidden="true"></span>
+                                <span class="game-card__devices" aria-hidden="true"><i class="dev-sp is-best"></i><i class="dev-pc"></i></span>
                                 <img src="/assets/images/blackhole_sweeper_thumbnail_1779194532152-640.webp" alt="ブラックホール・スイーパー" width="640" height="640" loading="lazy" decoding="async" />
                             </a>
                             <div class="game-card-content">
                                 <header class="major game-card-title">
                                     <h3><a href="/blackhole-sweeper/">ブラックホール・スイーパー</a></h3>
                                 </header>
-                                <p class="game-card-desc"><strong class="game-badge">一筆書きアクション / スマホ最適 (PC対応)</strong><br>画面をなぞって「線」を引き、湧き出るバグをぐるっと囲んで一網打尽！欲張りすぎにはご用心。</p>
+                                <p class="game-card-desc"><strong class="game-badge"><span class="game-badge__genre">一筆書きアクション</span><span class="game-badge__sep"> / </span><span class="game-badge__device">スマホ最適 (PC対応)</span></strong><br>画面をなぞって「線」を引き、湧き出るバグをぐるっと囲んで一網打尽！欲張りすぎにはご用心。</p>
                                 <ul class="actions">
                                     <li><a href="/blackhole-sweeper/" class="button next">遊ぶ</a></li>
                                 </ul>
@@ -170,13 +177,15 @@
                         <!-- ギリギリ・ブレーキ！ -->
                         <div class="game-card" style="--game-theme: #00f2fe; --game-theme-alpha: rgba(0, 242, 254, 0.3);">
                             <a href="/girigiri-brake/" class="image-link">
+                                <span class="game-card__no" aria-hidden="true"></span>
+                                <span class="game-card__devices" aria-hidden="true"><i class="dev-sp is-best"></i><i class="dev-pc"></i></span>
                                 <img src="/assets/images/girigiri_brake_thumbnail_1779165077904-640.webp" alt="ギリギリ・ブレーキ！" width="640" height="640" loading="lazy" decoding="async" />
                             </a>
                             <div class="game-card-content">
                                 <header class="major game-card-title">
                                     <h3><a href="/girigiri-brake/">ギリギリ・ブレーキ！</a></h3>
                                 </header>
-                                <p class="game-card-desc"><strong class="game-badge">チキンレース / スマホ最適 (PC対応)</strong><br>猛スピードからの急ブレーキ！崖ギリギリで止まる快感とスリルを味わおう。</p>
+                                <p class="game-card-desc"><strong class="game-badge"><span class="game-badge__genre">チキンレース</span><span class="game-badge__sep"> / </span><span class="game-badge__device">スマホ最適 (PC対応)</span></strong><br>猛スピードからの急ブレーキ！崖ギリギリで止まる快感とスリルを味わおう。</p>
                                 <ul class="actions">
                                     <li><a href="/girigiri-brake/" class="button next">遊ぶ</a></li>
                                 </ul>
@@ -186,13 +195,15 @@
                         <!-- 超絶！仕分け工場 -->
                         <div class="game-card" style="--game-theme: #ffd700; --game-theme-alpha: rgba(255, 215, 0, 0.3);">
                             <a href="/sorting-factory/" class="image-link">
+                                <span class="game-card__no" aria-hidden="true"></span>
+                                <span class="game-card__devices" aria-hidden="true"><i class="dev-sp is-best"></i><i class="dev-pc"></i></span>
                                 <img src="/assets/images/sorting_factory_thumbnail_1779165097756-640.webp" alt="超絶！仕分け工場" width="640" height="640" loading="lazy" decoding="async" />
                             </a>
                             <div class="game-card-content">
                                 <header class="major game-card-title">
                                     <h3><a href="/sorting-factory/">超絶！仕分け工場</a></h3>
                                 </header>
-                                <p class="game-card-desc"><strong class="game-badge">脳トレパニック / スマホ最適 (PC対応)</strong><br>迫り来るアイテムを左右に仕分けろ！途中で変わるルールに君の脳はついてこれるか？</p>
+                                <p class="game-card-desc"><strong class="game-badge"><span class="game-badge__genre">脳トレパニック</span><span class="game-badge__sep"> / </span><span class="game-badge__device">スマホ最適 (PC対応)</span></strong><br>迫り来るアイテムを左右に仕分けろ！途中で変わるルールに君の脳はついてこれるか？</p>
                                 <ul class="actions">
                                     <li><a href="/sorting-factory/" class="button next">遊ぶ</a></li>
                                 </ul>
@@ -202,13 +213,15 @@
                         <!-- 限界！ステルスサボタージュ -->
                         <div class="game-card" style="--game-theme: #ff3366; --game-theme-alpha: rgba(255, 51, 102, 0.3);">
                             <a href="/stealth-slacker/" class="image-link">
+                                <span class="game-card__no" aria-hidden="true"></span>
+                                <span class="game-card__devices" aria-hidden="true"><i class="dev-sp is-best"></i><i class="dev-pc"></i></span>
                                 <img src="/assets/images/stealth_slacker_thumbnail_1779165112569-640.webp" alt="限界！ステルスサボタージュ" width="640" height="640" loading="lazy" decoding="async" />
                             </a>
                             <div class="game-card-content">
                                 <header class="major game-card-title">
                                     <h3><a href="/stealth-slacker/">限界！ステルスサボタージュ</a></h3>
                                 </header>
-                                <p class="game-card-desc"><strong class="game-badge">バカゲー / スマホ最適 (PC対応)</strong><br>画面長押しで全力サボり！上司が振り返る瞬間に指を離して仕事してるフリをしろ！</p>
+                                <p class="game-card-desc"><strong class="game-badge"><span class="game-badge__genre">バカゲー</span><span class="game-badge__sep"> / </span><span class="game-badge__device">スマホ最適 (PC対応)</span></strong><br>画面長押しで全力サボり！上司が振り返る瞬間に指を離して仕事してるフリをしろ！</p>
                                 <ul class="actions">
                                     <li><a href="/stealth-slacker/" class="button next">遊ぶ</a></li>
                                 </ul>
@@ -218,13 +231,15 @@
                         <!-- みきり一閃 -->
                         <div class="game-card" style="--game-theme: #ffd36a; --game-theme-alpha: rgba(255, 211, 106, 0.3);">
                             <a href="/mikiri-issen/" class="image-link">
+                                <span class="game-card__no" aria-hidden="true"></span>
+                                <span class="game-card__devices" aria-hidden="true"><i class="dev-sp is-best"></i><i class="dev-pc"></i></span>
                                 <img src="/assets/images/mikiri_issen_thumbnail_1779165128314-640.webp" alt="みきり一閃" width="640" height="640" loading="lazy" decoding="async" />
                             </a>
                             <div class="game-card-content">
                                 <header class="major game-card-title">
                                     <h3><a href="/mikiri-issen/">みきり一閃</a></h3>
                                 </header>
-                                <p class="game-card-desc"><strong class="game-badge">反射神経 / スマホ最適 (PC対応)</strong><br>合図の瞬間だけを斬る、純粋な一瞬勝負。襲い来る剣客たちを打ち倒し、限界突破を目指せ！</p>
+                                <p class="game-card-desc"><strong class="game-badge"><span class="game-badge__genre">反射神経</span><span class="game-badge__sep"> / </span><span class="game-badge__device">スマホ最適 (PC対応)</span></strong><br>合図の瞬間だけを斬る、純粋な一瞬勝負。襲い来る剣客たちを打ち倒し、限界突破を目指せ！</p>
                                 <ul class="actions">
                                     <li><a href="/mikiri-issen/" class="button next">遊ぶ</a></li>
                                 </ul>
@@ -234,13 +249,15 @@
                         <!-- ウォールジャンパー -->
                         <div class="game-card" style="--game-theme: #ff6666; --game-theme-alpha: rgba(255, 102, 102, 0.3);">
                             <a href="/wall-jumper/" class="image-link">
+                                <span class="game-card__no" aria-hidden="true"></span>
+                                <span class="game-card__devices" aria-hidden="true"><i class="dev-pc is-best"></i></span>
                                 <img src="/assets/images/wall_jumper_thumbnail_1779165143429-640.webp" alt="ウォールジャンパー" width="640" height="640" loading="lazy" decoding="async" />
                             </a>
                             <div class="game-card-content">
                                 <header class="major game-card-title">
                                     <h3><a href="/wall-jumper/">ウォールジャンパー</a></h3>
                                 </header>
-                                <p class="game-card-desc"><strong class="game-badge">激ムズアクション / PC推奨 (キーボード最適)</strong><br>壁を蹴ってひたすら上に登り続ける即死系アクション。赤いアイツを操って自己ベストに挑もう！</p>
+                                <p class="game-card-desc"><strong class="game-badge"><span class="game-badge__genre">激ムズアクション</span><span class="game-badge__sep"> / </span><span class="game-badge__device">PC推奨 (キーボード最適)</span></strong><br>壁を蹴ってひたすら上に登り続ける即死系アクション。赤いアイツを操って自己ベストに挑もう！</p>
                                 <ul class="actions">
                                     <li><a href="/wall-jumper/" class="button next">遊ぶ</a></li>
                                 </ul>
@@ -250,13 +267,15 @@
                         <!-- 影まね道場 -->
                         <div class="game-card" style="--game-theme: #e0b756; --game-theme-alpha: rgba(224, 183, 86, 0.3);">
                             <a href="/kage-mane-dojo/" class="image-link">
+                                <span class="game-card__no" aria-hidden="true"></span>
+                                <span class="game-card__devices" aria-hidden="true"><i class="dev-sp is-best"></i></span>
                                 <img src="/assets/images/kage_mane_dojo_thumbnail.svg" alt="影まね道場" width="640" height="640" loading="lazy" decoding="async" />
                             </a>
                             <div class="game-card-content">
                                 <header class="major game-card-title">
                                     <h3><a href="/kage-mane-dojo/">影まね道場</a></h3>
                                 </header>
-                                <p class="game-card-desc"><strong class="game-badge">記憶アクション / スマホ対応</strong><br>師範が見せる型を覚え、弟子として同じ順番で打ち返せ。集中力と記憶力で段位を伸ばす道場稽古。</p>
+                                <p class="game-card-desc"><strong class="game-badge"><span class="game-badge__genre">記憶アクション</span><span class="game-badge__sep"> / </span><span class="game-badge__device">スマホ対応</span></strong><br>師範が見せる型を覚え、弟子として同じ順番で打ち返せ。集中力と記憶力で段位を伸ばす道場稽古。</p>
                                 <ul class="actions">
                                     <li><a href="/kage-mane-dojo/" class="button next">遊ぶ</a></li>
                                 </ul>
