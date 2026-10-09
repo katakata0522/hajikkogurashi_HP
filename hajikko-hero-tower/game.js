@@ -1894,6 +1894,10 @@
         sword: false,
         chalice: false
       };
+      // ✅ 死亡リトライ時は、前の挑戦で残ったシールドや「次のフロア」用の呪文書効果も持ち越さない
+      state.activeShield = false;
+      state.nextFloorShield = false;
+      state.nextFloorFever = false;
     }
 
     // 実績によるボーナスバフ

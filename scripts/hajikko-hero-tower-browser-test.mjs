@@ -86,6 +86,38 @@ try {
   if (errors.length) throw new Error(`storage-blocked: page errors: ${errors.join(' | ')}`);
   await context.close();
 
+  // 回帰テスト: ゲームオーバー後の「再挑戦」で、前の挑戦のシールドや呪文書の効果が持ち越されない
+  {
+    const retryContext = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+    const retryPage = await retryContext.newPage();
+    await retryPage.route('**/hajikko-hero-tower/game.js*', async (route) => {
+      const response = await route.fetch();
+      let body = await response.text();
+      body = body.replace('const state = createReactiveState(', 'const state = window.__heroState = createReactiveState(');
+      body = body.replace('  // ─── セーブ・ロード ───', '  window.__heroTest = { handleGameOver };\n  // ─── セーブ・ロード ───');
+      await route.fulfill({ response, body });
+    });
+    await retryPage.goto(`${site.origin}/hajikko-hero-tower/`, { waitUntil: 'networkidle' });
+    await retryPage.click('#start-play-btn');
+    await retryPage.waitForTimeout(600);
+    const leaked = await retryPage.evaluate(async () => {
+      const s = window.__heroState;
+      s.artifacts.hourglass = false;
+      s.activeShield = true;
+      s.nextFloorShield = true;
+      s.nextFloorFever = true;
+      s.hero.hp = 0;
+      window.__heroTest.handleGameOver();
+      document.getElementById('retry-btn').click();
+      await new Promise((r) => setTimeout(r, 200));
+      return { activeShield: s.activeShield, nextFloorShield: s.nextFloorShield, nextFloorFever: s.nextFloorFever, floor: s.floor };
+    });
+    if (leaked.floor !== 1 || leaked.activeShield || leaked.nextFloorShield || leaked.nextFloorFever) {
+      throw new Error(`retry after game over carried over previous-run buffs: ${JSON.stringify(leaked)}`);
+    }
+    await retryContext.close();
+  }
+
   console.log('hajikko-hero-tower browser test passed');
 } finally {
   await browser?.close();
