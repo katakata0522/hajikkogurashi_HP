@@ -2111,3 +2111,46 @@ body {
     max-height: 880px;
   }
 }
+
+/* 2026-10: ミニゲーム広場へ戻る入口（他のゲームと同じく、どの画面からでも戻れるように）。文字は使わずアイコンのみ */
+.settings-bar {
+  gap: 8px;
+}
+.settings-bar .footer-copy {
+  margin-left: auto;
+}
+.back-to-list,
+.start-back-to-list {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+}
+.back-to-list {
+  min-width: 36px;
+}
+.start-back-to-list {
+  position: absolute;
+  top: calc(12px + env(safe-area-inset-top, 0px));
+  left: calc(12px + env(safe-area-inset-left, 0px));
+  z-index: 2;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  font-size: 0.75rem;
+}
+.start-back-to-list:hover,
+.back-to-list:hover {
+  color: #00ffff;
+  border-color: rgba(0, 255, 255, 0.5);
+}
+.back-to-list:focus-visible,
+.start-back-to-list:focus-visible,
+#sound-btn:focus-visible,
+.start-btn:focus-visible {
+  outline: 3px solid #00ffff;
+  outline-offset: 3px;
+}
