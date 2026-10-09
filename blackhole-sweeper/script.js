@@ -310,6 +310,8 @@ class UIManager {
     }
 
     startGameUI(showTutorial) {
+        // 前のゲームオーバーの結果画面が、すぐ再挑戦した新しいゲームの上に遅れて出ないようにする
+        clearTimeout(this.resultTimer);
         this.startScreen.classList.remove('active');
         this.resultScreen.classList.remove('active');
         this.hud.classList.remove('hidden');
@@ -352,7 +354,8 @@ class UIManager {
             this.newRecordBadge.classList.add('hidden');
         }
 
-        setTimeout(() => { this.resultScreen.classList.add('active'); }, 1000);
+        clearTimeout(this.resultTimer);
+        this.resultTimer = setTimeout(() => { this.resultScreen.classList.add('active'); }, 1000);
     }
 
     updateNextAchievement(stats) {
@@ -797,6 +800,8 @@ class GameController {
     }
 
     startGame() {
+        // チュートリアル完了直後にやり直した場合、前のゲーム用の敵が新しいゲームに追加されないようにする
+        clearTimeout(this.tutorialTimer);
         this.audio.init();
         this.audio.playEffect('start');
         this.gameState = STATE.PLAYING;
@@ -999,7 +1004,9 @@ class GameController {
             markTutorialSeen();
             
             // 吸い込まれたアニメーション（約0.25秒）の余韻を残して1秒後に本番スタート
-            setTimeout(() => {
+            clearTimeout(this.tutorialTimer);
+            this.tutorialTimer = setTimeout(() => {
+                if (this.gameState !== STATE.PLAYING) return;
                 this.ui.hideHint();
                 this.ui.showToast('チュートリアル完了！本番スタート！');
                 

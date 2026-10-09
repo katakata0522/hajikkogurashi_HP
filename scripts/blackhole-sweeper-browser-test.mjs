@@ -153,6 +153,29 @@ try {
   }
   await popupPage.close();
 
+  // 回帰テスト: ゲームオーバー直後に R で再挑戦しても、前の結果画面が新しいゲームの上に遅れて出てこない
+  const quickRetryPage = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  await quickRetryPage.addInitScript(() => localStorage.setItem('blackhole_tutorial_seen', '1'));
+  await quickRetryPage.goto(`http://127.0.0.1:${port}/blackhole-sweeper/`, { waitUntil: 'networkidle' });
+  await quickRetryPage.evaluate(() => {
+    const originalUpdate = GameController.prototype.update;
+    GameController.prototype.update = function (dt) { window.__game = this; return originalUpdate.call(this, dt); };
+  });
+  await quickRetryPage.click('#start-btn');
+  await quickRetryPage.waitForFunction(() => window.__game);
+  await quickRetryPage.evaluate(() => { window.__game.life = 1; window.__game.triggerGameOver(); });
+  await quickRetryPage.waitForTimeout(100);
+  await quickRetryPage.keyboard.press('KeyR');
+  await quickRetryPage.waitForTimeout(1300);
+  const quickRetry = await quickRetryPage.evaluate(() => ({
+    playing: window.__game.gameState === 1,
+    resultActive: document.querySelector('#result-screen').classList.contains('active'),
+  }));
+  if (!quickRetry.playing || quickRetry.resultActive) {
+    throw new Error(`stale result screen covered the new game: ${JSON.stringify(quickRetry)}`);
+  }
+  await quickRetryPage.close();
+
   await browser.close();
 } finally {
   await new Promise((resolveClose) => server.close(resolveClose));
