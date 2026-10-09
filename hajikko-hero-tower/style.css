@@ -2032,6 +2032,56 @@ body {
   min-height: 0;
   min-width: 0;
 }
+/* マスの中のアイコンがマスの外（上）にはみ出して、隣のマスに重なって見えていたのを修正。
+   SVG に viewBox が無く大きさが決まらなかったため、アイコン枠の高さに合わせて縮める。 */
+.grid-panel .panel-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 52%;
+  flex: 0 0 auto;
+  margin-bottom: 1px;
+}
+.grid-panel .panel-icon svg {
+  width: auto;
+  height: 100%;
+  aspect-ratio: 1;
+}
+/* 「獲得した宝物」が1文字ずつ縦に折り返して段が高くなり、盤面が小さくなっていたのを修正 */
+.artifact-slots-row {
+  gap: 8px;
+}
+.art-section-label {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.art-badge-container {
+  flex: 1;
+  min-width: 0;
+  justify-content: space-between;
+  gap: 2px;
+}
+.art-badge-container .art-badge {
+  margin: 0;
+}
+/* 盤面を常に正方形に（パソコンの横長画面でマスが横に潰れ、アイコンがずれて見えていた）。
+   盤面エリアの幅と高さの小さい方に合わせて中央に置く。 */
+@supports (container-type: size) {
+  .grid-section-wrap {
+    container-type: size;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+    min-height: 220px;
+  }
+  #grid-container {
+    flex: none;
+    width: min(100cqw, 100cqh) !important;
+    height: min(100cqw, 100cqh) !important;
+  }
+}
 
 /* 2026-10: スマホのブラウザでアドレスバー分だけ下が切れないよう、実際に見えている高さ(dvh)を使う */
 @supports (height: 100dvh) {

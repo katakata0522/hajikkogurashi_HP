@@ -2850,7 +2850,7 @@
 
       const icon = document.createElement("span");
       icon.className = "panel-icon";
-      icon.innerHTML = `<svg><use href=""></use></svg>`;
+      icon.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href=""></use></svg>`;
       panel.appendChild(icon);
 
       const val = document.createElement("span");
