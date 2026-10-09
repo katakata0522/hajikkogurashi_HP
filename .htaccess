@@ -1,2 +1,23 @@
 # HTMLファイル内でPHPを動作させる設定（エックスサーバー FastCGI環境用）
 AddHandler fcgid-script .html .htm
+
+# 存在しないURLでは、Xserver標準画面ではなくサイトの404ページを出す
+ErrorDocument 404 /404.html
+
+# フォルダの中身一覧を表示しない
+Options -Indexes
+
+# 隠しファイル（.htaccess / .git など）と、サイト内部用の部品フォルダは直接開けないようにする
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule "(^|/)\.(?!well-known/)" - [F]
+  RewriteRule "^includes/" - [F]
+</IfModule>
+
+# 基本的なセキュリティ用ヘッダー
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+</IfModule>
