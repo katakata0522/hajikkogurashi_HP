@@ -206,6 +206,14 @@ try {
   if (pausedByKey.state !== 'paused' || pausedByKey.pauseBtn !== 'none' || resumedByKey.state !== 'playing' || resumedByKey.pauseBtn === 'none') {
     throw new Error(`keyboard pause is inconsistent: ${JSON.stringify({ pausedByKey, resumedByKey })}`);
   }
+  // 回帰テスト: トゲに当たらずに「タイトルへ」でやめても、その回の到達点が最高記録に残る
+  await qaPage.evaluate(() => { eval('maxDistance = 37'); });
+  await qaPage.keyboard.press('KeyP');
+  await qaPage.click('#quit-btn');
+  const savedAfterQuit = await qaPage.evaluate(() => ({ stored: localStorage.getItem('wallJumperBestDistance'), text: document.querySelector('#best-time-display').textContent }));
+  if (savedAfterQuit.stored !== '37' || !savedAfterQuit.text.includes('37')) {
+    throw new Error(`run record was lost when quitting: ${JSON.stringify(savedAfterQuit)}`);
+  }
   await qaPage.close();
 
   // 回帰テスト: 横向きの案内が出たら一時停止する

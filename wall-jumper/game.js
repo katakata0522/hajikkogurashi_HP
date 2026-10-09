@@ -171,7 +171,18 @@ function updateBestDistanceUI() {
     }
 }
 
+// 走行中の最高到達点を記録に反映する（トゲ以外でやめた場合も記録が消えないように）
+function saveRunRecord() {
+    if (maxDistance > bestDistance) {
+        bestDistance = maxDistance;
+        safeWriteBestDistance(bestDistance);
+        updateBestDistanceUI();
+    }
+}
+
 function initGame() {
+    // 「タイトルへ」や R でのやり直しの前に、今回の到達点を記録する
+    saveRunRecord();
     initAudio();
     updateBestDistanceUI();
     
@@ -760,7 +771,10 @@ function togglePause() {
 // 戻った瞬間にいきなり再開して落下・被弾しないように、ポーズ画面から再開してもらう。
 document.addEventListener('visibilitychange', () => {
     if (document.hidden && gameState === 'playing') togglePause();
+    if (document.hidden) saveRunRecord();
 });
+// 「広場に戻る」やページを閉じたときも記録を残す
+window.addEventListener('pagehide', saveRunRecord);
 
 pauseBtn.addEventListener('click', togglePause);
 resumeBtn.addEventListener('click', togglePause);
