@@ -1,0 +1,34 @@
+/* =========================================================
+   site-theme.css
+   夜間作業で追加した共通スタイル（サイトページ専用。ミニゲームには読み込まない）
+   ========================================================= */
+
+/* ---- アクセシビリティ: 本文へスキップ ---- */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 1rem;
+  z-index: 100001;
+  padding: 0.6rem 1rem;
+  background: #ffcc00;
+  color: #121526 !important;
+  font-weight: 700;
+  border-radius: 6px;
+  border-bottom: none !important;
+  text-decoration: none;
+  transition: top 0.15s ease;
+}
+.skip-link:focus {
+  top: 0.75rem;
+}
+
+/* ---- キーボード操作時のフォーカス表示 ---- */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[role="button"]:focus-visible {
+  outline: 3px solid #ffcc00 !important;
+  outline-offset: 3px;
+}

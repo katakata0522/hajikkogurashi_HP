@@ -106,7 +106,14 @@ try {
 
   await page.goto(`http://${host}:${port}/minigames.html`, { waitUntil: 'networkidle' });
   const card = await page.locator('a[href="/kage-mane-dojo/"]').count();
-  const imageStatus = await page.locator('img[src="/assets/images/kage_mane_dojo_thumbnail.svg"]').evaluate((img) => img.complete && img.naturalWidth > 0);
+  // サムネイルは遅延読み込み(loading="lazy")なので、画面内に入れてから読み込み完了を確認する
+  const thumbnail = page.locator('img[src="/assets/images/kage_mane_dojo_thumbnail.svg"]');
+  await thumbnail.scrollIntoViewIfNeeded();
+  await page.waitForFunction(() => {
+    const img = document.querySelector('img[src="/assets/images/kage_mane_dojo_thumbnail.svg"]');
+    return img && img.complete && img.naturalWidth > 0;
+  }, null, { timeout: 5000 }).catch(() => {});
+  const imageStatus = await thumbnail.evaluate((img) => img.complete && img.naturalWidth > 0);
   if (card < 2 || !imageStatus) {
     throw new Error(`minigames card is incomplete: ${JSON.stringify({ card, imageStatus })}`);
   }
