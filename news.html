@@ -30,9 +30,13 @@
 	<meta name="twitter:title" content="お知らせ | Corner Neighbor公式ホームページ" />
 	<meta name="twitter:description" content="「Corner Neighbor」サークルの最新ニュースとお知らせをお届け！ホームページのアップデート情報やイベントへの出展情報、note記事の更新、新規ミニゲームのリリース情報など、私たちの活動の「いま」を随時更新しています。" />
 	<meta name="twitter:image" content="https://hajikkoroom.xsrv.jp/assets/images/pic02.webp" />
-	<link rel="stylesheet" href="/assets/css/main.css?v=20260708" />
-	<link rel="stylesheet" href="/assets/css/custom.css?v=20260708-2" />
-	<link rel="stylesheet" href="/assets/css/site-theme.css?v=20261010-r2" />
+	<!-- フォント・アイコンは表示を止めないように後から読み込む（2026-10: 表示速度改善） -->
+	<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=DotGothic16&amp;family=Noto+Sans+JP:wght@300;400;700&amp;family=Space+Grotesk:wght@400;700&amp;display=swap" onload="this.onload=null;this.rel='stylesheet'" />
+	<link rel="preload" as="style" href="/assets/css/font-awesome.min.css" onload="this.onload=null;this.rel='stylesheet'" />
+	<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&amp;family=Noto+Sans+JP:wght@300;400;700&amp;family=Space+Grotesk:wght@400;700&amp;display=swap" /><link rel="stylesheet" href="/assets/css/font-awesome.min.css" /></noscript>
+	<link rel="stylesheet" href="/assets/css/main.css?v=20261010-r2" />
+	<link rel="stylesheet" href="/assets/css/custom.css?v=20261010-r2" />
+	<link rel="stylesheet" href="/assets/css/site-theme.css?v=20261010-r3" />
 	<script type="application/ld+json">
 	{
 		"@context": "https://schema.org",
@@ -141,7 +145,7 @@
 
 <a href="#" id="scrollToTopBtn" title="ページトップへ戻る">▲</a>
 <!-- Scripts -->
-	<script src="/assets/js/main.js?v=20260708-2"></script>
+	<script src="/assets/js/main.js?v=20260708-2" defer></script>
 	
 
     </div>

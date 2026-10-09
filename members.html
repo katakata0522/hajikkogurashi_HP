@@ -30,6 +30,10 @@
 	<meta name="twitter:title" content="メンバー紹介 | Corner Neighbor公式ホームページ" />
 	<meta name="twitter:description" content="インディーゲーム開発に情熱を燃やす「Corner Neighbor」の個性豊かな制作メンバーをご紹介！エンジニア、デザイナー、プランナー、進行管理など、それぞれのスキルや趣味、活動における役割を公開しています。" />
 	<meta name="twitter:image" content="https://hajikkoroom.xsrv.jp/assets/images/pic03.webp" />
+	<!-- フォント・アイコンは表示を止めないように後から読み込む（2026-10: 表示速度改善） -->
+	<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=DotGothic16&amp;family=Noto+Sans+JP:wght@300;400;700&amp;family=Space+Grotesk:wght@400;700&amp;display=swap" onload="this.onload=null;this.rel='stylesheet'" />
+	<link rel="preload" as="style" href="/assets/css/font-awesome.min.css" onload="this.onload=null;this.rel='stylesheet'" />
+	<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&amp;family=Noto+Sans+JP:wght@300;400;700&amp;family=Space+Grotesk:wght@400;700&amp;display=swap" /><link rel="stylesheet" href="/assets/css/font-awesome.min.css" /></noscript>
 	<link rel="stylesheet" href="/assets/css/main.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/css/main.css'); ?>" />
 	<link rel="stylesheet" href="/assets/css/custom.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/css/custom.css'); ?>" />
 	<script type="application/ld+json">
@@ -53,7 +57,7 @@
 	}
 	</script>
 	<link rel="stylesheet" href="/assets/css/members.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/css/members.css'); ?>" />
-	<link rel="stylesheet" href="/assets/css/site-theme.css?v=20261010-r2" />
+	<link rel="stylesheet" href="/assets/css/site-theme.css?v=20261010-r3" />
 	<link rel="stylesheet" href="/assets/css/theme-members.css?v=20261010-r2" />
 </head>
 
@@ -243,7 +247,7 @@
 
 <a href="#" id="scrollToTopBtn" title="ページトップへ戻る">▲</a>
 <!-- Scripts -->
-	<script src="/assets/js/main.js?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/js/main.js'); ?>"></script>
+	<script src="/assets/js/main.js?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/js/main.js'); ?>" defer></script>
 	
 
     </div>
