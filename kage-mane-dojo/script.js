@@ -376,6 +376,9 @@ function updateLivesUi() {
 
 function startLesson() {
   clearTimers();
+  // お手つき演出の途中で止まった場合でも、赤い札と正解表示を残さない
+  elements.dirButtons.forEach((button) => button.classList.remove('error'));
+  elements.directionFlash.classList.remove('correct-hint');
   state.mode = 'watching';
   state.inputIndex = 0;
   
@@ -416,6 +419,8 @@ function startGame() {
 }
 
 function completeLesson() {
+  // 次の型が始まるまでの間に押したキーを「お手つき」にしない
+  state.mode = 'waiting';
   state.streak += 1;
   state.bestLesson = Math.max(state.bestLesson, state.lesson);
   saveRecord();
@@ -518,14 +523,15 @@ function handleDirection(direction) {
       triggerVibration([60, 40, 60]);
       
       // 0.65秒後に答え合わせ演出を解除し、もう一度お手本を最初から再生！(修行やり直し)
-      window.setTimeout(() => {
+      // タイマーを管理対象にして、この間に一時停止したら止まるようにする
+      state.timers.push(window.setTimeout(() => {
         pressedButton?.classList.remove('error');
         elements.directionFlash.classList.remove('correct-hint');
         
         // 手数をリセットしてお手本を再スタート
         state.inputIndex = 0;
         showSequence();
-      }, 650);
+      }, 650));
       
     } else {
       // --- 残機（ライフ）が尽きた場合（ゲームオーバー） ---
@@ -655,6 +661,9 @@ function bindEvents() {
     if (event.repeat) return;
     if (event.key === ' ' || event.key === 'Enter') {
       if (document.activeElement && document.activeElement.tagName === 'BUTTON') return;
+      // お名前の入力中は、スペースや変換確定の Enter でゲームを始めない
+      const typing = document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA');
+      if (typing && (event.key === ' ' || event.isComposing || event.keyCode === 229)) return;
       if (state.mode === 'result' || !elements.playScreen.classList.contains('active')) {
         event.preventDefault();
         startGame();
@@ -919,7 +928,8 @@ function removePauseOverlay() {
 }
 
 function pauseGame() {
-  if (state.mode === 'watching' || state.mode === 'input') {
+  const retrying = state.mode === 'waiting' && state.lives > 0 && elements.playScreen.classList.contains('active');
+  if (state.mode === 'watching' || state.mode === 'input' || retrying) {
     clearTimers();
     state.mode = 'paused';
     setInputEnabled(false);

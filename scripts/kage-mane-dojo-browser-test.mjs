@@ -104,6 +104,35 @@ try {
     throw new Error(`unexpected game state: ${JSON.stringify(state)}`);
   }
 
+  // 回帰テスト: 型を打ち終えた直後（次の型までの間）に押したキーで、お札（ライフ）が減らない
+  const keyOf = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
+  const lessonSequence = await page.evaluate(() => state.sequence.slice());
+  for (const direction of lessonSequence) await page.keyboard.press(keyOf[direction]);
+  const livesBeforeExtraKey = await page.evaluate(() => state.lives);
+  await page.keyboard.press('ArrowUp');
+  const livesAfterExtraKey = await page.evaluate(() => state.lives);
+  if (livesAfterExtraKey !== livesBeforeExtraKey) {
+    throw new Error(`extra key after clearing a lesson cost a life: ${livesBeforeExtraKey} -> ${livesAfterExtraKey}`);
+  }
+
+  // 回帰テスト: お手つき演出の途中でタブを離れたら一時停止し、裏でお手本が再生されない
+  await page.waitForFunction(() => state.mode === 'input', null, { timeout: 15000 });
+  await page.evaluate(() => {
+    const wrong = ['up', 'right', 'down', 'left'].find((direction) => direction !== state.sequence[state.inputIndex]);
+    handleDirection(wrong);
+    window.dispatchEvent(new Event('blur'));
+  });
+  await page.waitForTimeout(900);
+  const pausedMode = await page.evaluate(() => ({ mode: state.mode, errors: document.querySelectorAll('.dir-button.error').length }));
+  if (pausedMode.mode !== 'paused') throw new Error(`blur during mistake feedback did not pause: ${JSON.stringify(pausedMode)}`);
+
+  // 回帰テスト: お名前の入力中にスペースを打ってもゲームが始まらない
+  await page.goto(`http://${host}:${port}/kage-mane-dojo/`, { waitUntil: 'networkidle' });
+  await page.focus('#usernameInput');
+  await page.keyboard.press('Space');
+  const stillTitle = await page.evaluate(() => document.querySelector('#titleScreen').classList.contains('active'));
+  if (!stillTitle) throw new Error('typing a space in the name field started the game');
+
   await page.goto(`http://${host}:${port}/minigames.html`, { waitUntil: 'networkidle' });
   const card = await page.locator('a[href="/kage-mane-dojo/"]').count();
   // サムネイルは遅延読み込み(loading="lazy")なので、画面内に入れてから読み込み完了を確認する
