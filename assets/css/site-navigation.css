@@ -27,6 +27,8 @@ body.menu-open { position: fixed; width: 100%; overflow: hidden; }
 
 :where(.site-header, .mobile-menu) { font-family: var(--nav-font); line-height: 1.4; letter-spacing: normal; }
 .site-header a, .mobile-menu a { border-bottom: 0 !important; text-decoration: none; color: inherit !important; }
+/* タップでメニューを開いたときは枠を出さない（キーボード操作のときだけ黄色の枠） */
+.site-header a:focus:not(:focus-visible), .site-header button:focus:not(:focus-visible), .mobile-menu a:focus:not(:focus-visible) { box-shadow: none !important; outline: none; }
 .site-header a:focus-visible, .site-header button:focus-visible, .mobile-menu a:focus-visible {
   outline: 3px solid var(--nav-yellow) !important;
   outline-offset: 4px;
