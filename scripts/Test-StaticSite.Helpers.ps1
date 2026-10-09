@@ -16,9 +16,11 @@ $script:StaticAssets = @(
     "assets\css\custom.css",
     "assets\css\members.css",
     "assets\css\index.css",
+    "assets\css\home-v2.css",
     "assets\css\portfolio.css",
     "assets\js\main.js",
     "assets\js\index.js"
+    "assets\js\home-v2.js"
 )
 
 function Get-RepoRoot {
