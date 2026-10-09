@@ -13,6 +13,7 @@ const games = [
   'mikiri-issen',
   'wall-jumper',
   'kage-mane-dojo',
+  'hajikko-hero-tower',
 ];
 
 for (const game of games) {
