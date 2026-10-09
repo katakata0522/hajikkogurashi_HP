@@ -21,3 +21,13 @@ Options -Indexes
   Header always set X-Frame-Options "SAMEORIGIN"
   Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
 </IfModule>
+
+# サイトの入口ページ（HTML 10ページ）だけ、毎回更新を確認させる（PR #52 から取り込み）。
+# ゲームや CSS/JS のキャッシュには影響しない。
+<IfModule mod_setenvif.c>
+    SetEnvIf Request_URI "^/(?:$|index\.html$|aboutus\.html$|portfolio\.html$|members\.html$|minigames\.html$|news\.html$|coming-soon\.html$|privacy-policy\.html$|terms-of-service\.html$|404\.html$)" cn_site_html
+</IfModule>
+<IfModule mod_headers.c>
+    Header onsuccess unset Cache-Control env=cn_site_html
+    Header always set Cache-Control "no-cache" env=cn_site_html
+</IfModule>
