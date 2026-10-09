@@ -27,8 +27,8 @@
 	<meta name="twitter:title" content="作品一覧 | Corner Neighbor公式ホームページ" />
 	<meta name="twitter:description" content="ゲーム制作サークル「Corner Neighbor」のインディーゲーム開発実績・作品一覧です。現在公開に向けてUE5で鋭意制作中のメインゲームの進捗状況から、活動記録であるnote記事や動画へのリンクまで幅広く掲載しています。" />
 	<meta name="twitter:image" content="https://hajikkoroom.xsrv.jp/assets/images/pic05.webp" />
-	<link rel="stylesheet" href="/assets/css/main.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/css/main.css'); ?>" />
-	<link rel="stylesheet" href="/assets/css/custom.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/css/custom.css'); ?>" />
+	<link rel="stylesheet" href="/assets/css/main.css?v=6bef7fc59b5a" />
+	<link rel="stylesheet" href="/assets/css/custom.css?v=7245d28ce2ad" />
 	<script type="application/ld+json">
 	{
 		"@context": "https://schema.org",
@@ -49,35 +49,45 @@
 		]
 	}
 	</script>
-	<link rel="stylesheet" href="/assets/css/portfolio.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/css/portfolio.css'); ?>" />
+	<link rel="stylesheet" href="/assets/css/portfolio.css?v=81f8ef95a180" />
+  <link rel="stylesheet" href="/assets/css/site-navigation.css?v=5ba8eff240ed">
 </head>
 
 
-<body>
+<body class="cn-subpage">
+  <a class="skip-link" href="#main">本文へ移動する</a>
     <div id="wrapper">
         <!-- Header -->
-<header id="header">
-  <a href="/" class="logo">
-    <strong>Corner Neighbor</strong>
-    <span>まったりゲームを作るサークル！</span>
-  </a>
-  <nav>
-    <a href="#menu" aria-label="メニューを開く">MENU</a>
-  </nav>
-</header>
-
-<!-- Menu -->
-<nav id="menu">
-  <ul class="links">
-    <li><a href="/">ホーム</a></li>
-    <li><a href="/aboutus.html">私たちについて</a></li>
-    <li><a href="/members.html">メンバー紹介</a></li>
-    <li><a href="/news.html">お知らせ</a></li>
-    <li><a href="/portfolio.html">作品一覧</a></li>
-    <li><a href="/minigames.html">ミニゲーム広場</a></li>
-    <li><a href="/coming-soon.html">鋭意制作中！</a></li>
-  </ul>
-</nav>
+<!-- site-nav:start -->
+    <header class="site-header" id="site-header">
+      <a class="brand" href="/" aria-label="Corner Neighbor トップに戻る">
+        <span class="brand-symbol" aria-hidden="true"><i></i><b></b><em></em></span>
+        <span class="brand-name">corner<span>neighbor</span><small>はじっこぐらし</small></span>
+      </a>
+      <nav class="desktop-nav" aria-label="メインナビゲーション">
+        <a href="/aboutus.html">わたしたち</a><a href="/portfolio.html" aria-current="page">つくるもの</a><a href="/news.html">活動の記録</a><a href="/members.html">メンバー</a>
+      </nav>
+      <div class="header-actions">
+        <a class="header-play" href="/minigames.html">あそぶ <span aria-hidden="true">↗</span></a>
+        <button class="menu-toggle" type="button" aria-controls="mobile-menu" aria-expanded="false" aria-label="メニューを開く">
+          <span class="menu-toggle-lines" aria-hidden="true"><i></i><i></i></span><span class="menu-toggle-text">MENU</span>
+        </button>
+      </div>
+    </header>
+    <nav class="mobile-menu" id="mobile-menu" aria-label="モバイルメニュー" inert>
+      <div class="mobile-menu-inner">
+        <p>WHERE TO?</p>
+<a href="/"><span aria-hidden="true">00</span> ホームへ</a>
+        <a href="/aboutus.html"><span aria-hidden="true">01</span> わたしたち</a>
+        <a href="/portfolio.html" aria-current="page"><span aria-hidden="true">02</span> つくるもの</a>
+        <a href="/minigames.html"><span aria-hidden="true">03</span> いますぐあそぶ</a>
+        <a href="/news.html"><span aria-hidden="true">04</span> 活動の記録</a>
+        <a href="/members.html"><span aria-hidden="true">05</span> メンバー</a>
+        <a href="/#contact"><span aria-hidden="true">06</span> お問い合わせ</a>
+        <div class="mobile-menu-bottom">なんでもない日を、ちょっと面白く。</div>
+      </div>
+    </nav>
+    <!-- site-nav:end -->
 
 
         <!-- Main -->
@@ -218,6 +228,9 @@
         <!-- Contact -->
 <?php include 'includes/contact-section.php'; ?>
 
+<nav class="site-trail" aria-label="ほかの活動へ">
+  <p>次の寄り道</p><div><a href="/">ホームへ</a><a href="/portfolio.html">つくるもの</a><a href="/news.html">活動の記録</a><a href="/members.html">メンバー</a><a href="/#contact">お問い合わせ</a></div>
+</nav>
 <!-- Footer -->
 	<footer id="footer">
 		<div class="inner">
@@ -233,10 +246,11 @@
 
 <a href="#" id="scrollToTopBtn" title="ページトップへ戻る">▲</a>
 <!-- Scripts -->
-	<script src="/assets/js/main.js?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/js/main.js'); ?>"></script>
+	<script src="/assets/js/main.js?v=84ce4285d7a8"></script>
 	
 
     </div>
+  <script defer src="/assets/js/site-navigation.js?v=af6ea83ac1e0"></script>
 </body>
 
 </html>

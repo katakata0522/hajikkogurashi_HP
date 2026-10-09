@@ -20,7 +20,8 @@ $script:StaticAssets = @(
     "assets\css\portfolio.css",
     "assets\js\main.js",
     "assets\js\index.js"
-    "assets\js\home-v2.js"
+    "assets\js\site-navigation.js",
+    "assets\css\site-navigation.css"
 )
 
 function Get-RepoRoot {

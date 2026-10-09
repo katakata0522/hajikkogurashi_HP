@@ -9,8 +9,8 @@ const vm = require('node:vm');
 const root = path.resolve(__dirname, '..');
 const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 const html = read('index.html');
-const css = read('assets/css/home-v2.css');
-const js = read('assets/js/home-v2.js');
+const css = read('assets/css/home-v2.css') + read('assets/css/site-navigation.css');
+const js = read('assets/js/site-navigation.js');
 
 test('V2 homepage is independent static HTML with canonical and sharing metadata', () => {
   assert.match(html, /<html\s+lang="ja">/);
@@ -42,7 +42,7 @@ test('V2 navigation remains accessible in keyboard and small-screen use', () => 
   assert.match(js, /restoreFocus/);
   assert.match(css, /prefers-reduced-motion/);
   assert.match(css, /max-width:\s*380px/);
-  assert.doesNotThrow(() => new vm.Script(js, { filename: 'home-v2.js' }));
+  assert.doesNotThrow(() => new vm.Script(js, { filename: 'site-navigation.js' }));
 });
 
 test('V2 local pages and featured mini-games correspond to real site routes', () => {
@@ -63,11 +63,11 @@ test('V2 local pages and featured mini-games correspond to real site routes', ()
   assert.doesNotMatch(html, /逃亡おじさん|V2 CONCEPT/);
 });
 
-test('V2 loads paired revisioned CSS and JS and exposes a contact path', () => {
-  const style = html.match(/href="\/assets\/css\/home-v2\.css\?v=([^"]+)"/);
-  const script = html.match(/src="\/assets\/js\/home-v2\.js\?v=([^"]+)"/);
-  assert.ok(style && script);
-  assert.equal(style[1], script[1]);
+test('V2 exposes content-versioned assets and a contact path', () => {
+  for (const asset of ['assets/css/home-v2.css', 'assets/css/site-navigation.css', 'assets/js/site-navigation.js']) {
+    const digest = require('node:crypto').createHash('sha256').update(fs.readFileSync(path.join(root,asset))).digest('hex').slice(0,12);
+    assert.ok(html.includes('/' + asset + '?v=' + digest + '"'), 'current content version: ' + asset);
+  }
   assert.match(html, /href="mailto:[^"]+"/);
   assert.doesNotMatch(html, /src="\/assets\/js\/main\.js/);
 });

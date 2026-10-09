@@ -4,7 +4,7 @@ $ErrorActionPreference = 'Stop'
 $repoRoot = Get-RepoRoot
 $index = [System.IO.File]::ReadAllText((Join-Path $repoRoot 'index.html'), [System.Text.Encoding]::UTF8)
 $cssFile = Join-Path $repoRoot 'assets/css/home-v2.css'
-$jsFile = Join-Path $repoRoot 'assets/js/home-v2.js'
+$jsFile = Join-Path $repoRoot 'assets/js/site-navigation.js'
 $errors = New-TestErrorList
 
 foreach ($asset in @($cssFile, $jsFile)) {
@@ -21,12 +21,15 @@ if ($index -match 'file_get_contents|simplexml_load_string|<\?php') {
 }
 
 $cssReference = [regex]::Match($index, '<link\b[^>]*\bhref="/assets/css/home-v2\.css\?v=([A-Za-z0-9._-]+)"')
-$jsReference = [regex]::Match($index, '<script\b[^>]*\bsrc="/assets/js/home-v2\.js\?v=([A-Za-z0-9._-]+)"')
+$jsReference = [regex]::Match($index, '<script\b[^>]*\bsrc="/assets/js/site-navigation\.js\?v=([A-Za-z0-9._-]+)"')
 if (-not $cssReference.Success -or -not $jsReference.Success) {
     $errors.Add('V2 homepage must reference versioned external CSS and JS')
 }
-elseif ($cssReference.Groups[1].Value -ne $jsReference.Groups[1].Value) {
-    $errors.Add('V2 homepage CSS and JS asset revisions are inconsistent')
+foreach ($asset in @(@{ File=$cssFile; Reference=$cssReference }, @{ File=$jsFile; Reference=$jsReference })) {
+    if ((Test-Path -LiteralPath $asset.File) -and $asset.Reference.Success) {
+        $digest = (Get-FileHash -LiteralPath $asset.File -Algorithm SHA256).Hash.Substring(0,12).ToLowerInvariant()
+        if ($asset.Reference.Groups[1].Value -ne $digest) { $errors.Add("Stale content version: $($asset.File)") }
+    }
 }
 
 if ([regex]::Matches($index, '<h1\b', 'IgnoreCase').Count -ne 1) {
