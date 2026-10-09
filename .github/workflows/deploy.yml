@@ -82,6 +82,7 @@ jobs:
         run: |
           pwsh -File ./scripts/static-site-smoke-test.ps1
           pwsh -File ./scripts/home-asset-smoke-test.ps1
+          node --test ./scripts/home-v2-contract.test.cjs
           pwsh -File ./scripts/structure-smoke-test.ps1
           pwsh -File ./scripts/local-reference-check.ps1
           pwsh -File ./scripts/deploy-public-artifact-smoke-test.ps1
