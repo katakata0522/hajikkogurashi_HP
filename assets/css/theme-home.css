@@ -1,0 +1,504 @@
+/* =========================================================
+   theme-home.css  トップページ専用（2026-10 夜間作業 第2弾）
+   - ヒーロー: ドットの星空＋走査線＋ゲーム画面モニター
+   - ボタン: 「PRESS START」風
+   - タイル: ホバー／フォーカスで浮き上がり＋ピクセル枠
+   動きはすべて「動きを減らす」設定で止まる
+   ========================================================= */
+
+/* ---------- ヒーロー全体 ---------- */
+body.is-home #wrapper #banner.major {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(ellipse 60% 70% at 78% 45%, rgba(92, 225, 230, 0.12), transparent 70%),
+    radial-gradient(ellipse 50% 60% at 15% 110%, rgba(255, 107, 139, 0.14), transparent 70%),
+    linear-gradient(180deg, #0b0e1c 0%, #121733 60%, #161b38 100%) !important;
+}
+/* 第1弾の角の飾りはモニターの枠に移したので消す */
+body.is-home #wrapper #banner.major::before {
+  display: none !important;
+}
+/* 走査線（ブラウン管っぽい横じま） */
+body.is-home #wrapper #banner.major::after {
+  content: "";
+  display: block !important;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 1;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.16) 0 1px, transparent 1px 3px) !important;
+  pointer-events: none;
+  transition: none;
+}
+
+/* ドットの星空（2層。ゆっくり流れる） */
+.hero-sky {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.hero-sky__stars {
+  position: absolute;
+  inset: -240px 0 0 0;
+  background-image:
+    radial-gradient(1.2px 1.2px at 23px 41px, rgba(255, 255, 255, 0.9) 99%, transparent),
+    radial-gradient(1.2px 1.2px at 141px 13px, rgba(255, 255, 255, 0.7) 99%, transparent),
+    radial-gradient(1.5px 1.5px at 87px 160px, rgba(92, 225, 230, 0.9) 99%, transparent),
+    radial-gradient(1.2px 1.2px at 199px 117px, rgba(255, 255, 255, 0.6) 99%, transparent),
+    radial-gradient(1.5px 1.5px at 11px 189px, rgba(255, 204, 0, 0.85) 99%, transparent),
+    radial-gradient(1.2px 1.2px at 170px 70px, rgba(255, 255, 255, 0.5) 99%, transparent),
+    radial-gradient(1.2px 1.2px at 60px 225px, rgba(255, 107, 139, 0.8) 99%, transparent);
+  background-size: 240px 240px;
+  animation: hero-stars 60s linear infinite;
+}
+.hero-sky__stars--far {
+  opacity: 0.55;
+  background-size: 160px 160px;
+  animation-duration: 110s;
+}
+/* 下のほうに、奥へ続くグリッドの床（うっすら） */
+.hero-sky__floor {
+  position: absolute;
+  left: -25%;
+  right: -25%;
+  bottom: -2px;
+  height: 46%;
+  transform: perspective(380px) rotateX(62deg);
+  transform-origin: 50% 100%;
+  background-image:
+    linear-gradient(rgba(165, 148, 255, 0.35) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(165, 148, 255, 0.35) 1px, transparent 1px);
+  background-size: 48px 48px;
+  -webkit-mask-image: linear-gradient(to top, #000 0%, transparent 85%);
+  mask-image: linear-gradient(to top, #000 0%, transparent 85%);
+  opacity: 0.5;
+  animation: hero-floor 4s linear infinite;
+}
+
+/* ---------- 見出し・本文 ---------- */
+body.is-home #wrapper #banner > .inner {
+  position: relative;
+  z-index: 2;
+}
+body.is-home #banner h1 {
+  text-shadow: -2px 0 0 rgba(92, 225, 230, 0.45), 2px 2px 0 rgba(255, 107, 139, 0.5) !important;
+  letter-spacing: 0.04em !important;
+  line-height: 1.3 !important;
+}
+body.is-home #banner .content p {
+  color: #dfe3f5 !important;
+}
+
+/* ---------- PRESS START 風のボタン ---------- */
+body.is-home #banner .content .actions {
+  position: relative;
+  padding-top: 1.7rem !important;
+  margin-left: 0 !important;
+}
+body.is-home #banner .content .actions li {
+  padding-left: 0 !important;
+  margin-left: 0 !important;
+}
+/* 日本語の改行を文節単位に（対応ブラウザのみ） */
+body.is-home #banner h1,
+body.is-home #banner .content p,
+.tiles--home article p {
+  word-break: auto-phrase;
+  text-wrap: pretty;
+}
+body.is-home #banner h1 {
+  text-wrap: balance;
+}
+body.is-home #banner .content .actions::before {
+  content: "PRESS START";
+  position: absolute;
+  top: 0;
+  left: 0.1rem;
+  font-family: var(--cn-font-pixel);
+  font-size: 0.78rem;
+  letter-spacing: 0.32em;
+  color: var(--cn-cyan);
+  animation: hero-blink 1.1s steps(2, jump-none) infinite;
+}
+body.is-home #wrapper #banner .button.next {
+  padding: 0.95rem 2.2rem 0.95rem 3.1rem !important;
+  min-width: 14rem;
+  font-size: 1rem;
+  letter-spacing: 0.18em;
+  border-radius: 10px !important;
+}
+body.is-home #wrapper #banner .button.next::before,
+body.is-home #wrapper #banner .button.next::after {
+  content: "" !important;
+  background: var(--cn-bg) !important;
+  -webkit-clip-path: polygon(0 0, 100% 50%, 0 100%);
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+  width: 10px !important;
+  height: 12px !important;
+  top: 50% !important;
+  right: auto !important;
+  left: 1.35rem !important;
+  margin-top: -6px;
+  border: none !important;
+  opacity: 1;
+  transform: none;
+  transition: transform 0.15s ease, left 0s !important;
+}
+body.is-home #wrapper #banner .button.next::after {
+  display: none;
+}
+body.is-home #wrapper #banner .button.next:hover::before,
+body.is-home #wrapper #banner .button.next:focus-visible::before {
+  transform: translateX(3px);
+  animation: hero-nudge 0.6s steps(2, jump-none) infinite;
+}
+
+/* ---------- 右側: ゲーム画面のモニター ---------- */
+.hero-stage {
+  position: relative;
+  z-index: 2;
+  display: none;
+}
+.hero-monitor {
+  position: relative;
+  display: block;
+  padding: 0.85rem 0.85rem 0;
+  border-radius: 18px;
+  background: linear-gradient(160deg, #2b3263 0%, #1a1f3d 55%, #141832 100%);
+  border-bottom: none !important;
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.07),
+    inset 0 -4px 0 rgba(0, 0, 0, 0.35),
+    0 26px 60px rgba(0, 0, 0, 0.5),
+    0 0 70px rgba(92, 225, 230, 0.14);
+  transform: rotate(1.5deg);
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+  color: inherit !important;
+}
+.hero-monitor:hover,
+.hero-monitor:focus-visible {
+  transform: rotate(0deg) translateY(-6px);
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 204, 0, 0.35),
+    inset 0 -4px 0 rgba(0, 0, 0, 0.35),
+    0 32px 70px rgba(0, 0, 0, 0.55),
+    0 0 90px rgba(255, 204, 0, 0.18);
+}
+/* 角（コーナー）の飾り: サークル名にちなんだ L 字 */
+.hero-monitor::before,
+.hero-monitor::after {
+  content: "";
+  position: absolute;
+  width: 3.2rem;
+  height: 3.2rem;
+  pointer-events: none;
+  transition: transform 0.35s ease;
+}
+.hero-monitor::before {
+  top: -1.1rem;
+  left: -1.1rem;
+  border-top: 8px solid var(--cn-yellow);
+  border-left: 8px solid var(--cn-yellow);
+}
+.hero-monitor::after {
+  right: -1.1rem;
+  bottom: -1.1rem;
+  border-right: 8px solid var(--cn-cyan);
+  border-bottom: 8px solid var(--cn-cyan);
+}
+.hero-monitor:hover::before,
+.hero-monitor:focus-visible::before {
+  transform: translate(-4px, -4px);
+}
+.hero-monitor:hover::after,
+.hero-monitor:focus-visible::after {
+  transform: translate(4px, 4px);
+}
+.hero-monitor__screen {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #05060d;
+  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.6);
+}
+.hero-monitor__screen img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  animation: hero-cycle 20s linear infinite;
+}
+.hero-monitor__screen img:nth-child(1) { opacity: 1; animation-delay: 0s; }
+.hero-monitor__screen img:nth-child(2) { animation-delay: -16s; }
+.hero-monitor__screen img:nth-child(3) { animation-delay: -12s; }
+.hero-monitor__screen img:nth-child(4) { animation-delay: -8s; }
+.hero-monitor__screen img:nth-child(5) { animation-delay: -4s; }
+/* 画面の走査線と周辺減光 */
+.hero-monitor__screen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.22) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.55) 100%);
+  pointer-events: none;
+}
+/* モニター下の帯: 3色ランプ＋PLAY */
+.hero-monitor__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 2.6rem;
+  padding: 0 0.3rem;
+}
+.hero-monitor__bar::before {
+  content: "";
+  width: 46px;
+  height: 8px;
+  background:
+    linear-gradient(var(--cn-yellow), var(--cn-yellow)) 0 0 / 10px 8px no-repeat,
+    linear-gradient(var(--cn-pink), var(--cn-pink)) 18px 0 / 10px 8px no-repeat,
+    linear-gradient(var(--cn-cyan), var(--cn-cyan)) 36px 0 / 10px 8px no-repeat;
+}
+.hero-monitor__bar::after {
+  content: "▶ PLAY";
+  font-family: var(--cn-font-pixel);
+  font-size: 0.8rem;
+  letter-spacing: 0.25em;
+  color: var(--cn-yellow);
+}
+.hero-monitor:hover .hero-monitor__bar::after,
+.hero-monitor:focus-visible .hero-monitor__bar::after {
+  animation: hero-blink 0.6s steps(2, jump-none) infinite;
+}
+/* モニターのまわりに浮かぶドット */
+.hero-stage::before {
+  content: "";
+  position: absolute;
+  top: -2.2rem;
+  right: 18%;
+  width: 10px;
+  height: 10px;
+  background: var(--cn-pink);
+  box-shadow: -14rem 17rem 0 var(--cn-yellow), 4rem 12rem 0 -2px var(--cn-cyan), -9rem -1rem 0 -3px #fff;
+  animation: cn-float 6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* パソコン幅: 左に文章、右にモニターの2列 */
+@media screen and (min-width: 981px) {
+  body.is-home #wrapper #banner.major {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(17rem, 27rem);
+    column-gap: clamp(2.5rem, 5vw, 5.5rem);
+    align-items: center !important;
+    padding-left: max(3rem, calc((100% - 76rem) / 2)) !important;
+    padding-right: max(3.5rem, calc((100% - 76rem) / 2)) !important;
+    padding-top: 6.5rem !important;
+    padding-bottom: 4rem !important;
+    min-height: clamp(30rem, 78vh, 40rem) !important;
+  }
+  body.is-home #wrapper #banner > .inner {
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .hero-stage {
+    display: block;
+  }
+}
+/* タブレット・スマホ: 文章の下に小さめのモニター */
+@media screen and (max-width: 980px) {
+  body.is-home #wrapper #banner.major {
+    flex-direction: column;
+    align-items: stretch !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    padding-bottom: 3rem !important;
+  }
+  body.is-home #wrapper #banner > .inner {
+    width: 100% !important;
+    max-width: 44rem !important;
+    padding: 0 2.5rem !important;
+  }
+  .hero-stage {
+    display: block;
+    width: min(100% - 3rem, 24rem);
+    margin: 2.6rem 1.5rem 0.5rem auto;
+  }
+  .hero-stage::before {
+    display: none;
+  }
+}
+@media screen and (max-width: 736px) {
+  .hero-stage {
+    width: min(100% - 4.5rem, 19rem);
+    margin: 2.4rem auto 0.5rem;
+  }
+  .hero-monitor::before,
+  .hero-monitor::after {
+    width: 2.2rem;
+    height: 2.2rem;
+    border-width: 6px;
+  }
+  .hero-monitor::before { top: -0.8rem; left: -0.8rem; border-width: 6px 0 0 6px; }
+  .hero-monitor::after { right: -0.8rem; bottom: -0.8rem; border-width: 0 6px 6px 0; }
+  .hero-sky__floor {
+    height: 30%;
+  }
+}
+
+/* ---------- トップのタイル ---------- */
+.tiles--home {
+  counter-reset: cn-tile;
+  background: var(--cn-bg);
+  padding: 6px;
+}
+.tiles--home article {
+  counter-increment: cn-tile;
+  border: 6px solid var(--cn-bg) !important;
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.3, 1.2), box-shadow 0.25s ease !important;
+  will-change: transform;
+}
+/* タイル番号（01〜05）をドット文字で */
+.tiles--home article header.major {
+  width: 100%;
+}
+.tiles--home article header.major::before {
+  content: counter(cn-tile, decimal-leading-zero);
+  position: absolute;
+  top: -1.9rem;
+  right: 0;
+  z-index: 3;
+  font-family: var(--cn-font-pixel);
+  font-size: 0.85rem;
+  letter-spacing: 0.15em;
+  color: rgba(255, 255, 255, 0.75);
+  pointer-events: none;
+}
+.tiles--home article header.major h3 {
+  position: relative;
+  transition: transform 0.25s ease;
+}
+.tiles--home article header.major h3::before {
+  content: "▶";
+  position: absolute;
+  left: -1.3em;
+  top: 50%;
+  margin-top: -0.6em;
+  font-family: var(--cn-font-pixel);
+  font-size: 0.7em;
+  line-height: 1.2;
+  color: var(--cn-yellow);
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.tiles--home article header.major h3::after {
+  transition: max-width 0.35s ease, width 0.35s ease !important;
+}
+.tiles--home article:hover,
+.tiles--home article:focus-within {
+  z-index: 3;
+  transform: translateY(-6px) rotate(-0.6deg);
+  box-shadow:
+    0 0 0 3px var(--cn-yellow),
+    8px 8px 0 0 rgba(0, 0, 0, 0.45);
+}
+.tiles--home article:nth-child(even):hover,
+.tiles--home article:nth-child(even):focus-within {
+  transform: translateY(-6px) rotate(0.6deg);
+  box-shadow:
+    0 0 0 3px var(--cn-cyan),
+    -8px 8px 0 0 rgba(0, 0, 0, 0.45);
+}
+.tiles--home article:hover header.major h3,
+.tiles--home article:focus-within header.major h3 {
+  transform: translateX(1.3em);
+}
+.tiles--home article:hover header.major h3::before,
+.tiles--home article:focus-within header.major h3::before {
+  opacity: 1;
+  transform: translateX(0);
+  animation: hero-nudge 0.7s steps(2, jump-none) infinite;
+}
+.tiles--home article:hover header.major h3::after,
+.tiles--home article:focus-within header.major h3::after {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+.tiles--home article:hover .image img,
+.tiles--home article:focus-within .image img {
+  filter: saturate(1.25);
+}
+/* キーボードでタイルを選んだときの枠（リンク本体は透明で全面を覆っているため） */
+.tiles--home article a.link:focus-visible {
+  outline: none !important;
+}
+
+/* ---------- 動き ---------- */
+@keyframes hero-stars {
+  from { transform: translateY(0); }
+  to { transform: translateY(240px); }
+}
+@keyframes hero-floor {
+  from { background-position: 0 0; }
+  to { background-position: 0 48px; }
+}
+@keyframes hero-cycle {
+  0% { opacity: 1; }
+  19% { opacity: 1; }
+  23% { opacity: 0; }
+  96% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@keyframes hero-blink {
+  0% { opacity: 1; }
+  100% { opacity: 0.25; }
+}
+@keyframes hero-nudge {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-sky__stars,
+  .hero-sky__floor,
+  .hero-stage::before,
+  body.is-home #banner .content .actions::before,
+  .hero-monitor:hover .hero-monitor__bar::after,
+  .hero-monitor:focus-visible .hero-monitor__bar::after,
+  body.is-home #wrapper #banner .button.next:hover::before,
+  .tiles--home article:hover header.major h3::before,
+  .tiles--home article:focus-within header.major h3::before {
+    animation: none !important;
+  }
+  .hero-monitor__screen img {
+    animation: none !important;
+  }
+  .hero-monitor,
+  .tiles--home article,
+  .tiles--home article header.major h3 {
+    transition: none !important;
+  }
+  .hero-monitor,
+  .hero-monitor:hover,
+  .hero-monitor:focus-visible,
+  .tiles--home article:hover,
+  .tiles--home article:focus-within,
+  .tiles--home article:nth-child(even):hover,
+  .tiles--home article:nth-child(even):focus-within {
+    transform: none !important;
+  }
+}
