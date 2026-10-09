@@ -95,6 +95,48 @@ try {
     throw new Error(`canvas fallback did not process input: ${JSON.stringify(result)}`);
   }
 
+  // 回帰テスト: 横向きスマホで「縦向きにしてね」が出ている間は、アイテムが落ちない（案内の裏で負けない）
+  const landscape = await browser.newPage({ viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true, deviceScaleFactor: 1 });
+  landscape.on('pageerror', (error) => errors.push(error.message));
+  await landscape.goto(`http://127.0.0.1:${port}/sorting-factory/`, { waitUntil: 'networkidle' });
+  await landscape.waitForFunction(() => document.querySelector('.cn-rotate-hint.is-visible'));
+  await landscape.evaluate(() => {
+    document.querySelector('.cn-rotate-hint').classList.remove('is-visible');
+    document.querySelector('#start-btn').click();
+    document.querySelector('.cn-rotate-hint').classList.add('is-visible');
+  });
+  await landscape.waitForTimeout(4500);
+  const pausedState = await landscape.evaluate(() => ({
+    hud: document.querySelector('#score-value').textContent,
+    resultActive: document.querySelector('#result-screen').classList.contains('active'),
+  }));
+  if (pausedState.resultActive) throw new Error('game ended behind the rotate hint');
+  await landscape.locator('.cn-rotate-hint__button').click();
+  await landscape.waitForFunction(() => document.querySelector('#result-screen').classList.contains('active'), null, { timeout: 15000 });
+
+  // 回帰テスト: ゲームオーバー直後の Enter 連打では再挑戦が始まらず、少し待てば始まる
+  await landscape.keyboard.press('Enter');
+  const immediately = await landscape.evaluate(() => document.querySelector('#result-screen').classList.contains('active'));
+  if (!immediately) throw new Error('retry started immediately after game over (double input)');
+  await landscape.waitForTimeout(600);
+  await landscape.keyboard.press('Enter');
+  const later = await landscape.evaluate(() => document.querySelector('#result-screen').classList.contains('active'));
+  if (later) throw new Error('retry did not start after the short lock');
+
+  // 回帰テスト: 共有ボタンを続けて押しても、元の文字に戻る
+  await landscape.evaluate(() => {
+    const btn = document.querySelector('#share-btn');
+    window.__shareOriginal = btn.innerText;
+    const fake = {};
+    GameController.prototype.showShareFeedback.call(fake, 'A');
+    GameController.prototype.showShareFeedback.call(fake, 'B');
+  });
+  await landscape.waitForTimeout(1800);
+  const shareText = await landscape.evaluate(() => [document.querySelector('#share-btn').innerText, window.__shareOriginal]);
+  if (shareText[0] !== shareText[1]) throw new Error(`share button text stuck: ${shareText.join(' / ')}`);
+  await landscape.close();
+  if (errors.length) throw new Error(`browser errors: ${errors.join(' | ')}`);
+
   await browser.close();
 } finally {
   await new Promise((resolveClose) => server.close(resolveClose));
