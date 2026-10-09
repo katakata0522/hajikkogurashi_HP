@@ -471,6 +471,24 @@ body.is-home #banner header.major h1::after {
     letter-spacing: 0.05em !important;
   }
 }
+/* 幅 380px 以下（320〜375px の端末）では MENU ボタンが画面の右端からはみ出さないように詰める */
+@media screen and (max-width: 380px) {
+  #header .logo {
+    padding-left: 2.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+  #header .logo::before {
+    left: 0.9rem;
+  }
+  #header .logo strong {
+    font-size: 1.05rem !important;
+    letter-spacing: 0.02em !important;
+  }
+  #header nav a[href="#menu"] {
+    padding: 0 0.8rem !important;
+    letter-spacing: 0.08em !important;
+  }
+}
 
 /* =========================================================
    第2弾: ページ見出しを「ステージ名の看板」風にそろえる

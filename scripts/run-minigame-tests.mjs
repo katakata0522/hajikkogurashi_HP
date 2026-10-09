@@ -40,7 +40,8 @@ const browserTests = [
     'scripts/mikiri-issen-browser-test.mjs',
     'scripts/sorting-factory-browser-test.mjs',
     'scripts/stealth-slacker-browser-test.mjs',
-    'scripts/wall-jumper-browser-test.mjs'
+    'scripts/wall-jumper-browser-test.mjs',
+    'scripts/site-header-narrow-browser-test.mjs'
 ];
 
 let selectedTests;
