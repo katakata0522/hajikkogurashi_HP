@@ -37,7 +37,7 @@
 	<link rel="stylesheet" href="/assets/css/main.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/css/main.css'); ?>" />
 	<link rel="stylesheet" href="/assets/css/custom.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/css/custom.css'); ?>" />
 	<link rel="stylesheet" href="/assets/css/site-theme.css?v=20261010-r4" />
-    <link rel="stylesheet" href="/assets/css/theme-minigames.css?v=20261010-r4" />
+    <link rel="stylesheet" href="/assets/css/theme-minigames.css?v=20261010-r5" />
 	<script type="application/ld+json">
 	{
 		"@context": "https://schema.org",
@@ -129,7 +129,10 @@
                             <a href="/kanji-slicer/" class="image-link">
                                 <span class="game-card__no" aria-hidden="true"></span>
                                 <span class="game-card__devices" aria-hidden="true"><i class="dev-sp is-best"></i><i class="dev-pc"></i></span>
-                                <img src="/assets/images/kanji_slicer_thumbnail-640.webp" alt="漢字スライサー・マージ" width="640" height="640" loading="eager" decoding="async" />
+                                <picture>
+                                	<source type="image/avif" srcset="/assets/images/cards/kanji_slicer-352.avif 352w, /assets/images/cards/kanji_slicer-704.avif 704w" sizes="(max-width: 680px) calc(100vw - 52px), 344px" />
+                                	<img src="/assets/images/cards/kanji_slicer-704.webp" srcset="/assets/images/cards/kanji_slicer-352.webp 352w, /assets/images/cards/kanji_slicer-704.webp 704w" sizes="(max-width: 680px) calc(100vw - 52px), 344px" alt="漢字スライサー・マージ" width="640" height="400" loading="eager" fetchpriority="high" decoding="async" />
+                                </picture>
                             </a>
                             <div class="game-card-content">
                                 <header class="major game-card-title">
@@ -147,7 +150,10 @@
                             <a href="/lumen-mirror/" class="image-link">
                                 <span class="game-card__no" aria-hidden="true"></span>
                                 <span class="game-card__devices" aria-hidden="true"><i class="dev-pc is-best"></i></span>
-                                <img src="/assets/images/lumen_mirror_thumbnail-640.webp" alt="LUMEN_MIRROR - ルーメン・ミラー" width="640" height="640" loading="eager" decoding="async" />
+                                <picture>
+                                	<source type="image/avif" srcset="/assets/images/cards/lumen_mirror-352.avif 352w, /assets/images/cards/lumen_mirror-704.avif 704w" sizes="(max-width: 680px) calc(100vw - 52px), 344px" />
+                                	<img src="/assets/images/cards/lumen_mirror-704.webp" srcset="/assets/images/cards/lumen_mirror-352.webp 352w, /assets/images/cards/lumen_mirror-704.webp 704w" sizes="(max-width: 680px) calc(100vw - 52px), 344px" alt="LUMEN_MIRROR - ルーメン・ミラー" width="640" height="400" loading="lazy" decoding="async" />
+                                </picture>
                             </a>
                             <div class="game-card-content">
                                 <header class="major game-card-title">
@@ -165,7 +171,10 @@
                             <a href="/blackhole-sweeper/" class="image-link">
                                 <span class="game-card__no" aria-hidden="true"></span>
                                 <span class="game-card__devices" aria-hidden="true"><i class="dev-sp is-best"></i><i class="dev-pc"></i></span>
-                                <img src="/assets/images/blackhole_sweeper_thumbnail_1779194532152-640.webp" alt="ブラックホール・スイーパー" width="640" height="640" loading="lazy" decoding="async" />
+                                <picture>
+                                	<source type="image/avif" srcset="/assets/images/cards/blackhole_sweeper-352.avif 352w, /assets/images/cards/blackhole_sweeper-704.avif 704w" sizes="(max-width: 680px) calc(100vw - 52px), 344px" />
+                                	<img src="/assets/images/cards/blackhole_sweeper-704.webp" srcset="/assets/images/cards/blackhole_sweeper-352.webp 352w, /assets/images/cards/blackhole_sweeper-704.webp 704w" sizes="(max-width: 680px) calc(100vw - 52px), 344px" alt="ブラックホール・スイーパー" width="640" height="400" loading="lazy" decoding="async" />
+                                </picture>
                             </a>
                             <div class="game-card-content">
                                 <header class="major game-card-title">
@@ -183,7 +192,10 @@
                             <a href="/girigiri-brake/" class="image-link">
                                 <span class="game-card__no" aria-hidden="true"></span>
                                 <span class="game-card__devices" aria-hidden="true"><i class="dev-sp is-best"></i><i class="dev-pc"></i></span>
-                                <img src="/assets/images/girigiri_brake_thumbnail_1779165077904-640.webp" alt="ギリギリ・ブレーキ！" width="640" height="640" loading="lazy" decoding="async" />
+                                <picture>
+                                	<source type="image/avif" srcset="/assets/images/cards/girigiri_brake-352.avif 352w, /assets/images/cards/girigiri_brake-704.avif 704w" sizes="(max-width: 680px) calc(100vw - 52px), 344px" />
+                                	<img src="/assets/images/cards/girigiri_brake-704.webp" srcset="/assets/images/cards/girigiri_brake-352.webp 352w, /assets/images/cards/girigiri_brake-704.webp 704w" sizes="(max-width: 680px) calc(100vw - 52px), 344px" alt="ギリギリ・ブレーキ！" width="640" height="400" loading="lazy" decoding="async" />
+                                </picture>
                             </a>
                             <div class="game-card-content">
                                 <header class="major game-card-title">
@@ -201,7 +213,10 @@
                             <a href="/sorting-factory/" class="image-link">
                                 <span class="game-card__no" aria-hidden="true"></span>
                                 <span class="game-card__devices" aria-hidden="true"><i class="dev-sp is-best"></i><i class="dev-pc"></i></span>
-                                <img src="/assets/images/sorting_factory_thumbnail_1779165097756-640.webp" alt="超絶！仕分け工場" width="640" height="640" loading="lazy" decoding="async" />
+                                <picture>
+                                	<source type="image/avif" srcset="/assets/images/cards/sorting_factory-352.avif 352w, /assets/images/cards/sorting_factory-704.avif 704w" sizes="(max-width: 680px) calc(100vw - 52px), 344px" />
+                                	<img src="/assets/images/cards/sorting_factory-704.webp" srcset="/assets/images/cards/sorting_factory-352.webp 352w, /assets/images/cards/sorting_factory-704.webp 704w" sizes="(max-width: 680px) calc(100vw - 52px), 344px" alt="超絶！仕分け工場" width="640" height="400" loading="lazy" decoding="async" />
+                                </picture>
                             </a>
                             <div class="game-card-content">
                                 <header class="major game-card-title">
@@ -219,7 +234,10 @@
                             <a href="/stealth-slacker/" class="image-link">
                                 <span class="game-card__no" aria-hidden="true"></span>
                                 <span class="game-card__devices" aria-hidden="true"><i class="dev-sp is-best"></i><i class="dev-pc"></i></span>
-                                <img src="/assets/images/stealth_slacker_thumbnail_1779165112569-640.webp" alt="限界！ステルスサボタージュ" width="640" height="640" loading="lazy" decoding="async" />
+                                <picture>
+                                	<source type="image/avif" srcset="/assets/images/cards/stealth_slacker-352.avif 352w, /assets/images/cards/stealth_slacker-704.avif 704w" sizes="(max-width: 680px) calc(100vw - 52px), 344px" />
+                                	<img src="/assets/images/cards/stealth_slacker-704.webp" srcset="/assets/images/cards/stealth_slacker-352.webp 352w, /assets/images/cards/stealth_slacker-704.webp 704w" sizes="(max-width: 680px) calc(100vw - 52px), 344px" alt="限界！ステルスサボタージュ" width="640" height="400" loading="lazy" decoding="async" />
+                                </picture>
                             </a>
                             <div class="game-card-content">
                                 <header class="major game-card-title">
@@ -237,7 +255,10 @@
                             <a href="/mikiri-issen/" class="image-link">
                                 <span class="game-card__no" aria-hidden="true"></span>
                                 <span class="game-card__devices" aria-hidden="true"><i class="dev-sp is-best"></i><i class="dev-pc"></i></span>
-                                <img src="/assets/images/mikiri_issen_thumbnail_1779165128314-640.webp" alt="みきり一閃" width="640" height="640" loading="lazy" decoding="async" />
+                                <picture>
+                                	<source type="image/avif" srcset="/assets/images/cards/mikiri_issen-352.avif 352w, /assets/images/cards/mikiri_issen-704.avif 704w" sizes="(max-width: 680px) calc(100vw - 52px), 344px" />
+                                	<img src="/assets/images/cards/mikiri_issen-704.webp" srcset="/assets/images/cards/mikiri_issen-352.webp 352w, /assets/images/cards/mikiri_issen-704.webp 704w" sizes="(max-width: 680px) calc(100vw - 52px), 344px" alt="みきり一閃" width="640" height="400" loading="lazy" decoding="async" />
+                                </picture>
                             </a>
                             <div class="game-card-content">
                                 <header class="major game-card-title">
@@ -255,7 +276,10 @@
                             <a href="/wall-jumper/" class="image-link">
                                 <span class="game-card__no" aria-hidden="true"></span>
                                 <span class="game-card__devices" aria-hidden="true"><i class="dev-pc is-best"></i></span>
-                                <img src="/assets/images/wall_jumper_thumbnail_1779165143429-640.webp" alt="ウォールジャンパー" width="640" height="640" loading="lazy" decoding="async" />
+                                <picture>
+                                	<source type="image/avif" srcset="/assets/images/cards/wall_jumper-352.avif 352w, /assets/images/cards/wall_jumper-704.avif 704w" sizes="(max-width: 680px) calc(100vw - 52px), 344px" />
+                                	<img src="/assets/images/cards/wall_jumper-704.webp" srcset="/assets/images/cards/wall_jumper-352.webp 352w, /assets/images/cards/wall_jumper-704.webp 704w" sizes="(max-width: 680px) calc(100vw - 52px), 344px" alt="ウォールジャンパー" width="640" height="400" loading="lazy" decoding="async" />
+                                </picture>
                             </a>
                             <div class="game-card-content">
                                 <header class="major game-card-title">
@@ -291,7 +315,10 @@
                             <a href="/hajikko-hero-tower/" class="image-link">
                                 <span class="game-card__no" aria-hidden="true"></span>
                                 <span class="game-card__devices" aria-hidden="true"><i class="dev-sp"></i><i class="dev-pc"></i></span>
-                                <img src="/assets/images/hajikko_hero_tower_thumbnail-640.webp" alt="はじっこ勇者のインフレ魔塔" width="640" height="640" loading="lazy" decoding="async" />
+                                <picture>
+                                	<source type="image/avif" srcset="/assets/images/cards/hajikko_hero_tower-352.avif 352w, /assets/images/cards/hajikko_hero_tower-640.avif 640w" sizes="(max-width: 680px) calc(100vw - 52px), 344px" />
+                                	<img src="/assets/images/cards/hajikko_hero_tower-640.webp" srcset="/assets/images/cards/hajikko_hero_tower-352.webp 352w, /assets/images/cards/hajikko_hero_tower-640.webp 640w" sizes="(max-width: 680px) calc(100vw - 52px), 344px" alt="はじっこ勇者のインフレ魔塔" width="640" height="400" loading="lazy" decoding="async" />
+                                </picture>
                             </a>
                             <div class="game-card-content">
                                 <header class="major game-card-title">
