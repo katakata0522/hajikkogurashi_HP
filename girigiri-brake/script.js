@@ -254,7 +254,8 @@ class UIManager {
         } else {
             this.newRecordBadge.classList.add('hidden');
         }
-        this.bestScoreValue.innerText = bestDist ? bestDist.toFixed(2) : '--';
+        // 0.00m（ぴったり停止）も記録として表示する（0 を「記録なし」と取り違えない）
+        this.bestScoreValue.innerText = (typeof bestDist === 'number' && Number.isFinite(bestDist)) ? bestDist.toFixed(2) : '--';
 
         if (type === 'fall') {
             this.scoreValue.innerText = "落下";

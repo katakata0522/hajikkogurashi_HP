@@ -220,6 +220,16 @@ try {
   }
 
   await noAudioPage.close();
+
+  // 回帰テスト: 最高記録がぴったり 0.00m のとき「--」（記録なし）と表示しない
+  const zeroBestPage = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  await zeroBestPage.goto(`http://127.0.0.1:${port}/girigiri-brake/`, { waitUntil: 'networkidle' });
+  const zeroBestText = await zeroBestPage.evaluate(() => {
+    new UIManager().showResult(1.5, 1.5, 0, false);
+    return document.querySelector('#best-score-value').innerText;
+  });
+  if (zeroBestText !== '0.00') throw new Error(`a perfect 0.00m best record was shown as: ${zeroBestText}`);
+  await zeroBestPage.close();
   console.log('girigiri-brake browser test passed');
 } finally {
   if (browser) await browser.close();
