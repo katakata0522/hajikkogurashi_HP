@@ -3,13 +3,57 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>はじっこ勇者のインフレ魔塔 | hajikkogurashi HP</title>
+	<link rel="icon" href="/favicon.ico" sizes="any" />
+	<link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml" />
+	<link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png" />
+  <title>はじっこ勇者のインフレ魔塔 | Corner Neighbor</title>
+  <meta name="description" content="一筆書きでルートを描き、勇者をインフレさせて魔王を討伐せよ！">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://hajikkoroom.xsrv.jp/hajikko-hero-tower/">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Corner Neighbor">
+  <meta property="og:title" content="はじっこ勇者のインフレ魔塔 | Corner Neighbor">
+  <meta property="og:description" content="一筆書きでルートを描き、勇者をインフレさせて魔王を討伐せよ！">
+  <meta property="og:url" content="https://hajikkoroom.xsrv.jp/hajikko-hero-tower/">
+  <meta property="og:image" content="https://hajikkoroom.xsrv.jp/assets/images/hajikko_hero_tower_thumbnail.png">
+  <meta property="og:image:width" content="640">
+  <meta property="og:image:height" content="640">
+  <meta property="og:image:alt" content="はじっこ勇者のインフレ魔塔 | Corner Neighbor">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="はじっこ勇者のインフレ魔塔 | Corner Neighbor">
+  <meta name="twitter:description" content="一筆書きでルートを描き、勇者をインフレさせて魔王を討伐せよ！">
+  <meta name="twitter:image" content="https://hajikkoroom.xsrv.jp/assets/images/hajikko_hero_tower_thumbnail.png">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "VideoGame",
+    "name": "はじっこ勇者のインフレ魔塔",
+    "description": "一筆書きでルートを描き、勇者をインフレさせて魔王を討伐せよ！",
+    "url": "https://hajikkoroom.xsrv.jp/hajikko-hero-tower/",
+    "image": "https://hajikkoroom.xsrv.jp/assets/images/hajikko_hero_tower_thumbnail.png",
+    "inLanguage": "ja",
+    "genre": "一筆書きパズル",
+    "isAccessibleForFree": true,
+    "publisher": {
+      "@type": "Organization",
+      "name": "Corner Neighbor",
+      "url": "https://hajikkoroom.xsrv.jp/"
+    },
+    "author": {
+      "@type": "Organization",
+      "name": "Corner Neighbor",
+      "url": "https://hajikkoroom.xsrv.jp/"
+    }
+  }
+  </script>
   
   <!-- 🎨 Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Outfit:wght@400;600;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=20261010-r4">
+    <link rel="stylesheet" href="/assets/css/minigame-rotate-hint.css?v=20261010">
 </head>
 <body class="bg-area-1">
   <!-- 🎨 美麗ネオンSVGグラフィックスの定義 -->
@@ -310,6 +354,7 @@
 
       <!-- 音響設定ボタン -->
       <div class="settings-bar">
+        <a href="/minigames.html" class="control-btn back-to-list" aria-label="ミニゲーム広場"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path fill="currentColor" d="M3 4h7v7H3zm11 0h7v7h-7zM3 13h7v7H3zm11 0h7v7h-7z"/></svg></a>
         <button id="sound-btn" class="control-btn font-outfit">🔊 ON</button>
         <span class="footer-copy font-outfit">v3.1.0</span>
       </div>
@@ -457,6 +502,7 @@
 
   <!-- スタート開始用能動的オーバーレイ -->
   <div id="start-overlay">
+    <a href="/minigames.html" class="start-back-to-list" aria-label="ミニゲーム広場"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false"><path fill="currentColor" d="M16 3v18L4 12z"/></svg><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path fill="currentColor" d="M3 4h7v7H3zm11 0h7v7h-7zM3 13h7v7H3zm11 0h7v7h-7z"/></svg></a>
     <div class="start-content font-noto glass-panel">
       <h1 class="start-title font-outfit">はじっこ勇者の<br><span class="text-neon-pink">インフレ魔塔</span></h1>
       <p class="start-desc">一筆書きでルートを描き、勇者をインフレさせて魔王を討伐せよ！</p>
@@ -497,6 +543,8 @@
     </div>
   </div>
 
-  <script src="game.js"></script>
+  <script src="/assets/js/minigame-audio-lifecycle.js?v=20261010"></script>
+  <script src="game.js?v=20261010-qa"></script>
+    <script src="/assets/js/minigame-rotate-hint.js?v=20261010" defer></script>
 </body>
 </html>

@@ -11,6 +11,9 @@
 	<link rel="canonical" href="https://hajikkoroom.xsrv.jp/privacy-policy.html" />
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<link rel="icon" href="/favicon.ico" sizes="any" />
+	<link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml" />
+	<link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png" />
 	<meta name="description" content="ゲーム制作サークル「Corner Neighbor」公式サイトのプライバシーポリシーです。お問い合わせフォーム等で取得する個人情報の取扱方針、収集目的、セキュリティ対策、および安全な管理方法について詳しく規定しています。" />
 	<meta name="robots" content="index,follow" />
 	<meta property="og:locale" content="ja_JP" />
@@ -25,8 +28,17 @@
 	<meta name="twitter:title" content="プライバシーポリシー | Corner Neighbor公式ホームページ" />
 	<meta name="twitter:description" content="ゲーム制作サークル「Corner Neighbor」公式サイトのプライバシーポリシーです。お問い合わせフォーム等で取得する個人情報の取扱方針、収集目的、セキュリティ対策、および安全な管理方法について詳しく規定しています。" />
 	<meta name="twitter:image" content="https://hajikkoroom.xsrv.jp/assets/images/banner.webp" />
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<!-- フォント・アイコンは表示を止めないように後から読み込む（2026-10: 表示速度改善） -->
+	<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=DotGothic16&amp;family=Noto+Sans+JP:wght@300;400;700&amp;family=Space+Grotesk:wght@400;700&amp;display=swap" onload="this.onload=null;var l=this;requestAnimationFrame(function(){setTimeout(function(){l.rel='stylesheet'},0)})" />
+	<link rel="preload" as="style" href="/assets/css/font-awesome.min.css" onload="this.onload=null;this.rel='stylesheet'" />
+	<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&amp;family=Noto+Sans+JP:wght@300;400;700&amp;family=Space+Grotesk:wght@400;700&amp;display=swap" /><link rel="stylesheet" href="/assets/css/font-awesome.min.css" /></noscript>
 	<link rel="stylesheet" href="/assets/css/main.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/css/main.css'); ?>" />
 	<link rel="stylesheet" href="/assets/css/custom.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/css/custom.css'); ?>" />
+	<link rel="stylesheet" href="/assets/css/site-theme.css?v=20261010-r5" />
+	<link rel="stylesheet" href="/assets/css/site-navigation.css?v=20261010-nav2" />
+	<link rel="stylesheet" href="/assets/css/theme-pages.css?v=20261010-r1" />
 	<script type="application/ld+json">
 	{
 		"@context": "https://schema.org",
@@ -50,31 +62,40 @@
 </head>
 
 
-<body>
+<body class="page-privacy">
+	<a class="skip-link" href="#main">本文へスキップ</a>
     <div id="wrapper">
         <!-- Header -->
-<header id="header">
-  <a href="/" class="logo">
-    <strong>Corner Neighbor</strong>
-    <span>まったりゲームを作るサークル！</span>
-  </a>
-  <nav>
-    <a href="#menu" aria-label="メニューを開く">MENU</a>
-  </nav>
-</header>
-
-<!-- Menu -->
-<nav id="menu">
-  <ul class="links">
-    <li><a href="/">ホーム</a></li>
-    <li><a href="/aboutus.html">私たちについて</a></li>
-    <li><a href="/members.html">メンバー紹介</a></li>
-    <li><a href="/news.html">お知らせ</a></li>
-    <li><a href="/portfolio.html">作品一覧</a></li>
-    <li><a href="/minigames.html">ミニゲーム広場</a></li>
-    <li><a href="/coming-soon.html">鋭意制作中！</a></li>
-  </ul>
-</nav>
+<!-- site-nav:start -->
+    <header class="site-header" id="site-header">
+      <a class="brand" href="/" aria-label="Corner Neighbor トップに戻る">
+        <span class="brand-symbol" aria-hidden="true"><i></i><b></b><em></em></span>
+        <span class="brand-name">corner<span>neighbor</span><small>まったりゲームを作るサークル！</small></span>
+      </a>
+      <nav class="desktop-nav" aria-label="メインナビゲーション">
+        <a href="/aboutus.html">私たちについて</a><a href="/portfolio.html">作品一覧</a><a href="/members.html">メンバー</a><a href="/coming-soon.html">鋭意制作中！</a>
+      </nav>
+      <div class="header-actions">
+        <a class="header-play" href="/minigames.html">いますぐあそぶ！ <span aria-hidden="true">↗</span></a>
+        <button class="menu-toggle" type="button" aria-controls="mobile-menu" aria-expanded="false" aria-label="メニューを開く">
+          <span class="menu-toggle-lines" aria-hidden="true"><i></i><i></i></span><span class="menu-toggle-text">MENU</span>
+        </button>
+      </div>
+    </header>
+    <nav class="mobile-menu" id="mobile-menu" aria-label="モバイルメニュー" inert>
+      <div class="mobile-menu-inner">
+        <p>WHERE TO?</p>
+<a href="/"><span aria-hidden="true">00</span> ホームへ</a>
+        <a href="/aboutus.html"><span aria-hidden="true">01</span> 私たちについて</a>
+        <a href="/portfolio.html"><span aria-hidden="true">02</span> 作品一覧</a>
+        <a href="/minigames.html"><span aria-hidden="true">03</span> いますぐあそぶ！</a>
+        <a href="/members.html"><span aria-hidden="true">04</span> メンバー</a>
+        <a href="/coming-soon.html"><span aria-hidden="true">05</span> 鋭意制作中！</a>
+        <a href="/#contact"><span aria-hidden="true">06</span> お問い合わせ</a>
+        <div class="mobile-menu-bottom">なんでもない日を、ちょっと面白く。</div>
+      </div>
+    </nav>
+    <!-- site-nav:end -->
 
 
         <!-- Main -->
@@ -88,9 +109,11 @@
                             <li aria-current="page">プライバシーポリシー</li>
                         </ol>
                     </nav>
-                    <header class="major">
-                        <h1>プライバシーポリシー</h1>
-                    </header>
+                    <div class="page-header-container">
+                        <header class="major page-header-title">
+                            <h1>プライバシーポリシー</h1>
+                        </header>
+                    </div>
                     
                     <h2 id="プライバシーポリシー">プライバシーポリシー</h2>
 
@@ -146,6 +169,8 @@
 
 <p>ただし、サーバーの運用上必要な範囲でアクセスログが記録される場合があります。また、お問い合わせフォームの送信に関連して外部サービスが利用される場合があります。</p>
 
+<p>また、当サイトのミニゲームでは、ゲームの記録や設定（ハイスコア、進行状況、難易度、音のオン・オフ、入力したプレイヤー名、作成したステージなど）を、お使いのブラウザ内の保存領域（ローカルストレージ）に保存する場合があります。これらの情報はお使いの端末内にのみ保存され、当サークルのサーバーへ送信されることはありません。ブラウザの設定から閲覧データ（サイトデータ）を削除することで、いつでも消去できます。</p>
+
 <p>将来、アクセス解析サービスや広告配信サービスを導入する場合には、本ポリシーを更新し、必要な情報を明示します。</p>
 
 <h3 id="5-お問い合わせ窓口">5. お問い合わせ窓口</h3>
@@ -176,10 +201,11 @@
 
 <a href="#" id="scrollToTopBtn" title="ページトップへ戻る">▲</a>
 <!-- Scripts -->
-	<script src="/assets/js/main.js?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/js/main.js'); ?>"></script>
+	<script src="/assets/js/main.js?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/js/main.js'); ?>" defer></script>
 	
 
     </div>
+	<script defer src="/assets/js/site-navigation.js?v=20261010-nav"></script>
 </body>
 
 </html>

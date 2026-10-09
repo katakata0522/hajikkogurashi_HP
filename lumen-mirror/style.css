@@ -1740,6 +1740,7 @@ body {
 .color-picker-btn:focus-visible,
 .info-close-btn:focus-visible,
 .flat-btn:focus-visible,
+.icon-btn:focus-visible,
 .control-btn:focus-visible,
 .glow-btn:focus-visible,
 #prop-title:focus-visible,
@@ -2364,4 +2365,53 @@ body {
     background: rgba(255, 0, 127, 0.1);
     box-shadow: 0 0 12px rgba(255, 0, 127, 0.3);
     border-color: #ff007f;
+}
+
+/* ===== 2026-10 スマホでタイトル画面の上（LUMEN_MIRROR のロゴ）が切れる不具合の修正 =====
+   ゲーム枠は 3:4 固定のため、スマホでは高さが足りず、中央寄せした中身の上下が枠外に切れていた。
+   中身が収まる時は今まで通り中央、収まらない時は上から並べてスクロールできるようにする。 */
+#start-screen,
+#overlay,
+#stage-select {
+    overflow-y: auto;
+    justify-content: flex-start;
+    -webkit-overflow-scrolling: touch;
+}
+#start-screen > :first-child,
+#overlay > :first-child,
+#stage-select > :first-child {
+    margin-top: auto;
+}
+#start-screen > :last-child,
+#overlay > :last-child,
+#stage-select > :last-child {
+    margin-bottom: auto;
+}
+@media (max-width: 767px) {
+    #start-screen {
+        padding: 16px 18px;
+    }
+    #start-screen .title-logo {
+        margin-bottom: 12px;
+    }
+}
+
+/* ===== 2026-10 縦長スマホでは、ゲーム枠を画面いっぱいに使う =====
+   盤面（canvas）は JS 側で 3:4 を保ったまま中央に収めるので、枠だけ縦に伸ばしても操作座標はずれない。
+   タイトルやステージ選択の画面が窮屈で切れていたのを解消する。 */
+@media (max-width: 767px) and (max-aspect-ratio: 3/4) {
+    #game-container {
+        width: 100vw;
+        height: 100vh;
+        height: 100dvh;
+        max-height: none;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+    }
+    /* 枠が縦に伸びた分、盤面（操作できる範囲）の境目を細い線で示す */
+    #game-canvas {
+        outline: 1px solid rgba(0, 243, 255, 0.18);
+        background: rgba(0, 243, 255, 0.015);
+    }
 }

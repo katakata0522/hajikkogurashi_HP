@@ -43,7 +43,7 @@ function Set-MinigameSeoBlock {
 
     $urlPath = ($RelativePath -replace '/index\.html$', '/')
     $canonical = "$baseUrl/$urlPath"
-    $imageUrl = if ($Image -match '^https?://') { $Image } else { "$baseUrl/$Image" }
+    $imageUrl = if ($Image -match '^https?://') { $Image } else { "$baseUrl/" + $Image.TrimStart('/') }
 
     $safeTitle = Escape-HtmlAttribute $Title
     $safeDescription = Escape-HtmlAttribute $Description
@@ -148,7 +148,7 @@ $minigamePages = @(
     @{ Path = 'kage-mane-dojo/index.html'; Title = '影まね道場 | Corner Neighbor'; Description = 'お題の影や形を見極めて遊ぶ、Corner Neighbor制作のブラウザミニゲームです。'; Image = '/assets/images/banner.webp' },
     @{ Path = 'kanji-slicer/index.html'; Title = '漢字スライサー・マージ | Corner Neighbor'; Description = '落ちてくる漢字をスワイプで斬り、部首を合体させてお題をクリアするスマホ対応の物理スライスアクションです。'; Image = '/assets/images/kanji_slicer_thumbnail.png' },
     @{ Path = 'lumen-mirror/index.html'; Title = 'LUMEN_MIRROR | Corner Neighbor'; Description = '鏡のラインを描いて光をターゲットへ導く、幾何学的な物理反射パズルゲームです。'; Image = '/assets/images/lumen_mirror_thumbnail.png' },
-    @{ Path = 'mikiri-issen/index.html'; Title = '見切り一閃 | Corner Neighbor'; Description = 'タイミングを見極めて一閃を決める、Corner Neighbor制作のブラウザミニゲームです。'; Image = '/assets/images/banner.webp' },
+    @{ Path = 'mikiri-issen/index.html'; Title = '見切り一閃 | Corner Neighbor'; Description = 'タイミングを見極めて一閃を決める、Corner Neighbor制作のブラウザミニゲームです。'; Image = '/assets/images/mikiri_issen_og.jpg' },
     @{ Path = 'sorting-factory/index.html'; Title = '超絶！仕分け工場 | Corner Neighbor'; Description = '迫り来るアイテムを左右に仕分ける、ルール変化が楽しいスマホ対応の脳トレパニックゲームです。'; Image = '/assets/images/sorting_factory_thumbnail_1779165097756.png' },
     @{ Path = 'stealth-slacker/index.html'; Title = '限界！ステルスサボタージュ | Corner Neighbor'; Description = '上司にバレないように全力でサボる、スマホ対応のコミカルなバカゲー系ミニゲームです。'; Image = '/assets/images/stealth_slacker_thumbnail_1779165112569.png' },
     @{ Path = 'wall-jumper/index.html'; Title = 'ウォールジャンパー | Corner Neighbor'; Description = '壁を使って跳び回る、Corner Neighbor制作のブラウザアクションミニゲームです。'; Image = '/assets/images/banner.webp' }

@@ -7,6 +7,15 @@ mb_internal_encoding('UTF-8');
 const CONTACT_EMAIL = 'hajikkogurashi.official@gmail.com';
 const CONTACT_FROM = 'webform@hajikkoroom.xsrv.jp';
 const CONTACT_SUBJECT = '【Corner Neighbor公式サイト】お問い合わせ';
+const CONTACT_MAX_LINKS = 5;
+
+require_once __DIR__ . '/includes/form-guard.php';
+
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: DENY');
+header('Referrer-Policy: same-origin');
+header('Cache-Control: no-store');
+header("Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; form-action 'self'; frame-ancestors 'none'; base-uri 'none'");
 
 /**
  * 日本語を含む最小限の確認ページを返す。
@@ -169,26 +178,79 @@ function resolveReturnTo(mixed $value): string
     return in_array($normalized, $allowedPaths, true) ? $normalized : '/';
 }
 
+/**
+ * 送信元が同じサイトかを確認する（ブラウザが Origin / Referer を付けた場合だけ判定）。
+ */
+function isSameSiteRequest(): bool
+{
+    $host = strtolower((string) ($_SERVER['HTTP_HOST'] ?? ''));
+    if ($host === '') {
+        return true;
+    }
+    foreach (array('HTTP_ORIGIN', 'HTTP_REFERER') as $key) {
+        $value = (string) ($_SERVER[$key] ?? '');
+        if ($value === '' || $value === 'null') {
+            continue;
+        }
+        $sourceHost = strtolower((string) parse_url($value, PHP_URL_HOST));
+        $sourcePort = parse_url($value, PHP_URL_PORT);
+        if ($sourcePort !== null && $sourcePort !== false) {
+            $sourceHost .= ':' . $sourcePort;
+        }
+        return $sourceHost === $host || preg_replace('/:\d+$/', '', $sourceHost) === preg_replace('/:\d+$/', '', $host);
+    }
+    return true;
+}
+
+/** 改行とタブ以外の制御文字を取り除く。 */
+function stripControlChars(string $value): string
+{
+    return (string) preg_replace('/[^\P{C}\n\t]/u', '', str_replace(array("\r\n", "\r"), "\n", $value));
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header('Allow: POST');
     renderPage('不正なアクセスです', 'このページはお問い合わせフォームの送信専用です。', '/', 405);
 }
 
 $returnTo = resolveReturnTo($_POST['return_to'] ?? '/');
-$honeypot = trim((string)($_POST['company'] ?? ''));
+$successTitle = '送信を受け付けました';
+$successMessage = 'お問い合わせありがとうございます。内容を確認のうえ、必要に応じてご連絡します。';
 
+if (!isSameSiteRequest()) {
+    renderPage('不正なアクセスです', 'このページはお問い合わせフォームの送信専用です。', '/', 403);
+}
+
+$honeypot = trim((string)($_POST['company'] ?? ''));
 if ($honeypot !== '') {
-    renderPage('送信を受け付けました', 'お問い合わせありがとうございます。内容を確認のうえ、必要に応じてご連絡します。', $returnTo, 200);
+    // ボットには成功したように見せて、実際には送らない。
+    renderPage($successTitle, $successMessage, $returnTo, 200);
+}
+
+$tokenState = formGuardCheckToken((string) ($_POST['form_token'] ?? ''));
+if ($tokenState === 'too_fast') {
+    renderPage($successTitle, $successMessage, $returnTo, 200);
+}
+if ($tokenState !== 'ok') {
+    renderPage('入力内容をご確認ください', "ページの有効期限が切れました。\nお手数ですがページを再読み込みしてから、もう一度送信してください。", $returnTo, 400);
+}
+
+$rawFields = array($_POST['name'] ?? '', $_POST['_replyto'] ?? '', $_POST['message'] ?? '');
+foreach ($rawFields as $rawField) {
+    if (!is_string($rawField) || !mb_check_encoding($rawField, 'UTF-8')) {
+        renderPage('入力内容をご確認ください', '入力内容を読み取れませんでした。', $returnTo, 400);
+    }
 }
 
 $name = trim((string)($_POST['name'] ?? ''));
 $email = trim((string)($_POST['_replyto'] ?? ''));
-$message = trim((string)($_POST['message'] ?? ''));
+$message = trim(stripControlChars((string)($_POST['message'] ?? '')));
 
 if ($name === '' || $email === '' || $message === '') {
     renderPage('入力内容をご確認ください', 'お名前・メールアドレス・お問い合わせ内容は必須です。', $returnTo, 400);
 }
 
-if (mb_strlen($name) > 100 || mb_strlen($message) > 5000) {
+if (mb_strlen($name) > 100 || mb_strlen($message) > 5000 || strlen($email) > 254) {
     renderPage('入力内容をご確認ください', '入力文字数が上限を超えています。', $returnTo, 400);
 }
 
@@ -196,8 +258,17 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     renderPage('メールアドレスをご確認ください', 'メールアドレスの形式が正しくありません。', $returnTo, 400);
 }
 
-if (preg_match('/[\r\n]/', $name) || preg_match('/[\r\n]/', $email)) {
+if (preg_match('/[\x00-\x1F\x7F]/', $name) || preg_match('/[\x00-\x1F\x7F]/', $email)) {
     renderPage('入力内容をご確認ください', '不正な改行を含む入力は送信できません。', $returnTo, 400);
+}
+
+if (preg_match_all('#https?://#i', $message) > CONTACT_MAX_LINKS) {
+    renderPage('入力内容をご確認ください', 'URLが多すぎるため送信できません。URLを減らしてもう一度お試しください。', $returnTo, 400);
+}
+
+$clientKey = (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+if (!formGuardAllowRate($clientKey)) {
+    renderPage('しばらくお待ちください', "短い時間に何度も送信されたため、受付を一時停止しています。\n15分ほど待ってからもう一度お試しください。", $returnTo, 429);
 }
 
 $body = implode("\n", array(

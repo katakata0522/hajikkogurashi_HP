@@ -1,2 +1,33 @@
 # HTMLファイル内でPHPを動作させる設定（エックスサーバー FastCGI環境用）
 AddHandler fcgid-script .html .htm
+
+# 存在しないURLでは、Xserver標準画面ではなくサイトの404ページを出す
+ErrorDocument 404 /404.html
+
+# フォルダの中身一覧を表示しない
+Options -Indexes
+
+# 隠しファイル（.htaccess / .git など）と、サイト内部用の部品フォルダは直接開けないようにする
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule "(^|/)\.(?!well-known/)" - [F]
+  RewriteRule "^includes/" - [F]
+</IfModule>
+
+# 基本的なセキュリティ用ヘッダー
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+</IfModule>
+
+# サイトの入口ページ（HTML 10ページ）だけ、毎回更新を確認させる（PR #52 から取り込み）。
+# ゲームや CSS/JS のキャッシュには影響しない。
+<IfModule mod_setenvif.c>
+    SetEnvIf Request_URI "^/(?:$|index\.html$|aboutus\.html$|portfolio\.html$|members\.html$|minigames\.html$|news\.html$|coming-soon\.html$|privacy-policy\.html$|terms-of-service\.html$|404\.html$)" cn_site_html
+</IfModule>
+<IfModule mod_headers.c>
+    Header onsuccess unset Cache-Control env=cn_site_html
+    Header always set Cache-Control "no-cache" env=cn_site_html
+</IfModule>

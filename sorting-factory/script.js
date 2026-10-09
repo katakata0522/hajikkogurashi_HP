@@ -9,7 +9,8 @@ const CONFIG = {
     SHAPES: { CIRCLE: 0, SQUARE: 1 },
     SIZES: { SMALL: 64, LARGE: 164 },
     RULES: { COLOR: 'color', SHAPE: 'shape', SIZE: 'size', NUMBER: 'number' },
-    RULE_LABELS: { color: '色', shape: '形', size: '大きさ', number: '数字' }
+    RULE_LABELS: { color: '色', shape: '形', size: '大きさ', number: '数字' },
+    RETRY_LOCK_MS: 500
 };
 
 const STATE = { START: 0, PLAYING: 1, GAMEOVER: 2 };
@@ -443,6 +444,8 @@ class GameController {
         this.flipperAngleLeft = 0;
         this.flipperAngleRight = 0;
         this.dpr = 1;
+        this.gameOverAt = 0;
+        this.rotateHintEl = null;
 
         if (this.canvas) {
             this.initCanvas();
@@ -513,6 +516,7 @@ class GameController {
                 if (e.key === ' ' || e.key === 'Enter') {
                     if (document.activeElement && document.activeElement.tagName === 'BUTTON') return;
                     e.preventDefault();
+                    if (this.isRetryLocked()) return;
                     this.startGame();
                 }
             }
@@ -580,6 +584,7 @@ class GameController {
         const startWrapper = (e) => {
             e.stopPropagation();
             if (e.cancelable) e.preventDefault();
+            if (this.isRetryLocked()) return;
             this.startGame();
         };
 
@@ -653,6 +658,13 @@ class GameController {
 
         if (this.animationId) cancelAnimationFrame(this.animationId);
         this.animationId = requestAnimationFrame((t) => this.loop(t));
+    }
+
+    isRotateHintVisible() {
+        if (!this.rotateHintEl || !this.rotateHintEl.isConnected) {
+            this.rotateHintEl = document.querySelector('.cn-rotate-hint');
+        }
+        return !!(this.rotateHintEl && this.rotateHintEl.classList.contains('is-visible'));
     }
 
     getRandomRuleChangeCount() {
@@ -740,9 +752,15 @@ class GameController {
         }
     }
 
+    // ゲームオーバー直後の連打で、結果を見る前に再挑戦が始まってしまうのを防ぐ
+    isRetryLocked() {
+        return this.state === STATE.GAMEOVER && (performance.now() - this.gameOverAt) < CONFIG.RETRY_LOCK_MS;
+    }
+
     triggerGameOver() {
         this.audio.playError();
         this.state = STATE.GAMEOVER;
+        this.gameOverAt = performance.now();
         if (this.animationId) cancelAnimationFrame(this.animationId);
         
         if (this.container) {
@@ -951,7 +969,8 @@ class GameController {
         this.lastTime = timestamp;
 
         if (this.state === STATE.PLAYING) {
-            this.update(dt);
+            // 「縦向きにしてね」の案内が出ている間は、落下を止めて待つ（案内の裏でゲームオーバーにならないように）
+            if (!this.isRotateHintVisible()) this.update(dt);
             this.draw();
             this.animationId = requestAnimationFrame((t) => this.loop(t));
         }
@@ -991,7 +1010,9 @@ class GameController {
     showShareFeedback(message) {
         const shareBtn = document.getElementById('share-btn');
         if (!shareBtn) return;
-        const original = shareBtn.innerText;
+        // 連続で押しても元の文字に戻るよう、最初の文字だけを覚えておく
+        if (this.shareOriginalText === undefined) this.shareOriginalText = shareBtn.innerText;
+        const original = this.shareOriginalText;
         shareBtn.innerText = message;
         window.clearTimeout(this.shareFeedbackTimer);
         this.shareFeedbackTimer = window.setTimeout(() => {

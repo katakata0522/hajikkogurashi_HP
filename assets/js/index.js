@@ -36,3 +36,54 @@
 		observer.observe(tile);
 	});
 })();
+
+// トップのモニター: 1枚目だけ先に表示し、残りの画面はページの読み込みが落ち着いてから取得する。
+// 「動きを減らす」設定のときは切り替えないので、残りは読み込まない。
+(function() {
+	'use strict';
+
+	var screen = document.querySelector('.hero-monitor__screen');
+	if (!screen) {
+		return;
+	}
+	var lazyImages = Array.prototype.slice.call(screen.querySelectorAll('img[data-src]'));
+	var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+	if (!lazyImages.length || reduceMotion) {
+		return;
+	}
+
+	function whenLoaded(img) {
+		return new Promise(function(resolve) {
+			if (img.complete && img.naturalWidth) {
+				resolve();
+				return;
+			}
+			img.addEventListener('load', function() { resolve(); }, { once: true });
+			img.addEventListener('error', function() { resolve(); }, { once: true });
+		});
+	}
+
+	function start() {
+		var pending = lazyImages.map(function(img) {
+			img.src = img.getAttribute('data-src');
+			img.removeAttribute('data-src');
+			return whenLoaded(img);
+		});
+		Promise.all(pending).then(function() {
+			var ok = lazyImages.every(function(img) { return img.naturalWidth > 0; });
+			if (ok) {
+				screen.classList.add('is-cycling');
+			}
+		});
+	}
+
+	function schedule() {
+		window.setTimeout(start, 3500);
+	}
+
+	if (document.readyState === 'complete') {
+		schedule();
+	} else {
+		window.addEventListener('load', schedule, { once: true });
+	}
+})();

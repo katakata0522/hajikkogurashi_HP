@@ -296,3 +296,72 @@ button.secondary {
     25% { opacity: 1; transform: scale(1); }
     100% { opacity: 0; transform: scale(1.08); }
 }
+
+/* ===== 2026-10 タイトル画面のレイアウト修正 =====
+   - 「広場に戻る」がタイトル文字に重なっていた → スタートボタンの下に配置
+   - スマホで「ゲームスタート」が3行に折れていた → 1行に
+   - スタートボタンを押した瞬間に左へずれていた（transform の上書き）→ 中央のまま沈むように
+   - 説明文が足場と重なって読みにくい → うっすら背景を敷く */
+#start-btn,
+#menu-btn-title {
+    white-space: nowrap;
+}
+#start-btn:active {
+    transform: translate(-50%, 4px);
+}
+#menu-btn-title {
+    position: absolute;
+    top: calc(65% + 96px);
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0 !important;
+    padding: 10px 32px;
+    font-size: 18px;
+}
+#menu-btn-title:active {
+    transform: translate(-50%, 4px);
+}
+#instruction {
+    left: 50%;
+    transform: translateX(-50%);
+    width: max-content;
+    max-width: calc(100% - 32px);
+    margin: 0;
+    box-sizing: border-box;
+    padding: 10px 16px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.35);
+}
+@media (max-width: 450px) {
+    #start-btn {
+        padding: 14px 36px;
+        font-size: 22px;
+    }
+}
+@media (max-height: 640px) {
+    #menu-btn-title {
+        top: calc(65% + 80px);
+    }
+}
+
+/* 2026-10: スマホのブラウザでアドレスバー分だけ下が切れないよう、実際に見えている高さ(dvh)を使う */
+@supports (height: 100dvh) {
+    body,
+    #game-container {
+        height: 100dvh;
+    }
+    @media (max-width: 450px) {
+        #game-container {
+            max-height: 100dvh;
+        }
+    }
+}
+
+/* キーボード操作時の選択枠（他のミニゲームとそろえた太めの枠） */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+label:focus-visible {
+    outline: 3px solid #ffd54a;
+    outline-offset: 3px;
+}

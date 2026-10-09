@@ -398,6 +398,7 @@ class GameController {
         this.screenShake = 0;
         this.gameOverTime = 0;
         this.dpr = 1;
+        this.rotateHintEl = null;
 
         if (this.canvas) {
             this.initCanvas();
@@ -434,6 +435,13 @@ class GameController {
         Object.assign(this.canvas.style, styles);
         const uiLayer = document.getElementById('ui-layer');
         if (uiLayer) Object.assign(uiLayer.style, styles);
+    }
+
+    isRotateHintVisible() {
+        if (!this.rotateHintEl || !this.rotateHintEl.isConnected) {
+            this.rotateHintEl = document.querySelector('.cn-rotate-hint');
+        }
+        return !!(this.rotateHintEl && this.rotateHintEl.classList.contains('is-visible'));
     }
 
     getRandomInt(min, max) {
@@ -1013,7 +1021,12 @@ class GameController {
         this.lastTime = timestamp;
 
         if (this.gameState === STATE.PLAYING) {
-            this.update(dt);
+            // 「縦向きにしてね」の案内が出ている間は時間を止める（案内の裏でストレスが溜まって倒れないように）
+            if (this.isRotateHintVisible()) {
+                if (this.isSlacking) this.stopSlacking();
+            } else {
+                this.update(dt);
+            }
             this.draw();
             this.animationId = requestAnimationFrame((t) => this.loop(t));
         }

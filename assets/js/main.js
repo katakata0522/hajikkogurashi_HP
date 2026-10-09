@@ -63,7 +63,14 @@
 
 				// Background image from <img>
 				if (img) {
-					tile.style.backgroundImage = 'url(' + img.getAttribute('src') + ')';
+					var src = img.getAttribute('src');
+					var avif = img.getAttribute('data-avif');
+					var bg = 'url(' + src + ')';
+					// AVIF に対応したブラウザでは軽い AVIF を使い、それ以外は今までどおり WebP
+					if (avif && window.CSS && CSS.supports('background-image', 'image-set(url("a.avif") type("image/avif"))')) {
+						bg = 'image-set(url("' + avif + '") type("image/avif"), url("' + src + '") type("image/webp"))';
+					}
+					tile.style.backgroundImage = bg;
 					var pos = img.getAttribute('data-position');
 					if (pos && image) image.style.backgroundPosition = pos;
 					if (image) image.style.display = 'none';
@@ -199,7 +206,20 @@
 		closeBtn.className = 'close';
 		closeBtn.href = '#menu';
 		closeBtn.textContent = 'Close';
+		closeBtn.setAttribute('role', 'button');
+		closeBtn.setAttribute('aria-label', 'メニューを閉じる');
 		menu.appendChild(closeBtn);
+
+		// メニューを開くボタンに、開閉状態を読み上げ用に伝える
+		var triggers = document.querySelectorAll('#header a[href="#menu"]');
+		for (var t = 0; t < triggers.length; t++) {
+			triggers[t].setAttribute('role', 'button');
+			triggers[t].setAttribute('aria-controls', 'menu');
+			triggers[t].setAttribute('aria-expanded', 'false');
+		}
+		menu.setAttribute('aria-label', 'サイトメニュー');
+		menu.setAttribute('aria-hidden', 'true');
+		var lastFocus = null;
 
 		// Move menu to body end
 		document.body.appendChild(menu);
@@ -218,6 +238,7 @@
 				body.style.top = '-' + menuScrollY + 'px';
 				root.classList.add('is-menu-visible');
 				body.classList.add('is-menu-visible');
+				syncMenuState(true);
 				return;
 			}
 
@@ -226,6 +247,24 @@
 			body.classList.remove('is-menu-visible');
 			body.style.top = '';
 			window.scrollTo(0, menuScrollY);
+			syncMenuState(false);
+		}
+
+		function syncMenuState(visible) {
+			for (var i = 0; i < triggers.length; i++) {
+				triggers[i].setAttribute('aria-expanded', visible ? 'true' : 'false');
+			}
+			menu.setAttribute('aria-hidden', visible ? 'false' : 'true');
+			if (visible) {
+				lastFocus = document.activeElement;
+				var first = inner.querySelector('a[href]');
+				if (first) {
+					setTimeout(function () { try { first.focus({ preventScroll: true }); } catch (err) { first.focus(); } }, 50);
+				}
+			} else if (lastFocus && typeof lastFocus.focus === 'function') {
+				try { lastFocus.focus({ preventScroll: true }); } catch (err) { lastFocus.focus(); }
+				lastFocus = null;
+			}
 		}
 
 		function show()   { if (lock()) setMenuVisible(true); }
@@ -259,6 +298,8 @@
 			if (!a) return;
 			var href = a.getAttribute('href');
 			if (!href || href === '#menu') return;
+			// Ctrl / Cmd / Shift クリックや新しいタブ指定は、ブラウザ本来の動きに任せる
+			if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey || e.button !== 0 || a.target === '_blank') return;
 
 			e.preventDefault();
 			e.stopPropagation();
@@ -278,7 +319,7 @@
 
 		// Escape key
 		document.addEventListener('keydown', function (e) {
-			if (e.key === 'Escape' || e.keyCode === 27) hide();
+			if ((e.key === 'Escape' || e.keyCode === 27) && body.classList.contains('is-menu-visible')) hide();
 		});
 	}
 
@@ -288,6 +329,7 @@
 	function initScrollToTop() {
 		var btn = document.getElementById('scrollToTopBtn');
 		if (!btn) return;
+		btn.setAttribute('aria-label', 'ページトップへ戻る');
 
 		window.addEventListener('scroll', function () {
 			if (window.scrollY > 200) {

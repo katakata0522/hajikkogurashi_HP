@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="/favicon.ico" sizes="any" />
+	<link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml" />
+	<link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png" />
     <title>ウォールジャンパー | Corner Neighbor</title>
     <!-- SEO: hajikkogurashi-minigame -->
     <meta name="description" content="壁を使って跳び回る、Corner Neighbor制作のブラウザアクションミニゲームです。">
@@ -21,10 +24,34 @@
     <meta name="twitter:description" content="壁を使って跳び回る、Corner Neighbor制作のブラウザアクションミニゲームです。">
     <meta name="twitter:image" content="https://hajikkoroom.xsrv.jp/assets/images/wall_jumper_thumbnail_1779165143429.png">
     <!-- /SEO: hajikkogurashi-minigame -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "VideoGame",
+      "name": "ウォールジャンパー",
+      "description": "壁を使って跳び回る、Corner Neighbor制作のブラウザアクションミニゲームです。",
+      "url": "https://hajikkoroom.xsrv.jp/wall-jumper/",
+      "image": "https://hajikkoroom.xsrv.jp/assets/images/wall_jumper_thumbnail_1779165143429.png",
+      "inLanguage": "ja",
+      "genre": "激ムズアクション",
+      "isAccessibleForFree": true,
+      "publisher": {
+        "@type": "Organization",
+        "name": "Corner Neighbor",
+        "url": "https://hajikkoroom.xsrv.jp/"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "Corner Neighbor",
+        "url": "https://hajikkoroom.xsrv.jp/"
+      }
+    }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Noto+Sans+JP:wght@700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=20261010-r2">
+    <link rel="stylesheet" href="/assets/css/minigame-rotate-hint.css?v=20261010">
 </head>
 <body>
     <div id="game-container">
@@ -62,6 +89,8 @@
     </div>
     <script src="/assets/js/minigame-storage-guard.js"></script>
     <script src="/assets/js/minigame-seed.js"></script>
-    <script src="game.js"></script>
+    <script src="/assets/js/minigame-audio-lifecycle.js?v=20261010"></script>
+    <script src="game.js?v=20261010-r4"></script>
+    <script src="/assets/js/minigame-rotate-hint.js?v=20261010" defer></script>
 </body>
 </html>

@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+	<link rel="icon" href="/favicon.ico" sizes="any" />
+	<link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml" />
+	<link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png" />
   <title>見切り一閃 | Corner Neighbor</title>
     <!-- SEO: hajikkogurashi-minigame -->
     <meta name="description" content="タイミングを見極めて一閃を決める、Corner Neighbor制作のブラウザミニゲームです。">
@@ -14,14 +17,37 @@
     <meta property="og:title" content="見切り一閃 | Corner Neighbor">
     <meta property="og:description" content="タイミングを見極めて一閃を決める、Corner Neighbor制作のブラウザミニゲームです。">
     <meta property="og:url" content="https://hajikkoroom.xsrv.jp/mikiri-issen/">
-    <meta property="og:image" content="https://hajikkoroom.xsrv.jp/assets/images/banner.webp">
+    <meta property="og:image" content="https://hajikkoroom.xsrv.jp/assets/images/mikiri_issen_og.jpg">
     <meta property="og:image:alt" content="見切り一閃 | Corner Neighbor">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="見切り一閃 | Corner Neighbor">
     <meta name="twitter:description" content="タイミングを見極めて一閃を決める、Corner Neighbor制作のブラウザミニゲームです。">
-    <meta name="twitter:image" content="https://hajikkoroom.xsrv.jp/assets/images/banner.webp">
+    <meta name="twitter:image" content="https://hajikkoroom.xsrv.jp/assets/images/mikiri_issen_og.jpg">
     <!-- /SEO: hajikkogurashi-minigame -->
-  <link rel="stylesheet" href="style.css">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "VideoGame",
+      "name": "見切り一閃",
+      "description": "タイミングを見極めて一閃を決める、Corner Neighbor制作のブラウザミニゲームです。",
+      "url": "https://hajikkoroom.xsrv.jp/mikiri-issen/",
+      "image": "https://hajikkoroom.xsrv.jp/assets/images/mikiri_issen_og.jpg",
+      "inLanguage": "ja",
+      "genre": "反射神経",
+      "isAccessibleForFree": true,
+      "publisher": {
+        "@type": "Organization",
+        "name": "Corner Neighbor",
+        "url": "https://hajikkoroom.xsrv.jp/"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "Corner Neighbor",
+        "url": "https://hajikkoroom.xsrv.jp/"
+      }
+    }
+    </script>
+  <link rel="stylesheet" href="style.css?v=20261010-focus">
   <!-- Google Fonts: Flashレトロ＆和風プロロゴフォント -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -168,6 +194,7 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite">コピーしました</div>
 
-  <script src="game.js"></script>
+  <script src="/assets/js/minigame-audio-lifecycle.js?v=20261010"></script>
+  <script src="game.js?v=20261010-qa"></script>
 </body>
 </html>

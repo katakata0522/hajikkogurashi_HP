@@ -1,0 +1,608 @@
+/* =========================================================
+   site-theme.css
+   夜間作業で追加した共通スタイル（サイトページ専用。ミニゲームには読み込まない）
+   ========================================================= */
+
+/* ---- アクセシビリティ: 本文へスキップ ---- */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 1rem;
+  z-index: 100001;
+  padding: 0.6rem 1rem;
+  background: #ffcc00;
+  color: #121526 !important;
+  font-weight: 700;
+  border-radius: 6px;
+  border-bottom: none !important;
+  text-decoration: none;
+  transition: top 0.15s ease;
+}
+.skip-link:focus {
+  top: 0.75rem;
+}
+
+/* ---- キーボード操作時のフォーカス表示 ---- */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[role="button"]:focus-visible {
+  outline: 3px solid #ffcc00 !important;
+  outline-offset: 3px;
+}
+
+/* =========================================================
+   インディーゲームサークルらしい見た目（2026-10 夜間作業）
+   - 既存の紺×ゴールドを土台に、水色・ピンクを差し色として追加
+   - ドット（ピクセル）調の飾りを少しだけ。子どもっぽくなりすぎないよう控えめに
+   - 動きは「動きを減らす」設定の人には出さない
+   ========================================================= */
+
+:root {
+  --cn-yellow: #ffcc00;
+  --cn-cyan: #5ce1e6;
+  --cn-pink: #ff6b8b;
+  --cn-violet: #a594ff;
+  --cn-bg: #121526;
+  --cn-card: rgba(28, 33, 62, 0.78);
+  --cn-card-line: rgba(255, 255, 255, 0.09);
+  --cn-radius: 16px;
+  --cn-stripe: linear-gradient(90deg, var(--cn-yellow) 0 33.3%, var(--cn-pink) 33.3% 66.6%, var(--cn-cyan) 66.6% 100%);
+  --cn-font-pixel: 'DotGothic16', 'Noto Sans JP', monospace;
+}
+
+/* ---- 背景: うっすらドット柄 ---- */
+body {
+  background-image:
+    radial-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1.2px),
+    var(--theme-bg-gradient, linear-gradient(135deg, #0d101d 0%, #171c33 100%)) !important;
+  background-size: 22px 22px, auto !important;
+  background-attachment: fixed !important;
+}
+
+/* ---- ヘッダー: 下に3色のピクセル帯、ロゴにアイコン ---- */
+#header {
+  border-bottom: none !important;
+}
+#header::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 3px;
+  background: var(--cn-stripe);
+  opacity: 0.85;
+  pointer-events: none;
+}
+#header .logo {
+  position: relative;
+  padding-left: 3.4rem !important;
+}
+#header .logo::before {
+  content: "";
+  position: absolute;
+  left: 1.25rem;
+  top: 50%;
+  width: 1.6rem;
+  height: 1.6rem;
+  margin-top: -0.8rem;
+  background: url("/assets/images/favicon.svg") center / contain no-repeat;
+  transition: transform 0.25s ease;
+}
+#header .logo:hover::before {
+  transform: rotate(-8deg) scale(1.08);
+}
+#header nav a[href="#menu"] {
+  border-radius: 10px !important;
+}
+
+/* ---- メニュー: 項目にピクセル矢印 ---- */
+#menu .links li a {
+  position: relative;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+#menu .links li a:hover {
+  transform: translateX(4px);
+}
+#menu .links li a::before {
+  content: "▶";
+  content: "▶" / ""; /* 飾りなので読み上げない */
+  font-family: var(--cn-font-pixel);
+  font-size: 0.7em;
+  color: var(--cn-yellow);
+  margin-right: 0.6em;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+#menu .links li a:hover::before,
+#menu .links li a:focus-visible::before {
+  opacity: 1;
+}
+
+/* ---- ページ見出し: 下線を3色のピクセル帯に ---- */
+.page-header-title h1,
+#main > section > .inner > header.major h1 {
+  position: relative;
+}
+.page-header-title h1::after,
+header.major.page-header-title h1::after {
+  background: var(--cn-stripe) !important;
+  height: 4px !important;
+  border-radius: 0 !important;
+}
+header.major > :first-child::after {
+  background: var(--cn-stripe) !important;
+  height: 3px !important;
+}
+
+/* ---- パンくず・日付・タグ類はドット文字 ---- */
+.breadcrumbs,
+.news-entry__date,
+.portfolio-timeline__date,
+.portfolio-card__kicker,
+.member-card__role,
+.game-badge {
+  font-family: var(--cn-font-pixel) !important;
+  letter-spacing: 0.06em !important;
+}
+
+/* ---- ボタン: 押せる感じの立体ボタン ---- */
+.button,
+input[type="submit"],
+input[type="reset"],
+input[type="button"],
+button {
+  border-radius: 10px !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease, color 0.2s ease !important;
+}
+.button.special,
+input[type="submit"].special,
+input[type="submit"],
+.button.next.special,
+#banner .button.next {
+  background-color: var(--cn-yellow) !important;
+  color: var(--cn-bg) !important;
+  box-shadow: 0 4px 0 #b38f00, 0 10px 20px rgba(0, 0, 0, 0.25) !important;
+  border: none !important;
+}
+.button:hover,
+input[type="submit"]:hover,
+input[type="reset"]:hover {
+  transform: translateY(-2px);
+}
+.button.special:hover,
+input[type="submit"]:hover,
+#banner .button.next:hover {
+  box-shadow: 0 6px 0 #b38f00, 0 14px 24px rgba(255, 204, 0, 0.18) !important;
+}
+.button:active,
+input[type="submit"]:active,
+input[type="reset"]:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #b38f00 !important;
+}
+
+/* ---- カード共通: 角丸・上に色帯・ホバーで少し浮く ---- */
+.game-card,
+.member-card,
+.news-entry,
+.portfolio-card {
+  border-radius: var(--cn-radius) !important;
+  border: 1px solid var(--cn-card-line) !important;
+  background: var(--cn-card) !important;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease !important;
+}
+.member-card,
+.news-entry,
+.portfolio-card {
+  border-top: 1px solid var(--cn-card-line) !important;
+}
+.member-card::before,
+.news-entry::before,
+.portfolio-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--cn-stripe);
+}
+.member-card:nth-child(3n+2)::before { background: linear-gradient(90deg, var(--cn-pink), var(--cn-violet)); }
+.member-card:nth-child(3n+3)::before { background: linear-gradient(90deg, var(--cn-cyan), var(--cn-yellow)); }
+.member-card:hover,
+.news-entry:hover,
+.portfolio-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 204, 0, 0.35) !important;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 204, 0, 0.12) !important;
+}
+
+/* ミニゲームカード: ゲームごとのテーマ色で光る */
+.game-card {
+  border-top: 1px solid var(--cn-card-line) !important;
+}
+.game-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 2px var(--game-theme, var(--cn-yellow));
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.game-card:hover,
+.game-card:focus-within {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.4), 0 0 28px var(--game-theme-alpha, rgba(255, 204, 0, 0.25)) !important;
+}
+.game-card:hover::after,
+.game-card:focus-within::after {
+  opacity: 1;
+}
+.game-card .image-link {
+  border-radius: var(--cn-radius) var(--cn-radius) 0 0 !important;
+  overflow: hidden;
+}
+.game-card .image-link img {
+  transition: transform 0.4s ease !important;
+}
+.game-card:hover .image-link img {
+  transform: scale(1.05);
+}
+.game-badge {
+  display: inline-block;
+  padding: 0.2em 0.7em !important;
+  border-radius: 999px !important;
+  font-weight: 400 !important;
+}
+
+/* メンバーのアイコン（絵文字）をゲームのアイコン枠風に */
+.member-card__avatar {
+  border-radius: 12px !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.12);
+}
+.member-card:hover .member-card__avatar {
+  animation: cn-hop 0.5s ease;
+}
+
+/* ---- トップ: ヒーローの余白を詰め、ピクセルの飾りを浮かべる ---- */
+body.is-home #banner.major {
+  position: relative;
+  overflow: hidden;
+  min-height: clamp(26rem, 70vh, 34rem) !important;
+}
+body.is-home #banner.major::before {
+  content: "";
+  position: absolute;
+  right: 5%;
+  bottom: 2.5rem;
+  width: 12rem;
+  height: 12rem;
+  background:
+    linear-gradient(var(--cn-yellow), var(--cn-yellow)) 0 0 / 40% 12% no-repeat,
+    linear-gradient(var(--cn-yellow), var(--cn-yellow)) 0 0 / 12% 40% no-repeat,
+    linear-gradient(var(--cn-cyan), var(--cn-cyan)) 100% 100% / 40% 12% no-repeat,
+    linear-gradient(var(--cn-cyan), var(--cn-cyan)) 100% 100% / 12% 40% no-repeat,
+    linear-gradient(var(--cn-pink), var(--cn-pink)) 50% 50% / 12% 12% no-repeat;
+  opacity: 0.55;
+  pointer-events: none;
+  animation: cn-float 7s ease-in-out infinite;
+}
+body.is-home #banner h1 {
+  text-shadow: 3px 3px 0 rgba(255, 107, 139, 0.35);
+}
+body.is-home #banner header.major h1::after {
+  background: var(--cn-stripe) !important;
+  height: 4px !important;
+}
+
+/* トップのタイル: 5枚目（ミニゲーム広場）を横いっぱいにして空きマスをなくす */
+@media screen and (min-width: 737px) {
+  .tiles--home article:nth-child(5) {
+    width: 100% !important;
+  }
+}
+.tiles--home article header.major h3 a {
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.25);
+}
+
+/* ---- お問い合わせ: スマホでメールアドレスが切れないように ---- */
+.contact-method a,
+.contact-method span {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.contact-form input[type="text"],
+.contact-form input[type="email"],
+.contact-form textarea {
+  border-radius: 10px !important;
+}
+
+/* X（旧Twitter）のアイコンを今のXロゴに */
+.fa-twitter::before {
+  content: "" !important;
+  display: inline-block;
+  width: 0.95em;
+  height: 0.95em;
+  vertical-align: -0.1em;
+  background-color: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* ---- フッター ---- */
+#footer {
+  position: relative;
+}
+#footer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--cn-stripe);
+  opacity: 0.6;
+}
+
+/* ---- ページトップへ戻るボタン: ゲームのカーソル風 ---- */
+#scrollToTopBtn {
+  border-radius: 12px !important;
+  font-family: var(--cn-font-pixel);
+}
+
+/* ---- 飾りの動き ---- */
+@keyframes cn-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(3deg); }
+}
+@keyframes cn-hop {
+  0%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-6px); }
+}
+
+/* ---- スマホ ---- */
+@media screen and (max-width: 980px) {
+  body.is-home #banner.major::before {
+    width: 9rem;
+    height: 9rem;
+    right: 1.5rem;
+    bottom: 1.5rem;
+    opacity: 0.3;
+  }
+}
+@media screen and (max-width: 736px) {
+  body.is-home #banner.major {
+    min-height: auto !important;
+    padding-top: 6.5rem !important;
+    padding-bottom: 2.5rem !important;
+  }
+  body.is-home #banner.major::before {
+    animation: none;
+    width: 6rem;
+    height: 6rem;
+    right: 1rem;
+    bottom: 1rem;
+    opacity: 0.25;
+  }
+  #header .logo {
+    padding-left: 2.9rem !important;
+  }
+  #header .logo::before {
+    left: 1.1rem;
+    width: 1.35rem;
+    height: 1.35rem;
+    margin-top: -0.675rem;
+  }
+  .game-card:hover,
+  .member-card:hover,
+  .news-entry:hover,
+  .portfolio-card:hover {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.is-home #banner.major::before,
+  .member-card:hover .member-card__avatar {
+    animation: none !important;
+  }
+  .game-card,
+  .member-card,
+  .news-entry,
+  .portfolio-card,
+  .game-card .image-link img,
+  .button {
+    transition: none !important;
+  }
+  .game-card:hover,
+  .member-card:hover,
+  .news-entry:hover,
+  .portfolio-card:hover,
+  .game-card:hover .image-link img {
+    transform: none !important;
+  }
+}
+
+/* ---- 作品一覧: ボタンの文字が上に寄っていたのを上下中央に ---- */
+.portfolio-links .button,
+.portfolio-cta .button {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  height: auto !important;
+  min-height: 3rem;
+  line-height: 1.3 !important;
+  padding: 0.75rem 1.4rem !important;
+}
+
+/* ---- ボタンの文字を上下中央に（作品一覧・404 などで上に寄っていた） ---- */
+.button {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---- メンバー: スマホでも X アイコンを名前の横に（以前は名前の下に1行使っていた） ---- */
+@media screen and (max-width: 980px) {
+  .member-card__header {
+    grid-template-columns: auto 1fr auto !important;
+  }
+  .member-sns-container {
+    grid-column: auto !important;
+  }
+}
+
+/* ---- スマホ: ロゴが2行に折れないように ---- */
+#header .logo strong {
+  white-space: nowrap;
+}
+@media screen and (max-width: 420px) {
+  #header .logo strong {
+    font-size: 1.2rem !important;
+    letter-spacing: 0.05em !important;
+  }
+}
+/* 幅 380px 以下（320〜375px の端末）では MENU ボタンが画面の右端からはみ出さないように詰める */
+@media screen and (max-width: 380px) {
+  #header .logo {
+    padding-left: 2.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+  #header .logo::before {
+    left: 0.9rem;
+  }
+  #header .logo strong {
+    font-size: 1.05rem !important;
+    letter-spacing: 0.02em !important;
+  }
+  #header nav a[href="#menu"] {
+    padding: 0 0.8rem !important;
+    letter-spacing: 0.08em !important;
+  }
+}
+
+/* =========================================================
+   第2弾: ページ見出しを「ステージ名の看板」風にそろえる
+   （私たちについて・メンバー・作品一覧・お知らせ・ミニゲーム・規約類）
+   英語の小見出しは飾り（CSS で表示。読み上げ対象外の装飾）
+   ========================================================= */
+body.page-about { --cn-eyebrow: "ABOUT US"; }
+body.page-members { --cn-eyebrow: "MEMBERS"; }
+body.page-portfolio { --cn-eyebrow: "WORKS"; }
+body.page-news { --cn-eyebrow: "NEWS"; }
+body.page-minigames { --cn-eyebrow: "MINI GAMES"; }
+body.page-coming-soon { --cn-eyebrow: "COMING SOON"; }
+body.page-privacy { --cn-eyebrow: "PRIVACY POLICY"; }
+body.page-terms { --cn-eyebrow: "TERMS OF SERVICE"; }
+body.page-404 { --cn-eyebrow: "ERROR 404"; }
+
+#main .page-header-container {
+  position: relative;
+  margin: 0 0 2.6rem;
+  padding: 2.4rem 2.2rem 2.1rem;
+  border-radius: var(--cn-radius);
+  background:
+    radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1.3px) 0 0 / 14px 14px,
+    radial-gradient(ellipse 60% 120% at 100% 0%, rgba(92, 225, 230, 0.16), transparent 70%),
+    radial-gradient(ellipse 50% 120% at 0% 100%, rgba(255, 107, 139, 0.14), transparent 70%),
+    linear-gradient(135deg, #1d2348 0%, #151a36 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 6px 0 rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+/* 英語の小見出し（ドット文字） */
+#main .page-header-container::before {
+  content: var(--cn-eyebrow, "");
+  content: var(--cn-eyebrow, "") / ""; /* 飾りなので読み上げない */
+  display: block;
+  margin-bottom: 0.6rem;
+  font-family: var(--cn-font-pixel);
+  font-size: 0.8rem;
+  letter-spacing: 0.3em;
+  color: var(--cn-cyan);
+}
+/* 右下の L 字（サークル名の「角」） */
+#main .page-header-container::after {
+  content: "";
+  position: absolute;
+  right: 1.4rem;
+  bottom: 1.4rem;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-right: 6px solid var(--cn-yellow);
+  border-bottom: 6px solid var(--cn-yellow);
+  opacity: 0.85;
+  pointer-events: none;
+}
+#main .page-header-container header.major {
+  margin: 0 !important;
+}
+#main .page-header-container h1 {
+  margin: 0 !important;
+  font-size: clamp(1.9rem, 4vw, 2.7rem) !important;
+  letter-spacing: 0.06em !important;
+  line-height: 1.3 !important;
+  text-shadow: 2px 2px 0 rgba(255, 107, 139, 0.35);
+}
+#main .page-header-container h1::after {
+  margin-top: 0.9rem !important;
+}
+#main .breadcrumbs {
+  margin-bottom: 1.1rem !important;
+}
+@media screen and (max-width: 736px) {
+  #main .page-header-container {
+    padding: 1.7rem 1.4rem 1.5rem;
+    margin-bottom: 2rem;
+  }
+  #main .page-header-container::after {
+    right: 1rem;
+    bottom: 1rem;
+    width: 1.8rem;
+    height: 1.8rem;
+    border-width: 0 4px 4px 0;
+  }
+}
+
+/* =========================================================
+   第2弾: 文字組みの調整（読みやすさ）
+   ========================================================= */
+#main p,
+#main li {
+  line-height: 1.9;
+  letter-spacing: 0.03em;
+}
+#main h2 {
+  letter-spacing: 0.05em;
+  line-height: 1.45;
+  margin-top: 2.2em;
+}
+#main h3 {
+  line-height: 1.5;
+}
+#main > section > .inner > h2:first-of-type {
+  margin-top: 0;
+}
+/* 規約・ポリシーなど長文ページは1行を長くしすぎない */
+body.page-privacy #main .inner > :not(.page-header-container):not(.breadcrumbs),
+body.page-terms #main .inner > :not(.page-header-container):not(.breadcrumbs) {
+  max-width: 46rem;
+}
+/* 見出し・短い文の改行を文節単位に（対応ブラウザのみ） */
+#main h1,
+#main h2,
+#main h3 {
+  word-break: auto-phrase;
+}
+#main h1,
+#main h2 {
+  text-wrap: balance;
+}

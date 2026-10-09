@@ -12,8 +12,8 @@ const html = readFileSync(htmlPath, 'utf8');
 const style = readFileSync(stylePath, 'utf8');
 const script = readFileSync(scriptPath, 'utf8');
 
-assert.match(html, /<link rel="stylesheet" href="style\.css">/, 'Mikiri styles should load from style.css');
-assert.match(html, /<script src="game\.js"><\/script>/, 'Mikiri game code should load from game.js');
+assert.match(html, /<link rel="stylesheet" href="style\.css\?v=20261010-focus">/, 'Mikiri styles should load from style.css');
+assert.match(html, /<script src="game\.js\?v=20261010-qa"><\/script>/, 'Mikiri game code should load from game.js');
 assert.doesNotMatch(html, /<style>[\s\S]*?<\/style>/, 'Mikiri should not keep the large inline style block');
 assert.doesNotMatch(html, /<script>[\s\S]*?<\/script>/, 'Mikiri should not keep the large inline game script');
 assert.doesNotThrow(() => new vm.Script(script), 'mikiri-issen game.js must be valid JavaScript');

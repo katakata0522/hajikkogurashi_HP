@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="/favicon.ico" sizes="any" />
+	<link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml" />
+	<link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png" />
     <title>超絶！仕分け工場 | Corner Neighbor</title>
     <!-- SEO: hajikkogurashi-minigame -->
     <meta name="description" content="迫り来るアイテムを左右に仕分ける、ルール変化が楽しいスマホ対応の脳トレパニックゲームです。">
@@ -21,8 +24,32 @@
     <meta name="twitter:description" content="迫り来るアイテムを左右に仕分ける、ルール変化が楽しいスマホ対応の脳トレパニックゲームです。">
     <meta name="twitter:image" content="https://hajikkoroom.xsrv.jp/assets/images/sorting_factory_thumbnail_1779165097756.png">
     <!-- /SEO: hajikkogurashi-minigame -->
-    <link rel="stylesheet" href="style.css">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "VideoGame",
+      "name": "超絶！仕分け工場",
+      "description": "迫り来るアイテムを左右に仕分ける、ルール変化が楽しいスマホ対応の脳トレパニックゲームです。",
+      "url": "https://hajikkoroom.xsrv.jp/sorting-factory/",
+      "image": "https://hajikkoroom.xsrv.jp/assets/images/sorting_factory_thumbnail_1779165097756.png",
+      "inLanguage": "ja",
+      "genre": "脳トレパニック",
+      "isAccessibleForFree": true,
+      "publisher": {
+        "@type": "Organization",
+        "name": "Corner Neighbor",
+        "url": "https://hajikkoroom.xsrv.jp/"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "Corner Neighbor",
+        "url": "https://hajikkoroom.xsrv.jp/"
+      }
+    }
+    </script>
+    <link rel="stylesheet" href="style.css?v=20261010">
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;900&family=Teko:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/minigame-rotate-hint.css?v=20261010">
 </head>
 <body>
     <div id="game-container">
@@ -98,6 +125,8 @@
         </div>
     </div>
     <script src="/assets/js/minigame-storage-guard.js"></script>
-    <script src="script.js"></script>
+    <script src="/assets/js/minigame-audio-lifecycle.js?v=20261010"></script>
+    <script src="script.js?v=20261010-qa"></script>
+    <script src="/assets/js/minigame-rotate-hint.js?v=20261010" defer></script>
 </body>
 </html>

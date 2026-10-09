@@ -496,3 +496,19 @@ body {
 }
 
 /* --- 残業モード（ダークモード）トグル --- */
+
+/* 2026-10: スマホのブラウザでアドレスバー分だけ下が切れないよう、実際に見えている高さ(dvh)を使う */
+@supports (height: 100dvh) {
+    body {
+        height: 100dvh;
+    }
+}
+
+/* キーボード操作時の選択枠（他のミニゲームとそろえた太めの枠） */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+label:focus-visible {
+    outline: 3px solid var(--primary-color);
+    outline-offset: 3px;
+}

@@ -422,6 +422,47 @@ try {
       });
     }
 
+    // 回帰テスト: リセット連打でステージ名・ヒントが積み重ならない／タッチ中断で描画と効果音が残らない
+    {
+      const qaPage = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+      await qaPage.goto(`http://127.0.0.1:${port}/lumen-mirror/`, { waitUntil: 'networkidle' });
+      await qaPage.click('#start-btn');
+      await qaPage.click('#stage-cards-container .stage-card');
+      const canvasBox = await qaPage.locator('#game-canvas').boundingBox();
+      const drawMirror = async () => {
+        await qaPage.mouse.move(canvasBox.x + canvasBox.width * 0.4, canvasBox.y + canvasBox.height * 0.3);
+        await qaPage.mouse.down();
+        await qaPage.mouse.move(canvasBox.x + canvasBox.width * 0.5, canvasBox.y + canvasBox.height * 0.4, { steps: 5 });
+        await qaPage.mouse.up();
+      };
+      for (let i = 0; i < 4; i++) {
+        await drawMirror();
+        await qaPage.click('#reset-btn');
+        await qaPage.waitForTimeout(80);
+      }
+      await qaPage.waitForTimeout(1600);
+      const toastTexts = await qaPage.$$eval('#toast-container .toast', (els) => els.map((el) => el.textContent));
+      const counts = {};
+      toastTexts.forEach((text) => { counts[text] = (counts[text] || 0) + 1; });
+      if (Object.values(counts).some((n) => n > 1)) {
+        failures.push(`rapid reset stacked duplicate stage/hint toasts: ${JSON.stringify(counts)}`);
+      }
+      const cancelled = await qaPage.evaluate(() => {
+        const canvas = document.getElementById('game-canvas');
+        const rect = canvas.getBoundingClientRect();
+        canvas.dispatchEvent(new PointerEvent('pointerdown', { clientX: rect.x + rect.width * 0.3, clientY: rect.y + rect.height * 0.6, bubbles: true, pointerId: 7 }));
+        canvas.dispatchEvent(new PointerEvent('pointermove', { clientX: rect.x + rect.width * 0.45, clientY: rect.y + rect.height * 0.75, bubbles: true, pointerId: 7 }));
+        canvas.dispatchEvent(new PointerEvent('pointercancel', { bubbles: true, pointerId: 7 }));
+        const scratchStillOn = audio.isPlayingIce;
+        window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 8 }));
+        return { scratchStillOn, mirrorCreated: !document.getElementById('reset-btn').disabled };
+      });
+      if (cancelled.scratchStillOn || cancelled.mirrorCreated) {
+        failures.push(`pointercancel left drawing/scratch sound active: ${JSON.stringify(cancelled)}`);
+      }
+      await qaPage.close();
+    }
+
     if (failures.length) throw new Error(`editor regression failures:\n- ${failures.join('\n- ')}`);
   } finally {
     await browser.close();

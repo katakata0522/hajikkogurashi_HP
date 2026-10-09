@@ -105,6 +105,7 @@ class GameController {
 
     _showStageSelect() {
         this.state = STATE.STAGE_SELECT;
+        this._clearStageIntroToasts();
         document.getElementById('start-screen').classList.add('hidden');
         document.getElementById('stage-select').classList.remove('hidden');
         document.getElementById('overlay').classList.add('hidden');
@@ -309,6 +310,14 @@ class GameController {
             if (this.state === STATE.EDITING) this.handleEditorKeyboard(e);
         });
         window.addEventListener('pointerup', handleUp);
+        // OS のジェスチャー等でタッチが中断されたら、描きかけの鏡を取り消して効果音も止める
+        window.addEventListener('pointercancel', () => {
+            if (!this.isDrawing) return;
+            this.isDrawing = false;
+            audio.stopIceScratch();
+            if (this.emitter) this.calculateLaserPath();
+            this._updateModeIndicator();
+        });
 
         // Button wiring
         document.getElementById('start-btn').addEventListener('click', () => {
@@ -481,15 +490,26 @@ class GameController {
         this.calculateLaserPath();
         this._updateModeIndicator();
 
+        // リセットやステージ移動を素早く繰り返しても、前回分のステージ名・ヒント表示が積み重ならないようにする
+        this._clearStageIntroToasts();
         if (!isCustom) {
-            this.showToast(`STG_0${idx + 1}: ${tmpl.name}`, false);
+            this._stageIntroToasts.push(this.showToast(`STG_0${idx + 1}: ${tmpl.name}`, false));
             // Show stage-specific hints
             if (tmpl.hints && tmpl.hints.length > 0) {
                 tmpl.hints.forEach((hint, i) => {
-                    setTimeout(() => this.showToast(hint, true), 1200 + i * 2000);
+                    this._stageHintTimers.push(setTimeout(() => {
+                        this._stageIntroToasts.push(this.showToast(hint, true));
+                    }, 1200 + i * 2000));
                 });
             }
         }
+    }
+
+    _clearStageIntroToasts() {
+        (this._stageHintTimers || []).forEach(id => clearTimeout(id));
+        this._stageHintTimers = [];
+        (this._stageIntroToasts || []).forEach(t => t && t.remove());
+        this._stageIntroToasts = [];
     }
 
     updateHUD() {
@@ -607,6 +627,7 @@ class GameController {
             toast.classList.remove('show');
             setTimeout(() => toast.remove(), 300);
         }, isHint ? 4000 : 2800);
+        return toast;
     }
 
     // ---- Physics ----

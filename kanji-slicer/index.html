@@ -4,6 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="/favicon.ico" sizes="any" />
+	<link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml" />
+	<link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png" />
     <title>漢字スライサー・マージ | Corner Neighbor</title>
     <meta name="description" content="落ちてくる漢字をスワイプで斬り、部首を合体させてお題をクリアするスマホ対応の物理スライスアクションです。">
     <meta name="robots" content="index,follow">
@@ -21,6 +24,29 @@
     <meta name="twitter:description" content="落ちてくる漢字をスワイプで斬り、部首を合体させてお題をクリアするスマホ対応の物理スライスアクションです。">
     <meta name="twitter:image" content="https://hajikkoroom.xsrv.jp/assets/images/kanji_slicer_thumbnail.png">
     <!-- /SEO: hajikkogurashi-minigame -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "VideoGame",
+      "name": "漢字スライサー・マージ",
+      "description": "落ちてくる漢字をスワイプで斬り、部首を合体させてお題をクリアするスマホ対応の物理スライスアクションです。",
+      "url": "https://hajikkoroom.xsrv.jp/kanji-slicer/",
+      "image": "https://hajikkoroom.xsrv.jp/assets/images/kanji_slicer_thumbnail.png",
+      "inLanguage": "ja",
+      "genre": "物理スライス",
+      "isAccessibleForFree": true,
+      "publisher": {
+        "@type": "Organization",
+        "name": "Corner Neighbor",
+        "url": "https://hajikkoroom.xsrv.jp/"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "Corner Neighbor",
+        "url": "https://hajikkoroom.xsrv.jp/"
+      }
+    }
+    </script>
 
     <!-- Google Fonts for premium Japanese typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -122,6 +148,7 @@
     </div>
 
     <!-- Existing physics constants are calibrated for one 60 Hz simulation step. -->
+    <script src="/assets/js/minigame-audio-lifecycle.js?v=20261010"></script>
     <script src="fixed-step-raf.js?v=b6a6f029f4b7"></script>
     <script src="game.js?v=3ef137647b6d"></script>
 </body>

@@ -1,26 +1,23 @@
 <?php
-// 現在のファイルパスから動的に戻り先URLを判定（安全対策込み）
-$current_script = $_SERVER['SCRIPT_NAME'] ?? '/';
+require_once __DIR__ . '/form-guard.php';
+
+// 送信後の戻り先は、いま表示しているページ（許可した既知ページだけ）にする。
+// 以前は '/' が先に部分一致してしまい、どのページから送っても戻り先がトップになっていた。
+$current_script = (string) parse_url((string) ($_SERVER['SCRIPT_NAME'] ?? '/'), PHP_URL_PATH);
+if ($current_script === '' || $current_script === '/index.html') {
+    $current_script = '/';
+}
 $allowed_redirect_paths = array(
     '/',
-    '/index.html',
     '/aboutus.html',
-    '/portfolio.html'
+    '/portfolio.html',
+    '/members.html',
+    '/news.html',
+    '/minigames.html',
+    '/coming-soon.html'
 );
-
-$safe_return_to = '/';
-foreach ($allowed_redirect_paths as $path) {
-    if (strpos($current_script, $path) !== false) {
-        // 例: /index.html や /aboutus.html に部分一致、または完全一致した場合
-        // Xserver等でディレクトリトップの場合は / になるため / も許可
-        $safe_return_to = $path;
-        break;
-    }
-}
-// index.htmlはルートパス / にマッピング
-if ($safe_return_to === '/index.html') {
-    $safe_return_to = '/';
-}
+$safe_return_to = in_array($current_script, $allowed_redirect_paths, true) ? $current_script : '/';
+$form_token = formGuardIssueToken();
 ?>
 		<!-- Contact -->
 		<section id="contact">
@@ -32,18 +29,19 @@ if ($safe_return_to === '/index.html') {
 					<form action="/contact.php" method="POST" class="contact-form">
 						<div class="field half first">
 							<label for="name">お名前</label>
-							<input type="text" name="name" id="name" autocomplete="name" required />
+							<input type="text" name="name" id="name" autocomplete="name" maxlength="100" required />
 						</div>
 						<div class="field half">
 							<label for="email"><span class="required-mark">※</span>メールアドレス</label>
-							<input type="email" name="_replyto" id="email" autocomplete="email" inputmode="email" placeholder="例：example@mail.com" required />
+							<input type="email" name="_replyto" id="email" autocomplete="email" inputmode="email" maxlength="254" placeholder="例：example@mail.com" required />
 						</div>
 						<div class="field">
 							<label for="message">お問い合わせ内容</label>
-							<textarea name="message" id="message" rows="6" required></textarea>
+							<textarea name="message" id="message" rows="6" maxlength="5000" required></textarea>
 						</div>
 						<input type="hidden" name="return_to" value="<?php echo htmlspecialchars($safe_return_to, ENT_QUOTES, 'UTF-8'); ?>" />
-						<div style="display:none;">
+						<input type="hidden" name="form_token" value="<?php echo htmlspecialchars($form_token, ENT_QUOTES, 'UTF-8'); ?>" />
+						<div style="display:none;" aria-hidden="true">
 							<label for="company">会社名</label>
 							<input type="text" name="company" id="company" tabindex="-1" autocomplete="off" />
 						</div>

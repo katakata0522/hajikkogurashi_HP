@@ -13,6 +13,7 @@ const smokeTests = [
     'scripts/minigame-dangerous-api-smoke-test.mjs',
     'scripts/blackhole-sweeper-smoke-test.mjs',
     'scripts/girigiri-brake-smoke-test.mjs',
+    'scripts/hajikko-hero-tower-smoke-test.mjs',
     'scripts/kage-mane-dojo-smoke-test.mjs',
     'scripts/kanji-slicer-smoke-test.mjs',
     'scripts/kanji-slicer-data-integrity-smoke-test.mjs',
@@ -27,8 +28,10 @@ const smokeTests = [
 const browserTests = [
     'scripts/minigame-startup-browser-audit.mjs',
     'scripts/minigame-audio-constructor-browser-test.mjs',
+    'scripts/minigame-audio-lifecycle-browser-test.mjs',
     'scripts/blackhole-sweeper-browser-test.mjs',
     'scripts/girigiri-brake-browser-test.mjs',
+    'scripts/hajikko-hero-tower-browser-test.mjs',
     'scripts/kage-mane-dojo-browser-test.mjs',
     'scripts/kanji-slicer-browser-test.mjs',
     'scripts/kanji-slicer-cache-browser-test.mjs',
@@ -37,7 +40,9 @@ const browserTests = [
     'scripts/mikiri-issen-browser-test.mjs',
     'scripts/sorting-factory-browser-test.mjs',
     'scripts/stealth-slacker-browser-test.mjs',
-    'scripts/wall-jumper-browser-test.mjs'
+    'scripts/wall-jumper-browser-test.mjs',
+    'scripts/site-header-narrow-browser-test.mjs',
+    'scripts/site-browser-test.mjs'
 ];
 
 let selectedTests;

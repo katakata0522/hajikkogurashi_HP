@@ -185,6 +185,52 @@ try {
   }
   await storagePage.close();
 
+  // 回帰テスト: タイトル画面で R を押したら、タイトルの文字やボタンを消してから始まる
+  const qaPage = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  await qaPage.goto(`http://127.0.0.1:${port}/wall-jumper/`, { waitUntil: 'networkidle' });
+  await qaPage.keyboard.press('KeyR');
+  const rOnTitle = await qaPage.evaluate(() => ({
+    state: eval('gameState'),
+    title: getComputedStyle(document.querySelector('#title')).display,
+    startBtn: getComputedStyle(document.querySelector('#start-btn')).display,
+  }));
+  if (rOnTitle.state !== 'playing' || rOnTitle.title !== 'none' || rOnTitle.startBtn !== 'none') {
+    throw new Error(`R on title left the title UI over the game: ${JSON.stringify(rOnTitle)}`);
+  }
+
+  // 回帰テスト: P キーでの一時停止・再開も、ボタンと同じく一時停止ボタンを出し入れする
+  await qaPage.keyboard.press('KeyP');
+  const pausedByKey = await qaPage.evaluate(() => ({ state: eval('gameState'), pauseBtn: getComputedStyle(document.querySelector('#pause-btn')).display }));
+  await qaPage.keyboard.press('KeyP');
+  const resumedByKey = await qaPage.evaluate(() => ({ state: eval('gameState'), pauseBtn: getComputedStyle(document.querySelector('#pause-btn')).display }));
+  if (pausedByKey.state !== 'paused' || pausedByKey.pauseBtn !== 'none' || resumedByKey.state !== 'playing' || resumedByKey.pauseBtn === 'none') {
+    throw new Error(`keyboard pause is inconsistent: ${JSON.stringify({ pausedByKey, resumedByKey })}`);
+  }
+  // 回帰テスト: トゲに当たらずに「タイトルへ」でやめても、その回の到達点が最高記録に残る
+  await qaPage.evaluate(() => { eval('maxDistance = 37'); });
+  await qaPage.keyboard.press('KeyP');
+  await qaPage.click('#quit-btn');
+  const savedAfterQuit = await qaPage.evaluate(() => ({ stored: localStorage.getItem('wallJumperBestDistance'), text: document.querySelector('#best-time-display').textContent }));
+  if (savedAfterQuit.stored !== '37' || !savedAfterQuit.text.includes('37')) {
+    throw new Error(`run record was lost when quitting: ${JSON.stringify(savedAfterQuit)}`);
+  }
+  await qaPage.close();
+
+  // 回帰テスト: 横向きの案内が出たら一時停止する
+  const landscapePage = await browser.newPage({ viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true });
+  await landscapePage.goto(`http://127.0.0.1:${port}/wall-jumper/`, { waitUntil: 'networkidle' });
+  await landscapePage.waitForFunction(() => document.querySelector('.cn-rotate-hint.is-visible'));
+  await landscapePage.evaluate(() => {
+    const hint = document.querySelector('.cn-rotate-hint');
+    hint.classList.remove('is-visible');
+    document.querySelector('#start-btn').click();
+    hint.classList.add('is-visible');
+  });
+  await landscapePage.waitForTimeout(300);
+  const hintState = await landscapePage.evaluate(() => eval('gameState'));
+  if (hintState !== 'paused') throw new Error(`game kept running behind the rotate hint: ${hintState}`);
+  await landscapePage.close();
+
   await browser.close();
   console.log('wall-jumper browser test passed');
 } finally {

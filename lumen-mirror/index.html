@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="/favicon.ico" sizes="any" />
+	<link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml" />
+	<link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png" />
     <title>LUMEN_MIRROR | Corner Neighbor</title>
     <!-- SEO: hajikkogurashi-minigame -->
     <meta name="description" content="鏡のラインを描いて光をターゲットへ導く、幾何学的な物理反射パズルゲームです。">
@@ -21,10 +24,34 @@
     <meta name="twitter:description" content="鏡のラインを描いて光をターゲットへ導く、幾何学的な物理反射パズルゲームです。">
     <meta name="twitter:image" content="https://hajikkoroom.xsrv.jp/assets/images/lumen_mirror_thumbnail.png">
     <!-- /SEO: hajikkogurashi-minigame -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "VideoGame",
+      "name": "LUMEN_MIRROR",
+      "description": "鏡のラインを描いて光をターゲットへ導く、幾何学的な物理反射パズルゲームです。",
+      "url": "https://hajikkoroom.xsrv.jp/lumen-mirror/",
+      "image": "https://hajikkoroom.xsrv.jp/assets/images/lumen_mirror_thumbnail.png",
+      "inLanguage": "ja",
+      "genre": "物理反射パズル",
+      "isAccessibleForFree": true,
+      "publisher": {
+        "@type": "Organization",
+        "name": "Corner Neighbor",
+        "url": "https://hajikkoroom.xsrv.jp/"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "Corner Neighbor",
+        "url": "https://hajikkoroom.xsrv.jp/"
+      }
+    }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&family=Noto+Sans+JP:wght@200;300;400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260526-editor-review-fix">
+    <link rel="stylesheet" href="style.css?v=20261010-focus">
+    <link rel="stylesheet" href="/assets/css/minigame-rotate-hint.css?v=20261010">
 </head>
 <body>
     <div id="app-layout">
@@ -419,9 +446,11 @@
 
     <div id="toast-container" role="status" aria-live="polite" aria-atomic="true"></div>
     <script src="/assets/js/minigame-storage-guard.js"></script>
+    <script src="/assets/js/minigame-audio-lifecycle.js?v=20261010"></script>
     <script src="core.js?v=20260911-core-split"></script>
     <script src="stages.js?v=20260911-stage-data"></script>
-    <script src="script.js?v=20260911-editor-split"></script>
+    <script src="script.js?v=20261010-qa"></script>
     <script src="editor.js?v=20260911-editor-split"></script>
+    <script src="/assets/js/minigame-rotate-hint.js?v=20261010" defer></script>
 </body>
 </html>

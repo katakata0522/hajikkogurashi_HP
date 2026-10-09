@@ -526,12 +526,30 @@
     return target;
   }
 
+  // 🔓 Proxy の中身（生のオブジェクト）を取り出すための目印
+  const RAW_STATE = Symbol('rawState');
+
+  // ✅ structuredClone は Proxy を複製できず例外になるため、Proxy を外しながら複製する
+  function cloneData(value) {
+    if (value === null || typeof value !== 'object') return value;
+    const raw = value[RAW_STATE] || value;
+    if (Array.isArray(raw)) return raw.map(cloneData);
+    const proto = Object.getPrototypeOf(raw);
+    if (proto === Object.prototype || proto === null) {
+      const out = {};
+      for (const key of Object.keys(raw)) out[key] = cloneData(raw[key]);
+      return out;
+    }
+    return structuredClone(raw);
+  }
+
   // 🔒 状態セッター層における負数の自動クリップ
   function createReactiveState(target, onDirty) {
     // ✅ WeakMapキャッシュ: 同じオブジェクトへのアクセスごとに新規Proxyを生成する問題を解決
     const proxyCache = new WeakMap();
     const handler = {
       get(obj, prop) {
+        if (prop === RAW_STATE) return obj;
         const val = obj[prop];
         if (val !== null && typeof val === 'object') {
           if (!proxyCache.has(val)) {
@@ -560,7 +578,7 @@
   }
 
   // リアクティブ状態
-  const state = createReactiveState(structuredClone(defaultState), () => {
+  const state = createReactiveState(cloneData(defaultState), () => {
     UIManager.isDirty = true;
   });
 
@@ -621,6 +639,11 @@
     dom.victoryResetBtn = document.getElementById("victory-reset-btn");
 
     dom.startOverlay = document.getElementById("start-overlay");
+    // スタート画面が出ている間は、裏のゲーム画面をキーボード・読み上げの対象から外す（見た目は変わらない）
+    dom.mainLayoutWrapper = document.getElementById("main-layout-wrapper");
+    if (dom.mainLayoutWrapper && dom.startOverlay && dom.startOverlay.style.display !== "none") {
+      dom.mainLayoutWrapper.inert = true;
+    }
     dom.startPlayBtn = document.getElementById("start-play-btn");
     dom.dragGuideHand = document.getElementById("drag-guide-hand");
     dom.soundBtn = document.getElementById("sound-btn");
@@ -1687,7 +1710,7 @@
     state.hasRevivedThisFloor = true;
     
     // バックアップからフロア初期状態を復元
-    gridData = structuredClone(state.floorStartBackup.gridData);
+    gridData = cloneData(state.floorStartBackup.gridData);
     state.hero.hp = state.floorStartBackup.heroHp;
     state.hero.atk = state.floorStartBackup.heroAtk;
     state.hero.level = state.floorStartBackup.heroLevel;
@@ -1699,12 +1722,12 @@
     
     // ✅ 秘宝（アーティファクト）の所持状況も復元（死による持ち逃げ防止）
     if (state.floorStartBackup.artifacts) {
-      state.artifacts = structuredClone(state.floorStartBackup.artifacts);
+      state.artifacts = cloneData(state.floorStartBackup.artifacts);
     }
     
     // ✅ 統計データもフロア開始時の状態に巻き戻す（二重加算を防止）
     if (state.floorStartBackup.stats) {
-      state.stats = structuredClone(state.floorStartBackup.stats);
+      state.stats = cloneData(state.floorStartBackup.stats);
     }
     
     triggerTimeWarpEffect(); // タイムワープ逆再生演出を発動
@@ -1871,6 +1894,10 @@
         sword: false,
         chalice: false
       };
+      // ✅ 死亡リトライ時は、前の挑戦で残ったシールドや「次のフロア」用の呪文書効果も持ち越さない
+      state.activeShield = false;
+      state.nextFloorShield = false;
+      state.nextFloorFever = false;
     }
 
     // 実績によるボーナスバフ
@@ -2063,7 +2090,7 @@
   // ⏳ 時の砂時計用のフロアバックアップ関数
   function backupFloorStart() {
     state.floorStartBackup = {
-      gridData: structuredClone(gridData),
+      gridData: cloneData(gridData),
       heroHp: state.hero.hp,
       heroAtk: state.hero.atk,
       heroLevel: state.hero.level,
@@ -2072,8 +2099,8 @@
       feverGauge: state.feverGauge,
       isFever: state.isFever,
       feverTurns: state.feverTurns,
-      stats: structuredClone(state.stats), // ✅ 統計データもフロア開始時にバックアップ
-      artifacts: structuredClone(state.artifacts) // ✅ アーティファクトの所有状況もバックアップ（死による持ち逃げ防止）
+      stats: cloneData(state.stats), // ✅ 統計データもフロア開始時にバックアップ
+      artifacts: cloneData(state.artifacts) // ✅ アーティファクトの所有状況もバックアップ（死による持ち逃げ防止）
     };
   }
 
@@ -2832,7 +2859,7 @@
 
       const icon = document.createElement("span");
       icon.className = "panel-icon";
-      icon.innerHTML = `<svg><use href=""></use></svg>`;
+      icon.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href=""></use></svg>`;
       panel.appendChild(icon);
 
       const val = document.createElement("span");
@@ -3031,7 +3058,7 @@
 
         const parsed = JSON.parse(decrypted);
         if (parsed && typeof parsed === 'object') {
-          const merged = deepMerge(structuredClone(defaultState), parsed);
+          const merged = deepMerge(cloneData(defaultState), parsed);
           for (const key in merged) {
             state[key] = merged[key];
           }
@@ -3053,6 +3080,8 @@
   // 💻 キーボード操作ショートカットハンドラ
   function handleKeyDown(e) {
     if (!gameStarted || isExecutingPath) return;
+    // ✅ キー押しっぱなし（リピート）で、クリア画面やショップ画面を意図せず連続で進めないように
+    if (e.repeat) return;
     
     const key = e.key;
 
@@ -3365,10 +3394,13 @@
 
     // 🕹️ 能動的スタートボタンイベント
     dom.startPlayBtn.addEventListener("click", () => {
+      // ✅ 連打・ダブルタップでゲームループが何重にも動き出すのを防ぐ
+      if (gameStarted) return;
       AudioManager.init();
 
       gameStarted = true;
       dom.startOverlay.style.display = "none";
+      if (dom.mainLayoutWrapper) dom.mainLayoutWrapper.inert = false;
 
       recordInteraction();
       loadGame();

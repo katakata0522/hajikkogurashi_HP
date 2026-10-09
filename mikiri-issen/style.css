@@ -1392,3 +1392,12 @@
       transform: rotate(15deg) !important;
       box-shadow: 0 0 8px var(--aura) !important;
     }
+
+/* 2026-10: キーボード操作で今どのボタンを選んでいるか分かるように（マウスのホバーは今までどおり枠なし） */
+.main-button:focus-visible,
+.sub-button:focus-visible,
+.sound-button:focus-visible,
+.quick-restart-button:focus-visible {
+  outline: 3px solid rgba(255, 211, 106, 0.85);
+  outline-offset: 3px;
+}

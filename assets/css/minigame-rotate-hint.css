@@ -1,0 +1,56 @@
+/* 縦画面向けミニゲーム用「縦向きにしてね」案内（minigame-rotate-hint.js とセット） */
+.cn-rotate-hint {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(10, 12, 24, 0.97);
+    color: #fff;
+    font-family: 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', sans-serif;
+    text-align: center;
+}
+.cn-rotate-hint.is-visible {
+    display: flex;
+}
+.cn-rotate-hint__box {
+    max-width: 420px;
+}
+.cn-rotate-hint__icon {
+    width: 34px;
+    height: 56px;
+    margin: 0 auto 14px;
+    border: 3px solid #ffcc00;
+    border-radius: 8px;
+    animation: cn-rotate-hint-turn 1.8s ease-in-out infinite;
+}
+.cn-rotate-hint__title {
+    margin: 0 0 6px;
+    font-size: 18px;
+    font-weight: 700;
+}
+.cn-rotate-hint__note {
+    margin: 0 0 16px;
+    font-size: 13px;
+    opacity: 0.75;
+}
+.cn-rotate-hint__button {
+    min-height: 44px;
+    padding: 10px 22px;
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    border-radius: 999px;
+    background: transparent;
+    color: #fff;
+    font: inherit;
+    font-size: 14px;
+    cursor: pointer;
+}
+@keyframes cn-rotate-hint-turn {
+    0%, 30% { transform: rotate(90deg); }
+    60%, 100% { transform: rotate(0deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .cn-rotate-hint__icon { animation: none; }
+}

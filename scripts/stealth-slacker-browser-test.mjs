@@ -181,6 +181,26 @@ try {
   }
   await darkModePage.close();
 
+  // 回帰テスト: 横向きスマホで「縦向きにしてね」が出ている間は、ストレスが溜まらず倒れない
+  const landscapePage = await browser.newPage({ viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true });
+  await landscapePage.goto(`http://127.0.0.1:${port}/stealth-slacker/`, { waitUntil: 'networkidle' });
+  await landscapePage.waitForFunction(() => document.querySelector('.cn-rotate-hint.is-visible'));
+  await landscapePage.evaluate(() => {
+    const hint = document.querySelector('.cn-rotate-hint');
+    hint.classList.remove('is-visible');
+    document.querySelector('#start-btn').click();
+    hint.classList.add('is-visible');
+  });
+  await landscapePage.waitForTimeout(7500);
+  const behindHint = await landscapePage.evaluate(() => ({
+    result: document.querySelector('#result-screen').classList.contains('active'),
+    stress: Number(document.querySelector('#stress-hud').getAttribute('aria-valuenow')),
+  }));
+  if (behindHint.result || behindHint.stress > 5) {
+    throw new Error(`game kept running behind the rotate hint: ${JSON.stringify(behindHint)}`);
+  }
+  await landscapePage.close();
+
   await browser.close();
 } finally {
   await new Promise((resolveClose) => server.close(resolveClose));

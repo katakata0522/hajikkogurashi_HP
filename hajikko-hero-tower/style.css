@@ -2014,3 +2014,143 @@ body {
   100% { box-shadow: 0 0 14px rgba(241, 196, 15, 0.6); }
 }
 
+
+/* ─── 盤面が画面の下にはみ出して見えなくなる不具合の修正（2026-10） ───
+   flex:1 の盤面エリアと 1fr の行が中身の高さで押し広げられ、
+   5段のうち下の段が画面外に切れていた。最小サイズを0にして、残りの高さに収める。 */
+.grid-section-wrap {
+  min-height: 0;
+  overflow: hidden;
+}
+.grid-layout,
+#grid-container {
+  grid-template-rows: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  min-height: 0;
+}
+.grid-panel {
+  min-height: 0;
+  min-width: 0;
+}
+/* マスの中のアイコンがマスの外（上）にはみ出して、隣のマスに重なって見えていたのを修正。
+   SVG に viewBox が無く大きさが決まらなかったため、アイコン枠の高さに合わせて縮める。 */
+.grid-panel .panel-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 52%;
+  flex: 0 0 auto;
+  margin-bottom: 1px;
+}
+.grid-panel .panel-icon svg {
+  width: auto;
+  height: 100%;
+  aspect-ratio: 1;
+}
+/* 「獲得した宝物」が1文字ずつ縦に折り返して段が高くなり、盤面が小さくなっていたのを修正 */
+.artifact-slots-row {
+  gap: 8px;
+}
+.art-section-label {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.art-badge-container {
+  flex: 1;
+  min-width: 0;
+  justify-content: space-between;
+  gap: 2px;
+}
+.art-badge-container .art-badge {
+  margin: 0;
+}
+/* 盤面を常に正方形に（パソコンの横長画面でマスが横に潰れ、アイコンがずれて見えていた）。
+   盤面エリアの幅と高さの小さい方に合わせて中央に置く。 */
+@supports (container-type: size) {
+  .grid-section-wrap {
+    container-type: size;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+    min-height: 220px;
+  }
+  #grid-container {
+    flex: none;
+    width: min(100cqw, 100cqh) !important;
+    height: min(100cqw, 100cqh) !important;
+  }
+}
+
+/* 2026-10: スマホのブラウザでアドレスバー分だけ下が切れないよう、実際に見えている高さ(dvh)を使う */
+@supports (height: 100dvh) {
+  body {
+    height: 100dvh;
+  }
+  #game-container {
+    height: 94dvh;
+  }
+}
+
+/* 2026-10: パソコンでは盤面が約230pxと小さかったので、中央の列を少し広く・高くして盤面を大きく（約300〜360px）。
+   スマホ・タブレット縦（1024px未満）には影響しない。 */
+@media (min-width: 1024px) {
+  #main-layout-wrapper {
+    height: 98vh;
+    margin: 1vh auto;
+  }
+  #game-container {
+    width: 420px !important;
+    height: 94vh !important;
+    max-height: 880px !important;
+  }
+  .sidebar-panel {
+    width: clamp(250px, calc((100vw - 420px - 80px) / 2), 320px);
+    height: 94vh;
+    max-height: 880px;
+  }
+}
+
+/* 2026-10: ミニゲーム広場へ戻る入口（他のゲームと同じく、どの画面からでも戻れるように）。文字は使わずアイコンのみ */
+.settings-bar {
+  gap: 8px;
+}
+.settings-bar .footer-copy {
+  margin-left: auto;
+}
+.back-to-list,
+.start-back-to-list {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+}
+.back-to-list {
+  min-width: 36px;
+}
+.start-back-to-list {
+  position: absolute;
+  top: calc(12px + env(safe-area-inset-top, 0px));
+  left: calc(12px + env(safe-area-inset-left, 0px));
+  z-index: 2;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  font-size: 0.75rem;
+}
+.start-back-to-list:hover,
+.back-to-list:hover {
+  color: #00ffff;
+  border-color: rgba(0, 255, 255, 0.5);
+}
+.back-to-list:focus-visible,
+.start-back-to-list:focus-visible,
+#sound-btn:focus-visible,
+.start-btn:focus-visible {
+  outline: 3px solid #00ffff;
+  outline-offset: 3px;
+}

@@ -171,7 +171,18 @@ function updateBestDistanceUI() {
     }
 }
 
+// 走行中の最高到達点を記録に反映する（トゲ以外でやめた場合も記録が消えないように）
+function saveRunRecord() {
+    if (maxDistance > bestDistance) {
+        bestDistance = maxDistance;
+        safeWriteBestDistance(bestDistance);
+        updateBestDistanceUI();
+    }
+}
+
 function initGame() {
+    // 「タイトルへ」や R でのやり直しの前に、今回の到達点を記録する
+    saveRunRecord();
     initAudio();
     updateBestDistanceUI();
     
@@ -711,8 +722,17 @@ let lastTimestamp = 0;
 const TIME_STEP = 1000 / 60; 
 let accumulatedTime = 0;
 
+let rotateHintEl = null;
+function isRotateHintVisible() {
+    if (!rotateHintEl || !rotateHintEl.isConnected) rotateHintEl = document.querySelector('.cn-rotate-hint');
+    return !!(rotateHintEl && rotateHintEl.classList.contains('is-visible'));
+}
+
 function gameLoop(timestamp) {
     requestAnimationFrame(gameLoop);
+
+    // 「縦向きにしてね」の案内が出たら、タブ切り替えと同じように一時停止する（案内の裏でトゲに当たらないように）
+    if (gameState === 'playing' && isRotateHintVisible()) togglePause();
     
     if (!lastTimestamp) {
         lastTimestamp = timestamp;
@@ -747,6 +767,15 @@ function togglePause() {
     }
 }
 
+// タブを隠したり別のアプリに切り替えたら自動で一時停止する（2026-10）
+// 戻った瞬間にいきなり再開して落下・被弾しないように、ポーズ画面から再開してもらう。
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden && gameState === 'playing') togglePause();
+    if (document.hidden) saveRunRecord();
+});
+// 「広場に戻る」やページを閉じたときも記録を残す
+window.addEventListener('pagehide', saveRunRecord);
+
 pauseBtn.addEventListener('click', togglePause);
 resumeBtn.addEventListener('click', togglePause);
 quitBtn.addEventListener('click', () => {
@@ -772,23 +801,26 @@ const handleJump = (e) => {
     if (e.type === 'keydown') {
         if (e.code === 'Space') {
             e.preventDefault();
+            // 押しっぱなしのキーリピートで連続ジャンプしないように（クリック・タップと同じ1回押し=1ジャンプ）
+            if (e.repeat) return;
             jump();
         } else if (e.code === 'KeyR') {
             e.preventDefault();
+            // タイトル画面で R を押したときは、スタートボタンと同じ開始処理（タイトルの文字などを消す）
+            if (gameState === 'start') {
+                startGame();
+                return;
+            }
             initGame();
             gameState = 'playing';
             hud.style.display = 'flex';
             pauseBtn.style.display = 'flex';
             pauseScreen.style.display = 'none';
         } else if (e.code === 'KeyP' || e.code === 'Escape') {
-            if (gameState === 'playing') {
+            // ボタンと同じ処理にそろえる（音の停止・再開と一時停止ボタンの表示）
+            if (gameState === 'playing' || gameState === 'paused') {
                 e.preventDefault();
-                gameState = 'paused';
-                pauseScreen.style.display = 'flex';
-            } else if (gameState === 'paused') {
-                e.preventDefault();
-                gameState = 'playing';
-                pauseScreen.style.display = 'none';
+                togglePause();
             }
         }
     } else {
@@ -806,7 +838,7 @@ if (window.PointerEvent) {
 }
 window.addEventListener('keydown', handleJump);
 
-startBtn.addEventListener('click', () => {
+function startGame() {
     initAudio();
     gameState = 'playing';
     uiTitle.style.display = 'none';
@@ -819,7 +851,8 @@ startBtn.addEventListener('click', () => {
     hud.style.display = 'flex';
     pauseBtn.style.display = 'flex';
     initGame();
-});
+}
+startBtn.addEventListener('click', startGame);
 
 initGame();
 gameState = 'start';

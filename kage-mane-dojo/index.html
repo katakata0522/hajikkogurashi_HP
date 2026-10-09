@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="/favicon.ico" sizes="any" />
+	<link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml" />
+	<link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png" />
   <title>影まね道場 | Corner Neighbor</title>
   <!-- SEO: hajikkogurashi-minigame -->
   <meta name="description" content="師範の型を覚えて同じ順番で入力する、記憶と集中のミニゲーム。">
@@ -21,6 +24,29 @@
   <meta name="twitter:description" content="師範の型を覚えて同じ順番で入力する、記憶と集中のミニゲーム。">
   <meta name="twitter:image" content="https://hajikkoroom.xsrv.jp/assets/images/banner.webp">
   <!-- /SEO: hajikkogurashi-minigame -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "VideoGame",
+      "name": "影まね道場",
+      "description": "師範の型を覚えて同じ順番で入力する、記憶と集中のミニゲーム。",
+      "url": "https://hajikkoroom.xsrv.jp/kage-mane-dojo/",
+      "image": "https://hajikkoroom.xsrv.jp/assets/images/banner.webp",
+      "inLanguage": "ja",
+      "genre": "記憶アクション",
+      "isAccessibleForFree": true,
+      "publisher": {
+        "@type": "Organization",
+        "name": "Corner Neighbor",
+        "url": "https://hajikkoroom.xsrv.jp/"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "Corner Neighbor",
+        "url": "https://hajikkoroom.xsrv.jp/"
+      }
+    }
+    </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700;800&family=Yuji+Syuku&display=swap" rel="stylesheet">
@@ -145,6 +171,7 @@
   </main>
 
   <div class="toast" id="toast" role="status" aria-live="polite">コピーしました</div>
-  <script src="./script.js"></script>
+  <script src="/assets/js/minigame-audio-lifecycle.js?v=20261010"></script>
+  <script src="./script.js?v=20261010-qa"></script>
 </body>
 </html>
