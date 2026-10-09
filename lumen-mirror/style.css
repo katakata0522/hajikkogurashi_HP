@@ -1740,6 +1740,7 @@ body {
 .color-picker-btn:focus-visible,
 .info-close-btn:focus-visible,
 .flat-btn:focus-visible,
+.icon-btn:focus-visible,
 .control-btn:focus-visible,
 .glow-btn:focus-visible,
 #prop-title:focus-visible,
