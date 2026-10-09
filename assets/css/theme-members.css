@@ -1,0 +1,209 @@
+/* =========================================================
+   theme-members.css  メンバー紹介専用（2026-10 夜間作業 第2弾）
+   ゲームの「キャラクター選択画面」風
+   - メンバーごとのテーマ色、P1〜P7 の番号、アイコンは大きなドット枠
+   - 紹介文はそのまま。番号・「ITEM」などは飾り
+   ========================================================= */
+.member-grid {
+  counter-reset: cn-member;
+  gap: 1.8rem !important;
+}
+.member-card { --m: var(--cn-yellow); --m-alpha: rgba(255, 204, 0, 0.18); }
+.member-card:nth-child(7n+2) { --m: var(--cn-pink); --m-alpha: rgba(255, 107, 139, 0.18); }
+.member-card:nth-child(7n+3) { --m: var(--cn-cyan); --m-alpha: rgba(92, 225, 230, 0.16); }
+.member-card:nth-child(7n+4) { --m: var(--cn-violet); --m-alpha: rgba(165, 148, 255, 0.18); }
+.member-card:nth-child(7n+5) { --m: #ff9f43; --m-alpha: rgba(255, 159, 67, 0.18); }
+.member-card:nth-child(7n+6) { --m: #4ade80; --m-alpha: rgba(74, 222, 128, 0.16); }
+.member-card:nth-child(7n+7) { --m: #60a5fa; --m-alpha: rgba(96, 165, 250, 0.18); }
+
+.member-grid .member-card {
+  counter-increment: cn-member;
+  padding: 0 !important;
+  overflow: visible !important;
+  background: linear-gradient(180deg, rgba(34, 40, 76, 0.92) 0%, rgba(22, 26, 50, 0.95) 100%) !important;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.35), 0 12px 24px rgba(0, 0, 0, 0.22) !important;
+}
+/* 上の帯はメンバー色に */
+.member-grid .member-card::before {
+  background: var(--m) !important;
+  height: 5px !important;
+  border-radius: var(--cn-radius) var(--cn-radius) 0 0;
+  z-index: 2;
+}
+
+/* ---- キャラクターの「顔」部分 ---- */
+.member-card__header {
+  position: relative;
+  grid-template-columns: auto 1fr auto !important;
+  gap: 1.1rem !important;
+  margin: 0 !important;
+  padding: 1.7rem 1.6rem 1.4rem;
+  border-radius: var(--cn-radius) var(--cn-radius) 0 0;
+  background:
+    radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1.3px) 0 0 / 12px 12px,
+    linear-gradient(120deg, var(--m-alpha) 0%, transparent 75%);
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
+}
+/* P1〜P7 */
+.member-card__header::after {
+  content: "P" counter(cn-member);
+  position: absolute;
+  top: 0.75rem;
+  right: 3.6rem;
+  font-family: var(--cn-font-pixel);
+  font-size: 0.78rem;
+  letter-spacing: 0.15em;
+  color: var(--m);
+  opacity: 0.9;
+}
+.member-card__avatar {
+  width: 4.4rem !important;
+  height: 4.4rem !important;
+  font-size: 2.2rem;
+  line-height: 1;
+  border-radius: 14px !important;
+  border: none !important;
+  background:
+    radial-gradient(circle at 50% 40%, var(--m-alpha), transparent 70%),
+    #0e1124 !important;
+  box-shadow:
+    inset 0 0 0 3px var(--m),
+    0 0 0 3px #0e1124,
+    5px 5px 0 3px rgba(0, 0, 0, 0.35) !important;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.member-card__name {
+  font-size: clamp(1.35rem, 2.4vw, 1.6rem) !important;
+  letter-spacing: 0.05em;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.35);
+}
+/* 役職は「クラス」表示風のタグ */
+.member-card__role {
+  display: inline-block !important;
+  margin-top: 0.45rem !important;
+  padding: 0.18em 0.7em 0.12em;
+  border-radius: 6px;
+  background: var(--m-alpha);
+  box-shadow: inset 0 0 0 1px var(--m);
+  color: #fff !important;
+  font-size: 0.78rem !important;
+}
+.member-sns-container {
+  align-self: start;
+}
+.member-sns-link {
+  width: 2.3rem;
+  height: 2.3rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #dfe3f5 !important;
+}
+.member-sns-link:hover,
+.member-sns-link:focus-visible {
+  background: var(--m);
+  color: #0b0e1c !important;
+}
+
+/* ---- 紹介文 ---- */
+.member-card__body {
+  padding: 1.3rem 1.6rem 1.6rem;
+}
+.member-card__body p {
+  color: #c9cfe6 !important;
+  font-size: 0.92rem !important;
+}
+/* 好きなもの: 「ITEM」ラベル付きのアイテム枠 */
+.member-card__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.35rem 0.8rem 0.35rem 0.4rem;
+  border-radius: 8px;
+  background: rgba(10, 12, 26, 0.6);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+  color: #fff !important;
+}
+.member-card__tag::before {
+  content: "ITEM";
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  background: var(--m);
+  color: #0b0e1c;
+  font-family: var(--cn-font-pixel);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+}
+
+/* ---- 選択カーソル（ホバー／キーボード） ---- */
+.member-grid .member-card::after {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    linear-gradient(var(--m), var(--m)) 0 0 / 22px 4px no-repeat,
+    linear-gradient(var(--m), var(--m)) 0 0 / 4px 22px no-repeat,
+    linear-gradient(var(--m), var(--m)) 100% 0 / 22px 4px no-repeat,
+    linear-gradient(var(--m), var(--m)) 100% 0 / 4px 22px no-repeat,
+    linear-gradient(var(--m), var(--m)) 0 100% / 22px 4px no-repeat,
+    linear-gradient(var(--m), var(--m)) 0 100% / 4px 22px no-repeat,
+    linear-gradient(var(--m), var(--m)) 100% 100% / 22px 4px no-repeat,
+    linear-gradient(var(--m), var(--m)) 100% 100% / 4px 22px no-repeat;
+  transition: opacity 0.2s ease;
+}
+.member-grid .member-card:hover,
+.member-grid .member-card:focus-within {
+  border-color: var(--m) !important;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.35), 0 0 30px var(--m-alpha) !important;
+}
+.member-grid .member-card:hover::after,
+.member-grid .member-card:focus-within::after {
+  opacity: 1;
+  animation: cn-select 0.9s ease-in-out infinite;
+}
+.member-grid .member-card:hover .member-card__avatar,
+.member-grid .member-card:focus-within .member-card__avatar {
+  transform: translateY(-3px) rotate(-4deg);
+  box-shadow:
+    inset 0 0 0 3px var(--m),
+    0 0 0 3px #0e1124,
+    0 0 22px 4px var(--m-alpha) !important;
+}
+
+@keyframes cn-select {
+  0%, 100% { inset: -7px; }
+  50% { inset: -11px; }
+}
+
+@media screen and (max-width: 480px) {
+  .member-card__header {
+    padding: 1.4rem 1.2rem 1.2rem;
+    gap: 0.9rem !important;
+  }
+  .member-card__avatar {
+    width: 3.6rem !important;
+    height: 3.6rem !important;
+    font-size: 1.8rem;
+  }
+  .member-card__body {
+    padding: 1.1rem 1.2rem 1.3rem;
+  }
+  .member-card__header::after {
+    right: 3.3rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .member-grid .member-card:hover::after,
+  .member-grid .member-card:focus-within::after {
+    animation: none !important;
+  }
+  .member-card__avatar {
+    transition: none !important;
+  }
+  .member-grid .member-card:hover .member-card__avatar,
+  .member-grid .member-card:focus-within .member-card__avatar {
+    transform: none !important;
+  }
+}
