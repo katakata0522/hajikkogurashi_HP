@@ -23,7 +23,7 @@ assert.match(html, /id="mode-indicator"/, 'mode indicator should exist');
 assert.match(html, /id="select-btn"/, 'stage select button in overlay should exist');
 assert.match(html, /id="best-banner"/, 'best rank banner should exist');
 assert.match(html, /id="stat-best"/, 'best rank stat display should exist');
-assert.match(html, /href="style\.css\?v=20261010-mobile-fit"/, 'editor stylesheet should be cache-busted');
+assert.match(html, /href="style\.css\?v=20261010-focus"/, 'editor stylesheet should be cache-busted');
 assert.match(html, /src="core\.js\?v=20260911-core-split"/, 'core runtime dependencies should be loaded explicitly');
 assert.match(html, /src="stages\.js\?v=20260911-stage-data"/, 'stage data should be loaded explicitly');
 assert.match(html, /src="script\.js\?v=20260911-editor-split"/, 'GameController runtime should use the editor-split cache key');
