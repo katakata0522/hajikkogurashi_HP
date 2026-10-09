@@ -4,6 +4,9 @@
   "private": true,
   "description": "Regression test tooling for Corner Neighbor browser minigames.",
   "scripts": {
+    "sync:site": "node scripts/sync-site-navigation.mjs --write",
+    "test:site": "node scripts/sync-site-navigation.mjs",
+    "test:site:browser": "node scripts/site-browser-test.mjs",
     "test:minigames:smoke": "node scripts/run-minigame-tests.mjs smoke",
     "test:minigames:browser": "node scripts/run-minigame-tests.mjs browser",
     "test:minigames": "node scripts/run-minigame-tests.mjs all"
