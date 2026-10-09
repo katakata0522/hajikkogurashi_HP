@@ -503,3 +503,12 @@ body {
         height: 100dvh;
     }
 }
+
+/* キーボード操作時の選択枠（他のミニゲームとそろえた太めの枠） */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+label:focus-visible {
+    outline: 3px solid var(--primary-color);
+    outline-offset: 3px;
+}
