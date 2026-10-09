@@ -1,0 +1,197 @@
+/* =========================================================
+   theme-pages.css  残りのページ（作品一覧・お知らせ・鋭意制作中・404・規約類）
+   2026-10 夜間作業 第3弾。トップ／ミニゲーム広場／メンバー紹介と同じ「ゲーム画面」の言葉づかいで、控えめに。
+   文字は一切追加しない（飾りは線・四角・カーソルだけ）。
+   ========================================================= */
+
+/* ---- 共通: 選択カーソル（四隅の枠） ---- */
+.page-portfolio .portfolio-card,
+.page-news .news-entry,
+.page-404 .error-game-box {
+  --c: var(--cn-yellow);
+  position: relative;
+  transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.3, 1.2), box-shadow 0.22s ease;
+}
+.page-portfolio .portfolio-card::after,
+.page-404 .error-game-box::after {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    linear-gradient(var(--c), var(--c)) 0 0 / 18px 3px no-repeat,
+    linear-gradient(var(--c), var(--c)) 0 0 / 3px 18px no-repeat,
+    linear-gradient(var(--c), var(--c)) 100% 0 / 18px 3px no-repeat,
+    linear-gradient(var(--c), var(--c)) 100% 0 / 3px 18px no-repeat,
+    linear-gradient(var(--c), var(--c)) 0 100% / 18px 3px no-repeat,
+    linear-gradient(var(--c), var(--c)) 0 100% / 3px 18px no-repeat,
+    linear-gradient(var(--c), var(--c)) 100% 100% / 18px 3px no-repeat,
+    linear-gradient(var(--c), var(--c)) 100% 100% / 3px 18px no-repeat;
+  transition: opacity 0.2s ease;
+}
+.page-portfolio .portfolio-card:hover,
+.page-portfolio .portfolio-card:focus-within,
+.page-news .news-entry:hover,
+.page-news .news-entry:focus-within {
+  transform: translateY(-4px);
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.35), 0 0 0 2px var(--c);
+}
+.page-portfolio .portfolio-card:hover::after,
+.page-portfolio .portfolio-card:focus-within::after,
+.page-404 .error-game-box:hover::after,
+.page-404 .error-game-box:focus-within::after {
+  opacity: 1;
+  animation: cn-pages-select 0.9s ease-in-out infinite;
+}
+@keyframes cn-pages-select {
+  0%, 100% { inset: -7px; }
+  50% { inset: -11px; }
+}
+/* 3枚のカードはテーマの3色で */
+.page-portfolio .portfolio-card:nth-of-type(3n+2) { --c: var(--cn-pink); }
+.page-portfolio .portfolio-card:nth-of-type(3n+3) { --c: var(--cn-cyan); }
+
+/* ---- 作品一覧: 活動ハイライトを「ステージの道のり」に ---- */
+.page-portfolio .portfolio-timeline {
+  position: relative;
+  padding-left: 2.1rem;
+}
+.page-portfolio .portfolio-timeline::before {
+  content: "";
+  position: absolute;
+  left: 0.45rem;
+  top: 0.4rem;
+  bottom: 0.4rem;
+  width: 3px;
+  background: repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0 6px, transparent 6px 12px);
+}
+.page-portfolio .portfolio-timeline__item {
+  position: relative;
+}
+.page-portfolio .portfolio-timeline__item::before {
+  content: "";
+  position: absolute;
+  left: -2.1rem;
+  top: 0.15rem;
+  width: 12px;
+  height: 12px;
+  margin-left: 0.25rem;
+  background: var(--cn-yellow);
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.45);
+}
+.page-portfolio .portfolio-timeline__item:nth-child(3n+2)::before { background: var(--cn-pink); }
+.page-portfolio .portfolio-timeline__item:nth-child(3n+3)::before { background: var(--cn-cyan); }
+/* 最後（これから）の地点は点滅させて「現在地」に */
+.page-portfolio .portfolio-timeline__item:last-child::before {
+  background: transparent;
+  box-shadow: inset 0 0 0 3px var(--cn-cyan), 3px 3px 0 rgba(0, 0, 0, 0.45);
+  animation: cn-pages-blink 1.2s steps(2, end) infinite;
+}
+@keyframes cn-pages-blink {
+  50% { opacity: 0.25; }
+}
+
+/* ---- お知らせ: 日付をドット文字の札に ---- */
+.page-news .news-entry {
+  --c: var(--cn-cyan);
+}
+.page-news .news-entry__date {
+  display: inline-block;
+  padding: 0.1rem 0.55rem;
+  border-radius: 4px;
+  background: rgba(92, 225, 230, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(92, 225, 230, 0.45);
+  color: var(--cn-cyan) !important;
+  letter-spacing: 0.08em;
+}
+
+/* ---- 鋭意制作中: 見出しの下に「読み込み中」のバー（飾り） ---- */
+.page-coming-soon #coming-soon-message::after {
+  content: "";
+  display: block;
+  width: min(16rem, 70%);
+  height: 12px;
+  margin: 1rem 0 0;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.35);
+  background:
+    repeating-linear-gradient(90deg, var(--cn-yellow) 0 10px, transparent 10px 14px) 3px 3px / 0% calc(100% - 6px) no-repeat;
+  animation: cn-pages-load 3.2s steps(16, end) infinite;
+}
+@keyframes cn-pages-load {
+  0% { background-size: 0% calc(100% - 6px); }
+  80%, 100% { background-size: calc(100% - 6px) calc(100% - 6px); }
+}
+
+/* ---- 404: 見出しをゲームオーバー風に（色ずれ）、寄り道の箱をボーナスステージ風に ---- */
+.page-404 #main .page-header-title h1 {
+  text-shadow: 2px 0 0 rgba(255, 107, 139, 0.85), -2px 0 0 rgba(92, 225, 230, 0.85);
+}
+.page-404 .error-game-box {
+  border: 2px solid rgba(255, 204, 0, 0.55) !important;
+  border-radius: 12px;
+  background:
+    radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px) 0 0 / 14px 14px,
+    linear-gradient(180deg, rgba(34, 40, 76, 0.85), rgba(22, 26, 50, 0.9)) !important;
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.35);
+}
+
+/* ---- プライバシーポリシー・利用規約: 見出しに四角の印、箇条書きの点も四角に ---- */
+.page-privacy #main h3,
+.page-terms #main h3 {
+  position: relative;
+  padding-left: 1.15em;
+  padding-bottom: 0.45rem;
+  border-bottom: 2px dashed rgba(255, 255, 255, 0.14);
+}
+.page-privacy #main h3::before,
+.page-terms #main h3::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.38em;
+  width: 0.55em;
+  height: 0.55em;
+  background: var(--cn-yellow);
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.45);
+}
+.page-privacy #main ul:not(.actions):not(.copyright) > li,
+.page-terms #main ul:not(.actions):not(.copyright) > li {
+  list-style: none;
+  position: relative;
+}
+.page-privacy #main ul:not(.actions):not(.copyright) > li::before,
+.page-terms #main ul:not(.actions):not(.copyright) > li::before {
+  content: "";
+  position: absolute;
+  left: -1.05em;
+  top: 0.8em;
+  width: 6px;
+  height: 6px;
+  background: var(--cn-cyan);
+}
+
+/* ---- 動きを減らす設定 ---- */
+@media (prefers-reduced-motion: reduce) {
+  .page-portfolio .portfolio-card,
+  .page-news .news-entry,
+  .page-404 .error-game-box {
+    transition: none;
+  }
+  .page-portfolio .portfolio-card:hover,
+  .page-portfolio .portfolio-card:focus-within,
+  .page-news .news-entry:hover,
+  .page-news .news-entry:focus-within {
+    transform: none;
+  }
+  .page-portfolio .portfolio-card::after,
+  .page-404 .error-game-box::after,
+  .page-portfolio .portfolio-timeline__item:last-child::before {
+    animation: none !important;
+  }
+  .page-coming-soon #coming-soon-message::after {
+    animation: none;
+    background-size: 62% calc(100% - 6px);
+  }
+}
