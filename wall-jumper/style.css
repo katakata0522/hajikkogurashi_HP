@@ -356,3 +356,12 @@ button.secondary {
         }
     }
 }
+
+/* キーボード操作時の選択枠（他のミニゲームとそろえた太めの枠） */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+label:focus-visible {
+    outline: 3px solid #ffd54a;
+    outline-offset: 3px;
+}
