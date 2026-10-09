@@ -3383,6 +3383,8 @@
 
     // 🕹️ 能動的スタートボタンイベント
     dom.startPlayBtn.addEventListener("click", () => {
+      // ✅ 連打・ダブルタップでゲームループが何重にも動き出すのを防ぐ
+      if (gameStarted) return;
       AudioManager.init();
 
       gameStarted = true;
