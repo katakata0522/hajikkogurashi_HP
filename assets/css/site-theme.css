@@ -109,6 +109,7 @@ body {
 }
 #menu .links li a::before {
   content: "▶";
+  content: "▶" / ""; /* 飾りなので読み上げない */
   font-family: var(--cn-font-pixel);
   font-size: 0.7em;
   color: var(--cn-yellow);
@@ -502,6 +503,7 @@ body.page-404 { --cn-eyebrow: "ERROR 404"; }
 /* 英語の小見出し（ドット文字） */
 #main .page-header-container::before {
   content: var(--cn-eyebrow, "");
+  content: var(--cn-eyebrow, "") / ""; /* 飾りなので読み上げない */
   display: block;
   margin-bottom: 0.6rem;
   font-family: var(--cn-font-pixel);

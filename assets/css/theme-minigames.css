@@ -44,6 +44,7 @@
 /* 「▶ PLAY」の表示 */
 .game-card .image-link::after {
   content: "▶ PLAY";
+  content: "▶ PLAY" / ""; /* 飾りなので読み上げない */
   position: absolute;
   left: 50%;
   top: 50%;
@@ -95,6 +96,7 @@
 }
 .game-card__no::before {
   content: "No." counter(cn-game, decimal-leading-zero);
+  content: "No." counter(cn-game, decimal-leading-zero) / ""; /* 飾りなので読み上げない */
 }
 
 /* 対応端末アイコン（バッジの文字から作った飾り。濃い方が「おすすめ」） */

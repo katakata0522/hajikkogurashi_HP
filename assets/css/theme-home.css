@@ -115,6 +115,7 @@ body.is-home #banner h1 {
 }
 body.is-home #banner .content .actions::before {
   content: "PRESS START";
+  content: "PRESS START" / ""; /* 飾りなので読み上げない */
   position: absolute;
   top: 0;
   left: 0.1rem;
@@ -271,6 +272,7 @@ body.is-home #wrapper #banner .button.next:focus-visible::before {
 }
 .hero-monitor__bar::after {
   content: "▶ PLAY";
+  content: "▶ PLAY" / ""; /* 飾りなので読み上げない */
   font-family: var(--cn-font-pixel);
   font-size: 0.8rem;
   letter-spacing: 0.25em;
@@ -377,6 +379,7 @@ body.is-home #wrapper #banner .button.next:focus-visible::before {
 }
 .tiles--home article header.major::before {
   content: counter(cn-tile, decimal-leading-zero);
+  content: counter(cn-tile, decimal-leading-zero) / ""; /* 飾りなので読み上げない */
   position: absolute;
   top: -1.9rem;
   right: 0;
@@ -384,7 +387,8 @@ body.is-home #wrapper #banner .button.next:focus-visible::before {
   font-family: var(--cn-font-pixel);
   font-size: 0.85rem;
   letter-spacing: 0.15em;
-  color: rgba(255, 255, 255, 0.75);
+  color: #fff;
+  text-shadow: 0 1px 0 rgba(10, 12, 26, 0.7), 0 0 6px rgba(10, 12, 26, 0.55);
   pointer-events: none;
 }
 .tiles--home article header.major h3 {
@@ -393,6 +397,7 @@ body.is-home #wrapper #banner .button.next:focus-visible::before {
 }
 .tiles--home article header.major h3::before {
   content: "▶";
+  content: "▶" / ""; /* 飾りなので読み上げない */
   position: absolute;
   left: -1.3em;
   top: 50%;

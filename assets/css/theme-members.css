@@ -47,6 +47,7 @@
 /* P1〜P7 */
 .member-card__header::after {
   content: "P" counter(cn-member);
+  content: "P" counter(cn-member) / ""; /* 飾りなので読み上げない */
   position: absolute;
   top: 0.75rem;
   right: 3.6rem;
@@ -125,6 +126,7 @@
 }
 .member-card__tag::before {
   content: "ITEM";
+  content: "ITEM" / ""; /* 飾りなので読み上げない */
   padding: 0.1rem 0.4rem;
   border-radius: 4px;
   background: var(--m);
