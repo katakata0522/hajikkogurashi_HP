@@ -400,6 +400,7 @@ class GameController {
         this.cameraX = 0;
         this.screenShake = 0;
         this.resultDistance = 0;
+        this.isFalling = false;
 
         this.player = {
             x: 100,
@@ -464,6 +465,10 @@ class GameController {
             if (e.code === 'Space') {
                 e.preventDefault(); // 画面スクロールを防止
                 if (this.state === STATE.START || this.state === STATE.RESULT) {
+                    // スペースを押しっぱなしにした時のキーリピートで、結果画面が一瞬で飛ばされるのを防ぐ
+                    if (e.repeat) return;
+                    // 崖から落ちている演出の途中では再スタートしない（演出が新しいゲームに混ざるのを防ぐ）
+                    if (this.isFalling) return;
                     this.startGame();
                 } else {
                     handleInput(e);
@@ -517,6 +522,7 @@ class GameController {
 
     startGame(e) {
         if (e) { e.stopPropagation(); e.preventDefault(); }
+        if (this.isFalling) return;
         this.audio.init();
         
         // --- ランダム要素の追加 ---
@@ -564,6 +570,7 @@ class GameController {
         this.audio.stopSkid();
         this.audio.playFall();
         this.state = STATE.RESULT;
+        this.isFalling = true;
         this.screenShake = 20;
         
         let fallSpeedY = 0;
@@ -615,6 +622,7 @@ class GameController {
     }
 
     processResult(type) {
+        this.isFalling = false;
         this.audio.stopSkid();
         this.state = STATE.RESULT;
         this.screenShake = 0;
