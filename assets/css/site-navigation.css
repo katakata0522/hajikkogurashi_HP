@@ -18,6 +18,9 @@
   --nav-content: 1320px;
 }
 html { scroll-padding-top: 88px; }
+/* scroll-padding はページ内リンクの移動先をヘッダーの下に出すためのもの。
+   ただしヘッダー自身にフォーカスしたとき（Tab キー）にページが上へ動かないよう、ヘッダー内は対象外にする */
+.site-header, .site-header * { scroll-margin-top: -120px; }
 body.menu-open { position: fixed; width: 100%; overflow: hidden; }
 /* 旧ヘッダー（固定配置）用の上余白は不要になる */
 #wrapper { padding-top: 0 !important; }

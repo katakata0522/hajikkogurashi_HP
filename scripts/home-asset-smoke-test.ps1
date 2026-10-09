@@ -33,8 +33,12 @@ if (-not ($rootIndex.Contains('class="tiles"') -or $rootIndex.Contains('class="t
     $errors.Add('index.html is missing the tiles section.')
 }
 
-if (-not ($rootIndex -match 'aria-label="[^"]+"' -and $rootIndex.Contains('>MENU</a>'))) {
+# 共通ナビ（PR #52 から取り込み）: ボタンのメニュー切り替えと、最初は操作できない状態のメニュー
+if ($rootIndex -notmatch '<button\b[^>]*class="menu-toggle"[^>]*aria-controls="mobile-menu"[^>]*aria-expanded="false"') {
     $errors.Add('index.html is missing the menu trigger.')
+}
+if ($rootIndex -notmatch '<nav\b[^>]*class="mobile-menu"[^>]*\bid="mobile-menu"[^>]*\binert\b') {
+    $errors.Add('index.html mobile menu must begin inert.')
 }
 
 if (-not ($rootIndex -match 'include\s+[\x27\x22]includes/contact-section\.php[\x27\x22]')) {

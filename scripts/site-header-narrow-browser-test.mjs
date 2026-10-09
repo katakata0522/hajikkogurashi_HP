@@ -21,8 +21,8 @@ try {
       await page.evaluate(() => document.fonts.ready);
       await page.waitForTimeout(150);
       const box = await page.evaluate(() => {
-        const menu = document.querySelector('#header nav a[href="#menu"]');
-        const logo = document.querySelector('#header .logo');
+        const menu = document.querySelector('.site-header .menu-toggle');
+        const logo = document.querySelector('.site-header .brand');
         if (!menu || !logo) return null;
         const m = menu.getBoundingClientRect();
         const l = logo.getBoundingClientRect();

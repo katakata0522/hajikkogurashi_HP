@@ -4,7 +4,7 @@
 
 ### ひとことで
 サイトとミニゲーム10本を、**見た目・速さ・安全・遊びやすさ**の面で手直ししました。
-すべてローカルの `overnight-improvements` ブランチだけの作業です。**push・PR・本番反映・誰かへの連絡は一切していません。**
+すべてローカルの `overnight-plus-nav` ブランチだけの作業です（`overnight-improvements` の続き）。**push・PR・本番反映・誰かへの連絡は一切していません。**
 main から見て **57 コミット**（Round 1: 15、Round 2: 11、Round 3: 31）。1つずつ分けてあるので、気に入らないものだけ `git revert <コミットID>` で戻せます。
 
 ### 全体で変わったこと
@@ -18,7 +18,7 @@ main から見て **57 コミット**（Round 1: 15、Round 2: 11、Round 3: 31�
 - **ぎりぎりブレーキ** は見た目を変えていません（直したのは中身の不具合だけで、PC とスマホの画面が main とピクセル単位で同じことを確認済み）。
 
 ### 確認のしかた（かんたん版）
-1. 作業フォルダ: `/workspace/hajikko-audit`（ブランチ `overnight-improvements`）。変更一覧は `git log --oneline main..HEAD`。
+1. 作業フォルダ: `/workspace/hajikko-audit`（ブランチ `overnight-plus-nav`）。変更一覧は `git log --oneline main..HEAD`。
 2. 画面を見る: フォルダで `php -S 127.0.0.1:8765 /workspace/hajikko-tools/router.php` を実行し、ブラウザで http://127.0.0.1:8765/ を開く。
 3. 撮影済みの画面: `/workspace/hajikko-audit-shots/`（round2/ と round3/ に before / after。ゲームの確認画像は round3/qa/）。
 4. テスト: `npm run test:minigames`（33ファイル、約4分）。
@@ -26,12 +26,17 @@ main から見て **57 コミット**（Round 1: 15、Round 2: 11、Round 3: 31�
 6. 詳しい理由や判断は、この下の Round 1〜3 と QA 第1〜3弾の各章にあります。
 
 ### 決めていただきたいこと
-1. **デザインの方向と PR #52**: PR #52（クリーム色の新トップ）と、このブランチ（暗いゲーム調）はデザインの方向が違い、同じファイルを触っています。どちらにするか決めていただくまで、PR #52 には触りません（まとめ方の案は「Round 2 → PR #52 との関係」の章）。
+1. **デザインの方向と PR #52（対応済み・確認待ち）**: 暗いゲーム調を採用し、PR #52 からは共通ヘッダー／メニューだけを取り込みました（クリーム系の新トップは使っていません）。ブランチ `overnight-plus-nav` に反映済み。見た目の最終確認だけお願いしたいです。
 2. **プライバシーポリシーの最終改定日** を今日の日付に更新するか。
 3. **iPhone の実機 Safari** でトップを開いて落ちないか（Linux 版 WebKit のテストだけ、main でも時々落ちるため）。
 4. **kage-mane-dojo の共有画像** は banner.webp のまま（専用画像は見た目が崩れたので見送り）。
 5. **本番での確認**: 公開後に、.htaccess・お問い合わせフォームのメール送信・フォント表示・Lighthouse の本番値をチェックが必要です。
 6. ゲームの「仕様かな？」と思って変えなかった点（R キーで確認なしにやり直し、など）は、QA 第1〜3弾の章に一覧があります。変えたいものがあれば教えてください。
+
+### 朝時点のブランチ
+- 作業フォルダ: `/workspace/hajikko-audit`
+- ブランチ: `overnight-plus-nav`（`overnight-improvements` に PR #52 の共通ナビを載せた続き）
+- push / PR / 本番反映はしていません
 
 ---
 
