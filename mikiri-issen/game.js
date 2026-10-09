@@ -860,6 +860,17 @@
         handleAction();
       }, { passive: false });
 
+      // タイトル画面の「画面タップ または SPACEキー で開始」のとおり、ボタン以外の場所のタップでも始められるようにする
+      const titleScreenEl = document.getElementById('titleScreen');
+      if (titleScreenEl) {
+        titleScreenEl.addEventListener('click', (event) => {
+          if (game.state !== 'title') return;
+          if (elements.howtoPanel && elements.howtoPanel.classList.contains('is-open')) return;
+          if (event.target.closest('button, a, input, label, .button-row, .title-record, #howtoPanel')) return;
+          safeCall(startRun);
+        });
+      }
+
       // スペースキー/Enterキーでタイトル画面やリザルト画面からもシームレスに進行可能に（Escapeでモーダル閉じ）
       window.addEventListener('keydown', (event) => {
         if (elements.howtoPanel && elements.howtoPanel.classList.contains('is-open')) {

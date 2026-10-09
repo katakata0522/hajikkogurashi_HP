@@ -143,6 +143,20 @@ try {
   }
   await storagePage.close();
 
+  // 回帰テスト: PC のタイトル画面で、ボタン以外の場所をクリックしても開始できる（「画面タップ または SPACEキー で開始」の表示どおり）
+  const pcPage = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+  await pcPage.goto(`http://127.0.0.1:${port}/mikiri-issen/`, { waitUntil: 'networkidle' });
+  const pressStart = await pcPage.locator('.press-start').boundingBox();
+  if (!pressStart) throw new Error('press-start hint should be visible on PC');
+  await pcPage.mouse.click(pressStart.x + pressStart.width / 2, pressStart.y + pressStart.height / 2);
+  await pcPage.waitForTimeout(200);
+  const tapStarted = await pcPage.evaluate(() => document.querySelector('#playScreen')?.classList.contains('is-active') === true);
+  if (!tapStarted) throw new Error('tapping the title screen did not start the duel');
+  // 開始のクリックが「お手つき」扱いにならないこと
+  const foulAfterStart = await pcPage.evaluate(() => document.querySelector('.arena')?.classList.contains('is-failed'));
+  if (foulAfterStart) throw new Error('the start click counted as an early foul');
+  await pcPage.close();
+
   await browser.close();
   console.log('mikiri-issen browser test passed');
 } finally {
