@@ -2014,3 +2014,21 @@ body {
   100% { box-shadow: 0 0 14px rgba(241, 196, 15, 0.6); }
 }
 
+
+/* ─── 盤面が画面の下にはみ出して見えなくなる不具合の修正（2026-10） ───
+   flex:1 の盤面エリアと 1fr の行が中身の高さで押し広げられ、
+   5段のうち下の段が画面外に切れていた。最小サイズを0にして、残りの高さに収める。 */
+.grid-section-wrap {
+  min-height: 0;
+  overflow: hidden;
+}
+.grid-layout,
+#grid-container {
+  grid-template-rows: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  min-height: 0;
+}
+.grid-panel {
+  min-height: 0;
+  min-width: 0;
+}
