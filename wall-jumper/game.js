@@ -747,6 +747,12 @@ function togglePause() {
     }
 }
 
+// タブを隠したり別のアプリに切り替えたら自動で一時停止する（2026-10）
+// 戻った瞬間にいきなり再開して落下・被弾しないように、ポーズ画面から再開してもらう。
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden && gameState === 'playing') togglePause();
+});
+
 pauseBtn.addEventListener('click', togglePause);
 resumeBtn.addEventListener('click', togglePause);
 quitBtn.addEventListener('click', () => {
