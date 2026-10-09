@@ -63,7 +63,14 @@
 
 				// Background image from <img>
 				if (img) {
-					tile.style.backgroundImage = 'url(' + img.getAttribute('src') + ')';
+					var src = img.getAttribute('src');
+					var avif = img.getAttribute('data-avif');
+					var bg = 'url(' + src + ')';
+					// AVIF に対応したブラウザでは軽い AVIF を使い、それ以外は今までどおり WebP
+					if (avif && window.CSS && CSS.supports('background-image', 'image-set(url("a.avif") type("image/avif"))')) {
+						bg = 'image-set(url("' + avif + '") type("image/avif"), url("' + src + '") type("image/webp"))';
+					}
+					tile.style.backgroundImage = bg;
 					var pos = img.getAttribute('data-position');
 					if (pos && image) image.style.backgroundPosition = pos;
 					if (image) image.style.display = 'none';

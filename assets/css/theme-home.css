@@ -235,6 +235,9 @@ body.is-home #wrapper #banner .button.next:focus-visible::before {
   height: 100%;
   object-fit: cover;
   opacity: 0;
+}
+/* 2枚目以降はページ表示の後に読み込み、全部そろってから切り替えを始める（index.js） */
+.hero-monitor__screen.is-cycling img {
   animation: hero-cycle 20s linear infinite;
 }
 .hero-monitor__screen img:nth-child(1) { opacity: 1; animation-delay: 0s; }
