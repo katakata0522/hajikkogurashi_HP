@@ -16,6 +16,9 @@ const browser = await chromium.launch({ headless: true, ...(process.env.CHROME_P
 const failures = [];
 let views = 0;
 const dimensions = [320, 375, 390, 768, 1024, 1440];
+// かたかたさんが決めたメニューの言葉と順番（お知らせ＝news.html はメニューに入れない）
+const menuLabels = ['私たちについて', '作品一覧', 'いますぐあそぶ！', 'メンバー', '鋭意制作中！', 'お問い合わせ'];
+const navPages = ['aboutus', 'portfolio', 'minigames', 'members', 'coming-soon'];
 // テスト用サーバーは PHP を実行しないので、トップのお問い合わせ欄（PHP の include）を HTML 部分だけ差し込んで再現する
 const contactSection = readFileSync(resolve(root, 'includes/contact-section.php'), 'utf8').replace(/<\?php[\s\S]*?\?>/g, '');
 async function withContactSection(page) {
@@ -59,6 +62,17 @@ try {
         assert.equal(layout.h1, 1, `${route}: one H1`);
         assert.equal(layout.skipLinks, 1, `${route}: exactly one skip link`);
         assert.equal(layout.oldMenu, false, `${route}: old header/menu must be gone`);
+        const labels = await page.evaluate(() => ({
+          mobile: [...document.querySelectorAll('.mobile-menu-inner > a')].map(a => a.textContent.replace(/^\s*\d+\s*/, '').trim()),
+          desktop: [...document.querySelectorAll('.desktop-nav a')].map(a => a.textContent.trim()),
+          play: document.querySelector('.header-play').textContent.trim(),
+          subtitle: document.querySelector('.brand-name small').textContent.trim(),
+        }));
+        const expectedMobile = [...(route === '/' ? [] : ['ホームへ']), ...menuLabels];
+        assert.deepEqual(labels.mobile, expectedMobile, `${route}: mobile menu labels/order`);
+        assert.deepEqual(labels.desktop, ['私たちについて', '作品一覧', 'メンバー', '鋭意制作中！'], `${route}: desktop nav labels/order`);
+        assert.equal(labels.play, 'いますぐあそぶ！ ↗', `${route}: CTA wording`);
+        assert.equal(labels.subtitle, 'まったりゲームを作るサークル！', `${route}: original logo subtitle`);
         assert.ok(layout.header.height >= 60 && layout.header.height <= 85, `${route}: header height ${layout.header.height}`);
         assert.ok(layout.toggleRight <= width + 0.5, `${route}: menu button clipped ${layout.toggleRight}`);
         if (width < 861) {
@@ -86,12 +100,16 @@ try {
             await page.waitForFunction(() => location.hash === '#contact').catch(error => { throw new Error('contact anchor navigation: ' + error.message); });
             assert.equal(await page.evaluate(() => document.activeElement.id), 'contact');
             assert.ok(await page.locator('#contact').evaluate(element => element.getBoundingClientRect().top) >= 60, 'anchor must clear the sticky header');
-          } else if (['aboutus', 'portfolio', 'minigames', 'news', 'members'].some(name => route === `/${name}.html`)) {
+          } else if (navPages.some(name => route === `/${name}.html`)) {
             assert.equal(await page.locator('.mobile-menu a[aria-current="page"]').count(), 1);
+          } else if (route === '/news.html') {
+            // お知らせはメニューに無いので、どの項目も強調しない（メニュー自体は表示する）
+            assert.equal(await page.locator('.mobile-menu a[aria-current="page"]').count(), 0, 'news: no menu item highlighted');
           }
         } else {
           const current = await page.locator('.desktop-nav a[aria-current="page"], .header-play[aria-current="page"]').count();
-          if (['aboutus', 'portfolio', 'minigames', 'news', 'members'].some(name => route === `/${name}.html`)) assert.equal(current, 1, `${route}: current page marked in desktop nav`);
+          if (navPages.some(name => route === `/${name}.html`)) assert.equal(current, 1, `${route}: current page marked in desktop nav`);
+          if (route === '/news.html') assert.equal(current, 0, 'news: no nav item highlighted');
         }
       } catch (error) { failures.push(`${width}px ${route}: ${error.message}`); }
     }
