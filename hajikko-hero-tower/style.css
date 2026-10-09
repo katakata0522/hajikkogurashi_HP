@@ -2092,3 +2092,22 @@ body {
     height: 94dvh;
   }
 }
+
+/* 2026-10: パソコンでは盤面が約230pxと小さかったので、中央の列を少し広く・高くして盤面を大きく（約300〜360px）。
+   スマホ・タブレット縦（1024px未満）には影響しない。 */
+@media (min-width: 1024px) {
+  #main-layout-wrapper {
+    height: 98vh;
+    margin: 1vh auto;
+  }
+  #game-container {
+    width: 420px !important;
+    height: 94vh !important;
+    max-height: 880px !important;
+  }
+  .sidebar-panel {
+    width: clamp(250px, calc((100vw - 420px - 80px) / 2), 320px);
+    height: 94vh;
+    max-height: 880px;
+  }
+}
