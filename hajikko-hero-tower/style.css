@@ -2032,3 +2032,13 @@ body {
   min-height: 0;
   min-width: 0;
 }
+
+/* 2026-10: スマホのブラウザでアドレスバー分だけ下が切れないよう、実際に見えている高さ(dvh)を使う */
+@supports (height: 100dvh) {
+  body {
+    height: 100dvh;
+  }
+  #game-container {
+    height: 94dvh;
+  }
+}

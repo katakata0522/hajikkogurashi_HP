@@ -343,3 +343,16 @@ button.secondary {
         top: calc(65% + 80px);
     }
 }
+
+/* 2026-10: スマホのブラウザでアドレスバー分だけ下が切れないよう、実際に見えている高さ(dvh)を使う */
+@supports (height: 100dvh) {
+    body,
+    #game-container {
+        height: 100dvh;
+    }
+    @media (max-width: 450px) {
+        #game-container {
+            max-height: 100dvh;
+        }
+    }
+}

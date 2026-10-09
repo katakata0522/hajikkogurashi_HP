@@ -478,3 +478,10 @@ body.dark-mode .hint-text { background: rgba(255,255,255,0.7); color: #000; }
     border: 2px solid #555;
     font-size: 0.9rem;
 }
+
+/* 2026-10: スマホのブラウザでアドレスバー分だけ下が切れないよう、実際に見えている高さ(dvh)を使う */
+@supports (height: 100dvh) {
+    body {
+        height: 100dvh;
+    }
+}

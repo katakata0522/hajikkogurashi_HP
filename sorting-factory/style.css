@@ -399,3 +399,10 @@ canvas {
     0% { transform: translateY(-50%) scale(1.1); opacity: 0; }
     100% { transform: translateY(-50%) scale(1); opacity: 1; }
 }
+
+/* 2026-10: スマホのブラウザでアドレスバー分だけ下が切れないよう、実際に見えている高さ(dvh)を使う */
+@supports (height: 100dvh) {
+    body {
+        height: 100dvh;
+    }
+}
