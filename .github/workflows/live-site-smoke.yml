@@ -33,31 +33,25 @@ jobs:
       - name: Resolve the most recent deploy-impacting main revision
         id: revision
         shell: bash
-        env:
-          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           set -euo pipefail
-          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
-            expected="$PR_BASE_SHA"
-          else
-            # A CI-only main commit is intentionally not deployed. Find the last main
-            # first-parent commit which the existing deploy impact classifier deploys.
-            expected=""
-            while IFS= read -r commit; do
-              parent="$(git rev-parse "$commit^" 2>/dev/null || true)"
-              if [ -n "$parent" ]; then
-                changed="$(git diff --name-only --no-renames "$parent" "$commit")"
-              else
-                changed="$(git diff-tree --root --no-commit-id --name-only -r "$commit")"
-              fi
-              if [ -z "$changed" ]; then continue; fi
-              impact="$(printf '%s\n' "$changed" | node .github/scripts/detect-deploy-impact.cjs | jq -r '.deployNeeded')"
-              if [ "$impact" = "true" ]; then
-                expected="$commit"
-                break
-              fi
-            done < <(git rev-list --first-parent HEAD)
-          fi
+          # CI-only commits do not change the production bytes. This same rule is
+          # exercised by both PR smoke runs and manual main workflow_dispatch.
+          expected=""
+          while IFS= read -r commit; do
+            parent="$(git rev-parse "$commit^" 2>/dev/null || true)"
+            if [ -n "$parent" ]; then
+              changed="$(git diff --name-only --no-renames "$parent" "$commit")"
+            else
+              changed="$(git diff-tree --root --no-commit-id --name-only -r "$commit")"
+            fi
+            if [ -z "$changed" ]; then continue; fi
+            impact="$(printf '%s\n' "$changed" | node .github/scripts/detect-deploy-impact.cjs | jq -r '.deployNeeded')"
+            if [ "$impact" = "true" ]; then
+              expected="$commit"
+              break
+            fi
+          done < <(git rev-list --first-parent HEAD)
           [[ "$expected" =~ ^[a-f0-9]{40}$ ]] || { echo "::error::No deployable main revision"; exit 1; }
           echo "sha=$expected" >> "$GITHUB_OUTPUT"
           echo "Expected production commit: $expected"
