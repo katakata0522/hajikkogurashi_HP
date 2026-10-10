@@ -1,0 +1,67 @@
+name: Production site read-only smoke
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/live-site-smoke.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: live-site-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout without credentials
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Use Node 22
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+      - name: Install locked smoke test dependencies
+        run: npm ci --ignore-scripts --prefer-offline --no-audit --no-fund
+      - name: Resolve the most recent deploy-impacting main revision
+        id: revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          # CI-only commits do not change the production bytes. This same rule is
+          # exercised by both PR smoke runs and manual main workflow_dispatch.
+          expected=""
+          while IFS= read -r commit; do
+            parent="$(git rev-parse "$commit^" 2>/dev/null || true)"
+            if [ -n "$parent" ]; then
+              changed="$(git diff --name-only --no-renames "$parent" "$commit")"
+            else
+              changed="$(git diff-tree --root --no-commit-id --name-only -r "$commit")"
+            fi
+            if [ -z "$changed" ]; then continue; fi
+            impact="$(printf '%s\n' "$changed" | node .github/scripts/detect-deploy-impact.cjs | jq -r '.deployNeeded')"
+            if [ "$impact" = "true" ]; then
+              expected="$commit"
+              break
+            fi
+          done < <(git rev-list --first-parent HEAD)
+          [[ "$expected" =~ ^[a-f0-9]{40}$ ]] || { echo "::error::No deployable main revision"; exit 1; }
+          echo "sha=$expected" >> "$GITHUB_OUTPUT"
+          echo "Expected production commit: $expected"
+      - name: Verify the published commit SHA
+        env:
+          EXPECTED_SHA: ${{ steps.revision.outputs.sha }}
+        run: |
+          set -euo pipefail
+          bash ./scripts/verify-deployment-marker.sh "https://hajikkoroom.xsrv.jp/deploy-version.txt" "$EXPECTED_SHA"
+      - name: Verify live minigame URLs and static content
+        env:
+          EXPECTED_SHA: ${{ steps.revision.outputs.sha }}
+        run: node ./scripts/verify-live-minigame-routes.mjs "https://hajikkoroom.xsrv.jp/" "$EXPECTED_SHA"
