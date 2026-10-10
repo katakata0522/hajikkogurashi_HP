@@ -18,7 +18,9 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # workflow_dispatchで作業ブランチを選んでも本番Xserverへの書き込みは禁止。
   deploy:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
