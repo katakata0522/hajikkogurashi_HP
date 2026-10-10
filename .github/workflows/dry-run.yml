@@ -2,6 +2,12 @@ name: Static Site Check
 
 on:
   pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+      - converted_to_draft
     branches:
       - main
     paths-ignore:
@@ -18,6 +24,8 @@ concurrency:
 
 jobs:
   static-check:
+    # Draft iterations must not consume shared Actions minutes.
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -26,6 +34,7 @@ jobs:
         run: |
           pwsh -File ./scripts/static-site-smoke-test.ps1
           pwsh -File ./scripts/home-asset-smoke-test.ps1
+          node --test ./scripts/home-v2-contract.test.cjs
           pwsh -File ./scripts/structure-smoke-test.ps1
           pwsh -File ./scripts/local-reference-check.ps1
           pwsh -File ./scripts/workflow-action-pin-smoke-test.ps1
@@ -37,6 +46,7 @@ jobs:
           node --check ./.github/scripts/detect-deploy-impact.cjs
 
   minigame-check:
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -49,6 +59,8 @@ jobs:
         run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Run minigame smoke tests
         run: |
+          npm run test:site
+          node scripts/kanji-slicer-asset-version-smoke-test.mjs
           node scripts/minigame-screenshots-test.mjs
           npm run test:minigames:smoke
       - name: Resolve runner Chrome
@@ -66,7 +78,9 @@ jobs:
         id: minigame-browser
         env:
           MINIGAME_SCREENSHOT_DIR: test-results/minigame-screenshots
-        run: npm run test:minigames:browser
+        run: |
+          npm run test:site:browser
+          npm run test:minigames:browser
       - name: Upload minigame screenshots
         if: ${{ !cancelled() && steps.minigame-browser.outcome != 'skipped' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
