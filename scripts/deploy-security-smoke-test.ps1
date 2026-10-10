@@ -30,6 +30,12 @@ $requiredOnce = @(
     'rm -f ~/.ssh/id_deploy ~/.ssh/known_hosts'
 )
 
+# workflow_dispatchはmain以外のrefでも起動できるため、本番deploy jobで明示的に拒否する。
+$mainOnlyDeployJob = "(?m)^  deploy:\r?\n    if: github\.ref == 'refs/heads/main'\r?\n    runs-on: ubuntu-latest\r?$"
+if ($content -notmatch $mainOnlyDeployJob) {
+    throw 'Production deploy job must reject non-main workflow_dispatch refs.'
+}
+
 foreach ($pattern in $requiredOnce) {
     if (-not $content.Contains($pattern)) {
         throw "Required deploy security setting is missing: $pattern"
