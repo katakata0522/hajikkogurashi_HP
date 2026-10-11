@@ -86,6 +86,54 @@ try {
           assert.ok(await page.locator('#pause-btn').isVisible(), 'resume did not return to play');
         }
         if (screenshotDir) await page.screenshot({ path: join(screenshotDir, `${slug}-${width}x${height}-playing.png`), animations:'disabled' });
+        // Short-screen result actions: activate the production result DOM after
+        // confirming gameplay. This is a layout fixture, not a claim to clear a
+        // level or exercise every game-over outcome.
+        const resultControls = {
+          'blackhole-sweeper': ['#result-screen', '#retry-btn', '#menu-btn'],
+          'girigiri-brake': ['#result-screen', '#retry-btn', '#menu-btn'],
+          'kage-mane-dojo': ['#resultScreen', '#retryButton', '#menuButtonResult'],
+          'mikiri-issen': ['#resultScreen', '#retryButton', '#backTitleButton'],
+          'sorting-factory': ['#result-screen', '#retry-btn', '#menu-btn'],
+          'stealth-slacker': ['#result-screen', '#retry-btn', '#menu-btn'],
+        }[slug];
+        if (resultControls) {
+          const resultGeometry = await page.evaluate(([result, retry, back], game) => {
+            const root = document.querySelector(result);
+            if (game === 'mikiri-issen') {
+              document.querySelector('#titleScreen').classList.remove('is-active');
+              document.querySelector('#playScreen').classList.remove('is-active');
+              root.classList.add('is-active');
+              document.querySelector('#resultCard').classList.add('is-early');
+            } else if (game === 'kage-mane-dojo') {
+              document.querySelector('#playScreen').classList.remove('active');
+              root.classList.add('active');
+            } else {
+              document.querySelector('#start-screen')?.classList.remove('active');
+              root.classList.add('active');
+              if (game === 'sorting-factory') {
+                document.querySelectorAll('.touch-zone').forEach(el => el.classList.add('hidden'));
+              }
+            }
+            const check = selector => {
+              const el = document.querySelector(selector);
+              const r = el.getBoundingClientRect();
+              const style = getComputedStyle(el);
+              const center = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+              return { selector, top:r.top, bottom:r.bottom, left:r.left, right:r.right,
+                width:r.width, height:r.height,
+                visible:style.display !== 'none' && style.visibility !== 'hidden',
+                hit:el.contains(center) };
+            };
+            return { buttons: [check(retry), check(back)],
+              pageWidth: document.documentElement.scrollWidth };
+          }, resultControls, slug);
+          assert.ok(resultGeometry.pageWidth <= width + 2,
+            `${slug}: result screen horizontal overflow at ${width}x${height}`);
+          assert.ok(resultGeometry.buttons.every(action => inside(action, width, height)
+            && action.visible && action.hit),
+            `${slug}: short-screen result actions clipped or obstructed at ${width}x${height}: ${JSON.stringify(resultGeometry)}`);
+        }
         assert.deepEqual(errors, [], `${slug}: page errors at ${width}x${height}`);
       } catch (error) {
         failures.push(`${slug} ${width}x${height}: ${String(error.message||error).slice(0,400)}`);
