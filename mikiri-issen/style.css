@@ -1392,3 +1392,21 @@
       transform: rotate(15deg) !important;
       box-shadow: 0 0 8px var(--aura) !important;
     }
+
+/* Corner Neighbor device-UX pass, 2026-10-11 */
+/* Short landscape title: visible primary decision, not a transformed crop. */
+@media (min-width: 540px) and (max-height: 500px) and (orientation: landscape) {
+  .title-screen { place-items:start center; align-content:start; overflow-y:auto; overscroll-behavior:contain; touch-action:pan-y; padding: 8px 14px; }
+  .title-screen .title-content { width:min(700px,100%); padding:0 0 8px; transform:none; }
+  .title-screen h1 { font-size:clamp(2.0rem, 4.7vw, 3.2rem); line-height:1.02; }
+  .title-screen .lead { font-size:.73rem; line-height:1.35; margin:5px auto 0; }
+  .title-screen .rule-lines { margin:5px auto 0; gap:1px; line-height:1.2; font-size:.73rem; }
+  .title-screen .button-row { margin-top:7px; gap:6px; }
+  .title-screen .button-row .main-button, .title-screen .button-row .sub-button { min-height:42px; padding:6px 15px; font-size:.79rem; width:auto; }
+  .title-screen .title-record { margin-top:8px; gap:6px; }
+  .title-screen .record-chip { padding:4px 6px; }
+  .title-screen .press-start { display:none; }
+  .title-screen .moon { width:100px; height:100px; opacity:.32; }
+  .title-screen .title-bg { position:absolute; }
+  .result-screen {overflow-y:auto;}
+}

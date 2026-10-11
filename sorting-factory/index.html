@@ -21,7 +21,7 @@
     <meta name="twitter:description" content="迫り来るアイテムを左右に仕分ける、ルール変化が楽しいスマホ対応の脳トレパニックゲームです。">
     <meta name="twitter:image" content="https://hajikkoroom.xsrv.jp/assets/images/sorting_factory_thumbnail_1779165097756.png">
     <!-- /SEO: hajikkogurashi-minigame -->
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=583da6cffc26">
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;900&family=Teko:wght@600;700&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -66,8 +66,10 @@
                         <span class="mute-text" style="font-weight: bold; color: #fff; font-family: 'M PLUS Rounded 1c', sans-serif;">🔇 消音 (ミュート)</span>
                     </label>
                 </div>
-                <button id="start-btn" class="action-btn" aria-label="業務開始（ゲームスタート）">業務開始</button>
-                <button id="menu-btn-title" class="action-btn tertiary" aria-label="広場に戻る" style="margin-top: 12px; background: rgba(255, 255, 255, 0.1); border: 2px solid rgba(255, 255, 255, 0.2);">広場に戻る</button>
+                <div class="start-actions">
+                    <button id="start-btn" class="action-btn" aria-label="業務開始（ゲームスタート）">業務開始</button>
+                    <button id="menu-btn-title" class="action-btn tertiary" aria-label="広場に戻る">広場に戻る</button>
+                </div>
             </div>
 
             <div id="result-screen" class="screen glass-panel" role="dialog" aria-modal="true" aria-labelledby="result-title">
