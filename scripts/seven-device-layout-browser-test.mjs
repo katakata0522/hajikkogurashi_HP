@@ -128,6 +128,22 @@ try {
             return { buttons: [check(retry), check(back)],
               pageWidth: document.documentElement.scrollWidth };
           }, { controls: resultControls, game: slug });
+          // Result screens may animate visibility; wait until the next painted
+          // frames so hit testing measures the interactive state, not frame 0.
+          await page.evaluate(() => new Promise(resolve =>
+            requestAnimationFrame(() => requestAnimationFrame(resolve))));
+          // Re-read hit testing after the paint: transition may begin hidden.
+          const readyResult = await page.evaluate(([retry, back]) => [retry, back].map(selector => {
+            const el = document.querySelector(selector), r = el.getBoundingClientRect();
+            const style = getComputedStyle(el);
+            return style.display !== 'none' && style.visibility !== 'hidden'
+              && el.contains(document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2));
+          }), [resultControls[1], resultControls[2]]);
+          resultGeometry.buttons.forEach((button, index) => {
+            button.visible = readyResult[index] && button.visible !== false
+              ? true : readyResult[index];
+            button.hit = readyResult[index];
+          });
           assert.ok(resultGeometry.pageWidth <= width + 2,
             `${slug}: result screen horizontal overflow at ${width}x${height}`);
           assert.ok(resultGeometry.buttons.every(action => inside(action, width, height)
