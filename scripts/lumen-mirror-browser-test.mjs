@@ -141,6 +141,29 @@ try {
         await titlePage.close();
       }
     }
+    // Exercise the short-landscape result state, not only the start menu.
+    // The result view is a stable UI fixture; game-clear physics are covered separately.
+    for (const [width, height] of [[667, 375], [844, 390]]) {
+      const resultPage = await browser.newPage({ viewport: { width, height } });
+      try {
+        await resultPage.goto(`http://127.0.0.1:${port}/lumen-mirror/`, { waitUntil: 'networkidle' });
+        await resultPage.click('#start-btn');
+        await resultPage.locator('.stage-card:not(.locked)').first().click();
+        await resultPage.evaluate(() => document.querySelector('#overlay').classList.remove('hidden'));
+        const buttons = await resultPage.evaluate(() => ['#next-btn', '#select-btn', '#overlay-plaza-btn'].map(selector => {
+          const el = document.querySelector(selector);
+          const r = el.getBoundingClientRect();
+          return { selector, x:r.x, y:r.y, right:r.right, bottom:r.bottom, width:r.width, height:r.height };
+        }));
+        if (buttons.some(x => x.width < 40 || x.height < 40 || x.y < -1 || x.bottom > height + 1 || x.x < -1 || x.right > width + 1)) {
+          failures.push(`short landscape result actions clipped at ${width}x${height}: ${JSON.stringify(buttons)}`);
+        }
+        await resultPage.click('#select-btn');
+        if (!(await resultPage.locator('#stage-select').isVisible())) {
+          failures.push(`short landscape result cannot return to stage select: ${width}x${height}`);
+        }
+      } finally { await resultPage.close(); }
+    }
     // Screen composition, not only the editor: controls must remain separate from goals and canvas.
     for (const viewport of [
       { width: 320, height: 568 },
