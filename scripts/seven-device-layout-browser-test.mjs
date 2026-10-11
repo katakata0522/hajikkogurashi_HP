@@ -98,7 +98,7 @@ try {
           'stealth-slacker': ['#result-screen', '#retry-btn', '#menu-btn'],
         }[slug];
         if (resultControls) {
-          const resultGeometry = await page.evaluate(([result, retry, back], game) => {
+          const resultGeometry = await page.evaluate(({ controls: [result, retry, back], game }) => {
             const root = document.querySelector(result);
             if (game === 'mikiri-issen') {
               document.querySelector('#titleScreen').classList.remove('is-active');
@@ -127,7 +127,7 @@ try {
             };
             return { buttons: [check(retry), check(back)],
               pageWidth: document.documentElement.scrollWidth };
-          }, resultControls, slug);
+          }, { controls: resultControls, game: slug });
           assert.ok(resultGeometry.pageWidth <= width + 2,
             `${slug}: result screen horizontal overflow at ${width}x${height}`);
           assert.ok(resultGeometry.buttons.every(action => inside(action, width, height)
