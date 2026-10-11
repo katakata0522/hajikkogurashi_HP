@@ -134,14 +134,21 @@ try {
             return { top: r.top, bottom: r.bottom, left: r.left, right: r.right, width: r.width, height: r.height };
           };
           return {
-            hud: box('#hud'), brief: box('#stage-brief'), viewport: box('#viewport'),
+            hud: box('#hud'), brief: box('#stage-brief'), viewport: box('#viewport'), canvas: box('#game-canvas'),
             controls: box('#controls'), emit: box('#emit-btn'),
             pageWidth: document.documentElement.scrollWidth,
             objective: document.querySelector('#stage-brief-objective').textContent,
+            stageName: document.querySelector('#stage-brief-name').textContent,
             briefVisible: getComputedStyle(document.querySelector('#stage-brief')).display !== 'none',
           };
         });
-        if (!geometry.briefVisible || !geometry.objective.includes('結晶')
+        if (!geometry.briefVisible || !geometry.stageName.includes('REFLECTION')
+            || geometry.canvas.width <= 0 || geometry.canvas.height <= 0
+            || geometry.canvas.left < geometry.viewport.left - 1
+            || geometry.canvas.top < geometry.viewport.top - 1
+            || geometry.canvas.right > geometry.viewport.right + 1
+            || geometry.canvas.bottom > geometry.viewport.bottom + 1
+            || !geometry.objective.includes('結晶')
             || geometry.pageWidth > viewport.width + 1
             || geometry.hud.bottom > geometry.brief.top + 1
             || geometry.brief.bottom > geometry.viewport.top + 1
@@ -154,6 +161,26 @@ try {
         if (!(await playPage.locator('#info-panel').isVisible())
             || !(await playPage.locator('#info-hints').textContent()).length) {
           failures.push(`compact screen cannot access stage hints at ${viewport.width}x${viewport.height}`);
+        }
+        // Stage 2 is verified after test fixture unlock and real page navigation.
+        if (viewport.width === 390) {
+          await playPage.evaluate(() => scoreManager.update(0, 'C', 5));
+          await playPage.reload({ waitUntil: 'networkidle' });
+          await playPage.click('#start-btn');
+          await playPage.locator('.stage-card:not(.locked)').nth(1).click();
+          const second = await playPage.evaluate(() => ({
+            name: document.querySelector('#stage-brief-name').textContent,
+            goal: document.querySelector('#stage-brief-objective').textContent,
+            toast: document.querySelectorAll('#toast-container .toast').length,
+            canvas: document.querySelector('#game-canvas').getBoundingClientRect().toJSON(),
+            viewport: document.querySelector('#viewport').getBoundingClientRect().toJSON(),
+          }));
+          if (second.name !== 'DOUBLE_ANGLE' || !second.goal.includes('反射')
+              || second.toast !== 0
+              || second.canvas.top < second.viewport.top - 1
+              || second.canvas.bottom > second.viewport.bottom + 1) {
+            failures.push(`stage 2 mobile goal/canvas: ${JSON.stringify(second)}`);
+          }
         }
       } finally { await playPage.close(); }
     }
