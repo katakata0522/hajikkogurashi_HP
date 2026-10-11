@@ -1043,7 +1043,9 @@ class GameController {
         // PANEL: Upper-center hint box
         // Placed at y=180 to avoid overlapping emitter at (80,150)
         // ============================================================
-        const panelW = 370, panelH = 104;
+        const displayScale = this.canvas.clientWidth / CONFIG.WIDTH || 1;
+        const hintScale = Math.max(1, Math.min(2, 13 / (14 * displayScale)));
+        const panelW = Math.min(CONFIG.WIDTH - 32, 370 * hintScale), panelH = 104 * hintScale;
         const panelX = (CONFIG.WIDTH - panelW) / 2; // centered
         const panelY = 185;
 
@@ -1070,28 +1072,28 @@ class GameController {
         ctx.shadowBlur = 8;
         ctx.shadowColor = 'rgba(0, 243, 255, 0.7)';
         ctx.fillStyle = `rgba(0, 243, 255, ${0.8 + pulse})`;
-        ctx.font = "bold 9px 'Inter', monospace";
+        ctx.font = `bold ${9 * hintScale}px 'Inter', monospace`;
         ctx.textAlign = 'center';
         ctx.letterSpacing = '0.15em';
-        ctx.fillText('▸ TUTORIAL: STAGE 1', CONFIG.WIDTH / 2, panelY + 20);
+        ctx.fillText('▸ TUTORIAL: STAGE 1', CONFIG.WIDTH / 2, panelY + 20 * hintScale);
 
         // Main hint Japanese
         ctx.shadowBlur = 4;
         ctx.shadowColor = 'rgba(255,255,255,0.3)';
         ctx.fillStyle = `rgba(255, 255, 255, ${fadeAlpha})`;
-        ctx.font = "14px 'Noto Sans JP', sans-serif";
-        ctx.fillText('斜めに鏡を引いて、光を結晶へ導け', CONFIG.WIDTH / 2, panelY + 48);
+        ctx.font = `${14 * hintScale}px 'Noto Sans JP', sans-serif`;
+        ctx.fillText('斜めに鏡を引いて、光を結晶へ導け', CONFIG.WIDTH / 2, panelY + 48 * hintScale);
 
         // Sub hint English
         ctx.shadowBlur = 0;
         ctx.fillStyle = `rgba(180, 180, 200, 0.6)`;
-        ctx.font = "9px 'Inter', monospace";
-        ctx.fillText('Drag diagonally across the laser path to place a mirror', CONFIG.WIDTH / 2, panelY + 68);
+        ctx.font = `${9 * hintScale}px 'Inter', monospace`;
+        ctx.fillText('Drag diagonally across the laser path to place a mirror', CONFIG.WIDTH / 2, panelY + 68 * hintScale);
 
         // Operation hint
         ctx.fillStyle = `rgba(0, 243, 255, 0.5)`;
         ctx.font = "9px 'Inter', monospace";
-        ctx.fillText('[ Drag = Draw Mirror ]   [ Tap Mirror = Erase ]   [ EMIT = Fire ]', CONFIG.WIDTH / 2, panelY + 87);
+        ctx.fillText('[ Drag = Draw Mirror ]   [ Tap Mirror = Erase ]   [ EMIT = Fire ]', CONFIG.WIDTH / 2, panelY + 87 * hintScale);
 
         // ============================================================
         // GUIDE: Show the laser beam path and where a mirror goes

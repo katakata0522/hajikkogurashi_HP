@@ -114,6 +114,29 @@ try {
 
   await page.close();
 
+  // Starting by click must not scroll the clipped shell or hide/overlap its HUD.
+  for (const viewport of [{ width: 320, height: 700 }, { width: 390, height: 844 }, { width: 1366, height: 900 }]) {
+    const layoutPage = await browser.newPage({ viewport });
+    await layoutPage.goto(`http://127.0.0.1:${port}/mikiri-issen/`, { waitUntil: 'networkidle' });
+    await layoutPage.click('#startButton');
+    await layoutPage.waitForSelector('#playScreen.is-active');
+    const layout = await layoutPage.evaluate(() => {
+      const shell = document.querySelector('.shell');
+      const controls = ['#quickRestartButton', '#soundButton', '.mini-status'].map((selector) => {
+        const rect = document.querySelector(selector).getBoundingClientRect();
+        return { selector, x: rect.x, y: rect.y, right: rect.right, bottom: rect.bottom };
+      });
+      return { scrollTop: shell.scrollTop, width: innerWidth, height: innerHeight, controls };
+    });
+    const outside = layout.controls.some((rect) => rect.x < 0 || rect.y < 0 || rect.right > layout.width || rect.bottom > layout.height);
+    const status = layout.controls[2];
+    const overlap = layout.controls.slice(0, 2).some((rect) => rect.x < status.right && rect.right > status.x && rect.y < status.bottom && rect.bottom > status.y);
+    if (layout.scrollTop !== 0 || outside || overlap) {
+      throw new Error(`Mikiri play HUD is clipped or overlapping: ${JSON.stringify({ viewport, layout, outside, overlap })}`);
+    }
+    await layoutPage.close();
+  }
+
   const storagePage = await browser.newPage({ viewport: { width: 390, height: 844 } });
   const storageErrors = [];
   storagePage.on('pageerror', (error) => storageErrors.push(error.message));
