@@ -96,6 +96,7 @@ class GameController {
 
     _showTitleScreen() {
         this.state = STATE.TITLE;
+        document.getElementById('stage-brief').classList.add('hidden');
         document.getElementById('start-screen').classList.remove('hidden');
         document.getElementById('stage-select').classList.add('hidden');
         document.getElementById('overlay').classList.add('hidden');
@@ -105,6 +106,7 @@ class GameController {
 
     _showStageSelect() {
         this.state = STATE.STAGE_SELECT;
+        document.getElementById('stage-brief').classList.add('hidden');
         document.getElementById('start-screen').classList.add('hidden');
         document.getElementById('stage-select').classList.remove('hidden');
         document.getElementById('overlay').classList.add('hidden');
@@ -152,6 +154,7 @@ class GameController {
 
     _startStage(idx) {
         this.state = STATE.PLAYING;
+        document.getElementById('stage-brief').classList.remove('hidden');
         document.getElementById('stage-select').classList.add('hidden');
         document.getElementById('overlay').classList.add('hidden');
         this._closeInfoPanel();
@@ -195,6 +198,10 @@ class GameController {
         document.getElementById('info-stg-num').textContent = isCustomStage ? 'CUSTOM_STG' : `STG_0${this.currentStageIdx + 1}`;
         document.getElementById('info-stg-name').textContent = tmpl.name;
         document.getElementById('info-objective').textContent = tmpl.objective || '——';
+        const hintsSection = document.getElementById('info-hints-section');
+        const hints = !isCustomStage && Array.isArray(tmpl.hints) ? tmpl.hints : [];
+        hintsSection.classList.toggle('hidden', hints.length === 0);
+        document.getElementById('info-hints').textContent = hints.join(' ／ ');
         document.getElementById('info-story').textContent = tmpl.story || '——';
 
         const container = document.getElementById('info-gimmicks');
@@ -390,6 +397,10 @@ class GameController {
             this._unlock();
             this._openInfoPanel();
         });
+        document.getElementById('stage-brief-details').addEventListener('click', () => {
+            this._unlock();
+            this._openInfoPanel();
+        });
         document.getElementById('info-close').addEventListener('click', () => {
             this._closeInfoPanel();
         });
@@ -482,13 +493,10 @@ class GameController {
         this._updateModeIndicator();
 
         if (!isCustom) {
-            this.showToast(`STG_0${idx + 1}: ${tmpl.name}`, false);
-            // Show stage-specific hints
-            if (tmpl.hints && tmpl.hints.length > 0) {
-                tmpl.hints.forEach((hint, i) => {
-                    setTimeout(() => this.showToast(hint, true), 1200 + i * 2000);
-                });
-            }
+            // Stage identity and objective are persistent, not transient toasts over controls.
+            document.getElementById('stage-brief-number').textContent = `STG ${String(idx + 1).padStart(2, '0')}`;
+            document.getElementById('stage-brief-objective').textContent = tmpl.objective || '光を結晶へ届けよう';
+            document.getElementById('stage-brief-tutorial').classList.toggle('hidden', idx !== 0);
         }
     }
 
@@ -992,7 +1000,7 @@ class GameController {
         this.blocks.forEach(b => b.draw(this.ctx));
 
         // Tutorial overlay (only STG1 with no mirrors)
-        if (this.currentStageIdx === 0 && this.state === STATE.PLAYING && this.mirrors.length === 0 && !this.isDrawing) {
+        if (window.matchMedia("(min-width: 1150px)").matches && this.currentStageIdx === 0 && this.state === STATE.PLAYING && this.mirrors.length === 0 && !this.isDrawing) {
             this._drawTutorialOverlay();
         }
 

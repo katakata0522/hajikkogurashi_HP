@@ -117,6 +117,46 @@ try {
     }
 
     const failures = [];
+    // Screen composition, not only the editor: controls must remain separate from goals and canvas.
+    for (const viewport of [
+      { width: 320, height: 568 },
+      { width: 390, height: 844 },
+      { width: 1024, height: 768 },
+    ]) {
+      const playPage = await browser.newPage({ viewport, isMobile: viewport.width <= 390, hasTouch: viewport.width <= 390 });
+      try {
+        await playPage.goto(`http://127.0.0.1:${port}/lumen-mirror/`, { waitUntil: 'networkidle' });
+        await playPage.click('#start-btn');
+        await playPage.locator('.stage-card:not(.locked)').first().click();
+        const geometry = await playPage.evaluate(() => {
+          const box = selector => {
+            const r = document.querySelector(selector).getBoundingClientRect();
+            return { top: r.top, bottom: r.bottom, left: r.left, right: r.right, width: r.width, height: r.height };
+          };
+          return {
+            hud: box('#hud'), brief: box('#stage-brief'), viewport: box('#viewport'),
+            controls: box('#controls'), emit: box('#emit-btn'),
+            pageWidth: document.documentElement.scrollWidth,
+            objective: document.querySelector('#stage-brief-objective').textContent,
+            briefVisible: getComputedStyle(document.querySelector('#stage-brief')).display !== 'none',
+          };
+        });
+        if (!geometry.briefVisible || !geometry.objective.includes('結晶')
+            || geometry.pageWidth > viewport.width + 1
+            || geometry.hud.bottom > geometry.brief.top + 1
+            || geometry.brief.bottom > geometry.viewport.top + 1
+            || geometry.viewport.bottom > geometry.controls.top + 1
+            || geometry.controls.bottom > viewport.height + 1
+            || geometry.emit.right > viewport.width + 1) {
+          failures.push(`play layout ${viewport.width}x${viewport.height}: ${JSON.stringify(geometry)}`);
+        }
+        await playPage.click('#stage-brief-details');
+        if (!(await playPage.locator('#info-panel').isVisible())
+            || !(await playPage.locator('#info-hints').textContent()).length) {
+          failures.push(`compact screen cannot access stage hints at ${viewport.width}x${viewport.height}`);
+        }
+      } finally { await playPage.close(); }
+    }
     async function runEditorScenario(name, viewport, scenario) {
       const scenarioPage = await browser.newPage({ viewport });
       const scenarioErrors = [];

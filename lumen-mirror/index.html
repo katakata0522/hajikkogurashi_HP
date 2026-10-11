@@ -24,7 +24,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&family=Noto+Sans+JP:wght@200;300;400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260526-editor-review-fix">
+    <link rel="stylesheet" href="style.css?v=20261011-device-ux-v1">
 </head>
 <body>
     <div id="app-layout">
@@ -123,6 +123,16 @@
                 </div>
             </header>
 
+            <!-- Objective stays outside the playfield on compact screens. -->
+            <div id="stage-brief" class="hidden" aria-label="ステージの目標">
+                <span id="stage-brief-number" class="stage-brief-number">STG 01</span>
+                <div class="stage-brief-copy">
+                    <p id="stage-brief-objective">光を結晶へ届けよう</p>
+                    <span id="stage-brief-tutorial">ドラッグで鏡を描き、「光を発射」で試そう</span>
+                </div>
+                <button type="button" id="stage-brief-details" aria-label="ステージの説明とヒントを見る">説明・ヒント</button>
+            </div>
+
             <!-- VIEWPORT / CANVAS -->
             <div id="viewport">
                 <div class="grid-overlay"></div>
@@ -175,6 +185,11 @@
                         <div id="info-story-section" class="info-section">
                             <div class="info-section-label">◈ STORY</div>
                             <div id="info-story" class="info-story-text">—</div>
+                        </div>
+
+                        <div id="info-hints-section" class="info-section hidden">
+                            <div class="info-section-label">◈ HINT</div>
+                            <p id="info-hints" class="info-story-text"></p>
                         </div>
 
                         <div id="info-gimmicks-section" class="info-section">
@@ -267,7 +282,7 @@
                 </button>
                 
                 <button id="emit-btn" class="glow-btn active-emit" disabled>
-                    <span>EMIT_PHOTON</span>
+                    <span class="emit-desktop-label">EMIT_PHOTON</span><span class="emit-mobile-label">光を発射</span>
                 </button>
             </footer>
 
@@ -421,7 +436,7 @@
     <script src="/assets/js/minigame-storage-guard.js"></script>
     <script src="core.js?v=20260911-core-split"></script>
     <script src="stages.js?v=20260911-stage-data"></script>
-    <script src="script.js?v=20260911-editor-split"></script>
+    <script src="script.js?v=20261011-device-ux-v1"></script>
     <script src="editor.js?v=20260911-editor-split"></script>
 </body>
 </html>

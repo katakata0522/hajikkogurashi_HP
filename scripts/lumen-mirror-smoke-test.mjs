@@ -15,6 +15,10 @@ const style = readFileSync(resolve(root, 'lumen-mirror', 'style.css'), 'utf8');
 
 // ---- HTML Structure ----
 assert.match(html, /id="game-canvas"/, 'canvas should exist');
+assert.match(html, /id="stage-brief"/, 'compact screens need a persistent objective outside canvas');
+assert.match(html, /id="stage-brief-details"/, 'objective should link to detailed hints');
+assert.match(runtime, /stage-brief-objective/, 'the active stage should update the objective');
+assert.doesNotMatch(runtime, /this\.showToast\(`STG_0/, 'stage headings should no longer overlap the playfield as toasts');
 assert.match(html, /id="emit-btn"/, 'emit button should exist');
 assert.match(html, /id="reset-btn"/, 'reset button should exist');
 assert.match(html, /id="stage-select"/, 'stage select screen should exist');
@@ -23,10 +27,10 @@ assert.match(html, /id="mode-indicator"/, 'mode indicator should exist');
 assert.match(html, /id="select-btn"/, 'stage select button in overlay should exist');
 assert.match(html, /id="best-banner"/, 'best rank banner should exist');
 assert.match(html, /id="stat-best"/, 'best rank stat display should exist');
-assert.match(html, /href="style\.css\?v=20260526-editor-review-fix"/, 'editor stylesheet should be cache-busted');
+assert.match(html, /href="style\.css\?v=20261011-device-ux-v1"/, 'editor stylesheet should be cache-busted');
 assert.match(html, /src="core\.js\?v=20260911-core-split"/, 'core runtime dependencies should be loaded explicitly');
 assert.match(html, /src="stages\.js\?v=20260911-stage-data"/, 'stage data should be loaded explicitly');
-assert.match(html, /src="script\.js\?v=20260911-editor-split"/, 'GameController runtime should use the editor-split cache key');
+assert.match(html, /src="script\.js\?v=20261011-device-ux-v1"/, 'GameController runtime should use the editor-split cache key');
 assert.match(html, /src="editor\.js\?v=20260911-editor-split"/, 'Stage Editor extension should be loaded explicitly');
 assert.doesNotMatch(html, /script\.js\?v=(?:20260526-editor-review-fix|20260911-runtime-split)/, 'pre-editor-split runtime cache keys must not remain');
 const storageIndex = html.indexOf('src="/assets/js/minigame-storage-guard.js');
