@@ -296,3 +296,33 @@ button.secondary {
     25% { opacity: 1; transform: scale(1); }
     100% { opacity: 0; transform: scale(1.08); }
 }
+
+/* Corner Neighbor device-UX pass, 2026-10-11 */
+/* The original menu-back button was in normal flow underneath the title.
+   Keep the title controls in separate, predictable regions. */
+body, #game-container { height:100vh; height:100dvh; }
+#sound-mute-container {
+  position:absolute; top:10px; left:50%; transform:translateX(-50%);
+  margin:0 !important; width:max-content !important; max-width:95%;
+  z-index:12;
+}
+#menu-btn-title {
+  position:absolute; bottom:12px; top:auto; left:50%; transform:translateX(-50%);
+  margin:0 !important; padding:9px 14px; min-height:40px;
+  max-width:calc(100% - 24px); width:fit-content; font-size:14px;
+  white-space:nowrap; box-shadow:none;
+}
+#start-btn { max-width:calc(100% - 28px); white-space:normal; font-size:clamp(17px, 5vw, 24px); padding:10px 20px; min-height:46px; }
+button:focus-visible, a:focus-visible, input:focus-visible { outline:2px solid var(--accent-color);outline-offset:3px; }
+@media (max-height:500px) and (min-width:540px) {
+  #title { top:14%; font-size:clamp(35px, 6vw, 44px); line-height:.94; }
+  #instruction { top:37%; font-size:13px; line-height:1.25; }
+  #instruction .highlight { font-size:14px; }
+  #start-btn { top:63%; font-size:18px; width:auto; max-width:220px; padding:7px 16px; min-height:42px; }
+  #menu-btn-title { bottom:7px; font-size:12px; padding:6px 14px; min-height:38px; }
+  #sound-mute-container { top:3px; }
+  #sound-mute-container .mute-label { font-size:12px !important; }
+  #pause-screen {gap:6px; overflow-y:auto; justify-content:center; padding:8px; }
+  #pause-screen h2 {font-size:28px; margin:0 0 4px;}
+  #pause-screen button { padding:7px 14px; min-height:39px; font-size:14px; }
+}

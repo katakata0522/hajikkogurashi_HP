@@ -21,7 +21,8 @@ const smokeTests = [
     'scripts/sorting-factory-smoke-test.mjs',
     'scripts/stealth-slacker-smoke-test.mjs',
     'scripts/wall-jumper-generation-safety-smoke-test.mjs',
-    'scripts/wall-jumper-smoke-test.mjs'
+    'scripts/wall-jumper-smoke-test.mjs',
+    'scripts/seven-device-ux-smoke-test.mjs'
 ];
 
 const browserTests = [
@@ -37,7 +38,8 @@ const browserTests = [
     'scripts/mikiri-issen-browser-test.mjs',
     'scripts/sorting-factory-browser-test.mjs',
     'scripts/stealth-slacker-browser-test.mjs',
-    'scripts/wall-jumper-browser-test.mjs'
+    'scripts/wall-jumper-browser-test.mjs',
+    'scripts/seven-device-layout-browser-test.mjs'
 ];
 
 let selectedTests;

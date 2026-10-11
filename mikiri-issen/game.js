@@ -801,7 +801,7 @@
 
       function bindButton(element, handler) {
         if (!element) return;
-        let lastTrigger = 0;
+        let lastTrigger = Number.NEGATIVE_INFINITY; // The very first tap must always work.
         const trigger = (event) => {
           const now = performance.now();
           if (now - lastTrigger < 250) return;

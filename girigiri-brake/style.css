@@ -477,3 +477,21 @@ canvas {
     background: rgba(255, 65, 108, 0.1);
     box-shadow: 0 0 15px rgba(255, 65, 108, 0.4);
 }
+
+/* Corner Neighbor device-UX pass, 2026-10-11 */
+/* A short landscape window still needs the full instructions and Start button. */
+body { height:100vh; height:100dvh; }
+@media (min-width: 540px) and (max-height: 500px) {
+  .screen { justify-content: flex-start; overflow-y: auto; overscroll-behavior: contain; padding: 7px 12px 12px; }
+  #start-screen .logo-container { margin: 0 0 4px; animation: none; }
+  #start-screen .main-title { font-size: 1.8rem; line-height: 1; margin-bottom: 2px; }
+  #start-screen .subtitle { font-size: .72rem; }
+  #start-screen .sound-mute-container { margin: 4px 0; }
+  #start-screen .sound-mute-label { font-size: .8rem; padding: 5px 12px; }
+  #start-screen .instruction { margin: 4px 0 6px; padding: 7px 12px; max-width: 530px; width: 95%; font-size: .8rem; gap: 4px; }
+  #start-screen .step { font-size: .8rem; }
+  #start-screen .cyber-btn { margin-top: 3px; min-height: 40px; padding: 6px 16px; font-size: .82rem; }
+  #result-screen .glass-panel { position: static; transform: none; flex-shrink: 0; margin: 0 auto; }
+}
+@media (prefers-reduced-motion: reduce) { .logo-container, .glow-text { animation: none !important; } }
+button:focus-visible, a:focus-visible, label:focus-within { outline: 2px solid var(--accent-color); outline-offset: 2px; }
