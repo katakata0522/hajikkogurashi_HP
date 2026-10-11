@@ -17,6 +17,7 @@ const smokeTests = [
     'scripts/kanji-slicer-smoke-test.mjs',
     'scripts/kanji-slicer-data-integrity-smoke-test.mjs',
     'scripts/lumen-mirror-smoke-test.mjs',
+    'scripts/lumen-responsive-logic-smoke-test.mjs',
     'scripts/mikiri-issen-smoke-test.mjs',
     'scripts/sorting-factory-smoke-test.mjs',
     'scripts/stealth-slacker-smoke-test.mjs',
