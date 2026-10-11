@@ -2097,6 +2097,53 @@ body {
 }
 
 @media (max-width: 767px) {
+    body,
+    #app-layout {
+        height: 100dvh;
+    }
+
+    #app-layout:not(.editing-mode) #game-container {
+        width: 100%;
+        height: 100%;
+        max-height: none;
+        border: none;
+        border-radius: 0;
+    }
+
+    /* ステージ名・残量とメーターを二段に分け、省略せず表示する。 */
+    #hud {
+        height: 92px;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-rows: 44px 26px;
+        gap: 6px 8px;
+        padding: 8px;
+    }
+
+    .hud-item {
+        height: 44px;
+        padding: 0 8px;
+        gap: 6px;
+    }
+
+    .hud-item.left { grid-column: 1; grid-row: 1; }
+    .hud-item.right { grid-column: 2; grid-row: 1; }
+    .hud-item.center {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        height: 26px;
+        padding: 0 10px;
+    }
+
+    #stage-name,
+    #stability-value {
+        flex-shrink: 0;
+        font-size: 11px;
+    }
+
+    .info-chip-btn { min-height: 36px; }
+    .info-chip-label { font-size: 10px; }
+    .ink-meter-container { max-width: none; }
+
     #app-layout.editing-mode #editor-controls {
         height: 86px;
         display: grid !important;

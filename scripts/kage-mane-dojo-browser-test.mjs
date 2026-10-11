@@ -91,6 +91,15 @@ try {
 
   await page.click('#startButton');
   await page.waitForSelector('#playScreen.active');
+  const headerLayout = await page.evaluate(() => {
+    const status = document.querySelector('#statusText').getBoundingClientRect();
+    const hud = document.querySelector('.dojo-hud').getBoundingClientRect();
+    const lives = document.querySelector('#dojoLives').getBoundingClientRect();
+    return { statusTop: status.top, hudBottom: hud.bottom, livesBottom: lives.bottom };
+  });
+  if (headerLayout.statusTop < Math.max(headerLayout.hudBottom, headerLayout.livesBottom) + 8) {
+    throw new Error(`Dojo mobile instruction overlaps the HUD: ${JSON.stringify(headerLayout)}`);
+  }
   await page.waitForFunction(() => document.querySelector('#statusText')?.textContent === '同じ順に打つ', null, { timeout: 6000 });
 
   const state = await page.evaluate(() => ({
