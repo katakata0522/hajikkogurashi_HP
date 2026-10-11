@@ -150,6 +150,10 @@ try {
     if (layout.instructions === 'none' || !layout.warningHidden) throw new Error('instructions/warning initial state incorrect');
     if (screenshots?.enabled && [320, 667, 1280].includes(width)) await screenshots.capture(page, 'play-hud');
     await page.locator('#btn-pause').click();
+    const resumeRect = await page.locator('#btn-resume').boundingBox();
+    if (!resumeRect || resumeRect.y < -1 || resumeRect.y + resumeRect.height > height + 1) {
+      throw new Error(`pause Resume is not visible at ${width}x${height}: ${JSON.stringify(resumeRect)}`);
+    }
     await page.locator('#btn-resume').scrollIntoViewIfNeeded();
     await page.locator('#btn-resume').click();
     if (await page.evaluate(() => isPaused)) throw new Error(`cannot resume at ${width}x${height}`);

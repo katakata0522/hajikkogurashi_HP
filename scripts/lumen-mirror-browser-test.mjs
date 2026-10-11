@@ -93,11 +93,15 @@ try {
         previewDisplayed: getComputedStyle(document.querySelector('#editor-stage-preview')).display !== 'none',
         inkLabelHeight: Math.ceil(inkLabel.getBoundingClientRect().height),
         inkLabelOverflow: Math.max(0, Math.ceil(inkLabel.scrollWidth - inkLabel.clientWidth)),
+        hudOverflow: document.querySelector('#hud').scrollWidth - document.querySelector('#hud').clientWidth,
+        hudChipsOutside: [...document.querySelectorAll('#hud .hud-item')].some(el =>
+            el.getBoundingClientRect().right > document.querySelector('#hud').getBoundingClientRect().right + 1),
       };
     });
     if (selectedInspectorLayout.bottomOutside > 0 || !selectedInspectorLayout.titleDisplayed
       || !selectedInspectorLayout.previewDisplayed || selectedInspectorLayout.inkLabelHeight > 20
-      || selectedInspectorLayout.inkLabelOverflow > 0) {
+      || selectedInspectorLayout.inkLabelOverflow > 0 || selectedInspectorLayout.hudOverflow > 0
+      || selectedInspectorLayout.hudChipsOutside) {
       throw new Error(`selected inspector is clipped or wraps in a short workspace: ${JSON.stringify(selectedInspectorLayout)}`);
     }
 
