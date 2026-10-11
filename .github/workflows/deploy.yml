@@ -84,6 +84,7 @@ jobs:
         run: |
           pwsh -File ./scripts/static-site-smoke-test.ps1
           pwsh -File ./scripts/home-asset-smoke-test.ps1
+          node --test ./scripts/home-v2-contract.test.cjs
           pwsh -File ./scripts/structure-smoke-test.ps1
           pwsh -File ./scripts/local-reference-check.ps1
           pwsh -File ./scripts/deploy-public-artifact-smoke-test.ps1
@@ -107,7 +108,10 @@ jobs:
 
       - name: Validate minigame logic before deploy
         if: steps.changes.outputs.deploy_needed == 'true'
-        run: npm run test:minigames:smoke
+        run: |
+          npm run test:site
+          node scripts/kanji-slicer-asset-version-smoke-test.mjs
+          npm run test:minigames:smoke
 
       - name: Resolve runner Chrome for predeploy regression
         if: steps.changes.outputs.deploy_needed == 'true'
@@ -124,7 +128,9 @@ jobs:
 
       - name: Validate minigame browser behavior before deploy
         if: steps.changes.outputs.deploy_needed == 'true'
-        run: npm run test:minigames:browser
+        run: |
+          npm run test:site:browser
+          npm run test:minigames:browser
 
       - name: Generate sitemap.xml
         if: steps.changes.outputs.deploy_needed == 'true'
@@ -235,7 +241,9 @@ jobs:
       - name: Verify live minigame routes
         if: success() && steps.changes.outputs.deploy_needed == 'true'
         shell: bash
-        run: node ./scripts/verify-live-minigame-routes.mjs "https://hajikkoroom.xsrv.jp/" "$GITHUB_SHA"
+        run: |
+          node ./scripts/verify-live-site-assets.mjs "https://hajikkoroom.xsrv.jp/"
+          node ./scripts/verify-live-minigame-routes.mjs "https://hajikkoroom.xsrv.jp/" "$GITHUB_SHA"
 
       - name: SEO deploy confirmation
         if: success() && steps.changes.outputs.deploy_needed == 'true'

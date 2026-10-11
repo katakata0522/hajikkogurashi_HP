@@ -1,2 +1,11 @@
 # HTMLファイル内でPHPを動作させる設定（エックスサーバー FastCGI環境用）
 AddHandler fcgid-script .html .htm
+
+# Revalidate only the site entry pages, not game routes or cached CSS/JS.
+<IfModule mod_setenvif.c>
+    SetEnvIf Request_URI "^/(?:$|index\.html$|aboutus\.html$|portfolio\.html$|members\.html$|minigames\.html$|news\.html$|coming-soon\.html$|privacy-policy\.html$|terms-of-service\.html$|404\.html$)" cn_site_html
+</IfModule>
+<IfModule mod_headers.c>
+    Header onsuccess unset Cache-Control env=cn_site_html
+    Header always set Cache-Control "no-cache" env=cn_site_html
+</IfModule>
