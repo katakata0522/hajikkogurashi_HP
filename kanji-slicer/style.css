@@ -675,3 +675,38 @@ canvas:focus-visible { outline: 2px solid rgba(235,94,40,0.30); outline-offset: 
 .pause-scroll-body {flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;padding-right:2px;scrollbar-width:thin;}
 .pause-content .dictionary-grid {max-height:none;overflow-y:visible;}
 .pause-content .modal-buttons {flex:0 0 auto;position:relative;z-index:1;gap:8px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08);background:#16181f;}
+
+/* Quality-gate fix: the first-play tutorial must fit a short landscape viewport.
+   Use the width for instructions instead of pushing Start below the fold. */
+@media (min-width: 600px) and (max-height: 480px) and (orientation: landscape) {
+    #welcome-modal { padding: 6px; }
+    .welcome-content {
+        width: min(96vw, 680px);
+        max-width: none;
+        max-height: calc(100dvh - 12px);
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+        grid-template-areas:
+            "eyebrow steps"
+            "title steps"
+            "lead note"
+            "start start"
+            "again again";
+        align-content: center;
+        align-items: center;
+        gap: 2px 12px;
+        padding: 8px 14px;
+        overflow-y: auto;
+    }
+    .welcome-eyebrow { grid-area: eyebrow; font-size: 10px; margin: 0; }
+    #welcome-title { grid-area: title; font-size: 17px; line-height: 1.3; }
+    .welcome-lead { grid-area: lead; font-size: 11px; line-height: 1.5; margin: 4px 0; }
+    .welcome-steps { grid-area: steps; gap: 3px; }
+    .welcome-steps li { padding-left: 28px; gap: 0; line-height: 1.3; }
+    .welcome-steps li::before { width: 21px; height: 21px; font-size: 10px; }
+    .welcome-steps strong { font-size: 11px; }
+    .welcome-steps span { font-size: 10px; line-height: 1.3; }
+    .welcome-note { grid-area: note; font-size: 10px; line-height: 1.3; margin: 4px 0; }
+    .welcome-start { grid-area: start; min-height: 42px; padding: 8px; }
+    .welcome-again { grid-area: again; font-size: 10px; margin-top: 2px; text-align: center; }
+}

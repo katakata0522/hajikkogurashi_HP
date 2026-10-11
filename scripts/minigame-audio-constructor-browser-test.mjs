@@ -52,6 +52,17 @@ try {
     try {
       await page.goto(`${site.origin}/${testCase.slug}/`, { waitUntil: 'networkidle', timeout: 20_000 });
       const target = page.locator(testCase.selector);
+      // Kanji's first-play guide is modal: the real first gameplay input comes
+      // after the user explicitly starts. Click that gate before exercising audio.
+      if (testCase.slug === 'kanji-slicer') {
+        const welcome = page.locator('#welcome-modal');
+        if (await welcome.isVisible()) {
+          await page.locator('#btn-welcome-start').click();
+          if (await page.evaluate(() => isPaused)) {
+            throw new Error('Kanji first-play guide did not resume gameplay');
+          }
+        }
+      }
       await target.waitFor({ state: 'visible', timeout: 5_000 });
 
       if (testCase.canvasTap) {

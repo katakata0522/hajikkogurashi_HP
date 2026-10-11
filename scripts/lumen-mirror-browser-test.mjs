@@ -121,6 +121,26 @@ try {
     }
 
     const failures = [];
+    // A landscape viewport can be shorter than the title's stacked contents:
+    // verify title, Start and Return stay visible without vertical scrolling.
+    for (const [width, height] of [[667, 375], [844, 390]]) {
+      const titlePage = await browser.newPage({ viewport: { width, height } });
+      try {
+        await titlePage.goto(`http://127.0.0.1:${port}/lumen-mirror/`, { waitUntil: 'networkidle' });
+        const geometry = await titlePage.evaluate(() => {
+          const r = selector => document.querySelector(selector).getBoundingClientRect();
+          return ['.title-logo h1', '#start-btn', '#menu-back-btn'].map(selector => {
+            const b = r(selector);
+            return { selector, top: b.top, bottom: b.bottom, left: b.left, right: b.right };
+          });
+        });
+        if (geometry.some(box => box.top < -1 || box.bottom > height + 1 || box.left < -1 || box.right > width + 1)) {
+          failures.push(`landscape title ${width}x${height}: ${JSON.stringify(geometry)}`);
+        }
+      } finally {
+        await titlePage.close();
+      }
+    }
     // Screen composition, not only the editor: controls must remain separate from goals and canvas.
     for (const viewport of [
       { width: 320, height: 568 },
