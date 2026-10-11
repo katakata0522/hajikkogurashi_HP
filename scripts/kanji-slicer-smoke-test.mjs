@@ -13,6 +13,9 @@ await import('./kanji-slicer-asset-version-smoke-test.mjs');
 
 const bodyStart = indexHtml.indexOf('<body>');
 assert.ok(bodyStart >= 0, 'body element must exist');
+assert.match(indexHtml, /id="welcome-modal"[^>]*role="dialog"/, 'new players need a first-play explanation');
+assert.match(indexHtml, /id="btn-welcome-start"/, 'first-play explanation needs a start action');
+assert.match(readFileSync(resolve(root, 'kanji-slicer/game.js'), 'utf8'), /kanjislicer_intro_seen_v1/, 'onboarding must remember first use');
 const bodyHtml = indexHtml.slice(bodyStart);
 assert.equal(/<meta\b/i.test(bodyHtml), false, 'SEO meta tags must not be duplicated inside body');
 assert.equal(indexHtml.includes('hajikkoroom.xsrv.jp//assets/'), false, 'absolute asset URLs must not contain a double slash after host');

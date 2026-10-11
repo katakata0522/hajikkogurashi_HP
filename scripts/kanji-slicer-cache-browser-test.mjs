@@ -48,6 +48,7 @@ try {
     assert.equal(await page.locator('#game-footer').isVisible(), false, 'fixture must reproduce the hidden footer');
     assert.equal(await page.locator('#game-header').evaluate(el => el.getBoundingClientRect().height), 76);
     await page.evaluate(() => {
+        localStorage.setItem('kanjislicer_intro_seen_v1', '1'); // returning player
         localStorage.setItem('kanjislicer_best', '123');
         localStorage.setItem('kanjislicer_discovered', JSON.stringify(['火山']));
     });

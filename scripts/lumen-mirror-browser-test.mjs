@@ -93,11 +93,15 @@ try {
         previewDisplayed: getComputedStyle(document.querySelector('#editor-stage-preview')).display !== 'none',
         inkLabelHeight: Math.ceil(inkLabel.getBoundingClientRect().height),
         inkLabelOverflow: Math.max(0, Math.ceil(inkLabel.scrollWidth - inkLabel.clientWidth)),
+        hudOverflow: document.querySelector('#hud').scrollWidth - document.querySelector('#hud').clientWidth,
+        hudChipsOutside: [...document.querySelectorAll('#hud .hud-item')].some(el =>
+            el.getBoundingClientRect().right > document.querySelector('#hud').getBoundingClientRect().right + 1),
       };
     });
     if (selectedInspectorLayout.bottomOutside > 0 || !selectedInspectorLayout.titleDisplayed
       || !selectedInspectorLayout.previewDisplayed || selectedInspectorLayout.inkLabelHeight > 20
-      || selectedInspectorLayout.inkLabelOverflow > 0) {
+      || selectedInspectorLayout.inkLabelOverflow > 0 || selectedInspectorLayout.hudOverflow > 0
+      || selectedInspectorLayout.hudChipsOutside) {
       throw new Error(`selected inspector is clipped or wraps in a short workspace: ${JSON.stringify(selectedInspectorLayout)}`);
     }
 
@@ -117,6 +121,116 @@ try {
     }
 
     const failures = [];
+    // A landscape viewport can be shorter than the title's stacked contents:
+    // verify title, Start and Return stay visible without vertical scrolling.
+    for (const [width, height] of [[667, 375], [844, 390]]) {
+      const titlePage = await browser.newPage({ viewport: { width, height } });
+      try {
+        await titlePage.goto(`http://127.0.0.1:${port}/lumen-mirror/`, { waitUntil: 'networkidle' });
+        const geometry = await titlePage.evaluate(() => {
+          const r = selector => document.querySelector(selector).getBoundingClientRect();
+          return ['.title-logo h1', '#start-btn', '#menu-back-btn'].map(selector => {
+            const b = r(selector);
+            return { selector, top: b.top, bottom: b.bottom, left: b.left, right: b.right };
+          });
+        });
+        if (geometry.some(box => box.top < -1 || box.bottom > height + 1 || box.left < -1 || box.right > width + 1)) {
+          failures.push(`landscape title ${width}x${height}: ${JSON.stringify(geometry)}`);
+        }
+      } finally {
+        await titlePage.close();
+      }
+    }
+    // Exercise the short-landscape result state, not only the start menu.
+    // The result view is a stable UI fixture; game-clear physics are covered separately.
+    for (const [width, height] of [[667, 375], [844, 390]]) {
+      const resultPage = await browser.newPage({ viewport: { width, height } });
+      try {
+        await resultPage.goto(`http://127.0.0.1:${port}/lumen-mirror/`, { waitUntil: 'networkidle' });
+        await resultPage.click('#start-btn');
+        await resultPage.locator('.stage-card:not(.locked)').first().click();
+        await resultPage.evaluate(() => document.querySelector('#overlay').classList.remove('hidden'));
+        const buttons = await resultPage.evaluate(() => ['#next-btn', '#select-btn', '#overlay-plaza-btn'].map(selector => {
+          const el = document.querySelector(selector);
+          const r = el.getBoundingClientRect();
+          return { selector, x:r.x, y:r.y, right:r.right, bottom:r.bottom, width:r.width, height:r.height };
+        }));
+        if (buttons.some(x => x.width < 40 || x.height < 40 || x.y < -1 || x.bottom > height + 1 || x.x < -1 || x.right > width + 1)) {
+          failures.push(`short landscape result actions clipped at ${width}x${height}: ${JSON.stringify(buttons)}`);
+        }
+        await resultPage.click('#select-btn');
+        if (!(await resultPage.locator('#stage-select').isVisible())) {
+          failures.push(`short landscape result cannot return to stage select: ${width}x${height}`);
+        }
+      } finally { await resultPage.close(); }
+    }
+    // Screen composition, not only the editor: controls must remain separate from goals and canvas.
+    for (const viewport of [
+      { width: 320, height: 568 },
+      { width: 390, height: 844 },
+      { width: 1024, height: 768 },
+    ]) {
+      const playPage = await browser.newPage({ viewport, isMobile: viewport.width <= 390, hasTouch: viewport.width <= 390 });
+      try {
+        await playPage.goto(`http://127.0.0.1:${port}/lumen-mirror/`, { waitUntil: 'networkidle' });
+        await playPage.click('#start-btn');
+        await playPage.locator('.stage-card:not(.locked)').first().click();
+        const geometry = await playPage.evaluate(() => {
+          const box = selector => {
+            const r = document.querySelector(selector).getBoundingClientRect();
+            return { top: r.top, bottom: r.bottom, left: r.left, right: r.right, width: r.width, height: r.height };
+          };
+          return {
+            hud: box('#hud'), brief: box('#stage-brief'), viewport: box('#viewport'), canvas: box('#game-canvas'),
+            controls: box('#controls'), emit: box('#emit-btn'),
+            pageWidth: document.documentElement.scrollWidth,
+            objective: document.querySelector('#stage-brief-objective').textContent,
+            stageName: document.querySelector('#stage-brief-name').textContent,
+            briefVisible: getComputedStyle(document.querySelector('#stage-brief')).display !== 'none',
+          };
+        });
+        if (!geometry.briefVisible || !geometry.stageName.includes('REFLECTION')
+            || geometry.canvas.width <= 0 || geometry.canvas.height <= 0
+            || geometry.canvas.left < geometry.viewport.left - 1
+            || geometry.canvas.top < geometry.viewport.top - 1
+            || geometry.canvas.right > geometry.viewport.right + 1
+            || geometry.canvas.bottom > geometry.viewport.bottom + 1
+            || !geometry.objective.includes('結晶')
+            || geometry.pageWidth > viewport.width + 1
+            || geometry.hud.bottom > geometry.brief.top + 1
+            || geometry.brief.bottom > geometry.viewport.top + 1
+            || geometry.viewport.bottom > geometry.controls.top + 1
+            || geometry.controls.bottom > viewport.height + 1
+            || geometry.emit.right > viewport.width + 1) {
+          failures.push(`play layout ${viewport.width}x${viewport.height}: ${JSON.stringify(geometry)}`);
+        }
+        await playPage.click('#stage-brief-details');
+        if (!(await playPage.locator('#info-panel').isVisible())
+            || !(await playPage.locator('#info-hints').textContent()).length) {
+          failures.push(`compact screen cannot access stage hints at ${viewport.width}x${viewport.height}`);
+        }
+        // Stage 2 is verified after test fixture unlock and real page navigation.
+        if (viewport.width === 390) {
+          await playPage.evaluate(() => scoreManager.update(0, 'C', 5));
+          await playPage.reload({ waitUntil: 'networkidle' });
+          await playPage.click('#start-btn');
+          await playPage.locator('.stage-card:not(.locked)').nth(1).click();
+          const second = await playPage.evaluate(() => ({
+            name: document.querySelector('#stage-brief-name').textContent,
+            goal: document.querySelector('#stage-brief-objective').textContent,
+            toast: document.querySelectorAll('#toast-container .toast').length,
+            canvas: document.querySelector('#game-canvas').getBoundingClientRect().toJSON(),
+            viewport: document.querySelector('#viewport').getBoundingClientRect().toJSON(),
+          }));
+          if (second.name !== 'DOUBLE_ANGLE' || !second.goal.includes('反射')
+              || second.toast !== 0
+              || second.canvas.top < second.viewport.top - 1
+              || second.canvas.bottom > second.viewport.bottom + 1) {
+            failures.push(`stage 2 mobile goal/canvas: ${JSON.stringify(second)}`);
+          }
+        }
+      } finally { await playPage.close(); }
+    }
     async function runEditorScenario(name, viewport, scenario) {
       const scenarioPage = await browser.newPage({ viewport });
       const scenarioErrors = [];

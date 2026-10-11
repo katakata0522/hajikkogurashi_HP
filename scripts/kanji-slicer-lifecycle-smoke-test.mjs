@@ -13,6 +13,7 @@ const elements = new Map();
 const storage = new Map([
     ['kanjislicer_discovered', JSON.stringify(['森林', '森林', 'invalid'])],
     ['katakata-minigames-mute', 'true'],
+    ['kanjislicer_intro_seen_v1', '1'], // returning-player fixture
 ]);
 const document = { hidden: false, activeElement: null };
 class Element {
@@ -83,7 +84,8 @@ const key = (code, extra = {}) => {
 assert.equal(run('discoveredKanji.length'), 1, 'stored discoveries must not exceed progress via duplicates');
 assert.equal(elements.get('btn-sound').getAttribute('aria-pressed'), 'false', 'stored mute must initialize accessible state');
 assert.ok(markup.includes('id="game-instructions"'), 'visible instructions must exist');
-assert.equal((markup.match(/class="modal-overlay hidden" hidden/g) || []).length, 2, 'both dialogs must be truly hidden at startup');
+assert.equal((markup.match(/class="modal-overlay hidden" hidden/g) || []).length, 3, 'welcome, pause and game-over dialogs must start hidden in markup');
+assert.equal(elements.get('welcome-modal').hidden, true, 'returning-player fixture skips onboarding');
 
 context.handleStart(event({ button: 2 }));
 context.handleEnd(event({ button: 2 }));

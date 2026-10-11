@@ -24,7 +24,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&family=Noto+Sans+JP:wght@200;300;400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260526-editor-review-fix">
+    <link rel="stylesheet" href="style.css?v=c4246751ef22">
 </head>
 <body>
     <div id="app-layout">
@@ -123,6 +123,17 @@
                 </div>
             </header>
 
+            <!-- Objective stays outside the playfield on compact screens. -->
+            <div id="stage-brief" class="hidden" aria-label="ステージの目標">
+                <span id="stage-brief-number" class="stage-brief-number">STG 01</span>
+                <div class="stage-brief-copy">
+                    <span id="stage-brief-name" class="stage-brief-name">REFLECTION</span>
+                    <p id="stage-brief-objective">光を結晶へ届けよう</p>
+                    <span id="stage-brief-tutorial">ドラッグで鏡を描き、「光を発射」で試そう</span>
+                </div>
+                <button type="button" id="stage-brief-details" aria-label="ステージの説明とヒントを見る">説明・ヒント</button>
+            </div>
+
             <!-- VIEWPORT / CANVAS -->
             <div id="viewport">
                 <div class="grid-overlay"></div>
@@ -175,6 +186,11 @@
                         <div id="info-story-section" class="info-section">
                             <div class="info-section-label">◈ STORY</div>
                             <div id="info-story" class="info-story-text">—</div>
+                        </div>
+
+                        <div id="info-hints-section" class="info-section hidden">
+                            <div class="info-section-label">◈ HINT</div>
+                            <p id="info-hints" class="info-story-text"></p>
                         </div>
 
                         <div id="info-gimmicks-section" class="info-section">
@@ -243,9 +259,9 @@
                         <input type="checkbox" id="sound-mute-toggle" class="sound-mute-checkbox">
                         <label for="sound-mute-toggle" id="sound-mute-label" class="sound-mute-label">SOUND: ON 🔊</label>
                     </div>
-                    <button id="start-btn" class="glow-btn">INITIALIZE_SYSTEM</button>
-                    <button id="editor-btn" class="control-btn" style="margin-top: 8px; width: 100%; letter-spacing: 0.15em;">CREATE_AREA (エディタ)</button>
-                    <button id="menu-back-btn" class="flat-btn">RETURN_TO_PLAZA</button>
+                    <button id="start-btn" class="glow-btn">ゲームをはじめる</button>
+                    <button id="editor-btn" class="control-btn" style="margin-top: 8px; width: 100%; letter-spacing: 0.15em;">ステージを作る（エディタ）</button>
+                    <button id="menu-back-btn" class="flat-btn">ミニゲーム広場へ戻る</button>
                 </div>
             </div>
 
@@ -255,7 +271,7 @@
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                         <path d="M19 12H5M12 19l-7-7 7-7"/>
                     </svg>
-                    <span>ARCHIVE</span>
+                    <span>広場へ</span>
                 </button>
 
                 <div id="mode-indicator" class="mode-indicator draw-mode">
@@ -267,7 +283,7 @@
                 </button>
                 
                 <button id="emit-btn" class="glow-btn active-emit" disabled>
-                    <span>EMIT_PHOTON</span>
+                    <span class="emit-desktop-label">EMIT_PHOTON</span><span class="emit-mobile-label">光を発射</span>
                 </button>
             </footer>
 
@@ -323,7 +339,7 @@
         <aside id="editor-sidebar-right" class="pc-only-sidebar editor-only hidden">
             <div class="sidebar-header">
                 <span class="cyber-tag">INSPECTOR</span>
-                <h2 class="sidebar-title">PROPERTIES</h2>
+                <h2 class="sidebar-title">設定・共有 <small class="editor-scroll-cue">↓ スクロール</small></h2>
             </div>
             
             <div id="inspector-panel" class="sidebar-section">
@@ -370,7 +386,7 @@
                     <input type="text" id="prop-title" maxlength="24" value="MY_STAGE" placeholder="MY_STAGE" autocomplete="off">
                 </div>
                 <div class="property-group">
-                    <label for="prop-ink" style="font-size:11px; color:rgba(255,255,255,0.5);">インク容量 (鏡の長さ): <span id="prop-ink-val" style="color:#ffffff;">500</span>px</label>
+                    <label for="prop-ink" style="font-size:11px; color:rgba(255,255,255,0.5);">鏡の長さ上限: <span id="prop-ink-val" style="color:#ffffff;">500</span>px</label>
                     <input type="range" id="prop-ink" min="150" max="1500" step="50" value="500" style="width:100%; margin-top:4px;">
                 </div>
                 <div class="editor-history-actions" aria-label="編集履歴">
@@ -421,7 +437,7 @@
     <script src="/assets/js/minigame-storage-guard.js"></script>
     <script src="core.js?v=20260911-core-split"></script>
     <script src="stages.js?v=20260911-stage-data"></script>
-    <script src="script.js?v=20260911-editor-split"></script>
+    <script src="script.js?v=228cfa19778e"></script>
     <script src="editor.js?v=20260911-editor-split"></script>
 </body>
 </html>

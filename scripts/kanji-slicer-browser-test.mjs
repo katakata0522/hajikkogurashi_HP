@@ -72,7 +72,19 @@ try {
     throw new Error(`canvas is not visible: ${JSON.stringify(initial.canvas)}`);
   }
   if (initial.metaInsideBody) throw new Error('SEO metadata must not be emitted inside body');
+  if (!(await page.locator('#welcome-modal').isVisible()) || !(await page.locator('#welcome-title').textContent()).includes('漢字')) {
+    throw new Error('first-run game rules are not visible before play');
+  }
+  if (await page.evaluate(() => !isPaused || !document.querySelector('#game-container').inert)) {
+    throw new Error('first-run tutorial should block play until acknowledged');
+  }
   if (screenshots?.enabled) await screenshots.capture(page, 'launch');
+  await page.locator('#btn-welcome-start').click();
+  if (await page.evaluate(() => isPaused || !document.querySelector('#welcome-modal').hidden)) {
+    throw new Error('first-run guide did not start the game');
+  }
+  await page.reload({ waitUntil: 'networkidle' });
+  if (await page.locator('#welcome-modal').isVisible()) throw new Error('first-run guide repeats after completion');
 
   const box = await page.locator('#game-canvas').boundingBox();
   if (!box) throw new Error('canvas bounding box is unavailable');
@@ -123,9 +135,15 @@ try {
         warningHidden: document.querySelector('#dead-line-alert').hidden };
     });
     if (layout.scrollWidth > width + 1) throw new Error(`horizontal overflow at ${width}x${height}: ${JSON.stringify(layout)}`);
-    const landscapeSidebar = width >= 600 && height <= 450;
-    const overlaps = landscapeSidebar
-      ? layout.header.right > layout.canvas.x + 1 || layout.footer.right > layout.canvas.x + 1 || layout.header.bottom > layout.footer.y + 1 || layout.canvas.height < height - 1
+    // Width 900+ has an intentional PC information rail; the low-height
+    // landscape mode uses that same two-column composition. In either case,
+    // the canvas and header sit side-by-side, not one above another.
+    const sideRail = (width >= 600 && height <= 450) || (width >= 900 && height >= 600);
+    const overlaps = sideRail
+      ? layout.header.right > layout.canvas.x + 1
+          || layout.footer.right > layout.canvas.x + 1
+          || layout.header.bottom > layout.footer.y + 1
+          || layout.canvas.height < Math.max(150, height * 0.6)
       : layout.header.bottom > layout.canvas.y + 1 || layout.canvas.bottom > layout.footer.y + 1;
     if (layout.canvas.height < 150 || overlaps || layout.footer.bottom > height + 1) {
       throw new Error(`overlapping or unusable layout at ${width}x${height}: ${JSON.stringify(layout)}`);
@@ -138,6 +156,10 @@ try {
     if (layout.instructions === 'none' || !layout.warningHidden) throw new Error('instructions/warning initial state incorrect');
     if (screenshots?.enabled && [320, 667, 1280].includes(width)) await screenshots.capture(page, 'play-hud');
     await page.locator('#btn-pause').click();
+    const resumeRect = await page.locator('#btn-resume').boundingBox();
+    if (!resumeRect || resumeRect.y < -1 || resumeRect.y + resumeRect.height > height + 1) {
+      throw new Error(`pause Resume is not visible at ${width}x${height}: ${JSON.stringify(resumeRect)}`);
+    }
     await page.locator('#btn-resume').scrollIntoViewIfNeeded();
     await page.locator('#btn-resume').click();
     if (await page.evaluate(() => isPaused)) throw new Error(`cannot resume at ${width}x${height}`);
@@ -150,6 +172,26 @@ try {
   await page.keyboard.press('Space');
   if (await page.evaluate(() => isGameOver || bodies.length !== 0 || score !== 0)) throw new Error('keyboard gameover restart failed');
   if (errors.length) throw new Error(`kanji-slicer lifecycle errors: ${errors.join(' | ')}`);
+
+  // The first-run explanation is designed separately for very short phones.
+  // Verify the Start control is not below the fold in real browser layouts.
+  for (const [width, height] of [[667, 375], [844, 390]]) {
+    const landscapePage = await browser.newPage({ viewport: { width, height } });
+    try {
+      await landscapePage.goto(`http://127.0.0.1:${port}/kanji-slicer/`, { waitUntil: 'networkidle' });
+      const welcomeStart = landscapePage.locator('#btn-welcome-start');
+      const bounds = await welcomeStart.boundingBox();
+      if (!await welcomeStart.isVisible() || !bounds || bounds.y < -1 || bounds.y + bounds.height > height + 1) {
+        throw new Error(`first-run Start clipped at ${width}x${height}: ${JSON.stringify(bounds)}`);
+      }
+      await welcomeStart.click();
+      if (await landscapePage.evaluate(() => isPaused)) {
+        throw new Error(`first-run Start unresponsive at ${width}x${height}`);
+      }
+    } finally {
+      await landscapePage.close();
+    }
+  }
 
   const blockedPage = await browser.newPage({
     viewport: { width: 390, height: 844 },
