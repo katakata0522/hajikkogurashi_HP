@@ -27,7 +27,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kaisei+Decol:wght@500;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="style.css?v=df0922e14604">
+    <link rel="stylesheet" href="style.css?v=e157fcacb84c">
 </head>
 <body>
     <div id="game-container">
@@ -81,7 +81,7 @@
     <div id="welcome-modal" class="modal-overlay hidden" hidden role="dialog" aria-modal="true" aria-labelledby="welcome-title">
         <div class="modal-content welcome-content">
             <p class="welcome-eyebrow">はじめての方へ</p>
-            <h2 id="welcome-title">漢字を落として、組み合わせよう。</h2>
+            <h2 id="welcome-title">漢字を重ねて、合体！</h2>
             <p class="welcome-lead">上のお題の熟語を作ると高得点！<br>まずは漢字を重ねるところから。</p>
             <ol class="welcome-steps">
                 <li><strong>落とす</strong><span>上の漢字を左右に動かして、指やマウスを離す</span></li>
@@ -98,6 +98,7 @@
     <div id="pause-modal" class="modal-overlay hidden" hidden role="dialog" aria-modal="true" aria-labelledby="pause-modal-title">
         <div class="modal-content pause-content">
             <h2 id="pause-modal-title" class="modal-title-pause">一時停止 ＆ 漢字図鑑</h2>
+            <div class="pause-scroll-body">
             <div class="how-to-play">
                 <h3>遊び方</h3>
                 <p>上の漢字をつかみ、左右に動かして離すと落下します。木＋木＝林のように漢字を組み合わせましょう。盤面をなぞると、合体した漢字を分解できます。</p>
@@ -118,6 +119,7 @@
                 <div id="dictionary-grid" class="dictionary-grid">
                     <!-- Spawns dynamically via JS -->
                 </div>
+            </div>
             </div>
             <div class="modal-buttons">
                 <button id="btn-resume" class="btn-primary">再開する</button>

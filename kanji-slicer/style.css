@@ -633,3 +633,45 @@ button:focus-visible, a:focus-visible, canvas:focus-visible {
     #game-canvas-wrapper { grid-area: board; min-width: 0; min-height: 0; height: 100%; }
     #game-footer { grid-area: help; text-align: left; padding: 12px 16px; font-size: 12px; }
 }
+
+/* The playing board must not acquire a high-contrast rectangle after closing onboarding. */
+canvas:focus-visible { outline: 2px solid rgba(235,94,40,0.30); outline-offset: -2px; }
+/* The active objective gets the available row instead of squeezing among score and buttons. */
+@media (max-width: 599px) {
+    #game-header {
+        display: grid;
+        grid-template-columns: minmax(0,1fr) auto;
+        grid-template-rows: auto auto;
+        grid-template-areas: "status actions" "mission mission";
+        padding: 5px 8px;
+        gap: 3px 5px;
+        min-height: 0;
+        align-content: center;
+    }
+    #game-header .header-left {grid-area:status; flex-direction:row;align-items:center;gap:5px; min-width:0;}
+    #game-header .header-center {grid-area:mission;min-width:0;}
+    #game-header .header-right {grid-area:actions;flex-direction:row;align-items:center;gap:3px;}
+    #game-header .btn-back {flex-shrink:0; margin:0;font-size:11px;white-space:nowrap;}
+    #game-header .score-box, #game-header .best-box {padding:3px 5px;font-size:10px;gap:4px;min-width:0;white-space:nowrap;}
+    #game-header .header-actions {gap:0;}
+    #game-header .next-box {padding:2px 3px; gap:0;}
+    #game-header .next-box .label {display:none;}
+    #game-header .mission-box {
+        display:grid;grid-template-columns:max-content minmax(0,1fr);
+        grid-template-rows:auto auto;grid-template-areas:'title desc' 'kanji desc';
+        padding:6px 12px; gap:0 12px;align-items:center;justify-items:start;text-align:left;
+    }
+    #game-header .mission-title {grid-area:title; font-size:10px;}
+    #game-header #mission-kanji {grid-area:kanji;font-size:28px;margin:0;line-height:1.1;}
+    #game-header .mission-desc {grid-area:desc; font-size:11px;line-height:1.5; color:#dce3ef;text-align:left;}
+}
+@media (max-width: 360px) {
+    #game-header .best-box { display:none; }
+    #game-header .mission-box {padding:5px 8px; gap:0 7px;}
+    #game-header #mission-kanji {font-size:26px;}
+}
+/* Keep restart and resume reachable on the smallest phones, without obscuring the dictionary. */
+.pause-content { display:flex; flex-direction:column; overflow:hidden !important; }
+.pause-scroll-body {flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;padding-right:2px;scrollbar-width:thin;}
+.pause-content .dictionary-grid {max-height:none;overflow-y:visible;}
+.pause-content .modal-buttons {flex:0 0 auto;position:relative;z-index:1;gap:8px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08);background:#16181f;}
