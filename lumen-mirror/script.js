@@ -72,6 +72,12 @@ class GameController {
     initCanvas() {
         this.resize();
         window.addEventListener('resize', () => this.resize());
+        // Displaying the objective changes #viewport height without a window resize.
+        // Observe the playable area itself so the logical board cannot be cropped.
+        if (typeof ResizeObserver !== 'undefined') {
+            this.viewportResizeObserver = new ResizeObserver(() => this.resize());
+            this.viewportResizeObserver.observe(document.getElementById('viewport'));
+        }
     }
 
     resize() {
@@ -79,10 +85,14 @@ class GameController {
         const aspect = CONFIG.WIDTH / CONFIG.HEIGHT;
         let w = container.clientWidth;
         let h = container.clientHeight;
+        if (w <= 0 || h <= 0) return;
         if (w / h > aspect) w = h * aspect; else h = w / aspect;
+        const dpr = window.devicePixelRatio || 1;
+        const key = [Math.round(w * 100), Math.round(h * 100), dpr].join(':');
+        if (this._lastCanvasSize === key) return;
+        this._lastCanvasSize = key;
         this.canvas.style.width = `${w}px`;
         this.canvas.style.height = `${h}px`;
-        const dpr = window.devicePixelRatio || 1;
         this.canvas.width = CONFIG.WIDTH * dpr;
         this.canvas.height = CONFIG.HEIGHT * dpr;
         this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -102,6 +112,7 @@ class GameController {
         document.getElementById('overlay').classList.add('hidden');
         document.getElementById('hud').style.opacity = '0.3';
         document.getElementById('controls').style.opacity = '0.3';
+        this.resize();
     }
 
     _showStageSelect() {
@@ -113,6 +124,7 @@ class GameController {
         document.getElementById('hud').style.opacity = '0.3';
         document.getElementById('controls').style.opacity = '0.3';
         this._buildStageCards();
+        this.resize();
     }
 
     _buildStageCards() {
@@ -162,6 +174,7 @@ class GameController {
         document.getElementById('hud').style.opacity = '1';
         document.getElementById('controls').style.opacity = '1';
         this.loadStage(idx);
+        this.resize();
     }
 
     // ---- Info Panel ----
@@ -495,6 +508,7 @@ class GameController {
         if (!isCustom) {
             // Stage identity and objective are persistent, not transient toasts over controls.
             document.getElementById('stage-brief-number').textContent = `STG ${String(idx + 1).padStart(2, '0')}`;
+            document.getElementById('stage-brief-name').textContent = tmpl.name || '';
             document.getElementById('stage-brief-objective').textContent = tmpl.objective || '光を結晶へ届けよう';
             document.getElementById('stage-brief-tutorial').classList.toggle('hidden', idx !== 0);
         }
@@ -999,10 +1013,8 @@ class GameController {
         if (this.colorFilters) this.colorFilters.forEach(f => f.draw(this.ctx));
         this.blocks.forEach(b => b.draw(this.ctx));
 
-        // Tutorial overlay (only STG1 with no mirrors)
-        if (window.matchMedia("(min-width: 1150px)").matches && this.currentStageIdx === 0 && this.state === STATE.PLAYING && this.mirrors.length === 0 && !this.isDrawing) {
-            this._drawTutorialOverlay();
-        }
+        // Playfield is unobstructed: mobile has a persistent objective above it,
+        // and wide desktop uses the objective and hints in the sidebar.
 
         // Mirrors
         for (let i = 0; i < this.mirrors.length; i++) {

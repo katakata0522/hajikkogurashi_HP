@@ -24,7 +24,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&family=Noto+Sans+JP:wght@200;300;400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20261011-device-ux-v1">
+    <link rel="stylesheet" href="style.css?v=1cec4d228d7b">
 </head>
 <body>
     <div id="app-layout">
@@ -127,6 +127,7 @@
             <div id="stage-brief" class="hidden" aria-label="ステージの目標">
                 <span id="stage-brief-number" class="stage-brief-number">STG 01</span>
                 <div class="stage-brief-copy">
+                    <span id="stage-brief-name" class="stage-brief-name">REFLECTION</span>
                     <p id="stage-brief-objective">光を結晶へ届けよう</p>
                     <span id="stage-brief-tutorial">ドラッグで鏡を描き、「光を発射」で試そう</span>
                 </div>
@@ -385,7 +386,7 @@
                     <input type="text" id="prop-title" maxlength="24" value="MY_STAGE" placeholder="MY_STAGE" autocomplete="off">
                 </div>
                 <div class="property-group">
-                    <label for="prop-ink" style="font-size:11px; color:rgba(255,255,255,0.5);">インク容量 (鏡の長さ): <span id="prop-ink-val" style="color:#ffffff;">500</span>px</label>
+                    <label for="prop-ink" style="font-size:11px; color:rgba(255,255,255,0.5);">鏡の長さ上限: <span id="prop-ink-val" style="color:#ffffff;">500</span>px</label>
                     <input type="range" id="prop-ink" min="150" max="1500" step="50" value="500" style="width:100%; margin-top:4px;">
                 </div>
                 <div class="editor-history-actions" aria-label="編集履歴">
@@ -436,7 +437,7 @@
     <script src="/assets/js/minigame-storage-guard.js"></script>
     <script src="core.js?v=20260911-core-split"></script>
     <script src="stages.js?v=20260911-stage-data"></script>
-    <script src="script.js?v=20261011-device-ux-v1"></script>
+    <script src="script.js?v=228cfa19778e"></script>
     <script src="editor.js?v=20260911-editor-split"></script>
 </body>
 </html>

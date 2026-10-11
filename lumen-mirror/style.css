@@ -2504,3 +2504,9 @@ body, #app-layout { height: 100dvh; }
     }
 }
 #stage-brief-details:focus-visible { outline: 2px solid #00f3ff; outline-offset: 2px; }
+
+/* Stage titles remain readable without covering the drawing surface. */
+.stage-brief-name { display: block; font: 500 10px/1.45 'Inter', sans-serif; color: #b2faff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 767px) {
+    #stage-brief .stage-brief-number { align-self: flex-start; margin-top: 2px; }
+}
