@@ -2407,7 +2407,7 @@ body, #app-layout { height: 100dvh; }
         font: inherit;
         font-size: 11px;
         padding: 9px 7px;
-        min-height: 42px;
+        min-height: 44px;
         cursor: pointer;
         letter-spacing: 0;
     }
@@ -2441,6 +2441,7 @@ body, #app-layout { height: 100dvh; }
         padding: 6px max(7px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(7px, env(safe-area-inset-left));
     }
     #controls > * { min-width: 0; }
+    #controls button { min-height: 44px; }
     #controls .icon-btn { font-size: 10px; }
     #controls .mode-indicator { min-width: 0; font-size: 9px; padding: 7px 5px; }
     #controls .control-btn { font-size: 10px; padding: 10px 6px; }
