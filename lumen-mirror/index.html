@@ -24,7 +24,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&family=Noto+Sans+JP:wght@200;300;400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=1cec4d228d7b">
+    <link rel="stylesheet" href="style.css?v=96408ffa2dc0">
 </head>
 <body>
     <div id="app-layout">
@@ -259,9 +259,9 @@
                         <input type="checkbox" id="sound-mute-toggle" class="sound-mute-checkbox">
                         <label for="sound-mute-toggle" id="sound-mute-label" class="sound-mute-label">SOUND: ON 🔊</label>
                     </div>
-                    <button id="start-btn" class="glow-btn">INITIALIZE_SYSTEM</button>
-                    <button id="editor-btn" class="control-btn" style="margin-top: 8px; width: 100%; letter-spacing: 0.15em;">CREATE_AREA (エディタ)</button>
-                    <button id="menu-back-btn" class="flat-btn">RETURN_TO_PLAZA</button>
+                    <button id="start-btn" class="glow-btn">ゲームをはじめる</button>
+                    <button id="editor-btn" class="control-btn" style="margin-top: 8px; width: 100%; letter-spacing: 0.15em;">ステージを作る（エディタ）</button>
+                    <button id="menu-back-btn" class="flat-btn">ミニゲーム広場へ戻る</button>
                 </div>
             </div>
 
@@ -271,7 +271,7 @@
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                         <path d="M19 12H5M12 19l-7-7 7-7"/>
                     </svg>
-                    <span>ARCHIVE</span>
+                    <span>広場へ</span>
                 </button>
 
                 <div id="mode-indicator" class="mode-indicator draw-mode">
@@ -339,7 +339,7 @@
         <aside id="editor-sidebar-right" class="pc-only-sidebar editor-only hidden">
             <div class="sidebar-header">
                 <span class="cyber-tag">INSPECTOR</span>
-                <h2 class="sidebar-title">PROPERTIES</h2>
+                <h2 class="sidebar-title">設定・共有 <small class="editor-scroll-cue">↓ スクロール</small></h2>
             </div>
             
             <div id="inspector-panel" class="sidebar-section">
