@@ -442,3 +442,23 @@ body { height:100vh; height:100dvh; }
   #start-screen .start-actions { gap: 5px; }
   #start-screen .start-actions .action-btn { min-height: 42px; padding: 7px 13px; font-size: .9rem; }
 }
+
+/* Result gate: the result panel itself (not a descendant .glass-panel) is the grid. */
+@media (min-width:540px) and (max-height:500px) {
+  #result-screen.screen.glass-panel.active {
+    width:min(94vw,560px);max-width:560px;height:auto;max-height:calc(100dvh - 16px);
+    top:50%;left:50%;transform:translate(-50%,-50%);
+    display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    grid-template-areas:'title title' 'stats rank' 'record rank' 'actions actions';
+    align-items:center;justify-items:stretch;gap:5px 10px;padding:8px 12px;
+    overflow-y:auto;touch-action:pan-y;
+  }
+  #result-screen .result-title {grid-area:title;font-size:1.5rem;margin:0;}
+  #result-screen .result-stats {grid-area:stats;margin:0;padding:5px 8px;}
+  #result-screen .stat-value {font-size:1.7rem;}
+  #result-screen .best-score-container {grid-area:record;margin:0;}
+  #result-screen .rank-container {grid-area:rank;margin:0;padding:5px 8px;}
+  #result-screen .rank-text {font-size:1.2rem;}
+  #result-screen .action-buttons {grid-area:actions;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:0;}
+  #result-screen .action-btn {width:100%;min-width:0;min-height:42px;font-size:.84rem;padding:7px 3px;letter-spacing:0;}
+}

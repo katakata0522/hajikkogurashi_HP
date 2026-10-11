@@ -1410,3 +1410,8 @@
   .title-screen .title-bg { position:absolute; }
   .result-screen {overflow-y:auto;}
 }
+
+/* Early foul may be retried immediately, but players must also be able to return to title. */
+.result-card.is-early .result-actions {grid-template-columns:repeat(2,minmax(0,1fr));max-width:440px;margin-inline:auto;}
+.result-card.is-early .result-actions #backTitleButton {display:inline-flex;align-items:center;justify-content:center;}
+@media (max-width:520px){.result-card.is-early .result-actions {grid-template-columns:repeat(2,minmax(0,1fr));}}
