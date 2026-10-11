@@ -574,3 +574,62 @@ button:focus-visible, a:focus-visible, canvas:focus-visible {
     #game-canvas-wrapper { grid-area: board; height: 100%; min-width: 0; min-height: 0; }
     #game-footer { grid-area: help; font-size: 11px; padding: 6px; }
 }
+
+/* First-play onboarding: separate from the active board and readable on short phones. */
+.welcome-content { max-width: 410px; text-align: left; padding: 23px 20px; }
+.welcome-eyebrow { color: #ffab80; font-size: 12px; font-weight: 700; margin-bottom: 8px; }
+#welcome-title { color: #fff; font-family: 'Kaisei Decol', serif; font-size: clamp(19px, 5.2vw, 25px); line-height: 1.45; }
+.welcome-lead { font-size: 14px; line-height: 1.7; color: #e2e8f0; margin: 12px 0 18px; }
+.welcome-steps { list-style: none; display: grid; gap: 10px; counter-reset: steps; }
+.welcome-steps li { display: grid; gap: 4px; padding-left: 38px; position: relative; line-height: 1.5; }
+.welcome-steps li::before {
+    counter-increment: steps; content: counter(steps);
+    position: absolute; left: 0; top: 1px;
+    display: grid; place-items: center; width: 27px; height: 27px;
+    border: 1px solid #eb5e28; border-radius: 50%; color: #ffab80; font-size: 12px;
+}
+.welcome-steps strong { font-size: 14px; color: #fff; }
+.welcome-steps span { font-size: 12px; color: #cbd5e0; }
+.welcome-note { font-size: 12px; line-height: 1.6; color: #e6adad; margin: 17px 0; }
+.welcome-start { width: 100%; min-height: 48px; }
+.welcome-again { font-size: 11px; line-height: 1.6; margin-top: 10px; color: #becadd; }
+@media (max-width: 360px), (max-height: 600px) {
+    .welcome-content { padding: 14px 15px; }
+    .welcome-steps { gap: 7px; }
+    .welcome-lead { margin: 9px 0 12px; }
+}
+/* On desktop, the board is the hero and the live mission/records are a separate rail. */
+@media (min-width: 900px) and (min-height: 600px) {
+    #game-container {
+        width: min(1100px, 96vw);
+        height: min(850px, 94dvh);
+        max-width: none;
+        max-height: none;
+        display: grid;
+        grid-template-columns: minmax(225px, 290px) minmax(0, 1fr);
+        grid-template-rows: minmax(0, 1fr) auto;
+        grid-template-areas: "hud board" "help board";
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    #game-header {
+        grid-area: hud;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        justify-content: flex-start;
+        align-items: stretch;
+        padding: 20px 16px;
+        overflow-y: auto;
+        border-right: 1px solid rgba(255,255,255,0.08);
+        border-bottom: 0;
+    }
+    #game-header .header-center { order: -1; }
+    #game-header .mission-box { padding: 13px; }
+    #game-header #mission-kanji { font-size: 42px; }
+    #game-header .mission-title { font-size: 12px; }
+    #game-header .header-right { flex-direction: row; justify-content: space-between; align-items: center; }
+    #game-canvas-wrapper { grid-area: board; min-width: 0; min-height: 0; height: 100%; }
+    #game-footer { grid-area: help; text-align: left; padding: 12px 16px; font-size: 12px; }
+}

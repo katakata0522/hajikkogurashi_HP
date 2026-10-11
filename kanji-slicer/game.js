@@ -596,6 +596,8 @@ const missionReadingEl = document.getElementById('mission-reading');
 const nextPreviewEl = document.getElementById('next-preview');
 const btnSound = document.getElementById('btn-sound');
 const btnPause = document.getElementById('btn-pause');
+const welcomeModal = document.getElementById('welcome-modal');
+const btnWelcomeStart = document.getElementById('btn-welcome-start');
 const pauseModal = document.getElementById('pause-modal');
 const btnResume = document.getElementById('btn-resume');
 const btnPauseRestart = document.getElementById('btn-pause-restart');
@@ -1181,6 +1183,14 @@ function hideModal(modal) {
     target.focus({ preventScroll: true });
 }
 
+function startFromWelcome() {
+    if (welcomeModal.hidden) return;
+    safeStorage.setItem('kanjislicer_intro_seen_v1', '1');
+    isPaused = false;
+    hideModal(welcomeModal);
+    soundSynth.resume();
+}
+
 function pauseGame() {
     if (isGameOver || isPaused) return;
     isPaused = true;
@@ -1203,6 +1213,24 @@ function resumeGame() {
 
 // Keep native Space/Enter activation on buttons and links, ignore held keys.
 window.addEventListener('keydown', (e) => {
+    // A first-run dialog must not accidentally resume via the global pause shortcut.
+    if (!welcomeModal.hidden) {
+        if (e.code === 'Escape') {
+            e.preventDefault();
+            startFromWelcome();
+        } else if (e.code === 'Tab') {
+            const controls = Array.from(welcomeModal.querySelectorAll('button, a[href], [tabindex="0"]'));
+            if (controls.length) {
+                const first = controls[0], last = controls[controls.length - 1];
+                if (e.shiftKey && document.activeElement === first) {
+                    e.preventDefault(); last.focus();
+                } else if (!e.shiftKey && document.activeElement === last) {
+                    e.preventDefault(); first.focus();
+                }
+            }
+        }
+        return;
+    }
     const modal = isGameOver ? gameoverModal : (isPaused ? pauseModal : null);
     if (modal && e.code === 'Tab') {
         const controls = Array.from(modal.querySelectorAll('button, a[href], [tabindex="0"]'));
@@ -1237,6 +1265,7 @@ window.addEventListener('keydown', (e) => {
 btnSound.addEventListener('click', () => soundSynth.toggle());
 soundSynth.updateButtonUI();
 
+btnWelcomeStart.addEventListener('click', startFromWelcome);
 btnPause.addEventListener('click', pauseGame);
 btnResume.addEventListener('click', resumeGame);
 btnPauseRestart.addEventListener('click', restartGame);
@@ -1852,6 +1881,11 @@ document.addEventListener('visibilitychange', () => {
     }
 });
 
-// Start Game Setup
+// Start Game Setup: first play starts only after the rules are visible and acknowledged.
 chooseNewMission();
+if (safeStorage.getItem('kanjislicer_intro_seen_v1') !== '1') {
+    isPaused = true;
+    modalReturnFocus = canvas;
+    showModal(welcomeModal, btnWelcomeStart);
+}
 requestAnimationFrame(tick);

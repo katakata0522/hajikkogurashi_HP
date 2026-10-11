@@ -27,7 +27,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kaisei+Decol:wght@500;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="style.css?v=42cbd210bff5">
+    <link rel="stylesheet" href="style.css?v=df0922e14604">
 </head>
 <body>
     <div id="game-container">
@@ -73,8 +73,25 @@
 
         <!-- Footer / Instructions -->
         <footer id="game-footer">
-            <p id="game-instructions" class="instruction">上の漢字を左右に動かし、離して落とす<br>盤面をなぞって切る · ⏸で遊び方・図鑑</p>
+            <p id="game-instructions" class="instruction">漢字を動かして落とし、重ねて合体させよう<br>盤面をなぞって分解 · ⏸で遊び方・図鑑</p>
         </footer>
+    </div>
+
+    <!-- Explain the game before the first move, not behind the pause menu. -->
+    <div id="welcome-modal" class="modal-overlay hidden" hidden role="dialog" aria-modal="true" aria-labelledby="welcome-title">
+        <div class="modal-content welcome-content">
+            <p class="welcome-eyebrow">はじめての方へ</p>
+            <h2 id="welcome-title">漢字を落として、組み合わせよう。</h2>
+            <p class="welcome-lead">上のお題の熟語を作ると高得点！<br>まずは漢字を重ねるところから。</p>
+            <ol class="welcome-steps">
+                <li><strong>落とす</strong><span>上の漢字を左右に動かして、指やマウスを離す</span></li>
+                <li><strong>合体する</strong><span>組み合わせると新しい漢字に。例：木＋木＝林、林＋木＝森</span></li>
+                <li><strong>お題を達成</strong><span>熟語を作ると得点。盤面をなぞると合体した漢字を分解できる</span></li>
+            </ol>
+            <p class="welcome-note">赤い線を越えたまま3秒経過するとゲームオーバー。</p>
+            <button type="button" id="btn-welcome-start" class="btn-primary welcome-start">遊んでみる</button>
+            <p class="welcome-again">遊び方は、プレイ中の ⏸ からいつでも確認できます。</p>
+        </div>
     </div>
 
     <!-- Pause / Guide Modal -->
@@ -83,7 +100,7 @@
             <h2 id="pause-modal-title" class="modal-title-pause">一時停止 ＆ 漢字図鑑</h2>
             <div class="how-to-play">
                 <h3>遊び方</h3>
-                <p>上の漢字をつかみ、左右に動かして離すと落下します。盤面をなぞると、合体した漢字を分解できます。</p>
+                <p>上の漢字をつかみ、左右に動かして離すと落下します。木＋木＝林のように漢字を組み合わせましょう。盤面をなぞると、合体した漢字を分解できます。</p>
                 <p>漢字を合わせてお題の熟語を作ると高得点！ 赤い線を超えた状態が3秒続くと終了です。</p>
                 <p class="keyboard-help">PC: Space / Pで一時停止、Escで再開、Rで最初から</p>
             </div>
@@ -123,6 +140,6 @@
 
     <!-- Existing physics constants are calibrated for one 60 Hz simulation step. -->
     <script src="fixed-step-raf.js?v=b6a6f029f4b7"></script>
-    <script src="game.js?v=3ef137647b6d"></script>
+    <script src="game.js?v=3775bda1c160"></script>
 </body>
 </html>

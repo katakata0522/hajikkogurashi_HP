@@ -72,7 +72,19 @@ try {
     throw new Error(`canvas is not visible: ${JSON.stringify(initial.canvas)}`);
   }
   if (initial.metaInsideBody) throw new Error('SEO metadata must not be emitted inside body');
+  if (!(await page.locator('#welcome-modal').isVisible()) || !(await page.locator('#welcome-title').textContent()).includes('漢字')) {
+    throw new Error('first-run game rules are not visible before play');
+  }
+  if (await page.evaluate(() => !isPaused || !document.querySelector('#game-container').inert)) {
+    throw new Error('first-run tutorial should block play until acknowledged');
+  }
   if (screenshots?.enabled) await screenshots.capture(page, 'launch');
+  await page.locator('#btn-welcome-start').click();
+  if (await page.evaluate(() => isPaused || !document.querySelector('#welcome-modal').hidden)) {
+    throw new Error('first-run guide did not start the game');
+  }
+  await page.reload({ waitUntil: 'networkidle' });
+  if (await page.locator('#welcome-modal').isVisible()) throw new Error('first-run guide repeats after completion');
 
   const box = await page.locator('#game-canvas').boundingBox();
   if (!box) throw new Error('canvas bounding box is unavailable');
