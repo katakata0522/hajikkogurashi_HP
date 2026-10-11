@@ -27,7 +27,7 @@ assert.match(html, /href="style\.css\?v=20261011-responsive-layout"/, 'responsiv
 assert.match(html, /src="core\.js\?v=20260911-core-split"/, 'core runtime dependencies should be loaded explicitly');
 assert.match(html, /src="stages\.js\?v=20260911-stage-data"/, 'stage data should be loaded explicitly');
 assert.match(html, /src="script\.js\?v=20261011-responsive-layout"/, 'GameController runtime should use the responsive-layout cache key');
-assert.match(html, /src="editor\.js\?v=20260911-editor-split"/, 'Stage Editor extension should be loaded explicitly');
+assert.match(html, /src="editor\.js\?v=20261011-responsive-layout"/, 'Stage Editor extension should be loaded explicitly');
 assert.doesNotMatch(html, /script\.js\?v=(?:20260526-editor-review-fix|20260911-runtime-split)/, 'pre-editor-split runtime cache keys must not remain');
 const storageIndex = html.indexOf('src="/assets/js/minigame-storage-guard.js');
 const coreIndex = html.indexOf('src="core.js');

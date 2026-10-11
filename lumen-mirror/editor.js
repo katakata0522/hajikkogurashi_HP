@@ -442,6 +442,7 @@ class LumenEditorMethods {
         document.getElementById('editor-sidebar-left').classList.remove('hidden');
         document.getElementById('editor-sidebar-right').classList.remove('hidden');
         document.getElementById('editor-controls').classList.remove('hidden');
+        this.resize();
         
         this.updateInspector();
         this.syncEditorToolUI();
@@ -456,6 +457,7 @@ class LumenEditorMethods {
         document.getElementById('editor-sidebar-left').classList.add('hidden');
         document.getElementById('editor-sidebar-right').classList.add('hidden');
         document.getElementById('editor-controls').classList.add('hidden');
+        this.resize();
         this._showTitleScreen();
     }
 

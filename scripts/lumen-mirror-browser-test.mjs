@@ -43,6 +43,31 @@ try {
   });
 
   try {
+    for (const viewport of [{ width: 320, height: 700 }, { width: 390, height: 844 }, { width: 1366, height: 900 }]) {
+      const modePage = await browser.newPage({ viewport });
+      try {
+        await modePage.goto(`http://127.0.0.1:${port}/lumen-mirror/`, { waitUntil: 'networkidle' });
+        for (const mode of ['editor', 'title']) {
+          await modePage.click(mode === 'editor' ? '#editor-btn' : '#editor-back-btn');
+          const bounds = await modePage.evaluate(() => {
+            const area = document.querySelector('#viewport').getBoundingClientRect();
+            const canvas = document.querySelector('#game-canvas').getBoundingClientRect();
+            return {
+              outside: Math.max(area.left - canvas.left, area.top - canvas.top,
+                canvas.right - area.right, canvas.bottom - area.bottom),
+              width: canvas.width,
+              height: canvas.height,
+            };
+          });
+          if (bounds.outside > 1 || bounds.width <= 0 || bounds.height <= 0) {
+            throw new Error(`${mode} canvas does not fit after mode switch at ${viewport.width}px: ${JSON.stringify(bounds)}`);
+          }
+        }
+      } finally {
+        await modePage.close();
+      }
+    }
+
     const page = await browser.newPage({ viewport: { width: 1280, height: 520 } });
     const errors = [];
     page.on('pageerror', (error) => errors.push(error.message));
