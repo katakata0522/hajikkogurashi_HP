@@ -1050,17 +1050,17 @@
       width: 100%;
       height: 100%;
       display: block;
-      image-rendering: pixelated;
+      image-rendering: auto;
     }
     .crt-screen-bezel::after {
       content: "";
       position: absolute;
       inset: 0;
-      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.22) 50%);
       background-size: 100% 3px;
       pointer-events: none;
       z-index: 10;
-      opacity: 0.55;
+      opacity: 0.25;
     }
     .crt-screen-bezel:focus-visible {
       outline: 2px solid var(--neon-cyan);
@@ -2260,7 +2260,7 @@
               <div class="crt-screen-bezel" id="crt-screen-bezel" tabindex="0" role="region" aria-label="レトロCRTミニゲーム画面 (クリックまたはSpace/Enterキーで操作)" title="画面をクリックまたはSpace/Enterキーで操作・遊ぶ！">
                 <div class="crt-osd-channel" id="crt-osd-channel">CH.01 [ギリギリ・ブレーキ！]</div>
                 <div class="crt-osd-action" id="crt-osd-action">CLICK TO ACCEL! 🏎️</div>
-                <canvas id="mini-crt-canvas" width="320" height="200" aria-label="ミニゲーム描画キャンバス"></canvas>
+                <canvas id="mini-crt-canvas" width="640" height="400" aria-label="ミニゲーム描画キャンバス"></canvas>
                 <!-- Screen Reader Live Announcements -->
                 <div id="crt-a11y-live" aria-live="polite" style="position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0;"></div>
               </div>
@@ -3884,28 +3884,34 @@
       // Static noise during cartridge swap
       if (crtNoiseTimer > 0) {
         crtNoiseTimer--;
+        ctx.save();
         ctx.fillStyle = '#06070d';
-        ctx.fillRect(0, 0, W, H);
-        const imgData = ctx.createImageData(W, H);
-        const data = imgData.data;
-        for (let i = 0; i < data.length; i += 4) {
-          const v = Math.random() < 0.25 ? Math.floor(Math.random() * 210) : 10;
-          data[i] = v;
-          data[i+1] = v > 50 ? v + 25 : v;
-          data[i+2] = v > 50 ? v + 45 : v;
-          data[i+3] = 255;
+        ctx.fillRect(0, 0, 640, 400);
+        for (let y = 0; y < 400; y += 8) {
+          for (let x = 0; x < 640; x += 8) {
+            if (Math.random() < 0.22) {
+              const v = Math.floor(Math.random() * 180);
+              ctx.fillStyle = `rgb(${v}, ${v + 25}, ${v + 45})`;
+              ctx.fillRect(x, y, 8, 8);
+            }
+          }
         }
-        ctx.putImageData(imgData, 0, 0);
+        ctx.restore();
         return;
       }
 
       ctx.save();
+      ctx.clearRect(0, 0, 640, 400);
+
       // Apply screen shake if active (e.g. on sword strikes or crashes)
       if (mikiriScreenShake > 0) {
-        const shakeMag = mikiriScreenShake;
+        const shakeMag = mikiriScreenShake * 2;
         mikiriScreenShake--;
         ctx.translate((Math.random() - 0.5) * shakeMag, (Math.random() - 0.5) * shakeMag);
       }
+
+      // Base 2x scale: Keeps sprites/pixel-art at retro integer scale while rendering text at high-DPI vector resolution!
+      ctx.scale(2, 2);
 
       ctx.fillStyle = '#0a0c18';
       ctx.fillRect(0, 0, W, H);
@@ -4018,8 +4024,9 @@
           if (gx >= 0 && gx <= roadEndX) {
             ctx.fillStyle = '#38bdf8';
             ctx.fillRect(gx, 155, 1.5, 7);
-            ctx.fillStyle = '#64748b';
-            ctx.fillText(`${gm.dist}m`, gx, 170);
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = 'bold 8.5px "Share Tech Mono", monospace';
+            ctx.fillText(`${gm.dist}m`, gx, 169);
           }
         });
 
@@ -4236,7 +4243,7 @@
         }
 
         // Top HUD (BEST, DISTANCE, SPEED)
-        ctx.font = '9px "Share Tech Mono", monospace';
+        ctx.font = 'bold 9.5px "Share Tech Mono", monospace';
         ctx.fillStyle = '#f59e0b';
         ctx.textAlign = 'left';
         ctx.fillText(`BEST: ${brakeBest.toFixed(2)}m`, 10, 32);
@@ -4252,36 +4259,36 @@
         // Verdict Display
         if (brakeVerdict) {
           ctx.textAlign = 'center';
-          ctx.font = 'bold 13px "DotGothic16", sans-serif';
+          ctx.font = 'bold 13.5px "DotGothic16", sans-serif';
           if (brakePhase === 'stopped') {
-            ctx.fillStyle = brakeDistance <= 0.30 ? '#fde047' : (brakeDistance <= 0.80 ? '#38bdf8' : '#cbd5e1');
-            ctx.shadowColor = ctx.fillStyle;
-            ctx.shadowBlur = 8;
-            ctx.fillText(brakeVerdict, 160, 78);
             ctx.shadowBlur = 0;
+            ctx.fillStyle = '#050713';
+            ctx.fillText(brakeVerdict, 160.5, 78.5);
+            ctx.fillStyle = brakeDistance <= 0.30 ? '#fde047' : (brakeDistance <= 0.80 ? '#38bdf8' : '#e2e8f0');
+            ctx.fillText(brakeVerdict, 160, 78);
 
             // "本編はこちら" CTA banner on canvas
-            ctx.fillStyle = '#0f172a';
-            ctx.fillRect(55, 94, 210, 20);
+            ctx.fillStyle = '#0b0f19';
+            ctx.fillRect(50, 93, 220, 22);
             ctx.strokeStyle = '#00f5ff';
-            ctx.lineWidth = 1;
-            ctx.strokeRect(55, 94, 210, 20);
-            ctx.font = 'bold 10px "DotGothic16", sans-serif';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(50, 93, 220, 22);
+            ctx.font = 'bold 11px "DotGothic16", sans-serif';
             ctx.fillStyle = '#00f5ff';
             ctx.fillText('▶ 本編はこちら (雨・突風モード搭載) ◀', 160, 108);
 
-            ctx.font = '8px "DotGothic16", sans-serif';
-            ctx.fillStyle = '#94a3b8';
-            ctx.fillText('枠外クリックで再挑戦 🔄 / ここを押すと本編起動', 160, 126);
-          } else if (brakePhase === 'fell') {
-            ctx.fillStyle = '#ef4444';
-            ctx.shadowColor = '#ef4444';
-            ctx.shadowBlur = 10;
-            ctx.fillText(brakeVerdict, 160, 85);
-            ctx.shadowBlur = 0;
             ctx.font = '9px "DotGothic16", sans-serif';
-            ctx.fillStyle = '#94a3b8';
-            ctx.fillText('画面クリックでリトライ 🔄', 160, 104);
+            ctx.fillStyle = '#cbd5e1';
+            ctx.fillText('枠外クリックで再挑戦 🔄 / ここを押すと本編起動', 160, 127);
+          } else if (brakePhase === 'fell') {
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#050713';
+            ctx.fillText(brakeVerdict, 160.5, 85.5);
+            ctx.fillStyle = '#ef4444';
+            ctx.fillText(brakeVerdict, 160, 85);
+            ctx.font = '9.5px "DotGothic16", sans-serif';
+            ctx.fillStyle = '#cbd5e1';
+            ctx.fillText('画面クリックでリトライ 🔄', 160, 105);
           }
         }
       }
@@ -4504,49 +4511,53 @@
         // Clear Banner / Instructions
         if (mirrorSolved) {
           ctx.textAlign = 'center';
-          ctx.font = 'bold 13px "DotGothic16", sans-serif';
-          ctx.fillStyle = '#fde047';
-          ctx.shadowColor = '#fde047';
-          ctx.shadowBlur = 10;
+          ctx.font = 'bold 14px "DotGothic16", sans-serif';
+          ctx.shadowBlur = 0;
           if (mirrorStage < 3) {
-            ctx.fillText(`★ STAGE 0${mirrorStage} CLEAR! ★`, 160, 78);
-            ctx.shadowBlur = 0;
-
-            // "本編はこちら" CTA banner on canvas
-            ctx.fillStyle = '#0f172a';
-            ctx.fillRect(55, 94, 210, 18);
-            ctx.strokeStyle = '#00f5ff';
-            ctx.lineWidth = 1;
-            ctx.strokeRect(55, 94, 210, 18);
-            ctx.font = 'bold 9.5px "DotGothic16", sans-serif';
-            ctx.fillStyle = '#00f5ff';
-            ctx.fillText('▶ 本編はこちら (全30ステージ収録) ◀', 160, 106);
-
-            ctx.font = '8.5px "DotGothic16", sans-serif';
-            ctx.fillStyle = '#38bdf8';
-            ctx.fillText(`画面クリックで STAGE 0${mirrorStage + 1} へ ➔`, 160, 124);
-          } else {
-            ctx.fillText('👑 ALL STAGES CLEARED!! 👑', 160, 78);
-            ctx.shadowBlur = 0;
-
-            // "本編はこちら" CTA banner on canvas
-            ctx.fillStyle = '#0f172a';
-            ctx.fillRect(55, 94, 210, 18);
-            ctx.strokeStyle = '#fde047';
-            ctx.lineWidth = 1;
-            ctx.strokeRect(55, 94, 210, 18);
-            ctx.font = 'bold 9.5px "DotGothic16", sans-serif';
+            ctx.fillStyle = '#050713';
+            ctx.fillText(`★ STAGE 0${mirrorStage} CLEAR! ★`, 160.5, 78.5);
             ctx.fillStyle = '#fde047';
-            ctx.fillText('▶ 本編はこちら (全30ステージ完全版) ◀', 160, 106);
+            ctx.fillText(`★ STAGE 0${mirrorStage} CLEAR! ★`, 160, 78);
 
-            ctx.font = '8.5px "DotGothic16", sans-serif';
+            // "本編はこちら" CTA banner on canvas
+            ctx.fillStyle = '#0b0f19';
+            ctx.fillRect(50, 93, 220, 22);
+            ctx.strokeStyle = '#00f5ff';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(50, 93, 220, 22);
+            ctx.font = 'bold 11px "DotGothic16", sans-serif';
+            ctx.fillStyle = '#00f5ff';
+            ctx.fillText('▶ 本編はこちら (全30ステージ収録) ◀', 160, 108);
+
+            ctx.font = '9px "DotGothic16", sans-serif';
             ctx.fillStyle = '#38bdf8';
-            ctx.fillText('全ステージ完全攻略！ クリックで最初へ 🔄', 160, 124);
+            ctx.fillText(`画面クリックで STAGE 0${mirrorStage + 1} へ ➔`, 160, 126);
+          } else {
+            ctx.fillStyle = '#050713';
+            ctx.fillText('👑 ALL STAGES CLEARED!! 👑', 160.5, 78.5);
+            ctx.fillStyle = '#fde047';
+            ctx.fillText('👑 ALL STAGES CLEARED!! 👑', 160, 78);
+
+            // "本編はこちら" CTA banner on canvas
+            ctx.fillStyle = '#0b0f19';
+            ctx.fillRect(50, 93, 220, 22);
+            ctx.strokeStyle = '#fde047';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(50, 93, 220, 22);
+            ctx.font = 'bold 11px "DotGothic16", sans-serif';
+            ctx.fillStyle = '#fde047';
+            ctx.fillText('▶ 本編はこちら (全30ステージ完全版) ◀', 160, 108);
+
+            ctx.font = '9px "DotGothic16", sans-serif';
+            ctx.fillStyle = '#38bdf8';
+            ctx.fillText('全ステージ完全攻略！ クリックで最初へ 🔄', 160, 126);
           }
         } else {
           ctx.textAlign = 'center';
-          ctx.font = '9px "DotGothic16", sans-serif';
-          ctx.fillStyle = '#64748b';
+          ctx.font = 'bold 9.5px "DotGothic16", sans-serif';
+          ctx.fillStyle = '#050713';
+          ctx.fillText('鏡 (M1~M3) をクリックして光を水晶へ導け！', 160.5, 105.5);
+          ctx.fillStyle = '#94a3b8';
           ctx.fillText('鏡 (M1~M3) をクリックして光を水晶へ導け！', 160, 105);
         }
       }
@@ -4713,56 +4724,59 @@
         // Game State Display
         ctx.textAlign = 'center';
         if (mikiriPhase === 'waiting') {
-          // Centered, static, NO dots, NO sway!
-          ctx.font = 'bold 14px "DotGothic16", sans-serif';
-          ctx.fillStyle = '#cbd5e1';
+          // Centered, static, NO dots, NO sway, razor sharp!
+          ctx.font = 'bold 15px "DotGothic16", sans-serif';
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = '#050713';
+          ctx.fillText('心を研ぎ澄ませ', 160.5, 92.5);
+          ctx.fillStyle = '#f8fafc';
           ctx.fillText('心を研ぎ澄ませ', 160, 92);
         } else if (mikiriPhase === 'trigger') {
-          // Sudden clean switch to 斬, NO ！！, NO 『 』
-          ctx.font = 'bold 38px "DotGothic16", sans-serif';
+          // Sudden clean switch to 斬, NO ！！, NO 『 』, razor sharp
+          ctx.font = 'bold 44px "DotGothic16", sans-serif';
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = '#4a0420';
+          ctx.fillText('斬', 161, 95);
           ctx.fillStyle = '#ff2a85';
-          ctx.shadowColor = '#ff2a85';
-          ctx.shadowBlur = 14;
           ctx.fillText('斬', 160, 94);
-          ctx.shadowBlur = 0;
         } else if (mikiriPhase === 'hit') {
-          ctx.font = 'bold 14px "DotGothic16", sans-serif';
-          ctx.fillStyle = '#22c55e';
-          ctx.shadowColor = '#22c55e';
-          ctx.shadowBlur = 8;
-          ctx.fillText(`★ 一閃成功！ ${mikiriReactionTime}秒 ${mikiriRank}`, 160, 74);
           ctx.shadowBlur = 0;
+          ctx.font = 'bold 13.5px "DotGothic16", sans-serif';
+          ctx.fillStyle = '#022c22';
+          ctx.fillText(`★ 一閃成功！ ${mikiriReactionTime}秒 ${mikiriRank}`, 160.5, 74.5);
+          ctx.fillStyle = '#22c55e';
+          ctx.fillText(`★ 一閃成功！ ${mikiriReactionTime}秒 ${mikiriRank}`, 160, 74);
 
           // "本編はこちら" CTA banner on canvas
-          ctx.fillStyle = '#0f172a';
-          ctx.fillRect(55, 92, 210, 18);
+          ctx.fillStyle = '#0b0f19';
+          ctx.fillRect(50, 93, 220, 22);
           ctx.strokeStyle = '#00f5ff';
-          ctx.lineWidth = 1;
-          ctx.strokeRect(55, 92, 210, 18);
-          ctx.font = 'bold 9.5px "DotGothic16", sans-serif';
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(50, 93, 220, 22);
+          ctx.font = 'bold 11px "DotGothic16", sans-serif';
           ctx.fillStyle = '#00f5ff';
-          ctx.fillText('▶ 本編はこちら (真剣勝負モード搭載) ◀', 160, 104);
+          ctx.fillText('▶ 本編はこちら (真剣勝負モード搭載) ◀', 160, 108);
 
-          ctx.font = '8.5px "DotGothic16", sans-serif';
+          ctx.font = '9px "DotGothic16", sans-serif';
           ctx.fillStyle = '#cbd5e1';
-          ctx.fillText(`連勝記録: ${mikiriStreak} 人斬り！ / クリックで次へ ➔`, 160, 122);
+          ctx.fillText(`連勝記録: ${mikiriStreak} 人斬り！ / クリックで次へ ➔`, 160, 126);
         } else if (mikiriPhase === 'rival_hit') {
-          ctx.font = 'bold 17px "DotGothic16", sans-serif';
-          ctx.fillStyle = '#ef4444';
-          ctx.shadowColor = '#ef4444';
-          ctx.shadowBlur = 10;
-          ctx.fillText('💥 相手の一閃！無念…【敗北】', 160, 80);
-          ctx.font = '11px "DotGothic16", sans-serif';
-          ctx.fillStyle = '#94a3b8';
-          ctx.fillText('連勝リセット / CLICK TO RETRY 🔄', 160, 102);
           ctx.shadowBlur = 0;
-        } else if (mikiriPhase === 'early') {
           ctx.font = 'bold 16px "DotGothic16", sans-serif';
+          ctx.fillStyle = '#050713';
+          ctx.fillText('💥 相手の一閃！無念…【敗北】', 160.5, 80.5);
           ctx.fillStyle = '#ef4444';
-          ctx.shadowColor = '#ef4444';
-          ctx.shadowBlur = 8;
-          ctx.fillText('早すぎた！【切腹】', 160, 95);
+          ctx.fillText('💥 相手の一閃！無念…【敗北】', 160, 80);
+          ctx.font = '10px "DotGothic16", sans-serif';
+          ctx.fillStyle = '#cbd5e1';
+          ctx.fillText('連勝リセット / CLICK TO RETRY 🔄', 160, 102);
+        } else if (mikiriPhase === 'early') {
           ctx.shadowBlur = 0;
+          ctx.font = 'bold 16px "DotGothic16", sans-serif';
+          ctx.fillStyle = '#050713';
+          ctx.fillText('早すぎた！【切腹】', 160.5, 95.5);
+          ctx.fillStyle = '#ef4444';
+          ctx.fillText('早すぎた！【切腹】', 160, 95);
         }
       }
 
