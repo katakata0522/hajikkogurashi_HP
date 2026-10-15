@@ -1162,11 +1162,81 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       flex-wrap: wrap;
-      margin-top: 4px;
-      padding-top: 6px;
-      border-top: 1px solid #1f2233;
+      margin-top: 10px;
+      padding: 12px 14px;
+      background: #0d0f1a;
+      border: 1.5px solid #22273d;
+      border-radius: 6px;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+    }
+    .mini-console-desc-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      min-width: 220px;
+    }
+    .crt-status-desc-text {
+      font-family: var(--font-pixel-jp);
+      font-size: 13.5px;
+      font-weight: bold;
+      color: #f1f5f9;
+      letter-spacing: 0.6px;
+      line-height: 1.35;
+    }
+    .crt-kb-hint-pill {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: #94a3b8;
+      background: #181c2b;
+      padding: 2px 8px;
+      border-radius: 3px;
+      border: 1px solid #2d3550;
+      display: inline-block;
+      width: fit-content;
+    }
+    .btn-mini-play-prominent {
+      padding: 9px 18px;
+      font-family: var(--font-pixel-en);
+      font-size: 13px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      color: #00f5ff;
+      background: linear-gradient(135deg, rgba(0, 245, 255, 0.15), rgba(2, 132, 199, 0.25));
+      border: 1.5px solid #00f5ff;
+      border-radius: 5px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 0 12px rgba(0, 245, 255, 0.25);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn-mini-play-prominent:hover {
+      background: #00f5ff;
+      color: #080a14;
+      box-shadow: 0 0 20px rgba(0, 245, 255, 0.7);
+      transform: translateY(-2px);
+    }
+    .btn-mini-play-prominent:active {
+      transform: translateY(1px);
+    }
+    .btn-mini-play-prominent.pulse-glow {
+      animation: pulse-full-play 1.4s infinite ease-in-out;
+    }
+    @keyframes pulse-full-play {
+      0%, 100% {
+        box-shadow: 0 0 12px rgba(0, 245, 255, 0.4);
+        border-color: #00f5ff;
+      }
+      50% {
+        box-shadow: 0 0 24px rgba(0, 245, 255, 0.9), 0 0 8px #fde047;
+        border-color: #fde047;
+      }
     }
 
     /* Right: Dispatch Hub (スクショ構成 + 案D + 拡張SNS) */
@@ -2220,14 +2290,14 @@
               </div>
             </div>
 
-            <!-- Mini Console Bottom Action Buttons -->
+            <!-- Mini Console Bottom Action Buttons & Full Play Portal -->
             <div class="mini-console-footer">
-              <div style="font-family:var(--font-pixel-jp); font-size:11px; color:#cbd5e1; display:flex; align-items:center; flex-wrap:wrap; gap:4px;">
-                <span id="crt-status-desc">崖っぷちまで突っ走れ！0.01m極限チキンレース</span>
-                <span class="crt-kb-hint" style="font-family:var(--font-mono); font-size:10px; color:#94a3b8; background:#1c2033; padding:1px 6px; border-radius:3px; border:1px solid #2d3550;">Space / Enterキー対応</span>
+              <div class="mini-console-desc-wrap">
+                <span id="crt-status-desc" class="crt-status-desc-text">崖っぷちまで突っ走れ！0.01m極限チキンレース</span>
+                <span class="crt-kb-hint-pill">Space / Enterキー対応</span>
               </div>
-              <div style="display:flex; gap:8px;">
-                <a id="btn-mini-play-full" href="https://hajikkoroom.xsrv.jp/girigiri-brake/" target="_blank" rel="noopener" class="btn-card-action" style="padding:4px 12px; font-size:10px; text-decoration:none; display:inline-flex; align-items:center; gap:4px;" aria-label="全画面で遊ぶ">
+              <div class="mini-console-cta-wrap">
+                <a id="btn-mini-play-full" href="https://hajikkoroom.xsrv.jp/girigiri-brake/" target="_blank" rel="noopener" class="btn-mini-play-prominent" aria-label="本編を全画面で遊ぶ">
                   <span>🕹️ FULL PLAY ▸</span>
                 </a>
               </div>
@@ -3417,6 +3487,8 @@
       brakeFallRotation = 0;
       const osd = document.getElementById('crt-osd-action');
       if (osd && activeCart === 'brake') osd.textContent = 'CLICK TO ACCEL! 🏎️';
+      const playBtn = document.getElementById('btn-mini-play-full');
+      if (playBtn) playBtn.classList.remove('pulse-glow');
     }
 
     // ==========================================
@@ -3474,6 +3546,8 @@
       currentMirrors = stg.mirrors.map(m => ({ ...m }));
       const osd = document.getElementById('crt-osd-action');
       if (osd && activeCart === 'mirror') osd.textContent = 'CLICK MIRRORS TO REFLECT 💎';
+      const playBtn = document.getElementById('btn-mini-play-full');
+      if (playBtn) playBtn.classList.remove('pulse-glow');
     }
 
     // ==========================================
@@ -3500,7 +3574,7 @@
       mikiriFlash = 0;
       mikiriScreenShake = 0;
       const osd = document.getElementById('crt-osd-action');
-      if (osd && activeCart === 'mikiri') osd.textContent = '… 構え … [！] を待て ⚡';
+      if (osd && activeCart === 'mikiri') osd.textContent = '構え — 合図「斬」を待て ⚡';
       const delay = 1600 + Math.random() * 2400;
       mikiriTimer = setTimeout(() => {
         if (activeCart === 'mikiri' && mikiriPhase === 'waiting') {
@@ -3509,7 +3583,7 @@
           mikiriFlash = 8;
           play8BitSound('alert');
           const osdAct = document.getElementById('crt-osd-action');
-          if (osdAct) osdAct.textContent = '！！ 今だ！斬れ！ ⚔️';
+          if (osdAct) osdAct.textContent = '【 斬 】 今だ！撃て！ ⚔️';
 
           // Rival Reaction Timeout: Rival attacks if player doesn't react in time!
           const rivalReactionSec = Math.max(0.24, 0.40 - (mikiriStreak * 0.02));
@@ -3547,14 +3621,14 @@
       },
       mikiri: {
         channel: 'CH.03 [みきり一閃]',
-        action: 'WAIT FOR [！] THEN CLICK ⚡',
-        desc: '合図の瞬間を見極めろ！0.01秒の超反応居合バトル',
+        action: '合図「斬」で即クリック ⚡',
+        desc: '合図「斬」の瞬間を見極めろ！0.01秒の超反応居合',
         url: 'https://hajikkoroom.xsrv.jp/mikiri-issen/'
       },
       duel: {
         channel: 'CH.04 [POCKET DUEL]',
         action: 'CLICK FOR LIGHTNING ⚡',
-        desc: '雨のサイバー秘密基地で対峙するドット絵剣士たち',
+        desc: '電脳空間の決闘！雨のサイバー秘密基地で対峙',
         url: 'https://hajikkoroom.xsrv.jp/preview/'
       }
     };
@@ -3624,7 +3698,7 @@
       if (activeCart === 'brake') {
         if (brakePhase === 'ready') {
           brakePhase = 'accel';
-          brakeSpeed = 4.0;
+          brakeSpeed = 2.0;
           brakeCarX = 30;
           brakeCameraX = 0;
           brakeSparks = [];
@@ -3685,15 +3759,16 @@
           showRetroToast(`⚡ [一閃成功！] ${reaction}秒 ${mikiriRank} (連勝: ${mikiriStreak})`);
           announceA11y(`一閃成功！反応速度${reaction}秒、${mikiriRank}、連勝${mikiriStreak}`);
           const osd = document.getElementById('crt-osd-action');
-          if (osd) osd.textContent = '★ 一閃成功！ CLICK TO NEXT ➔';
-          setTimeout(() => { if (activeCart === 'mikiri' && mikiriPhase === 'hit') resetMikiriMini(); }, 2800);
+          if (osd) osd.textContent = '★ 一閃成功！ 本編はこちら (FULL PLAY) ▸';
+          const playBtn = document.getElementById('btn-mini-play-full');
+          if (playBtn) playBtn.classList.add('pulse-glow');
         } else if (mikiriPhase === 'waiting') {
           clearTimeout(mikiriTimer);
           clearTimeout(mikiriRivalTimer);
           mikiriPhase = 'early';
           mikiriStreak = 0;
           play8BitSound('select');
-          showRetroToast('⚠️ [お手つき！] まだ合図が出ていません！連勝リセット');
+          showRetroToast('⚠️ [お手つき！] 合図「斬」を見る前に抜刀！連勝リセット');
           announceA11y('早すぎた！お手つき！連勝がリセットされました');
           const osd = document.getElementById('crt-osd-action');
           if (osd) osd.textContent = '早すぎた！【切腹】 CLICK TO RETRY 🔄';
@@ -3734,14 +3809,29 @@
     const crtScreen = document.getElementById('crt-screen-bezel');
     if (crtScreen) {
       crtScreen.addEventListener('click', (e) => {
+        const rect = crtScreen.getBoundingClientRect();
+        const canvasX = ((e.clientX - rect.left) / rect.width) * 320;
+        const canvasY = ((e.clientY - rect.top) / rect.height) * 200;
+
+        // "本編はこちら" CTA banner button click check
+        const isBrakeCleared = (activeCart === 'brake' && brakePhase === 'stopped' && brakeDistance > 0);
+        const isMirrorCleared = (activeCart === 'mirror' && mirrorSolved);
+        const isMikiriCleared = (activeCart === 'mikiri' && mikiriPhase === 'hit');
+
+        if ((isBrakeCleared || isMirrorCleared || isMikiriCleared) && canvasY >= 90 && canvasY <= 118 && canvasX >= 50 && canvasX <= 270) {
+          const targetUrl = CART_CONFIGS[activeCart]?.url;
+          if (targetUrl) {
+            window.open(targetUrl, '_blank', 'noopener');
+            showRetroToast(`🚀 [本編起動] ${CART_CONFIGS[activeCart].channel} を全画面で起動中...`);
+            return;
+          }
+        }
+
         let opt = 'default';
         if (activeCart === 'mirror') {
           if (mirrorSolved) {
             opt = 'next';
           } else {
-            const rect = crtScreen.getBoundingClientRect();
-            const canvasX = ((e.clientX - rect.left) / rect.width) * 320;
-            const canvasY = ((e.clientY - rect.top) / rect.height) * 200;
             let closest = null;
             let minDist = Infinity;
             currentMirrors.forEach(m => {
@@ -3938,15 +4028,15 @@
 
         // Update Car Physics
         if (brakePhase === 'accel') {
-          brakeSpeed = Math.min(22.0, brakeSpeed + 0.35);
+          brakeSpeed = Math.min(10.5, brakeSpeed + 0.14);
           brakeCarX += brakeSpeed;
           brakeTilt = 0.03; // Slight squat
         } else if (brakePhase === 'braking') {
           brakeCarX += brakeSpeed;
-          brakeSpeed = Math.max(0, brakeSpeed - 0.52);
+          brakeSpeed = Math.max(0, brakeSpeed - 0.22);
           brakeTilt = -0.09; // Forward nose dive!
           // Record tire skid mark
-          if (brakeSpeed > 0.5 && brakeCarX < BRAKE_CLIFF_X - 10) {
+          if (brakeSpeed > 0.4 && brakeCarX < BRAKE_CLIFF_X - 10) {
             brakeSkidMarks.push({
               x: brakeCarX - 10,
               y: 168,
@@ -3989,7 +4079,9 @@
                 brakeVerdict = `🐔 チキンストップ！ 残り ${brakeDistance}m (RANK C)`;
               }
               const osd = document.getElementById('crt-osd-action');
-              if (osd) osd.textContent = 'CLICK TO RETRY 🔄';
+              if (osd) osd.textContent = '★ 成功！ 本編はこちら (FULL PLAY) ▸';
+              const playBtn = document.getElementById('btn-mini-play-full');
+              if (playBtn) playBtn.classList.add('pulse-glow');
             }
           }
         }
@@ -4165,11 +4257,22 @@
             ctx.fillStyle = brakeDistance <= 0.30 ? '#fde047' : (brakeDistance <= 0.80 ? '#38bdf8' : '#cbd5e1');
             ctx.shadowColor = ctx.fillStyle;
             ctx.shadowBlur = 8;
-            ctx.fillText(brakeVerdict, 160, 85);
+            ctx.fillText(brakeVerdict, 160, 78);
             ctx.shadowBlur = 0;
-            ctx.font = '9px "DotGothic16", sans-serif';
+
+            // "本編はこちら" CTA banner on canvas
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(55, 94, 210, 20);
+            ctx.strokeStyle = '#00f5ff';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(55, 94, 210, 20);
+            ctx.font = 'bold 10px "DotGothic16", sans-serif';
+            ctx.fillStyle = '#00f5ff';
+            ctx.fillText('▶ 本編はこちら (雨・突風モード搭載) ◀', 160, 108);
+
+            ctx.font = '8px "DotGothic16", sans-serif';
             ctx.fillStyle = '#94a3b8';
-            ctx.fillText('画面クリックで再挑戦 🔄', 160, 102);
+            ctx.fillText('枠外クリックで再挑戦 🔄 / ここを押すと本編起動', 160, 126);
           } else if (brakePhase === 'fell') {
             ctx.fillStyle = '#ef4444';
             ctx.shadowColor = '#ef4444';
@@ -4178,7 +4281,7 @@
             ctx.shadowBlur = 0;
             ctx.font = '9px "DotGothic16", sans-serif';
             ctx.fillStyle = '#94a3b8';
-            ctx.fillText('画面クリックでリトライ 🔄', 160, 102);
+            ctx.fillText('画面クリックでリトライ 🔄', 160, 104);
           }
         }
       }
@@ -4317,8 +4420,10 @@
           showRetroToast('🌟 [LUMEN MIRROR] — 光学回路開通！結晶覚醒！');
           const osd = document.getElementById('crt-osd-action');
           if (osd) {
-            osd.textContent = mirrorStage < 3 ? '★ CLEAR! CLICK FOR NEXT STAGE ➔' : '★ ALL STAGES CLEARED! CLICK TO LOOP 🔄';
+            osd.textContent = mirrorStage < 3 ? '★ CLEAR! CLICK FOR NEXT STAGE ➔' : '★ 全面制覇！ 本編はこちら (FULL PLAY) ▸';
           }
+          const playBtn = document.getElementById('btn-mini-play-full');
+          if (playBtn) playBtn.classList.add('pulse-glow');
         }
 
         // Draw Laser Beam
@@ -4404,17 +4509,40 @@
           ctx.shadowColor = '#fde047';
           ctx.shadowBlur = 10;
           if (mirrorStage < 3) {
-            ctx.fillText(`★ STAGE 0${mirrorStage} CLEAR! ★`, 160, 105);
-            ctx.font = '9px "DotGothic16", sans-serif';
+            ctx.fillText(`★ STAGE 0${mirrorStage} CLEAR! ★`, 160, 78);
+            ctx.shadowBlur = 0;
+
+            // "本編はこちら" CTA banner on canvas
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(55, 94, 210, 18);
+            ctx.strokeStyle = '#00f5ff';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(55, 94, 210, 18);
+            ctx.font = 'bold 9.5px "DotGothic16", sans-serif';
+            ctx.fillStyle = '#00f5ff';
+            ctx.fillText('▶ 本編はこちら (全30ステージ収録) ◀', 160, 106);
+
+            ctx.font = '8.5px "DotGothic16", sans-serif';
             ctx.fillStyle = '#38bdf8';
-            ctx.fillText(`画面クリックで STAGE 0${mirrorStage + 1} へ ➔`, 160, 122);
+            ctx.fillText(`画面クリックで STAGE 0${mirrorStage + 1} へ ➔`, 160, 124);
           } else {
-            ctx.fillText('👑 ALL STAGES CLEARED!! 👑', 160, 105);
-            ctx.font = '9px "DotGothic16", sans-serif';
+            ctx.fillText('👑 ALL STAGES CLEARED!! 👑', 160, 78);
+            ctx.shadowBlur = 0;
+
+            // "本編はこちら" CTA banner on canvas
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(55, 94, 210, 18);
+            ctx.strokeStyle = '#fde047';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(55, 94, 210, 18);
+            ctx.font = 'bold 9.5px "DotGothic16", sans-serif';
+            ctx.fillStyle = '#fde047';
+            ctx.fillText('▶ 本編はこちら (全30ステージ完全版) ◀', 160, 106);
+
+            ctx.font = '8.5px "DotGothic16", sans-serif';
             ctx.fillStyle = '#38bdf8';
-            ctx.fillText('全ステージ完全攻略！ クリックで最初へ 🔄', 160, 122);
+            ctx.fillText('全ステージ完全攻略！ クリックで最初へ 🔄', 160, 124);
           }
-          ctx.shadowBlur = 0;
         } else {
           ctx.textAlign = 'center';
           ctx.font = '9px "DotGothic16", sans-serif';
@@ -4444,11 +4572,11 @@
         ctx.fillStyle = '#141728';
         ctx.fillRect(0, 145, W, 55);
 
-        // Swaying Grass / Reeds
+        // Swaying Grass / Reeds (Stationary tranquil silhouette to prevent distraction)
         ctx.strokeStyle = '#22283e';
         ctx.lineWidth = 1.5;
         for (let gx = 10; gx < W; gx += 16) {
-          const sway = Math.sin(crtAnimTime * 0.06 + gx) * 3;
+          const sway = Math.sin(gx) * 2;
           ctx.beginPath();
           ctx.moveTo(gx, 145);
           ctx.lineTo(gx + sway, 125);
@@ -4585,27 +4713,39 @@
         // Game State Display
         ctx.textAlign = 'center';
         if (mikiriPhase === 'waiting') {
-          ctx.font = '13px "DotGothic16", sans-serif';
+          // Centered, static, NO dots, NO sway!
+          ctx.font = 'bold 14px "DotGothic16", sans-serif';
           ctx.fillStyle = '#cbd5e1';
-          const dotCount = Math.floor(crtAnimTime / 15) % 4;
-          ctx.fillText(`… 心を研ぎ澄ませ ${'.'.repeat(dotCount)}`, 160, 95);
+          ctx.fillText('心を研ぎ澄ませ', 160, 92);
         } else if (mikiriPhase === 'trigger') {
-          ctx.font = 'bold 32px "DotGothic16", sans-serif';
+          // Sudden clean switch to 斬, NO ！！, NO 『 』
+          ctx.font = 'bold 38px "DotGothic16", sans-serif';
           ctx.fillStyle = '#ff2a85';
           ctx.shadowColor = '#ff2a85';
-          ctx.shadowBlur = 16;
-          ctx.fillText('『 ！！ 斬 』', 160, 95);
+          ctx.shadowBlur = 14;
+          ctx.fillText('斬', 160, 94);
           ctx.shadowBlur = 0;
         } else if (mikiriPhase === 'hit') {
-          ctx.font = 'bold 17px "DotGothic16", sans-serif';
+          ctx.font = 'bold 14px "DotGothic16", sans-serif';
           ctx.fillStyle = '#22c55e';
           ctx.shadowColor = '#22c55e';
-          ctx.shadowBlur = 10;
-          ctx.fillText(`一閃成功！ ${mikiriReactionTime}秒`, 160, 78);
-          ctx.font = '12px "DotGothic16", sans-serif';
-          ctx.fillStyle = '#fde047';
-          ctx.fillText(mikiriRank, 160, 98);
+          ctx.shadowBlur = 8;
+          ctx.fillText(`★ 一閃成功！ ${mikiriReactionTime}秒 ${mikiriRank}`, 160, 74);
           ctx.shadowBlur = 0;
+
+          // "本編はこちら" CTA banner on canvas
+          ctx.fillStyle = '#0f172a';
+          ctx.fillRect(55, 92, 210, 18);
+          ctx.strokeStyle = '#00f5ff';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(55, 92, 210, 18);
+          ctx.font = 'bold 9.5px "DotGothic16", sans-serif';
+          ctx.fillStyle = '#00f5ff';
+          ctx.fillText('▶ 本編はこちら (真剣勝負モード搭載) ◀', 160, 104);
+
+          ctx.font = '8.5px "DotGothic16", sans-serif';
+          ctx.fillStyle = '#cbd5e1';
+          ctx.fillText(`連勝記録: ${mikiriStreak} 人斬り！ / クリックで次へ ➔`, 160, 122);
         } else if (mikiriPhase === 'rival_hit') {
           ctx.font = 'bold 17px "DotGothic16", sans-serif';
           ctx.fillStyle = '#ef4444';
