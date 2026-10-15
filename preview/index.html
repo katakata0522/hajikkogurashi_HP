@@ -157,42 +157,35 @@
       box-shadow: 0 0 8px var(--neon-cyan);
     }
 
-    /* Neon Gradient Button (PLAY NOW) */
+    /* Physical Arcade Push Button (PLAY NOW) */
     .btn-neon-play {
       position: relative;
-      background: #14111d;
+      background: #d90f70;
       color: #ffffff;
       font-family: var(--font-mono);
-      font-size: 14.5px;
+      font-size: 13.5px;
+      font-weight: 700;
       letter-spacing: 0.9px;
       padding: 6px 17px;
-      border-radius: 6px;
-      border: none;
+      border-radius: 4px;
+      border: 1.5px solid #ff4099;
+      border-bottom: 3px solid #7a003b;
       cursor: pointer;
       z-index: 1;
       white-space: nowrap;
-      box-shadow:
-        -3px -2px 12px rgba(255, 0, 128, 0.42),
-        3px 2px 12px rgba(0, 245, 255, 0.42);
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-    }
-    .btn-neon-play::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      border-radius: 6px;
-      padding: 2px;
-      background: linear-gradient(125deg, #ff008c 0%, #ff2a85 38%, #00f5ff 100%);
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      pointer-events: none;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+      transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
     }
     .btn-neon-play:hover {
       transform: translateY(-1px);
-      box-shadow:
-        -4px -2px 18px rgba(255, 0, 128, 0.7),
-        4px 2px 18px rgba(0, 245, 255, 0.7);
+      background: #e6197d;
+      box-shadow: 0 5px 14px rgba(230, 25, 125, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+    .btn-neon-play:active {
+      transform: translateY(2px);
+      border-bottom-width: 1.5px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
     }
 
     /* SFX Toggle Mini Button */
@@ -309,37 +302,29 @@
     .btn-enter-base {
       position: relative;
       display: inline-block;
-      background: #141622;
+      background: #181d2c;
       color: #ffffff;
-      font-family: var(--font-mono);
+      font-family: var(--font-pixel-jp);
       font-size: 11.5px;
       letter-spacing: 0.8px;
-      padding: 6.5px 18px;
-      border-radius: 5px;
+      padding: 7px 18px;
+      border-radius: 4px;
       cursor: pointer;
-      border: none;
-      box-shadow:
-        -2px 0 8px rgba(0, 245, 255, 0.35),
-        2px 0 8px rgba(255, 0, 153, 0.35);
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-    }
-    .btn-enter-base::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      border-radius: 5px;
-      padding: 1.8px;
-      background: linear-gradient(90deg, #00f5ff 0%, #00f5ff 55%, #ff00a0 100%);
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      pointer-events: none;
+      border: 1.5px solid #333d59;
+      border-bottom: 3px solid #0f121b;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
     }
     .btn-enter-base:hover {
-      transform: scale(1.04);
-      box-shadow:
-        -3px 0 14px rgba(0, 245, 255, 0.7),
-        3px 0 14px rgba(255, 0, 153, 0.7);
+      transform: translateY(-1px);
+      background: #21283d;
+      border-color: var(--neon-cyan);
+      box-shadow: 0 5px 12px rgba(0, 245, 255, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+    .btn-enter-base:active {
+      transform: translateY(2px);
+      border-bottom-width: 1.5px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
     }
 
     /* Interactive Cat Tooltip Bubble inside Hero */
@@ -541,40 +526,31 @@
     .btn-card-action {
       flex: 1;
       position: relative;
-      background: #13141d;
-      color: #f1f5f9;
+      background: #171926;
+      color: #e2e8f0;
       font-family: var(--font-mono);
       font-size: 9.5px;
       letter-spacing: 0.6px;
       padding: 5px 0;
-      border-radius: 4px;
-      border: none;
+      border-radius: 3px;
+      border: 1px solid #2e354b;
+      border-bottom: 2px solid #0e1017;
       cursor: pointer;
       text-align: center;
       text-decoration: none;
-      box-shadow:
-        -1px 0 6px rgba(0, 245, 255, 0.25),
-        1px 0 6px rgba(255, 0, 160, 0.25);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
       transition: all 0.15s ease;
     }
-    .btn-card-action::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      border-radius: 4px;
-      padding: 1.5px;
-      background: linear-gradient(90deg, #00f5ff 0%, #00d4ff 48%, #ff00a0 100%);
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      pointer-events: none;
-    }
     .btn-card-action:hover {
-      background: #1d2030;
+      background: #222638;
       color: #ffffff;
-      box-shadow:
-        -2px 0 11px rgba(0, 245, 255, 0.6),
-        2px 0 11px rgba(255, 0, 160, 0.6);
+      border-color: #4b577a;
+      transform: translateY(-1px);
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.5);
+    }
+    .btn-card-action:active {
+      transform: translateY(1px);
+      border-bottom-width: 1px;
     }
 
     /* Circular Stamp Badges on Cartridges */
@@ -618,28 +594,16 @@
       border: 1.5px solid #fcd34d;
     }
 
-    /* Subscribe Box in Right Sidebar */
+    /* Field Note (Development Log) in Right Sidebar */
     .subscribe-box {
       position: relative;
-      background: #101118;
+      background: #0f1419;
+      border: 1px solid #1c2732;
+      border-left: 3px solid #22c55e;
       border-radius: 5px;
-      padding: 10px;
+      padding: 11px 13px;
       margin-top: 10px;
-      box-shadow:
-        -2px 0 8px rgba(0, 245, 255, 0.2),
-        2px 0 8px rgba(255, 0, 160, 0.2);
-    }
-    .subscribe-box::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      border-radius: 5px;
-      padding: 1.6px;
-      background: linear-gradient(135deg, #00f5ff 0%, #00d2ff 45%, #ff00a0 100%);
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      pointer-events: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
     }
 
     /* Hardware Icon Tile */
@@ -835,34 +799,163 @@
       }
     }
 
-    /* --- NEW WORLD-CLASS EXTENSIONS (UE5 Project, Crew Roster, Inquiry & Footer) --- */
+    /* --- HARDWARE ATELIER DEV-DECK (UE5 Flagship Project Card) --- */
     .ue5-flagship-card {
       margin-top: 20px;
       margin-bottom: 22px;
-      background: linear-gradient(135deg, rgba(20, 22, 38, 0.95) 0%, rgba(14, 15, 26, 0.98) 100%);
-      border: 1px solid rgba(0, 245, 255, 0.35);
-      border-radius: 8px;
-      padding: 18px 22px;
+      background: #0f121d;
+      border: 2px solid #232a3e;
+      border-radius: 6px;
+      padding: 0;
       position: relative;
-      overflow: hidden;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), inset 0 0 16px rgba(0, 245, 255, 0.05);
-      transition: all 0.25s ease;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
     .ue5-flagship-card:hover {
-      border-color: rgba(0, 245, 255, 0.65);
-      box-shadow: 0 12px 38px rgba(0, 245, 255, 0.15), inset 0 0 24px rgba(0, 245, 255, 0.08);
+      border-color: #3b4668;
+      box-shadow: 0 12px 34px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.12);
     }
-    .ue5-flagship-card::before {
-      content: '';
+    /* Industrial Dev-Deck Top Bar */
+    .ue5-dev-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 14px;
+      background: #151926;
+      border-bottom: 1px solid #242c40;
+      border-radius: 4px 4px 0 0;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.6px;
+      color: #94a3b8;
+    }
+    .ue5-dev-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 700;
+      color: #38bdf8;
+    }
+    .ue5-dev-status-led {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #ef4444;
+      box-shadow: 0 0 6px #ef4444;
+      animation: ledPulse 1.8s infinite ease-in-out;
+    }
+    @keyframes ledPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+    .ue5-dev-body {
+      padding: 16px 20px;
+      display: grid;
+      grid-template-columns: 1fr 220px;
+      gap: 20px;
+      align-items: center;
+    }
+    @media (max-width: 820px) {
+      .ue5-dev-body {
+        grid-template-columns: 1fr;
+        gap: 14px;
+        padding: 14px 16px;
+      }
+    }
+    /* Hardware Corner Screws */
+    .dev-screw {
       position: absolute;
-      top: 0; left: 0; right: 0; height: 2px;
-      background: linear-gradient(90deg, #00f5ff, #ff2a9d, #f59e0b);
-      opacity: 0.85;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #64748b 0%, #1e293b 100%);
+      border: 1px solid #0f172a;
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.3);
+      pointer-events: none;
+      z-index: 2;
     }
+    .screw-tl { top: 4px; left: 4px; }
+    .screw-tr { top: 4px; right: 4px; }
+    .screw-bl { bottom: 4px; left: 4px; }
+    .screw-br { bottom: 4px; right: 4px; }
+
+    /* Tactical 3D Wireframe Scope Monitor */
+    .ue5-wireframe-scope {
+      background: #090b12;
+      border: 1.5px solid #232c40;
+      border-radius: 4px;
+      padding: 8px 10px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.85);
+    }
+    .scope-screen-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 8.5px;
+      color: #64748b;
+      letter-spacing: 0.5px;
+    }
+    .scope-hud-target {
+      color: #38bdf8;
+      font-weight: 700;
+    }
+    .scope-wireframe-svg {
+      width: 100%;
+      height: 80px;
+      display: block;
+    }
+    .scope-stats-row {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 8px;
+      color: #818cf8;
+      border-top: 1px dashed #1e2638;
+      padding-top: 4px;
+    }
+
+    /* Milestone progress track */
+    .ue5-milestones {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+    }
+    .milestone-step {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 7px;
+      border-radius: 3px;
+      background: #161b2a;
+      border: 1px solid #29324d;
+      color: #94a3b8;
+    }
+    .milestone-step.done {
+      border-color: #10b981;
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.1);
+    }
+    .milestone-step.wip {
+      border-color: #38bdf8;
+      color: #7dd3fc;
+      background: rgba(56, 189, 248, 0.12);
+      font-weight: 700;
+    }
+
     .ue5-badge-row {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
       margin-bottom: 8px;
     }
@@ -875,9 +968,104 @@
       text-transform: uppercase;
       font-weight: bold;
     }
-    .pill-cyan { background: rgba(0, 245, 255, 0.15); color: #00f5ff; border: 1px solid rgba(0, 245, 255, 0.4); }
+    .pill-cyan { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); }
     .pill-pink { background: rgba(255, 42, 157, 0.15); color: #ff2a9d; border: 1px solid rgba(255, 42, 157, 0.4); }
     .pill-amber { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.4); }
+
+    /* --- TRACK RECORD & SPEC CARD (Sidebar Extension for Persona ④) --- */
+    .track-record-card {
+      background: #111420;
+      border: 1px solid #242c40;
+      border-left: 3px solid #38bdf8;
+      border-radius: 5px;
+      padding: 11px 13px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+    }
+    .track-record-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 9px;
+      padding-bottom: 7px;
+      border-bottom: 1px solid #1e2538;
+    }
+    .track-record-sub {
+      font-family: var(--font-mono);
+      font-size: 8.5px;
+      letter-spacing: 0.6px;
+      color: #38bdf8;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .track-record-title {
+      margin: 0;
+      font-family: var(--font-pixel-jp);
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #f1f5f9;
+      letter-spacing: 0.3px;
+    }
+    .track-record-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 7px;
+      margin-bottom: 10px;
+    }
+    .track-stat-item {
+      background: #161a29;
+      border: 1px solid #273048;
+      border-radius: 4px;
+      padding: 6px 8px;
+    }
+    .stat-label {
+      font-family: var(--font-mono);
+      font-size: 8px;
+      letter-spacing: 0.5px;
+      color: #7e8b9f;
+      text-transform: uppercase;
+    }
+    .stat-value {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.25;
+      margin: 1px 0;
+    }
+    .stat-desc {
+      font-family: var(--font-pixel-jp);
+      font-size: 9px;
+      color: #94a3b8;
+      line-height: 1.3;
+    }
+    .track-record-links {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .track-link-pill {
+      flex: 1;
+      min-width: 105px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 6px;
+      border-radius: 3px;
+      background: #181d2e;
+      border: 1px solid #323d5a;
+      color: #cbd5e1;
+      font-family: var(--font-pixel-jp);
+      font-size: 9.5px;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .track-link-pill:hover {
+      background: #222a42;
+      border-color: #38bdf8;
+      color: #ffffff;
+    }
 
     .crew-section {
       margin-top: 32px;
@@ -1749,27 +1937,97 @@
           </div>
         </section>
 
-        <!-- UNREAL ENGINE 5 FLAGSHIP PROJECT CARD -->
+        <!-- UNREAL ENGINE 5 FLAGSHIP PROJECT DEV-UNIT (Industrial Atelier Chassis) -->
         <section class="ue5-flagship-card" aria-label="Flagship Project">
-          <div class="ue5-badge-row">
-            <span class="ue5-pill pill-cyan">⚡ 本格制作中 // Unreal Engine 5</span>
+          <!-- Metallic Fastener Screws on 4 Corners -->
+          <span class="dev-screw screw-tl" aria-hidden="true"></span>
+          <span class="dev-screw screw-tr" aria-hidden="true"></span>
+          <span class="dev-screw screw-bl" aria-hidden="true"></span>
+          <span class="dev-screw screw-br" aria-hidden="true"></span>
+
+          <!-- Dev-Unit Industrial Header Bar -->
+          <div class="ue5-dev-header">
+            <div class="ue5-dev-badge">
+              <span class="ue5-dev-status-led" aria-hidden="true"></span>
+              <span>DEV-UNIT 01 // UNREAL ENGINE 5 FLAGSHIP</span>
+            </div>
+            <div style="font-family:var(--font-mono); font-size:9px; color:#64748b;">
+              BRANCH: <span style="color:#e2e8f0;">PROTOTYPE-V2</span> | TARGET: <span style="color:#e2e8f0;">PC/STEAM</span>
+            </div>
           </div>
-          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
-            <div style="max-width: 680px;">
-              <h2 style="margin:0 0 6px 0; font-family:var(--font-mono); font-size:19px; font-weight:700; color:#ffffff; letter-spacing:0.4px;">
+
+          <div class="ue5-dev-body">
+            <div>
+              <div class="ue5-badge-row">
+                <span class="ue5-pill pill-cyan">⚡ UE5 NEXT-GEN IN-DEV</span>
+                <span class="ue5-pill pill-pink">ORIGINAL INDIE</span>
+                <span class="ue5-pill pill-amber">FLAGSHIP</span>
+              </div>
+              <h2 style="margin:4px 0 8px 0; font-family:var(--font-mono); font-size:18px; font-weight:700; color:#ffffff; letter-spacing:0.3px; line-height:1.4;">
                 Re:青春！はじっこから創る、Unreal Engine 5 本格インディーゲーム
               </h2>
-              <p style="margin:0; font-family:var(--font-pixel-jp); font-size:11.5px; line-height:1.7; color:#a2a9c2;">
-                Corner Neighbor の大本命プロジェクト。UE5のハイエンドなグラフィックと独自のゲーム性を融合させた本格タイトルを鋭意開発中です。開発メモやイベント参加記録は公式noteで公開中！
+              <p style="margin:0 0 12px 0; font-family:var(--font-pixel-jp); font-size:11.5px; line-height:1.7; color:#94a3b8;">
+                Corner Neighbor の大本命プロジェクト。UE5のハイエンドなグラフィックと独自のゲーム性を融合させた本格タイトルを鋭意開発中です。開発メモや試作記録は公式noteで随時公開中！
               </p>
+
+              <!-- Milestone progress strip -->
+              <div class="ue5-milestones">
+                <span class="milestone-step done">✓ CONCEPT</span>
+                <span class="milestone-step done">✓ PROTOTYPE</span>
+                <span class="milestone-step wip">⚡ ALPHA BUILD [WIP]</span>
+                <span class="milestone-step">○ BETA 2026</span>
+              </div>
+
+              <!-- Action buttons -->
+              <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:14px;">
+                <a href="/coming-soon.html" style="background:#0284c7; border:1px solid #38bdf8; border-bottom:3px solid #0369a1; color:#ffffff; font-family:var(--font-mono); font-size:11px; font-weight:bold; padding:7px 16px; border-radius:4px; text-decoration:none; display:inline-flex; align-items:center; gap:6px; box-shadow:0 3px 6px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.25); transition:all 0.15s;">
+                  <span>制作中ページを見る</span> ▸
+                </a>
+                <a href="https://note.com/hajikkogurashi01" target="_blank" rel="noopener noreferrer" style="background:#161a29; border:1px solid #2e3852; border-bottom:2px solid #0d101a; color:#e2e8f0; font-family:var(--font-mono); font-size:11px; padding:6px 14px; border-radius:4px; text-decoration:none; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 4px rgba(0,0,0,0.4); transition:all 0.15s;">
+                  <span>開発note</span> ↗
+                </a>
+              </div>
             </div>
-            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:4px;">
-              <a href="/coming-soon.html" style="background:linear-gradient(135deg, #00f5ff, #0099ff); color:#08070f; font-family:var(--font-mono); font-size:11px; font-weight:bold; padding:7px 16px; border-radius:4px; text-decoration:none; display:inline-flex; align-items:center; gap:6px; box-shadow:0 0 14px rgba(0,245,255,0.4); transition:all 0.15s;">
-                <span>制作中ページを見る</span> ▸
-              </a>
-              <a href="https://note.com/hajikkogurashi01" target="_blank" rel="noopener noreferrer" style="background:#191c2b; border:1px solid #383f5c; color:#e2e8f0; font-family:var(--font-mono); font-size:11px; padding:6px 14px; border-radius:4px; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:all 0.15s;">
-                <span>開発note</span> ↗
-              </a>
+
+            <!-- Tactical 3D Wireframe Blueprint Scope -->
+            <div class="ue5-wireframe-scope" aria-label="UE5 3D Wireframe Scope View">
+              <div class="scope-screen-header">
+                <span class="scope-hud-target">[CAM-01 // SCOPE]</span>
+                <span style="color:#ef4444; font-weight:700;">REC ● 60.0 FPS</span>
+              </div>
+              <svg class="scope-wireframe-svg" viewBox="0 0 200 80" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <!-- Tactical Scope Reticle Grid -->
+                <line x1="0" y1="40" x2="200" y2="40" stroke="#1e293b" stroke-width="0.75" stroke-dasharray="3 3"/>
+                <line x1="100" y1="0" x2="100" y2="80" stroke="#1e293b" stroke-width="0.75" stroke-dasharray="3 3"/>
+                <!-- Perspective Ground Grid -->
+                <path d="M 20 75 L 85 45 M 60 75 L 95 45 M 100 75 L 100 45 M 140 75 L 105 45 M 180 75 L 115 45" stroke="#1d283a" stroke-width="0.8"/>
+                <line x1="30" y1="70" x2="170" y2="70" stroke="#1d283a" stroke-width="0.8"/>
+                <line x1="55" y1="60" x2="145" y2="60" stroke="#1d283a" stroke-width="0.8"/>
+                <line x1="75" y1="50" x2="125" y2="50" stroke="#1d283a" stroke-width="0.8"/>
+                <!-- 3D Wireframe Cube (Rotating Model Silhouette) -->
+                <!-- Front Face -->
+                <polygon points="85,32 115,28 115,50 85,54" stroke="#38bdf8" stroke-width="1.2" fill="rgba(56, 189, 248, 0.08)"/>
+                <!-- Top Face -->
+                <polygon points="85,32 100,20 130,17 115,28" stroke="#38bdf8" stroke-width="1" fill="rgba(56, 189, 248, 0.15)"/>
+                <!-- Right Face -->
+                <polygon points="115,28 130,17 130,38 115,50" stroke="#38bdf8" stroke-width="1" fill="rgba(56, 189, 248, 0.04)"/>
+                <!-- Coordinate Gizmo at Corner -->
+                <line x1="85" y1="54" x2="72" y2="60" stroke="#ef4444" stroke-width="1.2"/> <!-- X (red) -->
+                <line x1="85" y1="54" x2="85" y2="67" stroke="#22c55e" stroke-width="1.2"/> <!-- Y (green) -->
+                <line x1="85" y1="54" x2="98" y2="52" stroke="#3b82f6" stroke-width="1.2"/> <!-- Z (blue) -->
+                <text x="67" y="63" fill="#ef4444" font-size="6" font-family="monospace">X</text>
+                <text x="82" y="74" fill="#22c55e" font-size="6" font-family="monospace">Y</text>
+                <text x="100" y="52" fill="#3b82f6" font-size="6" font-family="monospace">Z</text>
+                <!-- Reticle Corner Accents -->
+                <path d="M 6 12 L 6 6 L 12 6" stroke="#0284c7" stroke-width="1"/>
+                <path d="M 194 12 L 194 6 L 188 6" stroke="#0284c7" stroke-width="1"/>
+                <path d="M 6 68 L 6 74 L 12 74" stroke="#0284c7" stroke-width="1"/>
+                <path d="M 194 68 L 194 74 L 188 74" stroke="#0284c7" stroke-width="1"/>
+              </svg>
+              <div class="scope-stats-row">
+                <span>NANITE // LUMEN ON</span>
+                <span>MESH: 14,820 POLYS</span>
+              </div>
             </div>
           </div>
         </section>
@@ -2007,23 +2265,61 @@
           </div>
 
           <!-- RIGHT SIDEBAR COLUMN: Updates & Development Log -->
-          <aside class="transmission-sidebar" aria-label="サークル最新情報">
-            <div>
-              <div style="display:flex; align-items:center; justify-content:space-between; margin: 2px 0 10px 0;">
-                <h3 style="margin: 0; font-size: 13.5px; font-weight: 700; color: #f1f5f9; letter-spacing: 0.4px; font-family: var(--font-pixel-jp);">
-                  📡 最新情報 // UPDATES
-                </h3>
-                <a href="/news.html" style="color:#00f5ff; font-family:var(--font-pixel-jp); font-size:10px; text-decoration:none; border:1px solid #2e3346; padding:2px 6px; border-radius:3px; transition:all 0.15s ease;" title="お知らせ一覧へ">
+          <aside class="transmission-sidebar" aria-label="サークル最新情報・実績">
+            <!-- CIRCLE TRACK RECORD CARD (Persona ④: Media & Event Scout Visiblity) -->
+            <div class="track-record-card" aria-label="サークル活動実績・規模">
+              <div class="track-record-header">
+                <span style="font-size: 15px;" aria-hidden="true">🏛️</span>
+                <div>
+                  <div class="track-record-sub">CIRCLE SPEC & TRACK RECORD</div>
+                  <h3 class="track-record-title">活動実績・サークル仕様</h3>
+                </div>
+              </div>
+              <div class="track-record-grid">
+                <div class="track-stat-item">
+                  <div class="stat-label">FOUNDED</div>
+                  <div class="stat-value">2024.08</div>
+                  <div class="stat-desc">活動開始・発足</div>
+                </div>
+                <div class="track-stat-item">
+                  <div class="stat-label">CATALOG</div>
+                  <div class="stat-value">9 TITLES</div>
+                  <div class="stat-desc">ブラウザ即時稼働</div>
+                </div>
+                <div class="track-stat-item">
+                  <div class="stat-label">TEAM CREW</div>
+                  <div class="stat-value">7 CREWS</div>
+                  <div class="stat-desc">多分野制作体制</div>
+                </div>
+                <div class="track-stat-item">
+                  <div class="stat-label">EXHIBITION</div>
+                  <div class="stat-value" style="font-size:11px; margin-top:2px;">東京ダンジョン</div>
+                  <div class="stat-desc">オフライン展示実績</div>
+                </div>
+              </div>
+              <div class="track-record-links">
+                <a href="/aboutus.html" class="track-link-pill" title="サークル詳細・沿革へ">サークル沿革 ▸</a>
+                <a href="/portfolio.html" class="track-link-pill" title="全作品ポートフォリオへ">実績一覧 ▸</a>
+              </div>
+            </div>
+
+            <div style="background: #111420; border: 1px solid #242c40; border-radius: 5px; padding: 11px 13px; margin-bottom: 12px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 9px; padding-bottom: 7px; border-bottom: 1px solid #1e2538;">
+                <div>
+                  <div style="font-family:var(--font-mono); font-size:8.5px; letter-spacing:0.6px; color:#38bdf8; text-transform:uppercase; font-weight:700;">TRANSMISSION // UPDATES</div>
+                  <h3 style="margin: 1px 0 0 0; font-size: 11.5px; font-weight: 700; color: #f1f5f9; letter-spacing: 0.3px; font-family: var(--font-pixel-jp);">📡 サークル最新情報</h3>
+                </div>
+                <a href="/news.html" style="color:#00f5ff; font-family:var(--font-pixel-jp); font-size:9.5px; text-decoration:none; border:1px solid #2e3346; padding:2px 7px; border-radius:3px; background:#181d2e; transition:all 0.15s ease;" title="お知らせ一覧へ">
                   一覧 ▸
                 </a>
               </div>
 
               <!-- Real, High-Contrast Updates List (Accessible & Clear) -->
-              <div class="transmission-news-list" style="font-size: 11.5px; line-height: 1.65; color: #cbd5e1; font-family: var(--font-pixel-jp); display: flex; flex-direction: column; gap: 8px;">
-                <div style="border-bottom: 1px solid #222638; padding-bottom: 6px;">
+              <div class="transmission-news-list" style="font-size: 11px; line-height: 1.65; color: #cbd5e1; font-family: var(--font-pixel-jp); display: flex; flex-direction: column; gap: 7px;">
+                <div style="border-bottom: 1px solid #1e2538; padding-bottom: 5px;">
                   <span style="color:#00f5ff; font-weight:bold;">[NEW]</span> 新トップページプレビュー公開
                 </div>
-                <div style="border-bottom: 1px solid #222638; padding-bottom: 6px;">
+                <div style="border-bottom: 1px solid #1e2538; padding-bottom: 5px;">
                   <span style="color:#ff2a9d; font-weight:bold;">[ROM]</span> ブラウザミニゲーム全9作品稼働中
                 </div>
                 <div>
@@ -2033,15 +2329,21 @@
             </div>
 
             <div>
-              <!-- Real Note Development Log Card (Replaces fake subscribe form) -->
-              <div class="subscribe-box" style="margin-top: 10px; background: #131726; border: 1px solid #28304a; border-radius: 6px; padding: 12px 14px;">
-                <div style="font-size: 12px; color: #00f5ff; font-weight: 700; font-family: var(--font-pixel-jp); margin-bottom: 4px;">
-                  📖 公式 note 開発手記
+              <!-- Real Note Development Log Card (Field Note) -->
+              <div class="subscribe-box" aria-label="公式note開発手記">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+                  <span style="font-family:var(--font-mono); font-size:8.5px; letter-spacing:0.6px; color:#4ade80; font-weight:700; background:rgba(34, 197, 94, 0.12); padding:2px 6px; border-radius:3px; border:1px solid rgba(34, 197, 94, 0.3);">
+                    FIELD NOTE // 開発手記
+                  </span>
+                  <span style="font-family:var(--font-mono); font-size:8.5px; color:#64748b;">UPDATED</span>
                 </div>
-                <div style="font-size: 11px; color: #94a3b8; line-height: 1.5; margin-bottom: 10px;">
-                  泥臭い制作過程や仕様書、開発の裏側を随時お届けしています。
+                <div style="font-size: 12px; color: #f1f5f9; font-weight: 700; font-family: var(--font-pixel-jp); margin-bottom: 4px;">
+                  公式 note にて舞台裏を発信中
                 </div>
-                <a href="https://note.com/hajikkogurashi01" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; background: #1c2236; border: 1px solid #3b466b; color: #ffffff; font-family: var(--font-mono); font-size: 11px; font-weight: bold; padding: 7px 10px; border-radius: 4px; text-decoration: none; transition: all 0.15s ease;" aria-label="公式note開発手記を開く">
+                <div style="font-size: 11px; color: #94a3b8; line-height: 1.5; margin-bottom: 10px; font-family:var(--font-pixel-jp);">
+                  泥臭い制作過程や仕様書、イベント参加の裏側を随時お届けしています。
+                </div>
+                <a href="https://note.com/hajikkogurashi01" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; background: #151e18; border: 1px solid #225e36; border-bottom: 2px solid #0d2415; color: #4ade80; font-family: var(--font-mono); font-size: 11px; font-weight: bold; padding: 7px 10px; border-radius: 4px; text-decoration: none; transition: all 0.15s ease;" aria-label="公式note開発手記を開く">
                   <span>note を読む</span> ↗
                 </a>
               </div>
