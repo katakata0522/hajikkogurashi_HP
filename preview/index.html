@@ -3381,26 +3381,34 @@
     let crtAnimTime = 0;
 
     // ==========================================
-    // 1. BRAKE MINI STATE (ギリギリ・ブレーキ！)
+    // 1. BRAKE MINI STATE (スクロール＆プログレスバー搭載チキンレース)
     // ==========================================
     let brakePhase = 'ready'; // 'ready' | 'accel' | 'braking' | 'stopped' | 'fell'
-    let brakeCarX = 20;
+    let brakeCarX = 30; // Global world coordinate
     let brakeCarY = 136;
     let brakeSpeed = 0;
-    let brakeCliffX = 236; // Cliff edge coordinate
+    const BRAKE_CLIFF_X = 2600; // Total world distance (approx 130m)
+    let brakeCameraX = 0;
     let brakeDistance = 0;
-    let brakeBest = 0.12;
+    let brakeBest = 0.48; // In meters
     let brakeSparks = [];
-    let brakeSkidMarks = [];
+    let brakeSkidMarks = []; // World coordinates { x, y, len }
     let brakeVerdict = '';
     let brakeTilt = 0;
     let brakeFallRotation = 0;
+    const brakeSignboards = [
+      { x: 700, text: 'あと 95m' },
+      { x: 1300, text: 'あと 65m' },
+      { x: 1900, text: 'あと 35m' },
+      { x: 2350, text: '⚠️ DANGER! あと 12m' }
+    ];
 
     function resetBrakeMini() {
       brakePhase = 'ready';
-      brakeCarX = 20;
+      brakeCarX = 30;
       brakeCarY = 136;
       brakeSpeed = 0;
+      brakeCameraX = 0;
       brakeDistance = 0;
       brakeSparks = [];
       brakeSkidMarks = [];
@@ -3412,28 +3420,58 @@
     }
 
     // ==========================================
-    // 2. LUMEN MIRROR MINI STATE (光学パズル)
+    // 2. LUMEN MIRROR MINI STATE (多段ステージ＆高質感光学パズル)
     // ==========================================
-    let mirrorAngle1 = 45; // Top Mirror: 45 or 135 (Solution: 135° deflects DOWN)
-    let mirrorAngle2 = 45; // Bottom Mirror: 45 or 135 (Solution: 135° deflects RIGHT)
+    let mirrorStage = 1; // 1 | 2 | 3
     let mirrorSolved = false;
     let mirrorSolvedAnim = 0;
     let mirrorGlowParticles = [];
 
-    function resetMirrorMini(shuffle = false) {
+    const MIRROR_STAGES = {
+      1: {
+        title: 'STG.01: REFLECTION (単一反射)',
+        emitter: { x: 35, y: 70 },
+        prism: { x: 160, y: 165 },
+        mirrors: [
+          { id: 'm1', x: 160, y: 70, angle: 45, target: 135 } // 45° -> sky, 135° -> down to prism
+        ],
+        blocks: []
+      },
+      2: {
+        title: 'STG.02: DOUBLE ANGLE (二段階屈折)',
+        emitter: { x: 35, y: 55 },
+        prism: { x: 265, y: 155 },
+        mirrors: [
+          { id: 'm1', x: 135, y: 55, angle: 45, target: 135 },  // 135° -> down to m2
+          { id: 'm2', x: 135, y: 155, angle: 45, target: 135 }  // 135° -> right to prism
+        ],
+        blocks: [
+          { x: 195, y: 105, w: 16, h: 26 } // Optical barrier block
+        ]
+      },
+      3: {
+        title: 'STG.03: TRI-REFLECT (三段Uターン)',
+        emitter: { x: 35, y: 45 },
+        prism: { x: 245, y: 45 },
+        mirrors: [
+          { id: 'm1', x: 110, y: 45, angle: 45, target: 135 },  // 135° -> down
+          { id: 'm2', x: 110, y: 160, angle: 45, target: 135 }, // 135° -> right
+          { id: 'm3', x: 245, y: 160, angle: 135, target: 45 }  // 45°  -> UP to prism!
+        ],
+        blocks: [
+          { x: 175, y: 95, w: 20, h: 40 } // Central dark core
+        ]
+      }
+    };
+
+    let currentMirrors = MIRROR_STAGES[1].mirrors.map(m => ({ ...m }));
+
+    function resetMirrorMini() {
       mirrorSolved = false;
       mirrorSolvedAnim = 0;
       mirrorGlowParticles = [];
-      if (shuffle) {
-        mirrorAngle1 = Math.random() < 0.5 ? 45 : 135;
-        mirrorAngle2 = Math.random() < 0.5 ? 45 : 135;
-        if (mirrorAngle1 === 135 && mirrorAngle2 === 135) {
-          mirrorAngle1 = 45; // Ensure starts unsolved
-        }
-      } else {
-        mirrorAngle1 = 45;
-        mirrorAngle2 = 45;
-      }
+      const stg = MIRROR_STAGES[mirrorStage] || MIRROR_STAGES[1];
+      currentMirrors = stg.mirrors.map(m => ({ ...m }));
       const osd = document.getElementById('crt-osd-action');
       if (osd && activeCart === 'mirror') osd.textContent = 'CLICK MIRRORS TO REFLECT 💎';
     }
@@ -3586,19 +3624,20 @@
       if (activeCart === 'brake') {
         if (brakePhase === 'ready') {
           brakePhase = 'accel';
-          brakeSpeed = 1.6;
-          brakeCarX = 20;
+          brakeSpeed = 4.0;
+          brakeCarX = 30;
+          brakeCameraX = 0;
           brakeSparks = [];
           brakeSkidMarks = [];
           play8BitSound('select');
-          showRetroToast('🏎️ [アクセル全開！] 崖の手前でキーまたはクリックで急制動！');
+          showRetroToast('🏎️ [アクセル全開！] 上部のプログレスバーと崖を見極めて急制動！');
           announceA11y('アクセル全開！崖の手前で急ブレーキ！');
           const osd = document.getElementById('crt-osd-action');
           if (osd) osd.textContent = '🛑 TAP TO BRAKE!! 🛑';
         } else if (brakePhase === 'accel') {
           brakePhase = 'braking';
           play8BitSound('jump');
-          showRetroToast('🛑 [急ブレーキ！] 止まれえぇぇ！');
+          showRetroToast('🛑 [急ブレーキ作動！] 止まれえぇぇ！');
           announceA11y('急ブレーキ作動！');
           const osd = document.getElementById('crt-osd-action');
           if (osd) osd.textContent = 'BRAKING... 🛑';
@@ -3608,21 +3647,19 @@
         }
       } else if (activeCart === 'mirror') {
         if (mirrorSolved) {
-          resetMirrorMini(true);
+          mirrorStage = (mirrorStage % 3) + 1;
+          resetMirrorMini();
           play8BitSound('select');
-          showRetroToast('💎 [LUMEN MIRROR] 新たな光学配置へシャッフル！');
-          announceA11y('新しい光学配置へシャッフル');
+          showRetroToast(`💎 [LUMEN MIRROR] ステージ 0${mirrorStage} へ進行！`);
+          announceA11y(`ステージ 0${mirrorStage} に進みました`);
         } else {
-          if (option === 'm2' || option === 'bottom') {
-            mirrorAngle2 = mirrorAngle2 === 45 ? 135 : 45;
-            showRetroToast(`💎 [下段ミラー M2] 角度を ${mirrorAngle2}° に回転！`);
-            announceA11y(`下段ミラーを${mirrorAngle2}度に回転`);
-          } else {
-            mirrorAngle1 = mirrorAngle1 === 45 ? 135 : 45;
-            showRetroToast(`💎 [上段ミラー M1] 角度を ${mirrorAngle1}° に回転！`);
-            announceA11y(`上段ミラーを${mirrorAngle1}度に回転`);
+          const target = currentMirrors.find(m => m.id === option) || currentMirrors[0];
+          if (target) {
+            target.angle = target.angle === 45 ? 135 : 45;
+            showRetroToast(`💎 [ミラー ${target.id.toUpperCase()}] 角度を ${target.angle}° に回転！`);
+            announceA11y(`ミラーを${target.angle}度に回転`);
+            play8BitSound('select');
           }
-          play8BitSound('select');
         }
       } else if (activeCart === 'mikiri') {
         if (mikiriPhase === 'trigger') {
@@ -3699,12 +3736,23 @@
       crtScreen.addEventListener('click', (e) => {
         let opt = 'default';
         if (activeCart === 'mirror') {
-          const rect = crtScreen.getBoundingClientRect();
-          const canvasX = ((e.clientX - rect.left) / rect.width) * 320;
-          const canvasY = ((e.clientY - rect.top) / rect.height) * 200;
-          const distM1 = Math.hypot(canvasX - 140, canvasY - 55);
-          const distM2 = Math.hypot(canvasX - 140, canvasY - 155);
-          opt = distM1 <= distM2 ? 'm1' : 'm2';
+          if (mirrorSolved) {
+            opt = 'next';
+          } else {
+            const rect = crtScreen.getBoundingClientRect();
+            const canvasX = ((e.clientX - rect.left) / rect.width) * 320;
+            const canvasY = ((e.clientY - rect.top) / rect.height) * 200;
+            let closest = null;
+            let minDist = Infinity;
+            currentMirrors.forEach(m => {
+              const d = Math.hypot(canvasX - m.x, canvasY - m.y);
+              if (d < minDist) {
+                minDist = d;
+                closest = m;
+              }
+            });
+            opt = closest ? closest.id : 'm1';
+          }
         }
         triggerCrtAction(opt);
       });
@@ -3712,13 +3760,25 @@
       crtScreen.addEventListener('keydown', (e) => {
         if (e.key === ' ' || e.key === 'Enter') {
           e.preventDefault();
-          triggerCrtAction('m1');
+          if (activeCart === 'mirror') {
+            if (mirrorSolved) {
+              triggerCrtAction('next');
+            } else {
+              const unsolved = currentMirrors.find(m => m.angle !== m.target) || currentMirrors[0];
+              triggerCrtAction(unsolved.id);
+            }
+          } else {
+            triggerCrtAction('default');
+          }
         } else if (e.key === 'ArrowUp' || e.key === '1') {
           e.preventDefault();
           triggerCrtAction('m1');
         } else if (e.key === 'ArrowDown' || e.key === '2') {
           e.preventDefault();
           triggerCrtAction('m2');
+        } else if (e.key === '3') {
+          e.preventDefault();
+          triggerCrtAction('m3');
         }
       });
     }
@@ -3761,125 +3821,144 @@
       ctx.fillRect(0, 0, W, H);
 
       // ====================================================
-      // A. BRAKE MINI SCENE (ギリギリ・ブレーキ！)
+      // A. BRAKE MINI SCENE (スクロール＆プログレスバー搭載チキンレース)
       // ==========================================
       if (activeCart === 'brake') {
-        // Starry night sky & cyber skyline
+        // Camera smooth follow (leads the car so the player can anticipate ahead)
+        const targetCamX = Math.max(0, brakeCarX - 70);
+        brakeCameraX += (targetCamX - brakeCameraX) * 0.22;
+
+        // Starry night sky & cyber skyline (parallax scrolling)
+        const bgScroll1 = (brakeCameraX * 0.12) % 180;
         ctx.fillStyle = '#101426';
-        ctx.fillRect(10, 80, 40, 75);
-        ctx.fillRect(60, 65, 50, 90);
-        ctx.fillRect(120, 85, 35, 70);
-        ctx.fillRect(170, 70, 45, 85);
+        for (let bx = -bgScroll1; bx < W + 100; bx += 70) {
+          ctx.fillRect(bx, 75, 45, 80);
+          ctx.fillRect(bx + 35, 60, 30, 95);
+        }
 
         // Lit Windows
         ctx.fillStyle = '#1e2c4c';
-        for (let y = 80; y < 145; y += 10) {
-          for (let x = 65; x < 105; x += 10) {
-            if ((x + y + Math.floor(crtAnimTime / 8)) % 5 === 0) {
-              ctx.fillStyle = '#00f5ff';
-            } else {
-              ctx.fillStyle = '#141d33';
+        for (let bx = -bgScroll1; bx < W + 100; bx += 70) {
+          for (let wy = 80; wy < 145; wy += 12) {
+            for (let wx = bx + 6; wx < bx + 38; wx += 10) {
+              if ((wx + wy + Math.floor(crtAnimTime / 8)) % 5 === 0) {
+                ctx.fillStyle = '#00f5ff';
+              } else {
+                ctx.fillStyle = '#141d33';
+              }
+              ctx.fillRect(wx, wy, 3.5, 3.5);
             }
-            ctx.fillRect(x, y, 4, 4);
           }
         }
 
-        // Road surface
-        ctx.fillStyle = '#181b2a';
-        ctx.fillRect(0, 155, brakeCliffX, 45);
-        ctx.strokeStyle = '#2d334d';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(0, 155);
-        ctx.lineTo(brakeCliffX, 155);
-        ctx.stroke();
+        const cliffScreenX = BRAKE_CLIFF_X - brakeCameraX;
+        const roadEndX = Math.min(W, Math.max(0, cliffScreenX));
 
-        // Speed road stripes
-        const stripeOffset = (crtAnimTime * (brakePhase === 'accel' ? 8 : (brakePhase === 'braking' ? 3 : 0))) % 30;
-        ctx.fillStyle = '#3b4263';
-        for (let sx = -stripeOffset; sx < brakeCliffX; sx += 30) {
-          ctx.fillRect(sx, 175, 14, 3);
+        // Road surface (only up to cliff edge!)
+        if (roadEndX > 0) {
+          ctx.fillStyle = '#181b2a';
+          ctx.fillRect(0, 155, roadEndX, 45);
+          ctx.strokeStyle = '#2d334d';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(0, 155);
+          ctx.lineTo(roadEndX, 155);
+          ctx.stroke();
+
+          // Speed road dashes
+          const stripeOffset = (brakeCameraX + crtAnimTime * 2) % 32;
+          ctx.fillStyle = '#3b4263';
+          for (let sx = -stripeOffset; sx < roadEndX; sx += 32) {
+            ctx.fillRect(sx, 175, 14, 3);
+          }
         }
 
-        // Road Distance Markers (10m, 5m, 1m markings)
+        // Cliff Warning Hazard Stripes (Checker pattern at edge)
+        if (cliffScreenX >= 0 && cliffScreenX <= W + 10) {
+          ctx.fillStyle = '#dc2626';
+          ctx.fillRect(cliffScreenX - 8, 155, 8, 45);
+          ctx.fillStyle = '#fef08a';
+          for (let wy = 155; wy < 200; wy += 8) {
+            ctx.fillRect(cliffScreenX - 8, wy, 8, 4);
+          }
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(cliffScreenX - 1, 155, 2, 45);
+        }
+
+        // Abyss beneath cliff
+        if (cliffScreenX < W) {
+          const abyssStart = Math.max(0, cliffScreenX);
+          ctx.fillStyle = '#05070f';
+          ctx.fillRect(abyssStart, 155, W - abyssStart, 45);
+          ctx.fillStyle = 'rgba(239, 68, 68, 0.28)';
+          ctx.fillRect(abyssStart, 155, Math.min(8, W - abyssStart), 45);
+        }
+
+        // Roadside signboards rushing past
         ctx.font = '8px "Share Tech Mono", monospace';
         ctx.textAlign = 'center';
-        const markers = [
-          { dist: 10, x: brakeCliffX - 18 - (10 * 22) },
-          { dist: 5, x: brakeCliffX - 18 - (5 * 22) },
-          { dist: 1, x: brakeCliffX - 18 - (1 * 22) }
-        ];
-        markers.forEach(m => {
-          if (m.x >= 0 && m.x <= brakeCliffX) {
-            ctx.fillStyle = '#38bdf8';
-            ctx.fillRect(m.x, 155, 1.5, 6);
+        brakeSignboards.forEach(sb => {
+          const sbScreenX = sb.x - brakeCameraX;
+          if (sbScreenX >= -60 && sbScreenX <= W + 60) {
+            // Post
             ctx.fillStyle = '#64748b';
-            ctx.fillText(`${m.dist}m`, m.x, 170);
+            ctx.fillRect(sbScreenX + 18, 120, 3, 35);
+            // Board
+            const isDanger = sb.x > 2000;
+            ctx.fillStyle = isDanger ? '#7f1d1d' : '#1e293b';
+            ctx.fillRect(sbScreenX - 10, 102, 60, 18);
+            ctx.strokeStyle = isDanger ? '#ef4444' : '#38bdf8';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(sbScreenX - 10, 102, 60, 18);
+            ctx.fillStyle = isDanger ? '#fef08a' : '#f8fafc';
+            ctx.fillText(sb.text, sbScreenX + 20, 114);
           }
         });
 
-        // The Cliff / Finish Line (Checker pattern border & Warning Stripes)
-        ctx.fillStyle = '#dc2626';
-        ctx.fillRect(brakeCliffX - 6, 155, 6, 45);
-        ctx.fillStyle = '#fef08a';
-        for (let wy = 155; wy < 200; wy += 8) {
-          ctx.fillRect(brakeCliffX - 6, wy, 6, 4);
-        }
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(brakeCliffX - 1, 155, 2, 45);
-
-        // Abyss / Waterfall beneath cliff
-        ctx.fillStyle = '#06070d';
-        ctx.fillRect(brakeCliffX, 155, W - brakeCliffX, 45);
-        ctx.fillStyle = 'rgba(239, 68, 68, 0.25)';
-        ctx.fillRect(brakeCliffX, 155, 6, 45);
+        // Road distance marks on asphalt (50m, 20m, 10m, 5m, 1m)
+        const groundMarkers = [
+          { dist: 50, x: BRAKE_CLIFF_X - 14 - (50 * 20) },
+          { dist: 20, x: BRAKE_CLIFF_X - 14 - (20 * 20) },
+          { dist: 10, x: BRAKE_CLIFF_X - 14 - (10 * 20) },
+          { dist: 5,  x: BRAKE_CLIFF_X - 14 - (5 * 20) },
+          { dist: 1,  x: BRAKE_CLIFF_X - 14 - (1 * 20) }
+        ];
+        groundMarkers.forEach(gm => {
+          const gx = gm.x - brakeCameraX;
+          if (gx >= 0 && gx <= roadEndX) {
+            ctx.fillStyle = '#38bdf8';
+            ctx.fillRect(gx, 155, 1.5, 7);
+            ctx.fillStyle = '#64748b';
+            ctx.fillText(`${gm.dist}m`, gx, 170);
+          }
+        });
 
         // Real-time Distance to Cliff
-        const currentDistM = Math.max(0, (brakeCliffX - 18 - brakeCarX) / 22);
-
-        // Top HUD: BEST, DISTANCE, SPEED
-        ctx.font = '10px "Share Tech Mono", monospace';
-        ctx.fillStyle = '#f59e0b';
-        ctx.textAlign = 'left';
-        ctx.fillText(`BEST: ${brakeBest.toFixed(2)}m`, 12, 34);
-
-        ctx.fillStyle = currentDistM < 1.0 ? '#ff2a85' : '#38bdf8';
-        ctx.textAlign = 'center';
-        ctx.fillText(`DIST: ${currentDistM.toFixed(2)}m`, 160, 34);
-
-        ctx.fillStyle = '#ef4444';
-        ctx.textAlign = 'right';
-        ctx.fillText(`SPEED: ${(brakeSpeed * 26).toFixed(0)} km/h`, W - 12, 34);
-
-        // Tire Skid Marks (Persisted on road)
-        ctx.fillStyle = '#0e101a';
-        brakeSkidMarks.forEach(sm => {
-          ctx.fillRect(sm.x, sm.y, sm.len, 2);
-        });
+        const currentDistM = Math.max(0, (BRAKE_CLIFF_X - 14 - brakeCarX) / 20);
 
         // Update Car Physics
         if (brakePhase === 'accel') {
+          brakeSpeed = Math.min(22.0, brakeSpeed + 0.35);
           brakeCarX += brakeSpeed;
-          brakeSpeed = Math.min(4.8, brakeSpeed + 0.05);
-          brakeTilt = 0.03; // Slight rear squat
+          brakeTilt = 0.03; // Slight squat
         } else if (brakePhase === 'braking') {
           brakeCarX += brakeSpeed;
-          brakeSpeed = Math.max(0, brakeSpeed - 0.16);
-          brakeTilt = -0.08; // Forward nose dive!
+          brakeSpeed = Math.max(0, brakeSpeed - 0.52);
+          brakeTilt = -0.09; // Forward nose dive!
           // Record tire skid mark
-          if (brakeSpeed > 0.5 && brakeCarX < brakeCliffX - 14) {
+          if (brakeSpeed > 0.5 && brakeCarX < BRAKE_CLIFF_X - 10) {
             brakeSkidMarks.push({
-              x: brakeCarX + 4,
+              x: brakeCarX - 10,
               y: 168,
               len: Math.max(3, brakeSpeed * 1.5)
             });
-            if (brakeSkidMarks.length > 50) brakeSkidMarks.shift();
+            if (brakeSkidMarks.length > 70) brakeSkidMarks.shift();
           }
-          // Spawn brake friction sparks
+          // Spawn friction sparks
           if (brakeSpeed > 0.4) {
-            for (let s = 0; s < 4; s++) {
+            for (let s = 0; s < 3; s++) {
               brakeSparks.push({
-                x: brakeCarX + 4,
+                x: brakeCarX - 8,
                 y: 153,
                 vx: -2.0 - Math.random() * 3.0,
                 vy: -Math.random() * 2.5,
@@ -3889,21 +3968,21 @@
           }
           if (brakeSpeed <= 0) {
             // Evaluated Stop
-            if (brakeCarX <= brakeCliffX - 18) {
+            if (brakeCarX <= BRAKE_CLIFF_X - 14) {
               brakePhase = 'stopped';
               brakeTilt = 0;
-              const dist = ((brakeCliffX - 18 - brakeCarX) / 22).toFixed(2);
+              const dist = ((BRAKE_CLIFF_X - 14 - brakeCarX) / 20).toFixed(2);
               brakeDistance = parseFloat(dist);
               if (brakeDistance < brakeBest && brakeDistance > 0) {
                 brakeBest = brakeDistance;
               }
-              if (brakeDistance <= 0.20) {
+              if (brakeDistance <= 0.30) {
                 brakeVerdict = `👑 神技！ 残り ${brakeDistance}m (RANK S+)`;
                 play8BitSound('coin');
-              } else if (brakeDistance <= 0.50) {
+              } else if (brakeDistance <= 0.80) {
                 brakeVerdict = `🏆 職人芸！ 残り ${brakeDistance}m (RANK A)`;
                 play8BitSound('coin');
-              } else if (brakeDistance <= 1.20) {
+              } else if (brakeDistance <= 2.00) {
                 brakeVerdict = `👍 ナイス制動！ 残り ${brakeDistance}m (RANK B)`;
                 play8BitSound('select');
               } else {
@@ -3916,7 +3995,7 @@
         }
 
         // Falling off cliff check
-        if ((brakePhase === 'accel' || brakePhase === 'braking') && brakeCarX > brakeCliffX - 18) {
+        if ((brakePhase === 'accel' || brakePhase === 'braking') && brakeCarX > BRAKE_CLIFF_X - 14) {
           brakePhase = 'fell';
           play8BitSound('sword');
           brakeVerdict = '💥 転落！！ CRASH & BURN!!';
@@ -3926,13 +4005,12 @@
         }
 
         if (brakePhase === 'fell') {
-          brakeCarX += 1.4;
+          brakeCarX += 1.8;
           brakeCarY += 3.8; // Plunge into abyss
           brakeFallRotation += 0.22; // Spin out!
-          // Explosion / smoke particles
           if (Math.random() < 0.6) {
             brakeSparks.push({
-              x: brakeCarX + 14 + (Math.random() - 0.5) * 12,
+              x: brakeCarX + (Math.random() - 0.5) * 12,
               y: brakeCarY + (Math.random() - 0.5) * 10,
               vx: (Math.random() - 0.5) * 2,
               vy: -1.5 - Math.random() * 2,
@@ -3941,29 +4019,41 @@
           }
         }
 
+        // Tire Skid Marks (in screen coordinates)
+        ctx.fillStyle = '#0e101a';
+        brakeSkidMarks.forEach(sm => {
+          const smX = sm.x - brakeCameraX;
+          if (smX >= -50 && smX <= W + 50) {
+            ctx.fillRect(smX, sm.y, sm.len, 2);
+          }
+        });
+
         // Render Sparks
-        brakeSparks.forEach((sp) => {
+        brakeSparks.forEach(sp => {
           sp.x += sp.vx;
           sp.y += sp.vy;
           sp.life--;
-          ctx.fillStyle = sp.life % 2 === 0 ? '#fde047' : '#ea580c';
-          ctx.fillRect(sp.x, sp.y, 2.5, 2.5);
+          const spX = sp.x - brakeCameraX;
+          if (spX >= -20 && spX <= W + 20) {
+            ctx.fillStyle = sp.life % 2 === 0 ? '#fde047' : '#ea580c';
+            ctx.fillRect(spX, sp.y, 2.5, 2.5);
+          }
         });
         brakeSparks = brakeSparks.filter(sp => sp.life > 0);
 
-        // Draw Cyber Sports Car (Red Pixel Racer) with Tilt/Rotation
-        const cx = brakeCarX;
-        const cy = brakeCarY;
-        if (cy < H + 40) {
+        // Draw Cyber Sports Car at screen coords
+        const carScreenX = brakeCarX - brakeCameraX;
+        const carScreenY = brakeCarY;
+        if (carScreenY < H + 40 && carScreenX >= -40 && carScreenX <= W + 40) {
           ctx.save();
-          ctx.translate(cx + 14, cy + 9);
+          ctx.translate(carScreenX + 14, carScreenY + 9);
           if (brakePhase === 'fell') {
             ctx.rotate(brakeFallRotation);
           } else {
             ctx.rotate(brakeTilt);
           }
 
-          // Chassis (centered at 0, 0)
+          // Chassis
           ctx.fillStyle = '#dc2626';
           ctx.fillRect(-14, -1, 28, 9);
           ctx.fillStyle = '#b91c1c';
@@ -3978,8 +4068,8 @@
             ctx.fillStyle = 'rgba(254, 240, 138, 0.25)';
             ctx.beginPath();
             ctx.moveTo(15, 1);
-            ctx.lineTo(45, -4);
-            ctx.lineTo(45, 13);
+            ctx.lineTo(48, -4);
+            ctx.lineTo(48, 13);
             ctx.closePath();
             ctx.fill();
           }
@@ -3997,156 +4087,213 @@
           ctx.restore();
         }
 
+        // ==========================================
+        // TOP PROGRESS BAR & COURSE MAP
+        // ==========================================
+        const barX = 45;
+        const barY = 16;
+        const barW = 230;
+        const barH = 5;
+
+        // Track Background
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(barX, barY, barW, barH);
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(barX, barY, barW, barH);
+
+        // Danger zone on progress bar (last 20%)
+        const dangerBarStart = barX + barW * 0.80;
+        ctx.fillStyle = 'rgba(239, 68, 68, 0.35)';
+        ctx.fillRect(dangerBarStart, barY, barW * 0.20, barH);
+
+        // Fill gradient
+        const progressRatio = Math.min(1.0, Math.max(0, brakeCarX / BRAKE_CLIFF_X));
+        const grad = ctx.createLinearGradient(barX, 0, barX + barW, 0);
+        grad.addColorStop(0, '#00f5ff');
+        grad.addColorStop(0.7, '#eab308');
+        grad.addColorStop(1, '#ef4444');
+        ctx.fillStyle = grad;
+        ctx.fillRect(barX, barY, barW * progressRatio, barH);
+
+        // Cliff flag at end
+        ctx.fillStyle = '#ef4444';
+        ctx.fillRect(barX + barW - 1, barY - 4, 2, barH + 8);
+        ctx.font = '7px "Share Tech Mono", monospace';
+        ctx.textAlign = 'right';
+        ctx.fillStyle = '#ef4444';
+        ctx.fillText('CLIFF ⚠️', barX + barW, barY - 6);
+
+        // Moving car marker on progress bar
+        const markerX = barX + barW * progressRatio;
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = '#00f5ff';
+        ctx.shadowBlur = 6;
+        ctx.beginPath();
+        ctx.arc(markerX, barY + barH / 2, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // Danger alert pulse when remaining < 20m
+        if (currentDistM < 20 && brakePhase !== 'fell' && brakePhase !== 'stopped') {
+          if (Math.floor(crtAnimTime / 5) % 2 === 0) {
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(barX - 2, barY - 2, barW + 4, barH + 4);
+          }
+        }
+
+        // Top HUD (BEST, DISTANCE, SPEED)
+        ctx.font = '9px "Share Tech Mono", monospace';
+        ctx.fillStyle = '#f59e0b';
+        ctx.textAlign = 'left';
+        ctx.fillText(`BEST: ${brakeBest.toFixed(2)}m`, 10, 32);
+
+        ctx.fillStyle = currentDistM < 1.0 ? '#ff2a85' : (currentDistM < 15 ? '#eab308' : '#38bdf8');
+        ctx.textAlign = 'center';
+        ctx.fillText(`DIST: ${currentDistM.toFixed(2)}m`, 160, 32);
+
+        ctx.fillStyle = '#ef4444';
+        ctx.textAlign = 'right';
+        ctx.fillText(`SPEED: ${(brakeSpeed * 12).toFixed(0)} km/h`, W - 10, 32);
+
         // Verdict Display
         if (brakeVerdict) {
           ctx.textAlign = 'center';
-          ctx.font = 'bold 15px "DotGothic16", sans-serif';
+          ctx.font = 'bold 13px "DotGothic16", sans-serif';
           if (brakePhase === 'stopped') {
-            ctx.fillStyle = brakeDistance <= 0.20 ? '#fde047' : (brakeDistance <= 0.50 ? '#38bdf8' : '#cbd5e1');
+            ctx.fillStyle = brakeDistance <= 0.30 ? '#fde047' : (brakeDistance <= 0.80 ? '#38bdf8' : '#cbd5e1');
             ctx.shadowColor = ctx.fillStyle;
             ctx.shadowBlur = 8;
-            ctx.fillText(brakeVerdict, 160, 95);
+            ctx.fillText(brakeVerdict, 160, 85);
             ctx.shadowBlur = 0;
+            ctx.font = '9px "DotGothic16", sans-serif';
+            ctx.fillStyle = '#94a3b8';
+            ctx.fillText('画面クリックで再挑戦 🔄', 160, 102);
           } else if (brakePhase === 'fell') {
             ctx.fillStyle = '#ef4444';
             ctx.shadowColor = '#ef4444';
             ctx.shadowBlur = 10;
-            ctx.fillText(brakeVerdict, 160, 95);
+            ctx.fillText(brakeVerdict, 160, 85);
             ctx.shadowBlur = 0;
+            ctx.font = '9px "DotGothic16", sans-serif';
+            ctx.fillStyle = '#94a3b8';
+            ctx.fillText('画面クリックでリトライ 🔄', 160, 102);
           }
         }
       }
 
       // ====================================================
-      // B. LUMEN MIRROR MINI SCENE (ちゃんと解ける本格光学パズル)
+      // B. LUMEN MIRROR MINI SCENE (多段ステージ＆高質感光学パズル)
       // ==========================================
       else if (activeCart === 'mirror') {
+        const curStg = MIRROR_STAGES[mirrorStage] || MIRROR_STAGES[1];
+
         // Rooftop skyline
         ctx.fillStyle = '#0f1322';
-        ctx.fillRect(30, 90, 50, 110);
-        ctx.fillRect(100, 70, 60, 130);
-        ctx.fillRect(180, 95, 70, 105);
+        ctx.fillRect(25, 95, 45, 105);
+        ctx.fillRect(95, 80, 55, 120);
+        ctx.fillRect(175, 100, 65, 100);
+        ctx.fillRect(255, 85, 50, 115);
 
-        // Moon
+        // Soft Moon
         ctx.fillStyle = '#f8fafc';
         ctx.beginPath();
-        ctx.arc(285, 45, 14, 0, Math.PI * 2);
+        ctx.arc(285, 32, 11, 0, Math.PI * 2);
         ctx.fill();
 
-        // Laser Source (Top-left: 30, 55)
-        const lx = 30;
-        const ly = 55;
-        ctx.fillStyle = '#1e2438';
-        ctx.fillRect(lx - 12, ly - 10, 24, 20);
-        ctx.fillStyle = '#00f5ff';
-        ctx.fillRect(lx + 8, ly - 4, 8, 8);
-        ctx.font = '8px "Share Tech Mono", monospace';
+        // Stage Title HUD
+        ctx.font = '9px "Share Tech Mono", monospace';
         ctx.fillStyle = '#00f5ff';
         ctx.textAlign = 'left';
-        ctx.fillText('EMITTER', lx - 10, ly - 14);
+        ctx.fillText(curStg.title, 10, 18);
+        ctx.fillStyle = '#64748b';
+        ctx.textAlign = 'right';
+        ctx.fillText(`STAGE ${mirrorStage}/3`, W - 10, 18);
 
-        // Top Mirror 1 (x: 140, y: 55)
-        const m1x = 140;
-        const m1y = 55;
-        // Mirror mount bracket
-        ctx.fillStyle = '#334155';
-        ctx.beginPath();
-        ctx.arc(m1x, m1y, 16, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.save();
-        ctx.translate(m1x, m1y);
-        ctx.rotate((mirrorAngle1 * Math.PI) / 180);
-        ctx.fillStyle = '#cbd5e1';
-        ctx.fillRect(-3, -24, 6, 48);
-        ctx.fillStyle = '#38bdf8';
-        ctx.fillRect(-1, -22, 2, 44);
-        ctx.restore();
-        ctx.font = '8px "Share Tech Mono", monospace';
-        ctx.fillStyle = '#38bdf8';
-        ctx.textAlign = 'center';
-        ctx.fillText(`M1 [⟳ ${mirrorAngle1}°]`, m1x, m1y - 26);
-
-        // Bottom Mirror 2 (x: 140, y: 155)
-        const m2x = 140;
-        const m2y = 155;
-        // Mirror mount bracket
-        ctx.fillStyle = '#334155';
-        ctx.beginPath();
-        ctx.arc(m2x, m2y, 16, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.save();
-        ctx.translate(m2x, m2y);
-        ctx.rotate((mirrorAngle2 * Math.PI) / 180);
-        ctx.fillStyle = '#cbd5e1';
-        ctx.fillRect(-3, -24, 6, 48);
-        ctx.fillStyle = '#38bdf8';
-        ctx.fillRect(-1, -22, 2, 44);
-        ctx.restore();
-        ctx.fillText(`M2 [⟳ ${mirrorAngle2}°]`, m2x, m2y + 36);
-
-        // Target Crystal (x: 265, y: 155)
-        const tx = 265;
-        const ty = 155;
-
-        // Optical Physics:
-        // Incoming beam from left to M1:
-        // M1 at 135° (\) reflects beam DOWN (to M2 at 140, 155).
-        // M1 at 45° (/) reflects beam UP (into sky at 140, 10).
-        //
-        // When beam reaches M2 moving DOWN:
-        // M2 at 135° (\) reflects beam RIGHT (to target crystal at 265, 155)! -> SOLVED!
-        // M2 at 45° (/) reflects beam LEFT (into wall at 20, 155).
-        const isAligned = (mirrorAngle1 === 135 && mirrorAngle2 === 135);
-        if (isAligned && !mirrorSolved) {
-          mirrorSolved = true;
-          mirrorSolvedAnim = 30;
-          play8BitSound('coin');
-          showRetroToast('🌟 [LUMEN MIRROR] — 光学回路開通！結晶覚醒！');
-          const osd = document.getElementById('crt-osd-action');
-          if (osd) osd.textContent = '★ CLEAR!! NEXT: CLICK TO RETRY 🔄 ★';
-        }
-
-        // Draw Laser Beams
-        ctx.strokeStyle = '#00f5ff';
-        ctx.shadowColor = '#00f5ff';
-        ctx.shadowBlur = 10;
-        ctx.lineWidth = 3.5;
-        ctx.beginPath();
-        ctx.moveTo(lx + 12, ly);
-        ctx.lineTo(m1x, ly);
-
-        if (mirrorAngle1 === 135) {
-          // Deflect DOWN to mirror 2
-          ctx.lineTo(m2x, m2y);
-          if (mirrorAngle2 === 135) {
-            // Deflect RIGHT to target crystal!
-            ctx.lineTo(tx, ty);
-          } else {
-            // Deflect LEFT into wall
-            ctx.lineTo(20, m2y);
+        // Obstacle barrier blocks
+        curStg.blocks.forEach(b => {
+          ctx.fillStyle = '#1e293b';
+          ctx.fillRect(b.x, b.y, b.w, b.h);
+          ctx.strokeStyle = '#475569';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(b.x, b.y, b.w, b.h);
+          // Hazard Hatching
+          ctx.strokeStyle = '#334155';
+          ctx.beginPath();
+          for (let hx = b.x - b.h; hx < b.x + b.w; hx += 6) {
+            ctx.moveTo(Math.max(b.x, hx), b.y);
+            ctx.lineTo(Math.min(b.x + b.w, hx + b.h), b.y + b.h);
           }
-        } else {
-          // Deflect UP into sky
-          ctx.lineTo(m1x, 10);
-        }
-        ctx.stroke();
-        ctx.shadowBlur = 0;
+          ctx.stroke();
+        });
 
-        // Draw Target Crystal (Octagon / Diamond shape)
+        // Laser Source Emitter
+        const em = curStg.emitter;
+        ctx.fillStyle = '#1e2438';
+        ctx.fillRect(em.x - 12, em.y - 7, 24, 14);
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(em.x - 12, em.y - 7, 24, 14);
+        ctx.fillStyle = '#00f5ff';
+        ctx.fillRect(em.x + 8, em.y - 3, 5, 6);
+        ctx.font = '7px "Share Tech Mono", monospace';
+        ctx.fillStyle = '#38bdf8';
+        ctx.textAlign = 'left';
+        ctx.fillText('EMIT', em.x - 10, em.y - 9);
+
+        // Mirrors (Sleek optical plate with pivot rings)
+        currentMirrors.forEach(m => {
+          // Pivot ring
+          ctx.strokeStyle = '#475569';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(m.x, m.y, 11, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Crosshair ticks
+          ctx.fillStyle = '#334155';
+          ctx.fillRect(m.x - 1, m.y - 13, 2, 4);
+          ctx.fillRect(m.x - 1, m.y + 9, 2, 4);
+          ctx.fillRect(m.x - 13, m.y - 1, 4, 2);
+          ctx.fillRect(m.x + 9, m.y - 1, 4, 2);
+
+          // Sleek optical mirror plate (24px long, 3.5px thick)
+          ctx.save();
+          ctx.translate(m.x, m.y);
+          ctx.rotate((m.angle * Math.PI) / 180);
+          // Silver glass core
+          ctx.fillStyle = '#e2e8f0';
+          ctx.fillRect(-2, -12, 4, 24);
+          // Cyan optical reflective coating edge
+          ctx.fillStyle = '#00f5ff';
+          ctx.fillRect(0, -11, 1.5, 22);
+          ctx.restore();
+
+          // Compact angle tag
+          ctx.font = '8px "Share Tech Mono", monospace';
+          ctx.fillStyle = '#38bdf8';
+          ctx.textAlign = 'center';
+          const tagY = m.y > 100 ? m.y + 20 : m.y - 14;
+          ctx.fillText(`${m.id.toUpperCase()}:${m.angle}°`, m.x, tagY);
+        });
+
+        // Target Prism
+        const pr = curStg.prism;
         ctx.save();
-        ctx.translate(tx, ty);
-        if (isAligned) {
-          ctx.rotate(crtAnimTime * 0.04);
+        ctx.translate(pr.x, pr.y);
+        if (mirrorSolved) {
+          ctx.rotate(crtAnimTime * 0.05);
         }
-        ctx.fillStyle = isAligned ? '#ff2a9d' : '#334155';
-        ctx.strokeStyle = isAligned ? '#ffffff' : '#64748b';
-        ctx.lineWidth = 2;
-        const cRad = isAligned ? 12 + Math.sin(crtAnimTime * 0.2) * 2 : 9;
+        const prRad = mirrorSolved ? 10 + Math.sin(crtAnimTime * 0.2) * 1.5 : 8;
+        ctx.fillStyle = mirrorSolved ? '#ff2a9d' : '#1e293b';
+        ctx.strokeStyle = mirrorSolved ? '#ffffff' : '#64748b';
+        ctx.lineWidth = 1.5;
         ctx.beginPath();
-        for (let a = 0; a < 8; a++) {
-          const ang = (a * Math.PI) / 4;
-          const px = Math.cos(ang) * cRad;
-          const py = Math.sin(ang) * cRad;
+        for (let a = 0; a < 6; a++) {
+          const ang = (a * Math.PI) / 3;
+          const px = Math.cos(ang) * prRad;
+          const py = Math.sin(ang) * prRad;
           if (a === 0) ctx.moveTo(px, py);
           else ctx.lineTo(px, py);
         }
@@ -4155,11 +4302,85 @@
         ctx.stroke();
         ctx.restore();
 
-        // Crystal Glow Particles when Solved
-        if (isAligned) {
-          if (Math.random() < 0.45) {
+        // Prism label
+        ctx.font = '7px "Share Tech Mono", monospace';
+        ctx.fillStyle = mirrorSolved ? '#ff2a9d' : '#94a3b8';
+        ctx.textAlign = 'center';
+        ctx.fillText('PRISM', pr.x, pr.y + 18);
+
+        // Alignment check
+        const isAligned = currentMirrors.every(m => m.angle === m.target);
+        if (isAligned && !mirrorSolved) {
+          mirrorSolved = true;
+          mirrorSolvedAnim = 30;
+          play8BitSound('coin');
+          showRetroToast('🌟 [LUMEN MIRROR] — 光学回路開通！結晶覚醒！');
+          const osd = document.getElementById('crt-osd-action');
+          if (osd) {
+            osd.textContent = mirrorStage < 3 ? '★ CLEAR! CLICK FOR NEXT STAGE ➔' : '★ ALL STAGES CLEARED! CLICK TO LOOP 🔄';
+          }
+        }
+
+        // Draw Laser Beam
+        ctx.strokeStyle = '#00f5ff';
+        ctx.shadowColor = '#00f5ff';
+        ctx.shadowBlur = 8;
+        ctx.lineWidth = 2.0;
+        ctx.beginPath();
+        ctx.moveTo(em.x + 10, em.y);
+
+        if (mirrorStage === 1) {
+          const m1 = currentMirrors[0];
+          ctx.lineTo(m1.x, m1.y);
+          if (m1.angle === 135) {
+            ctx.lineTo(pr.x, pr.y);
+          } else {
+            ctx.lineTo(m1.x, 10); // Reflect UP into sky
+          }
+        } else if (mirrorStage === 2) {
+          const m1 = currentMirrors[0];
+          const m2 = currentMirrors[1];
+          ctx.lineTo(m1.x, m1.y);
+          if (m1.angle === 135) {
+            ctx.lineTo(m2.x, m2.y);
+            if (m2.angle === 135) {
+              ctx.lineTo(pr.x, pr.y);
+            } else {
+              ctx.lineTo(20, m2.y); // Reflect LEFT into wall
+            }
+          } else {
+            ctx.lineTo(m1.x, 10);
+          }
+        } else if (mirrorStage === 3) {
+          const m1 = currentMirrors[0];
+          const m2 = currentMirrors[1];
+          const m3 = currentMirrors[2];
+          ctx.lineTo(m1.x, m1.y);
+          if (m1.angle === 135) {
+            ctx.lineTo(m2.x, m2.y);
+            if (m2.angle === 135) {
+              ctx.lineTo(m3.x, m3.y);
+              if (m3.angle === 45) {
+                ctx.lineTo(pr.x, pr.y);
+              } else {
+                ctx.lineTo(m3.x, 190); // Reflect DOWN into ground
+              }
+            } else {
+              ctx.lineTo(20, m2.y);
+            }
+          } else {
+            ctx.lineTo(m1.x, 10);
+          }
+        }
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // Solved Prism Particles
+        if (mirrorSolved) {
+          if (Math.random() < 0.5) {
             mirrorGlowParticles.push({
-              x: tx, y: ty,
+              x: pr.x,
+              y: pr.y,
               vx: (Math.random() - 0.5) * 3,
               vy: (Math.random() - 0.5) * 3,
               life: 18
@@ -4167,29 +4388,38 @@
           }
         }
         mirrorGlowParticles.forEach(p => {
-          p.x += p.vx; p.y += p.vy; p.life--;
+          p.x += p.vx;
+          p.y += p.vy;
+          p.life--;
           ctx.fillStyle = p.life % 2 === 0 ? '#ff2a9d' : '#00f5ff';
-          ctx.fillRect(p.x, p.y, 2.5, 2.5);
+          ctx.fillRect(p.x, p.y, 2, 2);
         });
         mirrorGlowParticles = mirrorGlowParticles.filter(p => p.life > 0);
 
-        // Status / Hint Banner
-        if (isAligned) {
+        // Clear Banner / Instructions
+        if (mirrorSolved) {
           ctx.textAlign = 'center';
-          ctx.font = 'bold 15px "DotGothic16", sans-serif';
+          ctx.font = 'bold 13px "DotGothic16", sans-serif';
           ctx.fillStyle = '#fde047';
           ctx.shadowColor = '#fde047';
-          ctx.shadowBlur = 12;
-          ctx.fillText('★ CLEAR!! 光学反射成功 ★', 160, 105);
-          ctx.font = '10px "DotGothic16", sans-serif';
-          ctx.fillStyle = '#38bdf8';
-          ctx.fillText('画面クリックでシャッフル再挑戦 🔄', 160, 122);
+          ctx.shadowBlur = 10;
+          if (mirrorStage < 3) {
+            ctx.fillText(`★ STAGE 0${mirrorStage} CLEAR! ★`, 160, 105);
+            ctx.font = '9px "DotGothic16", sans-serif';
+            ctx.fillStyle = '#38bdf8';
+            ctx.fillText(`画面クリックで STAGE 0${mirrorStage + 1} へ ➔`, 160, 122);
+          } else {
+            ctx.fillText('👑 ALL STAGES CLEARED!! 👑', 160, 105);
+            ctx.font = '9px "DotGothic16", sans-serif';
+            ctx.fillStyle = '#38bdf8';
+            ctx.fillText('全ステージ完全攻略！ クリックで最初へ 🔄', 160, 122);
+          }
           ctx.shadowBlur = 0;
         } else {
           ctx.textAlign = 'center';
-          ctx.font = '10px "DotGothic16", sans-serif';
+          ctx.font = '9px "DotGothic16", sans-serif';
           ctx.fillStyle = '#64748b';
-          ctx.fillText('M1/M2 をクリックして鏡の角度を回転', 160, 105);
+          ctx.fillText('鏡 (M1~M3) をクリックして光を水晶へ導け！', 160, 105);
         }
       }
 
