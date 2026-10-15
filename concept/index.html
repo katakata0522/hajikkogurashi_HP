@@ -1,0 +1,2127 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Corner Neighbor (コーナーネイバー) — 放課後の秘密基地から世界へ</title>
+  <meta name="description" content="世界の端っこ、放課後の部室から始まるインディーゲーム開発サークル「Corner Neighbor」。9本の遊べるWebミニゲームからUnreal Engine 5大作『Re:青春！』まで、好奇心と遊び心でゲームを創り続けます。">
+  
+  <!-- Modern Pixel & Monospace Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Silkscreen:wght@400;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-base: #090a12;
+      --bg-surface: #101222;
+      --bg-card: #15182e;
+      --bg-card-hover: #1b203c;
+      --border-subtle: #242946;
+      --border-accent: #373f6c;
+      
+      /* Emotional Nostalgia Palette (Twilight & CRT Neon) */
+      --twilight-amber: #ff9f43;
+      --twilight-coral: #ff5252;
+      --crt-cyan: #00f5ff;
+      --crt-magenta: #ff2a85;
+      --crt-green: #00e5a3;
+      --crt-gold: #ffc107;
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      
+      --font-pixel: 'DotGothic16', sans-serif;
+      --font-display: 'Silkscreen', monospace;
+      --font-mono: 'Space Mono', monospace;
+      --font-jp: 'BIZ UDPGothic', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      background-image: 
+        radial-gradient(ellipse at 50% 0%, rgba(255, 159, 67, 0.08) 0%, transparent 60%),
+        radial-gradient(ellipse at 10% 40%, rgba(0, 245, 255, 0.04) 0%, transparent 45%),
+        radial-gradient(ellipse at 90% 70%, rgba(255, 42, 133, 0.04) 0%, transparent 45%),
+        linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+      color: var(--text-main);
+      font-family: var(--font-jp);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* Subtle CRT Scanlines (Toggleable) */
+    body.scanlines-on::after {
+      content: " ";
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.22) 50%);
+      background-size: 100% 3px;
+      pointer-events: none;
+      z-index: 999;
+      opacity: 0.45;
+    }
+
+    /* Container */
+    .app-shell {
+      max-width: 1260px;
+      margin: 0 auto;
+      padding: 16px 20px 80px;
+      position: relative;
+    }
+
+    /* ====================================================================
+       1. TOP BAR & ENVIRONMENTAL CONTROLS (放課後の秘密基地ヘッダー)
+       ==================================================================== */
+    .top-deck {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 20px;
+      background: rgba(16, 18, 34, 0.85);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      margin-bottom: 24px;
+    }
+
+    .brand-identity {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .brand-cassette-icon {
+      width: 44px;
+      height: 32px;
+      position: relative;
+      background: #191c33;
+      border: 2px solid var(--twilight-amber);
+      border-radius: 4px;
+      box-shadow: 0 0 12px rgba(255, 159, 67, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform: rotate(-3deg);
+      transition: transform 0.2s ease;
+    }
+    .brand-identity:hover .brand-cassette-icon {
+      transform: rotate(0deg) scale(1.08);
+    }
+    .tape-window {
+      width: 24px;
+      height: 14px;
+      background: #090a12;
+      border: 1px solid var(--twilight-coral);
+      border-radius: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 2px;
+    }
+    .tape-spool {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      border: 1.5px dashed var(--crt-cyan);
+    }
+
+    .brand-text-block h1 {
+      font-family: var(--font-display);
+      font-size: 16px;
+      letter-spacing: 1px;
+      color: #ffffff;
+      line-height: 1.1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-text-block .sub-motto {
+      font-family: var(--font-pixel);
+      font-size: 12px;
+      color: var(--twilight-amber);
+      letter-spacing: 0.5px;
+    }
+
+    .deck-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .status-badge {
+      font-family: var(--font-display);
+      font-size: 10px;
+      padding: 4px 8px;
+      background: rgba(0, 229, 163, 0.12);
+      border: 1px solid rgba(0, 229, 163, 0.4);
+      color: var(--crt-green);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pulse-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--crt-green);
+      box-shadow: 0 0 6px var(--crt-green);
+      animation: blink-dot 1.4s infinite;
+    }
+    @keyframes blink-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.3; transform: scale(0.7); }
+    }
+
+    .btn-deck-toggle {
+      background: #14172b;
+      border: 1px solid var(--border-accent);
+      color: var(--text-muted);
+      font-family: var(--font-display);
+      font-size: 10.5px;
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.18s;
+    }
+    .btn-deck-toggle:hover, .btn-deck-toggle.active {
+      background: #1d2242;
+      color: #ffffff;
+      border-color: var(--crt-cyan);
+      box-shadow: 0 0 10px rgba(0, 245, 255, 0.25);
+    }
+
+    /* ====================================================================
+       2. CENTERPIECE: THE SECRET CRT GAMING STATION (遊べる秘密基地のモニター)
+       ==================================================================== */
+    .station-section {
+      margin-bottom: 34px;
+    }
+
+    .crt-cabinet {
+      background: linear-gradient(180deg, #181c36 0%, #121426 100%);
+      border: 2px solid #2d345a;
+      border-radius: 16px;
+      padding: 16px 20px 20px;
+      box-shadow: 
+        0 24px 60px rgba(0, 0, 0, 0.75),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 0 0 1px rgba(0, 245, 255, 0.08);
+      position: relative;
+    }
+
+    /* Top Cartridge Bay / Slot */
+    .cartridge-bay {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .slot-recess {
+      background: #080911;
+      border: 2px solid #20243d;
+      border-radius: 6px;
+      padding: 6px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .slot-label {
+      font-family: var(--font-display);
+      font-size: 9.5px;
+      color: var(--text-dim);
+      letter-spacing: 0.5px;
+    }
+    .inserted-cartridge-pill {
+      font-family: var(--font-pixel);
+      font-size: 13px;
+      color: var(--twilight-amber);
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .cartridge-eject-btn {
+      background: #232742;
+      border: 1px solid #3c436d;
+      color: #cbd5e1;
+      font-family: var(--font-display);
+      font-size: 9.5px;
+      padding: 3px 8px;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .cartridge-eject-btn:hover {
+      background: #2f355c;
+      color: #fff;
+    }
+
+    .crt-mode-tabs {
+      display: flex;
+      gap: 6px;
+    }
+    .crt-tab-btn {
+      background: #101222;
+      border: 1px solid #282e4e;
+      color: var(--text-muted);
+      font-family: var(--font-display);
+      font-size: 10px;
+      padding: 5px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .crt-tab-btn.active {
+      background: rgba(0, 245, 255, 0.12);
+      border-color: var(--crt-cyan);
+      color: var(--crt-cyan);
+      box-shadow: 0 0 10px rgba(0, 245, 255, 0.2);
+    }
+
+    /* Screen Frame */
+    .screen-housing {
+      background: #04050a;
+      border: 3px solid #1c213b;
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.95);
+      min-height: 380px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Glass Reflection Curve */
+    .screen-housing::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 45%;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, transparent 100%);
+      pointer-events: none;
+      z-index: 15;
+    }
+
+    /* Mode 1: Living Base Viewport */
+    .screen-view {
+      display: none;
+      width: 100%;
+      height: 100%;
+      flex: 1;
+      position: relative;
+    }
+    .screen-view.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    #hero-pixel-canvas {
+      width: 100%;
+      height: 380px;
+      display: block;
+      image-rendering: pixelated;
+      cursor: pointer;
+    }
+
+    /* Overlay HUD inside CRT */
+    .screen-hud-overlay {
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      right: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .hud-title-card {
+      background: rgba(8, 10, 18, 0.88);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(0, 245, 255, 0.35);
+      padding: 10px 14px;
+      border-radius: 6px;
+      pointer-events: auto;
+      max-width: 380px;
+    }
+    .hud-title-card h2 {
+      font-family: var(--font-display);
+      font-size: 15px;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+    .hud-title-card p {
+      font-family: var(--font-pixel);
+      font-size: 12px;
+      color: var(--twilight-amber);
+    }
+
+    .hud-action-cluster {
+      display: flex;
+      gap: 10px;
+      pointer-events: auto;
+    }
+    .btn-crt-launch {
+      background: linear-gradient(135deg, var(--crt-magenta) 0%, #b80058 100%);
+      color: #ffffff;
+      font-family: var(--font-display);
+      font-size: 12px;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      box-shadow: 0 0 16px rgba(255, 42, 133, 0.5);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s;
+    }
+    .btn-crt-launch:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 24px rgba(255, 42, 133, 0.8);
+    }
+    .btn-crt-play-instant {
+      background: #0f1224;
+      border: 1.5px solid var(--crt-cyan);
+      color: var(--crt-cyan);
+      font-family: var(--font-display);
+      font-size: 12px;
+      padding: 10px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s;
+    }
+    .btn-crt-play-instant:hover {
+      background: rgba(0, 245, 255, 0.15);
+      box-shadow: 0 0 16px rgba(0, 245, 255, 0.4);
+    }
+
+    /* Mode 2: Playable Instant Mini-Game (0.01秒 居合斬り) */
+    .mini-game-arena {
+      flex: 1;
+      min-height: 380px;
+      background: #060810;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 24px;
+      text-align: center;
+      user-select: none;
+      cursor: pointer;
+    }
+    .duel-stage {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      width: 100%;
+      max-width: 520px;
+      margin-bottom: 24px;
+    }
+    .duel-fighter {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .fighter-sprite {
+      font-size: 48px;
+      filter: drop-shadow(0 0 10px rgba(0, 245, 255, 0.4));
+      transition: transform 0.1s ease;
+    }
+    .fighter-name {
+      font-family: var(--font-display);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .signal-box {
+      font-family: var(--font-display);
+      font-size: 42px;
+      font-weight: bold;
+      color: var(--twilight-coral);
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .game-prompt {
+      font-family: var(--font-pixel);
+      font-size: 16px;
+      color: var(--twilight-amber);
+      margin-bottom: 12px;
+    }
+    .game-score-readout {
+      font-family: var(--font-mono);
+      font-size: 20px;
+      color: var(--crt-cyan);
+      margin-bottom: 16px;
+    }
+    .btn-restart-game {
+      background: #1a1e38;
+      border: 1px solid var(--crt-cyan);
+      color: #fff;
+      font-family: var(--font-display);
+      font-size: 11px;
+      padding: 7px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    /* Mode 3: Cartridge Briefing Screen */
+    .cartridge-briefing-view {
+      padding: 24px 32px;
+      flex: 1;
+      display: flex;
+      gap: 28px;
+      align-items: center;
+      background: #090b16;
+    }
+    .briefing-thumb {
+      width: 220px;
+      height: 160px;
+      border-radius: 8px;
+      border: 2px solid var(--border-accent);
+      object-fit: cover;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+      flex-shrink: 0;
+    }
+    .briefing-details {
+      flex: 1;
+    }
+    .briefing-code {
+      font-family: var(--font-display);
+      font-size: 11px;
+      color: var(--crt-magenta);
+      margin-bottom: 4px;
+    }
+    .briefing-title {
+      font-family: var(--font-display);
+      font-size: 22px;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+    .briefing-jp-title {
+      font-family: var(--font-pixel);
+      font-size: 16px;
+      color: var(--crt-cyan);
+      margin-bottom: 12px;
+    }
+    .briefing-desc {
+      font-family: var(--font-jp);
+      font-size: 13.5px;
+      color: #cbd5e1;
+      line-height: 1.6;
+      margin-bottom: 18px;
+    }
+    .briefing-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    /* CRT Bottom Speaker & Dials */
+    .crt-control-panel {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .speaker-grille {
+      display: flex;
+      gap: 4px;
+    }
+    .grille-line {
+      width: 3px;
+      height: 18px;
+      background: #0b0c16;
+      border-radius: 1px;
+    }
+    .hardware-indicators {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-family: var(--font-display);
+      font-size: 9.5px;
+      color: var(--text-dim);
+    }
+    .power-led-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .power-led {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--crt-green);
+      box-shadow: 0 0 8px var(--crt-green);
+    }
+
+    /* ====================================================================
+       3. THE 9-ROM RETRO CARTRIDGE RACK (全9本のファミコン棚)
+       ==================================================================== */
+    .rack-section {
+      margin-bottom: 48px;
+    }
+    .section-header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+    .section-title-group {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+    }
+    .section-title-group h2 {
+      font-family: var(--font-display);
+      font-size: 20px;
+      letter-spacing: 0.5px;
+      color: #ffffff;
+    }
+    .section-subtitle {
+      font-family: var(--font-pixel);
+      font-size: 13px;
+      color: var(--twilight-amber);
+    }
+
+    .genre-filter-tabs {
+      display: flex;
+      gap: 6px;
+      background: #101222;
+      padding: 4px;
+      border-radius: 6px;
+      border: 1px solid var(--border-subtle);
+    }
+    .filter-tab {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-family: var(--font-display);
+      font-size: 10px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .filter-tab.active, .filter-tab:hover {
+      background: #1c213d;
+      color: #ffffff;
+    }
+
+    /* Cartridge Shelf Layout */
+    .cartridge-rack-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 18px;
+    }
+
+    .cartridge-card {
+      background: var(--bg-card);
+      border: 2px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 12px;
+      position: relative;
+      cursor: pointer;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s, box-shadow 0.2s;
+      overflow: hidden;
+    }
+    .cartridge-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--cart-color, var(--crt-cyan));
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.65), 0 0 16px rgba(0, 245, 255, 0.15);
+    }
+    .cartridge-card.active-cartridge {
+      border-color: var(--twilight-amber);
+      background: #181d38;
+      box-shadow: 0 0 20px rgba(255, 159, 67, 0.3);
+    }
+
+    /* Famicom Cartridge Plastic Bezel */
+    .cart-plastic-shell {
+      border-radius: 6px;
+      padding: 8px;
+      background: #111425;
+      border: 1px solid #202644;
+      margin-bottom: 10px;
+      position: relative;
+    }
+    .cart-top-ribs {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      margin-bottom: 6px;
+    }
+    .rib {
+      width: 14px;
+      height: 2px;
+      background: #2b335c;
+      border-radius: 1px;
+    }
+    .cart-sticker {
+      height: 110px;
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+      border: 1.5px solid rgba(255, 255, 255, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #090b16;
+    }
+    .cart-sticker-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.25s ease;
+    }
+    .cartridge-card:hover .cart-sticker-img {
+      transform: scale(1.05);
+    }
+    .cart-badge-chip {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      font-family: var(--font-display);
+      font-size: 8px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-weight: bold;
+      background: rgba(0, 0, 0, 0.75);
+      border: 1px solid var(--cart-color, #00f5ff);
+      color: var(--cart-color, #00f5ff);
+      backdrop-filter: blur(4px);
+    }
+
+    .cart-title-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    .cart-title-jp {
+      font-family: var(--font-pixel);
+      font-size: 14px;
+      color: #ffffff;
+      font-weight: bold;
+    }
+    .cart-rom-code {
+      font-family: var(--font-display);
+      font-size: 9px;
+      color: var(--text-dim);
+    }
+    .cart-genre-tag {
+      font-family: var(--font-pixel);
+      font-size: 11px;
+      color: var(--twilight-amber);
+      margin-bottom: 10px;
+    }
+
+    .cart-card-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .btn-cart-slot {
+      flex: 1;
+      background: #171b33;
+      border: 1px solid #323a66;
+      color: #cbd5e1;
+      font-family: var(--font-display);
+      font-size: 10px;
+      padding: 6px;
+      border-radius: 4px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s;
+    }
+    .btn-cart-slot:hover {
+      background: var(--cart-color, var(--crt-cyan));
+      border-color: var(--cart-color, var(--crt-cyan));
+      color: #000;
+      font-weight: bold;
+    }
+    .btn-cart-direct-link {
+      background: none;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      font-size: 12px;
+      padding: 5px 8px;
+      border-radius: 4px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+    .btn-cart-direct-link:hover {
+      color: #fff;
+      border-color: #fff;
+    }
+
+    /* ====================================================================
+       4. THE FLAGSHIP WORKBENCH: Re:青春！(UE5 大本命プロジェクト)
+       ==================================================================== */
+    .ue5-workbench {
+      background: linear-gradient(135deg, rgba(22, 26, 50, 0.95) 0%, rgba(14, 16, 30, 0.98) 100%);
+      border: 2px solid rgba(255, 159, 67, 0.4);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-bottom: 48px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6), inset 0 0 24px rgba(255, 159, 67, 0.04);
+    }
+    .ue5-workbench::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--twilight-coral) 0%, var(--twilight-amber) 50%, var(--crt-cyan) 100%);
+    }
+
+    .workbench-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 32px;
+      align-items: center;
+    }
+    @media (max-width: 900px) {
+      .workbench-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .flagship-label-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .chip-flagship {
+      font-family: var(--font-display);
+      font-size: 9.5px;
+      padding: 3px 8px;
+      border-radius: 3px;
+      font-weight: bold;
+    }
+    .chip-ue5 { background: rgba(255, 82, 82, 0.18); border: 1px solid var(--twilight-coral); color: var(--twilight-coral); }
+    .chip-tgs { background: rgba(255, 159, 67, 0.18); border: 1px solid var(--twilight-amber); color: var(--twilight-amber); }
+    .chip-live { background: rgba(0, 229, 163, 0.18); border: 1px solid var(--crt-green); color: var(--crt-green); }
+
+    .flagship-title-jp {
+      font-size: 22px;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.35;
+      margin-bottom: 10px;
+    }
+    .flagship-story {
+      font-size: 13.5px;
+      color: #cbd5e1;
+      line-height: 1.7;
+      margin-bottom: 20px;
+    }
+
+    /* Live Devlog Note Ticker */
+    .note-dispatch-card {
+      background: #0d0f1e;
+      border: 1px solid #232846;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 18px;
+    }
+    .dispatch-header {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-display);
+      font-size: 9.5px;
+      color: var(--twilight-amber);
+      margin-bottom: 6px;
+    }
+    .dispatch-article-link {
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: bold;
+      display: block;
+      line-height: 1.4;
+      transition: color 0.15s;
+    }
+    .dispatch-article-link:hover {
+      color: var(--crt-cyan);
+    }
+
+    .flagship-cta-group {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .btn-ue5-page {
+      background: linear-gradient(135deg, var(--twilight-amber) 0%, #e65100 100%);
+      color: #000;
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: bold;
+      padding: 8px 18px;
+      border-radius: 5px;
+      text-decoration: none;
+      box-shadow: 0 0 14px rgba(255, 159, 67, 0.4);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-note-link {
+      background: #171b33;
+      border: 1px solid #353e6d;
+      color: #cbd5e1;
+      font-family: var(--font-display);
+      font-size: 11px;
+      padding: 8px 16px;
+      border-radius: 5px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Workbench Right: Concept Terminal */
+    .terminal-visual {
+      background: #080a14;
+      border: 1.5px solid #242c52;
+      border-radius: 8px;
+      padding: 16px;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: var(--crt-cyan);
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+      position: relative;
+    }
+    .terminal-top-dots {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .tdot { width: 8px; height: 8px; border-radius: 50%; }
+    .tdot-red { background: #ff5f56; }
+    .tdot-yellow { background: #ffbd2e; }
+    .tdot-green { background: #27c93f; }
+
+    .terminal-code-body {
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+    .t-keyword { color: var(--twilight-coral); }
+    .t-var { color: var(--crt-cyan); }
+    .t-str { color: var(--twilight-amber); }
+
+    /* ====================================================================
+       5. SECRET BASE CREW CORKBOARD (7人のゲーム職人たち)
+       ==================================================================== */
+    .crew-section {
+      margin-bottom: 48px;
+    }
+    .crew-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .polaroid-member-card {
+      background: #121426;
+      border: 1px solid #242a4a;
+      border-radius: 8px;
+      padding: 16px;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+    .polaroid-member-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--twilight-amber);
+      background: #171a33;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.5);
+    }
+    .member-top-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .member-avatar-chip {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      background: #1a1e38;
+      border: 1px solid #374070;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+    .member-name {
+      font-family: var(--font-display);
+      font-size: 14px;
+      color: #ffffff;
+      line-height: 1.2;
+    }
+    .member-role {
+      font-family: var(--font-pixel);
+      font-size: 11.5px;
+      color: var(--twilight-amber);
+    }
+    .member-quote {
+      font-size: 12.5px;
+      color: #94a3b8;
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+    .member-tag-chip {
+      font-family: var(--font-pixel);
+      font-size: 11px;
+      background: #0b0d1a;
+      border: 1px solid #202644;
+      padding: 2px 8px;
+      border-radius: 4px;
+      color: var(--crt-cyan);
+      display: inline-block;
+    }
+
+    /* ====================================================================
+       6. THE LITERAL CORNER EASTER EGG (画面の端っこギミック)
+       ==================================================================== */
+    .secret-corner-trigger {
+      position: fixed;
+      bottom: 14px;
+      right: 14px;
+      background: rgba(16, 18, 34, 0.92);
+      border: 1.5px dashed var(--twilight-amber);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-family: var(--font-display);
+      font-size: 10px;
+      color: var(--twilight-amber);
+      cursor: pointer;
+      z-index: 100;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.6);
+      transition: all 0.15s;
+    }
+    .secret-corner-trigger:hover {
+      background: var(--twilight-amber);
+      color: #000;
+      border-style: solid;
+      box-shadow: 0 0 16px rgba(255, 159, 67, 0.6);
+    }
+
+    /* Modal / Toast */
+    .retro-dialog-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .retro-dialog-backdrop.open {
+      display: flex;
+    }
+    .retro-dialog-box {
+      background: #111428;
+      border: 2px solid var(--crt-cyan);
+      border-radius: 10px;
+      max-width: 580px;
+      width: 100%;
+      padding: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.9), 0 0 24px rgba(0, 245, 255, 0.3);
+      position: relative;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+    footer a {
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+    footer a:hover {
+      color: var(--crt-cyan);
+    }
+
+    @media (max-width: 640px) {
+      .top-deck {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .deck-controls {
+        width: 100%;
+        justify-content: flex-start;
+      }
+      .cartridge-bay {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+      .crt-mode-tabs {
+        width: 100%;
+      }
+      .crt-tab-btn {
+        flex: 1;
+        text-align: center;
+        padding: 6px 4px;
+        font-size: 9px;
+      }
+      .screen-hud-overlay {
+        position: relative;
+        bottom: auto; left: auto; right: auto;
+        padding: 12px;
+        flex-direction: column;
+        gap: 10px;
+        background: #080a14;
+      }
+      .hud-title-card {
+        max-width: 100%;
+      }
+      .hud-action-cluster {
+        width: 100%;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .btn-crt-play-instant, .btn-crt-launch {
+        width: 100%;
+        justify-content: center;
+      }
+      .cartridge-briefing-view {
+        flex-direction: column;
+        padding: 16px;
+      }
+      .briefing-thumb {
+        width: 100%;
+        height: 180px;
+      }
+    }
+
+  </style>
+</head>
+<body class="scanlines-on">
+
+  <div class="app-shell">
+
+    <!-- 1. TOP BAR & ENVIRONMENTAL CONTROLS -->
+    <header class="top-deck">
+      <a href="#" class="brand-identity" title="Corner Neighbor Official Top">
+        <div class="brand-cassette-icon">
+          <div class="tape-window">
+            <div class="tape-spool"></div>
+            <div class="tape-spool"></div>
+          </div>
+        </div>
+        <div class="brand-text-block">
+          <h1>CORNER NEIGHBOR</h1>
+          <div class="sub-motto">世界の端っこ、放課後の秘密基地から。</div>
+        </div>
+      </a>
+
+      <div class="deck-controls">
+        <div class="status-badge" title="Circle Status">
+          <span class="pulse-dot"></span>
+          <span>DEV // ACTIVE 2026</span>
+        </div>
+
+        <!-- Ambient Sound Mode Toggle -->
+        <button class="btn-deck-toggle" id="btn-ambient-audio" title="放課後の環境音（雨音＋CRTノイズ）切替">
+          <span id="audio-icon">🔇</span>
+          <span id="audio-label">AMBIENT: OFF</span>
+        </button>
+
+        <!-- Scanlines Toggle -->
+        <button class="btn-deck-toggle active" id="btn-scanlines" title="CRT走査線エフェクト切替">
+          <span>📺 CRT SCAN: ON</span>
+        </button>
+      </div>
+    </header>
+
+
+    <!-- 2. THE CENTERPIECE: CRT GAMING STATION -->
+    <section class="station-section" aria-label="CRT Gaming Station">
+      <div class="crt-cabinet">
+
+        <!-- Cartridge Top Bay / Slot -->
+        <div class="cartridge-bay">
+          <div class="slot-recess">
+            <span class="slot-label">INSERTED ROM:</span>
+            <div class="inserted-cartridge-pill" id="current-slot-display">
+              <span>💾</span>
+              <span id="current-rom-name">CN-ROM-01 // 漢字スライサー・マージ</span>
+            </div>
+          </div>
+
+          <div class="crt-mode-tabs">
+            <button class="crt-tab-btn active" data-mode="view">🎥 BASE LIVE</button>
+            <button class="crt-tab-btn" data-mode="game">⚔️ 0.01秒 居合斬り (PLAY)</button>
+            <button class="crt-tab-btn" data-mode="briefing">📋 ROM BRIEFING</button>
+          </div>
+        </div>
+
+        <!-- The CRT Screen Housing -->
+        <div class="screen-housing">
+
+          <!-- MODE 1: Animated Living Secret Base (Canvas) -->
+          <div class="screen-view active" id="screen-mode-view">
+            <canvas id="hero-pixel-canvas" width="640" height="190" title="クリックで猫ちゃんが反応します"></canvas>
+            
+            <div class="screen-hud-overlay">
+              <div class="hud-title-card">
+                <h2>WE BUILD WORLDS IN THE SHADOWS</h2>
+                <p>放課後17:30の秘密基地。仲間とゲームを創る熱量。</p>
+              </div>
+
+              <div class="hud-action-cluster">
+                <button class="btn-crt-play-instant" id="btn-switch-to-game">
+                  <span>🕹️ 10秒ミニゲームを遊ぶ</span>
+                </button>
+                <a href="#cartridge-rack" class="btn-crt-launch">
+                  <span>カセット棚を見る (全9本) ▸</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- MODE 2: Instant Playable Micro-Game: 0.01秒の刹那 居合斬り -->
+          <div class="screen-view" id="screen-mode-game">
+            <div class="mini-game-arena" id="game-arena-click-target">
+              <div class="duel-stage">
+                <div class="duel-fighter">
+                  <div class="fighter-sprite" id="player-sprite">🥷</div>
+                  <div class="fighter-name">YOU (忍)</div>
+                </div>
+                <div class="signal-box" id="game-signal">...</div>
+                <div class="duel-fighter">
+                  <div class="fighter-sprite" id="enemy-sprite">👹</div>
+                  <div class="fighter-name">RIVAL (鬼)</div>
+                </div>
+              </div>
+
+              <div class="game-prompt" id="game-status-prompt">
+                「画面をクリック」または「スペースキー」でゲーム開始！
+              </div>
+              <div class="game-score-readout" id="game-score-display">
+                BEST TIME: <span id="local-best-time">--</span> ms
+              </div>
+              <button class="btn-restart-game" id="btn-reset-duel">もう一度勝負する</button>
+            </div>
+          </div>
+
+          <!-- MODE 3: Cartridge Briefing Screen -->
+          <div class="screen-view" id="screen-mode-briefing">
+            <div class="cartridge-briefing-view">
+              <img src="/assets/images/kanji_slicer_thumbnail.png" id="briefing-img" class="briefing-thumb" alt="ROM Thumbnail">
+              <div class="briefing-details">
+                <div class="briefing-code" id="briefing-code">ROM #01 // OUT NOW</div>
+                <h3 class="briefing-title" id="briefing-title">NEON SLICER</h3>
+                <div class="briefing-jp-title" id="briefing-jp-title">漢字スライサー・マージ</div>
+                <p class="briefing-desc" id="briefing-desc">
+                  ネオン輝くサイバー空間で漢字パーツをスワイプ切断＆合体！同じ漢字をぶつけて進化させ、ハイスコアを狙う新感覚物理マージパズル。
+                </p>
+                <div class="briefing-actions">
+                  <a href="https://hajikkoroom.xsrv.jp/kanji-slicer/" target="_blank" rel="noopener" class="btn-crt-launch" id="briefing-play-link">
+                    <span>🕹️ INSERT COIN & PLAY NOW ▸</span>
+                  </a>
+                  <button class="cartridge-eject-btn" onclick="switchCrtMode('view')">ライブ画面へ戻る</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- CRT Control Panel Below Screen -->
+        <div class="crt-control-panel">
+          <div class="speaker-grille">
+            <div class="grille-line"></div>
+            <div class="grille-line"></div>
+            <div class="grille-line"></div>
+            <div class="grille-line"></div>
+            <div class="grille-line"></div>
+          </div>
+          <div class="hardware-indicators">
+            <span>MODEL: CN-CRT-1989</span>
+            <div class="power-led-group">
+              <span class="power-led"></span>
+              <span>POWER ON</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- 3. THE 9-ROM RETRO CARTRIDGE RACK (全9本のカセット棚) -->
+    <section class="rack-section" id="cartridge-rack">
+      <div class="section-header-bar">
+        <div class="section-title-group">
+          <h2>THE 9-ROM CARTRIDGE RACK</h2>
+          <span class="section-subtitle">世界の端っこで作った全9本のゲームたち</span>
+        </div>
+
+        <div class="genre-filter-tabs">
+          <button class="filter-tab active" data-filter="all">ALL (9)</button>
+          <button class="filter-tab" data-filter="action">ACTION</button>
+          <button class="filter-tab" data-filter="puzzle">PUZZLE / LOGIC</button>
+          <button class="filter-tab" data-filter="reflex">REFLEX</button>
+        </div>
+      </div>
+
+      <div class="cartridge-rack-grid" id="rack-grid">
+        <!-- Rendered dynamically via JavaScript with rich authentic cartridge details -->
+      </div>
+    </section>
+
+
+    <!-- 4. THE FLAGSHIP WORKBENCH: Re:青春！(UE5 大本命プロジェクト) -->
+    <section class="ue5-workbench">
+      <div class="workbench-grid">
+        
+        <div>
+          <div class="flagship-label-row">
+            <span class="chip-flagship chip-ue5">⚡ FLAGSHIP PROJECT</span>
+            <span class="chip-flagship chip-tgs">🎯 TARGET: 東京ゲームショウ</span>
+            <span class="chip-flagship chip-live">ALPHA BUILD</span>
+          </div>
+
+          <h2 class="flagship-title-jp">
+            Re:青春！はじっこから創る、Unreal Engine 5 本格インディーゲーム
+          </h2>
+
+          <p class="flagship-story">
+            「夢はでっかく、目指せ東京ゲームショウ！」<br>
+            Corner Neighborの大本命。8-bitの手触りからUnreal Engine 5のハイエンドなグラフィックと独自のゲームシステムへ越境する本格長編インディーゲーム。仲間と泥臭くデバッグを重ねる開発の全記録は公式noteで連載中です。
+          </p>
+
+          <!-- Note Devlog Ticker -->
+          <div class="note-dispatch-card">
+            <div class="dispatch-header">
+              <span>📡 LATEST NOTE DEVLOG // 連載中</span>
+              <span>note.com/hajikkogurashi01</span>
+            </div>
+            <a href="https://note.com/hajikkogurashi01" target="_blank" rel="noopener" class="dispatch-article-link">
+              『UE5のライティング調整と格闘しながら、インディーの手触りを追求する話』▸
+            </a>
+          </div>
+
+          <div class="flagship-cta-group">
+            <a href="/coming-soon.html" class="btn-ue5-page">
+              <span>制作中ページを見る</span> ▸
+            </a>
+            <a href="https://note.com/hajikkogurashi01" target="_blank" rel="noopener" class="btn-note-link">
+              <span>開発note連載を読む ↗</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Terminal Concept Preview -->
+        <div class="terminal-visual">
+          <div class="terminal-top-dots">
+            <span class="tdot tdot-red"></span>
+            <span class="tdot tdot-yellow"></span>
+            <span class="tdot tdot-green"></span>
+            <span style="margin-left: auto; font-size: 10px; color: #64748b;">UE5_ProjectKernel.cpp</span>
+          </div>
+          <div class="terminal-code-body">
+            <div><span class="t-keyword">#include</span> <span class="t-str">"CornerNeighbor/Core.h"</span></div>
+            <div><span class="t-keyword">void</span> <span class="t-var">ASeishunGameMode</span>::BeginPlay() {</div>
+            <div>&nbsp;&nbsp;Super::BeginPlay();</div>
+            <div>&nbsp;&nbsp;Log(<span class="t-str">"Re:青春 — Engine Init Success."</span>);</div>
+            <div>&nbsp;&nbsp;TargetStage = <span class="t-str">"TOKYO_GAME_SHOW_2026"</span>;</div>
+            <div>&nbsp;&nbsp;TeamMembers = <span class="t-keyword">7</span>; <span style="color:#64748b;">// Vorei, Jelly, Go, Kei...</span></div>
+            <div>&nbsp;&nbsp;InspireNextGeneration();</div>
+            <div>}</div>
+            <div style="margin-top: 10px; border-top: 1px dashed #242c52; padding-top: 8px; color: var(--twilight-amber);">
+              > STATUS: Compile 100% OK. Next milestone: Demo Reel.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- 5. SECRET BASE CREW CORKBOARD (7人のゲーム職人たち) -->
+    <section class="crew-section">
+      <div class="section-header-bar">
+        <div class="section-title-group">
+          <h2>SECRET BASE CREW</h2>
+          <span class="section-subtitle">奇人変人が集う「端っこ暮らし」の7人</span>
+        </div>
+        <a href="/members.html" style="font-family:var(--font-display); font-size:11px; color:var(--crt-cyan); text-decoration:none;">
+          全員の詳細プロフィールを見る ▸
+        </a>
+      </div>
+
+      <div class="crew-grid" id="crew-grid">
+        <!-- Rendered with real bio tags: 味噌ラーメン, タコベル, 奇数派, どら焼き, 胡椒, ナタデココ, ドラム -->
+      </div>
+    </section>
+
+
+    <!-- FOOTER -->
+    <footer>
+      <div>
+        © 2024–2026 Corner Neighbor (コーナーネイバー) — 放課後の秘密基地から世界へ
+      </div>
+      <div style="display: flex; gap: 16px;">
+        <a href="https://x.com/Corner_neighbor" target="_blank" rel="noopener">𝕏 Twitter</a>
+        <a href="https://note.com/hajikkogurashi01" target="_blank" rel="noopener">note 開発記録</a>
+        <a href="https://www.youtube.com/@hajikkogurashi" target="_blank" rel="noopener">YouTube</a>
+        <a href="/contact.php">お問い合わせ</a>
+      </div>
+    </footer>
+
+    <!-- 6. THE LITERAL CORNER EASTER EGG -->
+    <button class="secret-corner-trigger" id="btn-secret-corner" title="秘密基地の隠しメモを開く">
+      [ 📍 端っこメモ ]
+    </button>
+
+    <!-- Secret Corner Modal -->
+    <div class="retro-dialog-backdrop" id="secret-modal">
+      <div class="retro-dialog-box">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid var(--border-accent); padding-bottom: 8px;">
+          <h3 style="font-family:var(--font-display); color:var(--twilight-amber); font-size:15px;">
+            SECRET BASE NOTEBOOK // 端っこメモ
+          </h3>
+          <button style="background:none; border:none; color:#fff; font-size:18px; cursor:pointer;" onclick="closeSecretModal()">×</button>
+        </div>
+        <div style="font-size:13.5px; color:#cbd5e1; line-height:1.7; margin-bottom:16px;">
+          <p><strong>「世界の端っこでゲームを作る」</strong></p>
+          <p>
+            Corner Neighborという名前は、部屋の片隅、教室の端っこ、世界の余白に居場所を見つけた仲間たちが集まったことから始まりました。<br>
+            巨大なスタジオには真似できない、小さくても体温の宿るインディーゲームを、この秘密基地から世界中へ届けます。
+          </p>
+          <div style="margin-top: 12px; padding: 10px; background: #080914; border: 1px solid #232846; border-radius: 4px; font-family: var(--font-mono); font-size: 11px; color: var(--crt-green);">
+            ★ コナミコマンド受付中: キーボードで [ ↑ ↑ ↓ ↓ ← → ← → B A ] と入力してみてください。
+          </div>
+        </div>
+        <div style="text-align: right;">
+          <button class="btn-deck-toggle" onclick="closeSecretModal()">閉じる</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    /**
+     * ====================================================================
+     * CORNER NEIGHBOR CONCEPT V2 SCRIPT
+     * - Web Audio API (Chiptune, Rain/CRT Ambient, Clacks)
+     * - Living Canvas (Rain, Neon City, Sleeping Cat)
+     * - Playable 0.01s Reaction Duel Game
+     * - Cartridge Shelf & Slot Switching
+     * - Konami Code Easter Egg
+     * ====================================================================
+     */
+
+    // 1. DATA: 9 CARTRIDGES
+    const CARTRIDGES_DATA = [
+      {
+        id: 'kanji-slicer',
+        code: 'CN-ROM-01',
+        titleEn: 'NEON SLICER',
+        titleJp: '漢字スライサー・マージ',
+        genreKey: 'puzzle',
+        genreText: '物理切断マージパズル',
+        badge: 'OUT NOW',
+        color: '#ff2a85',
+        img: '/assets/images/kanji_slicer_thumbnail.png',
+        url: 'https://hajikkoroom.xsrv.jp/kanji-slicer/',
+        desc: 'ネオン輝くサイバー空間で漢字パーツをスワイプ切断＆合体！同じ漢字をぶつけて進化させ、ハイスコアを狙う新感覚物理マージパズル。'
+      },
+      {
+        id: 'lumen-mirror',
+        code: 'CN-ROM-02',
+        titleEn: 'ROOFTOP CHILL',
+        titleJp: 'LUMEN_MIRROR（ルーメン・ミラー）',
+        genreKey: 'puzzle',
+        genreText: '光学反射ロジックパズル',
+        badge: 'PLAY NOW',
+        color: '#00f5ff',
+        img: '/assets/images/lumen_mirror_thumbnail.png',
+        url: 'https://hajikkoroom.xsrv.jp/lumen-mirror/',
+        desc: '真夜中のビル群の屋上で鏡の角度を操り、ネオンレーザーをターゲットまで導く静謐で美しい光学リフレクションパズル。'
+      },
+      {
+        id: 'mikiri-issen',
+        code: 'CN-ROM-03',
+        titleEn: 'CRT QUEST',
+        titleJp: 'みきり一閃（0.01秒居合）',
+        genreKey: 'reflex',
+        genreText: '超反応0.01秒居合斬り',
+        badge: 'PLAY NOW',
+        color: '#ff9f43',
+        img: '/assets/images/mikiri_issen_thumbnail_1779165128314.png',
+        url: 'https://hajikkoroom.xsrv.jp/mikiri-issen/',
+        desc: 'ブラウン管モニターが閃く刹那の合図を見極めろ！0.01秒の反射神経でライバルを斬り伏せる一撃必殺居合ゲーム。'
+      },
+      {
+        id: 'girigiri-brake',
+        code: 'CN-ROM-04',
+        titleEn: 'EDGE STOPPER',
+        titleJp: 'ギリギリブレーキ',
+        genreKey: 'reflex',
+        genreText: 'チキンレース・寸止めアクション',
+        badge: 'PLAY NOW',
+        color: '#ff5252',
+        img: '/assets/images/girigiri_brake_thumbnail_1779165077904.png',
+        url: 'https://hajikkoroom.xsrv.jp/girigiri-brake/',
+        desc: '崖っぷちの1ミリ手前で急ブレーキ！度胸とタイミングが試される究極のチキンレース系カジュアルアクション。'
+      },
+      {
+        id: 'blackhole-sweeper',
+        code: 'CN-ROM-05',
+        titleEn: 'COSMIC VACUUM',
+        titleJp: 'ブラックホールスイーパー',
+        genreKey: 'action',
+        genreText: '重力吸引パズルアクション',
+        badge: 'PLAY NOW',
+        color: '#a855f7',
+        img: '/assets/images/blackhole_sweeper_thumbnail_1779194532152.png',
+        url: 'https://hajikkoroom.xsrv.jp/blackhole-sweeper/',
+        desc: 'ブラックホールの引力を操り、宇宙の漂流ゴミを一気に吸い込め！連鎖ボーナスが爽快なスペースクリーナー。'
+      },
+      {
+        id: 'kage-mane-dojo',
+        code: 'CN-ROM-06',
+        titleEn: 'SHADOW CLONE',
+        titleJp: 'かげまね道場',
+        genreKey: 'action',
+        genreText: '残像コピー・シルエット道場',
+        badge: 'PLAY NOW',
+        color: '#00e5a3',
+        img: '/assets/images/kage_mane_dojo_thumbnail.svg',
+        url: 'https://hajikkoroom.xsrv.jp/kage-mane-dojo/',
+        desc: '師範の残像シルエットを瞬時に真似ろ！影と光のコントラストが楽しい和風レトロトレーニング。'
+      },
+      {
+        id: 'sorting-factory',
+        code: 'CN-ROM-07',
+        titleEn: 'PIXEL CONVEYOR',
+        titleJp: 'ソーティングファクトリー',
+        genreKey: 'puzzle',
+        genreText: '工場仕分けハイテンポパズル',
+        badge: 'PLAY NOW',
+        color: '#38bdf8',
+        img: '/assets/images/sorting_factory_thumbnail_1779165097756.png',
+        url: 'https://hajikkoroom.xsrv.jp/sorting-factory/',
+        desc: 'ベルトコンベアから流れてくるレトロカートリッジを素早く仕分け！ミスなくコンボを繋げてラインを高速稼働させろ。'
+      },
+      {
+        id: 'stealth-slacker',
+        code: 'CN-ROM-08',
+        titleEn: 'OFFICE SNEAK',
+        titleJp: 'ステルスサボり',
+        genreKey: 'reflex',
+        genreText: 'ステルススリラー・サボり道',
+        badge: 'PLAY NOW',
+        color: '#facc15',
+        img: '/assets/images/stealth_slacker_thumbnail_1779165112569.png',
+        url: 'https://hajikkoroom.xsrv.jp/stealth-slacker/',
+        desc: '上司が振り返るその一瞬を欺き、仕事をサボってゲームを進めろ！息を呑む緊張感のだるまさんが転んだ系ゲーム。'
+      },
+      {
+        id: 'wall-jumper',
+        code: 'CN-ROM-09',
+        titleEn: 'TOWER CLIMBER',
+        titleJp: 'ウォールジャンパー',
+        genreKey: 'action',
+        genreText: 'エンドレス三角跳びアクション',
+        badge: 'PLAY NOW',
+        color: '#ec4899',
+        img: '/assets/images/wall_jumper_thumbnail_1779165143429.png',
+        url: 'https://hajikkoroom.xsrv.jp/wall-jumper/',
+        desc: '左右の壁をキックして無限に登り続けろ！罠を避けながらどこまで登れるかを競うバーティカルクライマー。'
+      }
+    ];
+
+    // 2. DATA: 7 CREW MEMBERS (Real authentic data)
+    const CREW_DATA = [
+      {
+        name: 'Vorei',
+        role: '開発 / 言いだしっぺ',
+        avatar: '🔥',
+        tag: '🍜 味噌ラーメン',
+        quote: '元祖言いだしっぺ。やりたい事で頭がパンク寸前。味噌ラーメンを愛し臓器を破壊された過去を持つ。「氷」や「蟹」など「か行」が好き。'
+      },
+      {
+        name: 'Jelly',
+        role: '開発 / エンジニア',
+        avatar: '⚡',
+        tag: '🌮 タコベル',
+        quote: '本職もエンジニアの社畜。Voreiから声が掛かり秒で参入。ゲームはほぼエアプだが即ち無限の可能性。オーストラリアでパン屋を開く野望。'
+      },
+      {
+        name: 'Go',
+        role: '広報 / ブログ管理人',
+        avatar: '🎮',
+        tag: '🎲 奇数派',
+        quote: 'Goの部屋を訪れた者は例外なく生活にゲームが捻じ込まれる。「とりあえずやってみよう」でゲーム制作に頭から飛び込む。RTAと偶数が嫌い。'
+      },
+      {
+        name: 'Kei',
+        role: '2Dデザイン / ギター',
+        avatar: '🎸',
+        tag: '🍩 どら焼き',
+        quote: '学生時代はギターで世を魅了し今は船釣りにも進出。羽のように軽いフットワークでイラスト修行中。草月のどら焼きを食べるために生きている。'
+      },
+      {
+        name: 'Sususu',
+        role: '3Dデザイン / モデリング',
+        avatar: '🐺',
+        tag: '🌶️ 胡椒',
+        quote: '乞食から貴族への転職を夢見る。年上のお姉さんがかなり好き。野生に還りたい願望を持つが倫理観は人の2倍あるワイルドモラリスト。'
+      },
+      {
+        name: 'Volcano Yamamoto',
+        role: '仕様設計 / かたかた',
+        avatar: '🌋',
+        tag: '🥥 ナタデココ',
+        quote: '本名はかたかた。奇人変人サークルの中で唯一の常識人。「常に識る」を心掛け全てを吸収する。個人でKatakataLabやPlayPointも運営。'
+      },
+      {
+        name: 'Good Sun',
+        role: '進行管理 / ドラム',
+        avatar: '☀️',
+        tag: '🥁 ドラム',
+        quote: '新潟出身。趣味を25個持った化け物。サバイバルホラーとドラムをこよなく愛し、クラブやライブハウスで25%の確率でエンカウント可能。'
+      }
+    ];
+
+    // 3. SOUND SYNTHESIZER (Web Audio API)
+    let audioCtx = null;
+    let ambientGain = null;
+    let ambientActive = false;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playSoundEffect(type) {
+      initAudio();
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+
+      if (type === 'coin') {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(987.77, now); // B5
+        osc.frequency.setValueAtTime(1318.51, now + 0.08); // E6
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.45);
+      } else if (type === 'clack') {
+        // Heavy plastic cartridge insertion sound
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(120, now);
+        osc.frequency.exponentialRampToValueAtTime(30, now + 0.09);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.1);
+      } else if (type === 'slash') {
+        // Iai Slash white noise
+        const bufferSize = audioCtx.sampleRate * 0.15;
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const output = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          output[i] = Math.random() * 2 - 1;
+        }
+        const whiteNoise = audioCtx.createBufferSource();
+        whiteNoise.buffer = buffer;
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(1800, now);
+        filter.Q.setValueAtTime(3, now);
+        const gain = audioCtx.createGain();
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+        whiteNoise.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+        whiteNoise.start(now);
+      }
+    }
+
+    // Toggle Ambient Sound (Rain & CRT Hum)
+    function toggleAmbientSound() {
+      initAudio();
+      if (!audioCtx) return;
+      ambientActive = !ambientActive;
+      const btn = document.getElementById('btn-ambient-audio');
+      const icon = document.getElementById('audio-icon');
+      const label = document.getElementById('audio-label');
+
+      if (ambientActive) {
+        if (!ambientGain) {
+          ambientGain = audioCtx.createGain();
+          ambientGain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+          
+          // Noise source (rain texture)
+          const bufferSize = audioCtx.sampleRate * 2;
+          const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+          const output = noiseBuffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) {
+            output[i] = (Math.random() * 2 - 1) * 0.2;
+          }
+          const whiteNoise = audioCtx.createBufferSource();
+          whiteNoise.buffer = noiseBuffer;
+          whiteNoise.loop = true;
+
+          const filter = audioCtx.createBiquadFilter();
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(450, audioCtx.currentTime);
+
+          whiteNoise.connect(filter);
+          filter.connect(ambientGain);
+          ambientGain.connect(audioCtx.destination);
+          whiteNoise.start();
+        } else {
+          ambientGain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+        }
+        btn.classList.add('active');
+        icon.textContent = '🔊';
+        label.textContent = 'AMBIENT: ON';
+        playSoundEffect('coin');
+      } else {
+        if (ambientGain) {
+          ambientGain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+        }
+        btn.classList.remove('active');
+        icon.textContent = '🔇';
+        label.textContent = 'AMBIENT: OFF';
+      }
+    }
+    document.getElementById('btn-ambient-audio').addEventListener('click', toggleAmbientSound);
+
+    // Toggle Scanlines
+    document.getElementById('btn-scanlines').addEventListener('click', function() {
+      document.body.classList.toggle('scanlines-on');
+      const active = document.body.classList.contains('scanlines-on');
+      this.classList.toggle('active', active);
+      this.textContent = active ? '📺 CRT SCAN: ON' : '📺 CRT SCAN: OFF';
+      playSoundEffect('clack');
+    });
+
+    // 4. LIVING HERO CANVAS (Secret Base at Dusk/Night)
+    const heroCanvas = document.getElementById('hero-pixel-canvas');
+    const ctx = heroCanvas.getContext('2d');
+
+    function px(c, x, y, w, h, col) {
+      c.fillStyle = col;
+      c.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+    }
+
+    let catPurrPhase = 0;
+    heroCanvas.addEventListener('click', () => {
+      catPurrPhase = 120;
+      playSoundEffect('coin');
+    });
+
+    function drawBaseScene(time) {
+      const W = 640;
+      const H = 190;
+      ctx.clearRect(0, 0, W, H);
+
+      // Sky: Dusk transition into deep night
+      const sky = ctx.createLinearGradient(0, 0, W, H);
+      sky.addColorStop(0, '#0a0d1d');
+      sky.addColorStop(0.6, '#141834');
+      sky.addColorStop(1, '#241c38'); // warm dusk ambient
+      ctx.fillStyle = sky;
+      ctx.fillRect(0, 0, W, H);
+
+      // Distant Rainy Tokyo Skyline
+      for (let i = 0; i < 9; i++) {
+        const bx = 180 + i * 48;
+        const bh = 70 + (i * 29 % 65);
+        px(ctx, bx, H - bh - 35, 42, bh, '#12162b');
+        px(ctx, bx, H - bh - 35, 1, bh, '#1d2345');
+        // Beacon
+        if ((Math.floor(time / 600) + i) % 2 === 0) {
+          px(ctx, bx + 20, H - bh - 39, 2, 2, '#ff3b81');
+        }
+      }
+
+      // Rain streaks
+      for (let r = 0; r < 50; r++) {
+        const rx = (r * 47 + time * 0.12) % W;
+        const ry = (r * 31 + time * 0.28) % (H - 45);
+        px(ctx, rx, ry, 1, 4, 'rgba(0, 245, 255, 0.25)');
+      }
+
+      // Secret Base Window Sills & Loft Floor
+      px(ctx, 0, H - 45, W, 45, '#171a30');
+      px(ctx, 0, H - 45, W, 2, '#2f355c');
+
+      // Developer Desk (Woodgrain / Steel)
+      px(ctx, 20, H - 90, 240, 48, '#1e1c2b');
+      px(ctx, 20, H - 90, 240, 3, '#ff9f43'); // Desk edge glowing warm
+
+      // 3 Glowing Monitors on the Desk
+      // Monitor 1: Code terminal (Green phosphor)
+      px(ctx, 35, H - 145, 60, 52, '#0c1214');
+      px(ctx, 37, H - 143, 56, 48, '#061713');
+      for (let cl = 0; cl < 5; cl++) {
+        const cw = 15 + ((cl * 17) % 30);
+        px(ctx, 42, H - 138 + cl * 8, cw, 3, '#00e5a3');
+      }
+
+      // Monitor 2 (Center): Unreal Engine 5 Viewport
+      px(ctx, 105, H - 158, 85, 65, '#121422');
+      px(ctx, 108, H - 155, 79, 59, '#090b16');
+      // 3D wireframe / terrain in monitor
+      ctx.strokeStyle = '#00f5ff';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(120, H - 140, 55, 35);
+      px(ctx, 138, H - 128, 18, 12, '#ff5252');
+
+      // Monitor 3: Famicom Mini Emulator
+      px(ctx, 200, H - 142, 50, 48, '#181224');
+      px(ctx, 202, H - 140, 46, 44, '#241026');
+      px(ctx, 215, H - 125, 18, 14, '#ffc107');
+
+      // Coffee Mug on desk (with tiny steam)
+      px(ctx, 230, H - 105, 12, 14, '#ffffff');
+      const steamY = (time * 0.02) % 6;
+      px(ctx, 235, H - 110 - steamY, 2, 3, 'rgba(255,255,255,0.4)');
+
+      // Sleeping Pixel Cat on the Window Sill
+      const catBreath = Math.floor(time / 700) % 2;
+      px(ctx, 280, H - 56, 26, 11, '#664d38');
+      px(ctx, 283, H - 59 + catBreath, 20, 11 - catBreath, '#87694f');
+      px(ctx, 282, H - 61 + catBreath, 4, 3, '#664d38'); // left ear
+      px(ctx, 290, H - 61 + catBreath, 4, 3, '#664d38'); // right ear
+      px(ctx, 301, H - 53 - catBreath, 8, 4, '#543e2c'); // tail
+
+      // Cat "Zzz"
+      const zStep = Math.floor(time / 600) % 3;
+      if (zStep >= 1) px(ctx, 298, H - 72, 3, 2, 'rgba(255, 159, 67, 0.7)');
+      if (zStep === 2) px(ctx, 303, H - 78, 4, 3, 'rgba(255, 42, 133, 0.8)');
+
+      requestAnimationFrame(drawBaseScene);
+    }
+    requestAnimationFrame(drawBaseScene);
+
+
+    // 5. CRT MODE SWITCHER (Live Base vs Micro-Game vs Briefing)
+    function switchCrtMode(modeKey) {
+      document.querySelectorAll('.screen-view').forEach(v => v.classList.remove('active'));
+      document.querySelectorAll('.crt-tab-btn').forEach(b => b.classList.remove('active'));
+
+      const targetView = document.getElementById(`screen-mode-${modeKey}`);
+      if (targetView) targetView.classList.add('active');
+
+      const targetTab = document.querySelector(`.crt-tab-btn[data-mode="${modeKey}"]`);
+      if (targetTab) targetTab.classList.add('active');
+
+      playSoundEffect('clack');
+    }
+
+    document.querySelectorAll('.crt-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const mode = btn.getAttribute('data-mode');
+        switchCrtMode(mode);
+      });
+    });
+
+    document.getElementById('btn-switch-to-game').addEventListener('click', () => {
+      switchCrtMode('game');
+      startDuelGame();
+    });
+
+
+    // 6. INSTANT 10-SECOND MICRO-GAME: 0.01秒 居合斬り
+    let gameState = 'IDLE'; // IDLE, WAITING, READY_SIGNAL, FINISHED
+    let signalTime = 0;
+    let duelTimeout = null;
+    let bestTime = localStorage.getItem('cn_best_reaction') || null;
+
+    if (bestTime) {
+      document.getElementById('local-best-time').textContent = bestTime;
+    }
+
+    const arena = document.getElementById('game-arena-click-target');
+    const signalBox = document.getElementById('game-signal');
+    const promptBox = document.getElementById('game-status-prompt');
+    const playerSprite = document.getElementById('player-sprite');
+    const enemySprite = document.getElementById('enemy-sprite');
+
+    function startDuelGame() {
+      clearTimeout(duelTimeout);
+      gameState = 'WAITING';
+      signalBox.textContent = '...';
+      signalBox.style.color = '#ff9f43';
+      promptBox.textContent = '構えよ… 「！」が出た瞬間に画面を叩け！';
+      playerSprite.textContent = '🥷';
+      enemySprite.textContent = '👹';
+
+      // Random wait between 1.5s and 4.0s
+      const delay = 1500 + Math.random() * 2500;
+      duelTimeout = setTimeout(() => {
+        gameState = 'READY_SIGNAL';
+        signalTime = performance.now();
+        signalBox.textContent = '！！';
+        signalBox.style.color = '#00f5ff';
+        promptBox.textContent = '今だ、斬れッ！！！';
+        playSoundEffect('coin');
+      }, delay);
+    }
+
+    function handleStrike() {
+      if (gameState === 'IDLE' || gameState === 'FINISHED') {
+        startDuelGame();
+        return;
+      }
+
+      if (gameState === 'WAITING') {
+        // False start (フライング)
+        clearTimeout(duelTimeout);
+        gameState = 'FINISHED';
+        signalBox.textContent = '×';
+        signalBox.style.color = '#ff5252';
+        promptBox.textContent = '早すぎた！(フライング反則負け)';
+        playSoundEffect('clack');
+      } else if (gameState === 'READY_SIGNAL') {
+        const reaction = Math.round(performance.now() - signalTime);
+        gameState = 'FINISHED';
+        playSoundEffect('slash');
+        playerSprite.textContent = '⚔️';
+        enemySprite.textContent = '💀';
+
+        signalBox.textContent = `${reaction}ms`;
+        signalBox.style.color = '#00e5a3';
+
+        let rank = '神速の一閃！(達人級)';
+        if (reaction > 280) rank = '及第点の一刀！';
+        if (reaction > 400) rank = 'やや鈍い…修行あるのみ！';
+        promptBox.textContent = `見事討ち取った！ [ ${rank} ]`;
+
+        if (!bestTime || reaction < parseInt(bestTime)) {
+          bestTime = reaction;
+          localStorage.setItem('cn_best_reaction', bestTime);
+          document.getElementById('local-best-time').textContent = bestTime;
+        }
+      }
+    }
+
+    arena.addEventListener('click', handleStrike);
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' && document.getElementById('screen-mode-game').classList.contains('active')) {
+        e.preventDefault();
+        handleStrike();
+      }
+    });
+    document.getElementById('btn-reset-duel').addEventListener('click', (e) => {
+      e.stopPropagation();
+      startDuelGame();
+    });
+
+
+    // 7. RENDER 9 CARTRIDGES RACK
+    const rackGrid = document.getElementById('rack-grid');
+
+    function renderCartridges(filter = 'all') {
+      rackGrid.innerHTML = '';
+      const list = filter === 'all' ? CARTRIDGES_DATA : CARTRIDGES_DATA.filter(c => c.genreKey === filter);
+
+      list.forEach(c => {
+        const card = document.createElement('article');
+        card.className = 'cartridge-card';
+        card.style.setProperty('--cart-color', c.color);
+        card.setAttribute('data-id', c.id);
+
+        card.innerHTML = `
+          <div class="cart-plastic-shell">
+            <div class="cart-top-ribs">
+              <span class="rib"></span><span class="rib"></span><span class="rib"></span><span class="rib"></span>
+            </div>
+            <div class="cart-sticker">
+              <img src="${c.img}" class="cart-sticker-img" alt="${c.titleJp}" loading="lazy">
+              <span class="cart-badge-chip">${c.badge}</span>
+            </div>
+          </div>
+          <div class="cart-title-row">
+            <h3 class="cart-title-jp">${c.titleJp}</h3>
+            <span class="cart-rom-code">${c.code}</span>
+          </div>
+          <div class="cart-genre-tag">${c.genreText}</div>
+          <div class="cart-card-actions">
+            <button class="btn-cart-slot" data-cart-id="${c.id}">
+              <span>💾 スロットに挿す</span>
+            </button>
+            <a href="${c.url}" target="_blank" rel="noopener" class="btn-cart-direct-link" title="別タブで開く">
+              ↗
+            </a>
+          </div>
+        `;
+
+        card.addEventListener('click', () => insertCartridgeToConsole(c));
+        rackGrid.appendChild(card);
+      });
+    }
+
+    renderCartridges();
+
+    // Filter Buttons
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const filterKey = tab.getAttribute('data-filter');
+        renderCartridges(filterKey);
+        playSoundEffect('clack');
+      });
+    });
+
+    // 8. INSERT CARTRIDGE TO CRT CONSOLE
+    function insertCartridgeToConsole(c) {
+      playSoundEffect('clack');
+
+      // Update HUD display
+      document.getElementById('current-rom-name').textContent = `${c.code} // ${c.titleJp}`;
+
+      // Highlight card in rack
+      document.querySelectorAll('.cartridge-card').forEach(el => el.classList.remove('active-cartridge'));
+      const activeCard = document.querySelector(`.cartridge-card[data-id="${c.id}"]`);
+      if (activeCard) activeCard.classList.add('active-cartridge');
+
+      // Populate Mode 3 Briefing
+      document.getElementById('briefing-img').src = c.img;
+      document.getElementById('briefing-code').textContent = `${c.code} // ${c.badge}`;
+      document.getElementById('briefing-title').textContent = c.titleEn;
+      document.getElementById('briefing-jp-title').textContent = c.titleJp;
+      document.getElementById('briefing-desc').textContent = c.desc;
+      document.getElementById('briefing-play-link').href = c.url;
+
+      // Switch to Mode 3
+      switchCrtMode('briefing');
+
+      // Smooth scroll up to CRT Console if scrolled far
+      const crtEl = document.querySelector('.crt-cabinet');
+      if (crtEl && window.scrollY > 400) {
+        crtEl.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+
+    // 9. RENDER SECRET BASE CREW (7 Members)
+    const crewGrid = document.getElementById('crew-grid');
+    CREW_DATA.forEach(m => {
+      const card = document.createElement('div');
+      card.className = 'polaroid-member-card';
+      card.innerHTML = `
+        <div class="member-top-row">
+          <div class="member-avatar-chip">${m.avatar}</div>
+          <div>
+            <div class="member-name">${m.name}</div>
+            <div class="member-role">${m.role}</div>
+          </div>
+        </div>
+        <p class="member-quote">${m.quote}</p>
+        <span class="member-tag-chip">${m.tag}</span>
+      `;
+      crewGrid.appendChild(card);
+    });
+
+
+    // 10. SECRET CORNER MODAL & KONAMI CODE
+    const secretModal = document.getElementById('secret-modal');
+    document.getElementById('btn-secret-corner').addEventListener('click', () => {
+      secretModal.classList.add('open');
+      playSoundEffect('coin');
+    });
+
+    function closeSecretModal() {
+      secretModal.classList.remove('open');
+      playSoundEffect('clack');
+    }
+    window.closeSecretModal = closeSecretModal;
+
+    // Konami Code: Up Up Down Down Left Right Left Right B A
+    const konamiSequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'KeyB', 'KeyA'];
+    let konamiIndex = 0;
+
+    document.addEventListener('keydown', (e) => {
+      if (e.code === konamiSequence[konamiIndex]) {
+        konamiIndex++;
+        if (konamiIndex === konamiSequence.length) {
+          konamiIndex = 0;
+          playSoundEffect('coin');
+          alert('🎮 [KONAMI CODE ACCEPTED!]\\n秘密基地の隠しプロトタイプへようこそ！\\n制作中のUE5開発メモ（note）へご案内します。');
+          window.open('https://note.com/hajikkogurashi01', '_blank');
+        }
+      } else {
+        konamiIndex = 0;
+      }
+    });
+
+  </script>
+</body>
+</html>
