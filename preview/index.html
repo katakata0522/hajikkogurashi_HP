@@ -601,32 +601,33 @@
 
     /* Mobile Hamburger Menu Button */
     
-    /* Mobile Header Action Controls (SFX & Hamburger) */
+    /* Header Navigation & Action Controls */
+    .desktop-nav-group {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
     .mobile-header-actions {
       display: none;
       align-items: center;
       gap: 8px;
     }
-    @media (max-width: 768px) {
-      .desktop-nav-group {
-        display: none !important;
-      }
-      .mobile-header-actions {
-        display: flex !important;
-      }
-    }
-    
     .mobile-menu-btn {
       display: none;
       background: #161824;
       border: 1.5px solid #30344a;
       color: var(--neon-cyan);
-      width: 36px;
-      height: 34px;
-      border-radius: 5px;
+      width: 38px;
+      height: 36px;
+      border-radius: 6px;
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .mobile-menu-btn:focus-visible {
+      outline: 2px solid var(--neon-cyan);
+      outline-offset: 2px;
     }
 
     /* Mobile Drawer Navigation */
@@ -705,13 +706,6 @@
       }
     }
 
-    /* Mobile Header Action Controls (SFX & Hamburger) */
-    .mobile-header-actions {
-      display: none;
-      align-items: center;
-      gap: 8px;
-    }
-
     @media (max-width: 768px) {
       .desktop-nav-group {
         display: none !important;
@@ -720,7 +714,7 @@
         display: flex !important;
       }
       .mobile-menu-btn {
-        display: inline-flex;
+        display: inline-flex !important;
       }
       .hero-frame {
         height: auto;
@@ -1005,12 +999,16 @@
       z-index: 10;
       opacity: 0.55;
     }
+    .crt-screen-bezel:focus-visible {
+      outline: 2px solid var(--neon-cyan);
+      outline-offset: 2px;
+    }
     .crt-osd-channel {
       position: absolute;
       top: 8px;
       left: 10px;
       font-family: var(--font-pixel-en);
-      font-size: 9px;
+      font-size: 11px;
       color: #00f5ff;
       text-shadow: 0 0 4px #00f5ff;
       pointer-events: none;
@@ -1022,14 +1020,15 @@
       bottom: 8px;
       right: 10px;
       font-family: var(--font-pixel-jp);
-      font-size: 8.5px;
-      color: #ffd6ec;
-      background: rgba(26, 16, 40, 0.85);
-      border: 1px solid rgba(255, 42, 157, 0.5);
-      padding: 2px 6px;
-      border-radius: 3px;
+      font-size: 11px;
+      color: #ffffff;
+      background: rgba(22, 14, 34, 0.92);
+      border: 1px solid rgba(255, 42, 157, 0.7);
+      padding: 3px 8px;
+      border-radius: 4px;
       pointer-events: none;
       z-index: 12;
+      letter-spacing: 0.4px;
     }
 
     /* Cartridge Shelf / 4 Mini Cartridges */
@@ -1039,19 +1038,28 @@
       gap: 8px;
       margin-top: 8px;
     }
+    @media (max-width: 480px) {
+      .mini-cart-rack {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
     .mini-cart-item {
       background: #151724;
       border: 1.5px solid #282c3f;
       border-radius: 4px;
-      padding: 6px 4px;
+      padding: 7px 5px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 3px;
+      gap: 4px;
       cursor: pointer;
       transition: all 0.16s ease;
       user-select: none;
       text-align: center;
+    }
+    .mini-cart-item:focus-visible {
+      outline: 2px solid var(--neon-cyan);
+      outline-offset: 2px;
     }
     .mini-cart-item:hover {
       transform: translateY(-2px);
@@ -1065,12 +1073,13 @@
       transform: translateY(1px);
     }
     .mini-cart-icon {
-      font-size: 15px;
+      font-size: 16px;
       line-height: 1;
     }
     .mini-cart-label {
       font-family: var(--font-pixel-jp);
-      font-size: 8.5px;
+      font-size: 11px;
+      font-weight: 500;
       color: #e2e8f0;
       white-space: nowrap;
       overflow: hidden;
@@ -1079,10 +1088,11 @@
     }
     .mini-cart-tag {
       font-family: var(--font-pixel-en);
-      font-size: 7px;
-      padding: 1px 3px;
-      border-radius: 2px;
-      letter-spacing: 0.3px;
+      font-size: 9px;
+      padding: 2px 5px;
+      border-radius: 3px;
+      letter-spacing: 0.4px;
+      font-weight: bold;
     }
 
     .mini-console-footer {
@@ -1564,7 +1574,7 @@
           </a>
 
           <!-- Right Nav Links + SFX Toggle + PLAY NOW CTA (Desktop) -->
-          <div class="desktop-nav-group" style="display:flex; align-items:center; gap: 20px;">
+          <div class="desktop-nav-group">
             <nav style="display:flex; align-items:center; gap: 22px;" aria-label="Main Navigation">
               <a href="#games" class="nav-link active" data-nav="games">GAMES</a>
               <a href="/portfolio.html" class="nav-link" data-nav="portfolio">PORTFOLIO</a>
@@ -1633,13 +1643,13 @@
 
             <!-- Hero Callout Box (Right Side) -->
             <div class="hero-overlay-card">
-              <div class="hero-title-en">
-                WE BUILD WORLDS<br/>IN THE SHADOWS
+              <div class="hero-kicker" style="font-family:var(--font-pixel-jp); font-size:11px; color:#94a3b8; letter-spacing:0.8px; margin-bottom:4px;">
+                インディーゲーム制作サークル
               </div>
-              <h1 class="hero-title-jp">
+              <h1 class="hero-title-jp" style="margin-bottom:12px;">
                 世界の端っこでゲームを作る
               </h1>
-              <button class="btn-enter-base" id="btn-enter-base">ENTER THE BASE</button>
+              <a href="#games" class="btn-enter-base" id="btn-enter-base" style="text-decoration:none; display:inline-block;" aria-label="ゲーム一覧へスクロール">ゲームを遊ぶ ▼</a>
             </div>
           </div>
         </section>
@@ -1647,9 +1657,7 @@
         <!-- UNREAL ENGINE 5 FLAGSHIP PROJECT CARD -->
         <section class="ue5-flagship-card" aria-label="Flagship Project">
           <div class="ue5-badge-row">
-            <span class="ue5-pill pill-cyan">⚡ FLAGSHIP PROJECT</span>
-            <span class="ue5-pill pill-pink">UNREAL ENGINE 5</span>
-            <span class="ue5-pill pill-amber">IN ACTIVE DEVELOPMENT</span>
+            <span class="ue5-pill pill-cyan">⚡ 本格制作中 // Unreal Engine 5</span>
           </div>
           <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
             <div style="max-width: 680px;">
@@ -1903,55 +1911,44 @@
             </div>
           </div>
 
-          <!-- RIGHT SIDEBAR COLUMN: Latest Transmission -->
-          <aside class="transmission-sidebar" aria-label="Latest Transmission">
+          <!-- RIGHT SIDEBAR COLUMN: Updates & Development Log -->
+          <aside class="transmission-sidebar" aria-label="サークル最新情報">
             <div>
-              <div style="display:flex; align-items:center; justify-content:space-between; margin: 2px 0 8px 0;">
-                <h3 style="margin: 0; font-size: 14px; font-weight: 700; color: #f1f5f9; letter-spacing: 0.3px;">
-                  Latest Transmission
+              <div style="display:flex; align-items:center; justify-content:space-between; margin: 2px 0 10px 0;">
+                <h3 style="margin: 0; font-size: 13.5px; font-weight: 700; color: #f1f5f9; letter-spacing: 0.4px; font-family: var(--font-pixel-jp);">
+                  📡 最新情報 // UPDATES
                 </h3>
-                <button id="btn-decode-log" style="background:none; border:1px solid #2e3346; color:#00f5ff; font-family:var(--font-pixel-jp); font-size:8.5px; padding:1px 5px; border-radius:3px; cursor:pointer;" title="日本語ログ / 暗号ログ切替">
-                  JP/RAW
-                </button>
+                <a href="/news.html" style="color:#00f5ff; font-family:var(--font-pixel-jp); font-size:10px; text-decoration:none; border:1px solid #2e3346; padding:2px 6px; border-radius:3px; transition:all 0.15s ease;" title="お知らせ一覧へ">
+                  一覧 ▸
+                </a>
               </div>
 
-              <!-- 8-Line Micro-Text Block (Toggles between Mockup Cipher & Japanese News Log) -->
-              <div id="transmission-cipher" style="font-size: 5.5px; line-height: 1.48; color: #7e8291; letter-spacing: 0.22px; font-family: var(--font-mono); white-space: nowrap; overflow: hidden;">
-                <div>OCTUNS IL TEBDI CUACNT, CIDUT ERE ANEE, ENHER IORMO2</div>
-                <div>DOSTLHEO DOE OATT, ONII DHEXI SU8ND INDLAX TITI</div>
-                <div>EEAVOGSO M NI: OTTNTIHS CONUITANES UPLORTER</div>
-                <div>OOGNANIGE OEFOTHIIK. AWIIKE ANEE CWES RNOS PR CHROM.</div>
-                <div>CHENSNGO UHTSHC FEMIOS TABINCE DAOIMHAN DO FNIIITE</div>
-                <div>OCEGOHNS COUFOWY OENUIS OESSNTC ENRINAUN DET</div>
-                <div>EOANINOEN CHRUNS EONI COWOHOB DYARECAIK FISOEIOONLIS</div>
-                <div>GHHIIOR NIAIIN EXCLOIATRC AAIUKN TACUS IEOEGY.</div>
-              </div>
-
-              <div id="transmission-jp" style="display:none; font-size: 10px; line-height: 1.55; color: #a3aac2; font-family: var(--font-pixel-jp);">
-                <div><span style="color:#00f5ff;">[NEW]</span> 新トップページ稼働開始</div>
-                <div><span style="color:#ff2a9d;">[ROM]</span> ミニゲーム全9作品を公開中</div>
-                <div><span style="color:#fbbf24;">[LOG]</span> <a href="/news.html" style="color:#e2e8f0; text-decoration:underline;">最新のお知らせ一覧へ ▸</a></div>
+              <!-- Real, High-Contrast Updates List (Accessible & Clear) -->
+              <div class="transmission-news-list" style="font-size: 11.5px; line-height: 1.65; color: #cbd5e1; font-family: var(--font-pixel-jp); display: flex; flex-direction: column; gap: 8px;">
+                <div style="border-bottom: 1px solid #222638; padding-bottom: 6px;">
+                  <span style="color:#00f5ff; font-weight:bold;">[NEW]</span> 新トップページプレビュー公開
+                </div>
+                <div style="border-bottom: 1px solid #222638; padding-bottom: 6px;">
+                  <span style="color:#ff2a9d; font-weight:bold;">[ROM]</span> ブラウザミニゲーム全9作品稼働中
+                </div>
+                <div>
+                  <span style="color:#fbbf24; font-weight:bold;">[NOTE]</span> 『Re:青春』開発手記を定期更新中
+                </div>
               </div>
             </div>
 
             <div>
-              <!-- SUBSCRIBE FOR INTEL Neon Box -->
-              <div class="subscribe-box">
-                <div style="font-size: 11px; color: #ffffff; letter-spacing: 0.4px; font-weight: 700;">
-                  SUBSCRIBE FOR INTEL
+              <!-- Real Note Development Log Card (Replaces fake subscribe form) -->
+              <div class="subscribe-box" style="margin-top: 10px; background: #131726; border: 1px solid #28304a; border-radius: 6px; padding: 12px 14px;">
+                <div style="font-size: 12px; color: #00f5ff; font-weight: 700; font-family: var(--font-pixel-jp); margin-bottom: 4px;">
+                  📖 公式 note 開発手記
                 </div>
-                <div style="font-size: 5.5px; color: #6c7080; letter-spacing: 0.3px; margin: 3px 0 7px 0;">
-                  CIHNNLOAD IO EOUUE SSIVP EIENOIE.
+                <div style="font-size: 11px; color: #94a3b8; line-height: 1.5; margin-bottom: 10px;">
+                  泥臭い制作過程や仕様書、開発の裏側を随時お届けしています。
                 </div>
-                <form id="intel-form" style="margin:0; display:flex; gap:4px;">
-                  <input
-                    type="text"
-                    id="intel-input"
-                    value="SO2(MBION"
-                    aria-label="Subscribe for intel or enter secret code"
-                    style="width: 100%; background: #252836; border: 1px solid #35394c; border-radius: 3px; padding: 4.5px 7px; color: #8c92a6; font-family: var(--font-mono); font-size: 7.5px; letter-spacing: 0.5px; outline: none;"
-                  />
-                </form>
+                <a href="https://note.com/hajikkogurashi01" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; background: #1c2236; border: 1px solid #3b466b; color: #ffffff; font-family: var(--font-mono); font-size: 11px; font-weight: bold; padding: 7px 10px; border-radius: 4px; text-decoration: none; transition: all 0.15s ease;" aria-label="公式note開発手記を開く">
+                  <span>note を読む</span> ↗
+                </a>
               </div>
 
               <!-- Bottom 3 Pixel Hardware / Controller Tiles -->
@@ -2095,31 +2092,33 @@
               </div>
 
               <!-- CRT Bezel & Dynamic Canvas -->
-              <div class="crt-screen-bezel" id="crt-screen-bezel" title="画面をクリックして操作・遊ぶ！">
+              <div class="crt-screen-bezel" id="crt-screen-bezel" tabindex="0" role="region" aria-label="レトロCRTミニゲーム画面 (クリックまたはSpace/Enterキーで操作)" title="画面をクリックまたはSpace/Enterキーで操作・遊ぶ！">
                 <div class="crt-osd-channel" id="crt-osd-channel">CH.01 [ギリギリ・ブレーキ！]</div>
                 <div class="crt-osd-action" id="crt-osd-action">CLICK TO ACCEL! 🏎️</div>
-                <canvas id="mini-crt-canvas" width="320" height="200"></canvas>
+                <canvas id="mini-crt-canvas" width="320" height="200" aria-label="ミニゲーム描画キャンバス"></canvas>
+                <!-- Screen Reader Live Announcements -->
+                <div id="crt-a11y-live" aria-live="polite" style="position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0;"></div>
               </div>
             </div>
 
             <!-- 4 Mini Cartridge Slots -->
-            <div class="mini-cart-rack" id="mini-cart-rack">
-              <div class="mini-cart-item active" data-cart="brake" title="ギリギリ・ブレーキ！">
+            <div class="mini-cart-rack" id="mini-cart-rack" role="toolbar" aria-label="ミニゲームカセット選択ラック">
+              <div class="mini-cart-item active" data-cart="brake" tabindex="0" role="button" aria-pressed="true" aria-label="ROM 01 ギリギリ・ブレーキ カセット" title="ギリギリ・ブレーキ！">
                 <span class="mini-cart-icon">🏎️</span>
                 <span class="mini-cart-label">ギリギリ・ブレーキ</span>
                 <span class="mini-cart-tag" style="background:#3b1318; color:#f87171; border:1px solid #ef4444;">ROM 01</span>
               </div>
-              <div class="mini-cart-item" data-cart="mirror" title="LUMEN_MIRROR（光学反射）">
+              <div class="mini-cart-item" data-cart="mirror" tabindex="0" role="button" aria-pressed="false" aria-label="ROM 02 LUMEN MIRROR カセット" title="LUMEN_MIRROR（光学反射）">
                 <span class="mini-cart-icon">💎</span>
                 <span class="mini-cart-label">LUMEN MIRROR</span>
                 <span class="mini-cart-tag" style="background:#103542; color:#67e8f9; border:1px solid #67e8f9;">ROM 02</span>
               </div>
-              <div class="mini-cart-item" data-cart="mikiri" title="みきり一閃（0.01秒居合）">
+              <div class="mini-cart-item" data-cart="mikiri" tabindex="0" role="button" aria-pressed="false" aria-label="ROM 03 みきり一閃 カセット" title="みきり一閃（0.01秒居合）">
                 <span class="mini-cart-icon">⚔️</span>
                 <span class="mini-cart-label">みきり一閃</span>
                 <span class="mini-cart-tag" style="background:#3b240b; color:#fcd34d; border:1px solid #fcd34d;">ROM 03</span>
               </div>
-              <div class="mini-cart-item" data-cart="duel" title="POCKET DUEL（サイバー対決）">
+              <div class="mini-cart-item" data-cart="duel" tabindex="0" role="button" aria-pressed="false" aria-label="ROM 04 POCKET DUEL カセット" title="POCKET DUEL（サイバー対決）">
                 <span class="mini-cart-icon">⚡</span>
                 <span class="mini-cart-label">POCKET DUEL</span>
                 <span class="mini-cart-tag" style="background:#28183d; color:#c084fc; border:1px solid #c084fc;">ROM 04</span>
@@ -2128,11 +2127,12 @@
 
             <!-- Mini Console Bottom Action Buttons -->
             <div class="mini-console-footer">
-              <div style="font-family:var(--font-pixel-jp); font-size:10px; color:#8e96b0;">
+              <div style="font-family:var(--font-pixel-jp); font-size:11px; color:#cbd5e1; display:flex; align-items:center; flex-wrap:wrap; gap:4px;">
                 <span id="crt-status-desc">崖っぷちまで突っ走れ！0.01m極限チキンレース</span>
+                <span class="crt-kb-hint" style="font-family:var(--font-mono); font-size:10px; color:#94a3b8; background:#1c2033; padding:1px 6px; border-radius:3px; border:1px solid #2d3550;">Space / Enterキー対応</span>
               </div>
               <div style="display:flex; gap:8px;">
-                <a id="btn-mini-play-full" href="https://hajikkoroom.xsrv.jp/girigiri-brake/" target="_blank" rel="noopener" class="btn-card-action" style="padding:4px 12px; font-size:10px; text-decoration:none; display:inline-flex; align-items:center; gap:4px;">
+                <a id="btn-mini-play-full" href="https://hajikkoroom.xsrv.jp/girigiri-brake/" target="_blank" rel="noopener" class="btn-card-action" style="padding:4px 12px; font-size:10px; text-decoration:none; display:inline-flex; align-items:center; gap:4px;" aria-label="全画面で遊ぶ">
                   <span>🕹️ FULL PLAY ▸</span>
                 </a>
               </div>
@@ -3098,12 +3098,31 @@
     addListenerSafe('btn-sfx', 'click', toggleSfx);
     addListenerSafe('btn-sfx-mobile', 'click', toggleSfx);
 
-    // Mobile Menu Drawer Toggle
+    // Mobile Menu Drawer Toggle & Accessible Dismiss
     addListenerSafe('btn-mobile-menu', 'click', () => {
       const drawer = document.getElementById('mobile-nav-drawer');
       if (drawer) {
         drawer.classList.toggle('open');
         play8BitSound('select');
+      }
+    });
+
+    document.querySelectorAll('#mobile-nav-drawer a, #mobile-nav-drawer button').forEach(el => {
+      el.addEventListener('click', () => {
+        const drawer = document.getElementById('mobile-nav-drawer');
+        if (drawer && !el.classList.contains('btn-sfx-toggle')) {
+          drawer.classList.remove('open');
+        }
+      });
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const drawer = document.getElementById('mobile-nav-drawer');
+        if (drawer && drawer.classList.contains('open')) {
+          drawer.classList.remove('open');
+          play8BitSound('select');
+        }
       }
     });
 
@@ -3327,81 +3346,129 @@
       }
     }
 
-    // Cartridge buttons event binding
+    // Announce to Screen Readers
+    function announceA11y(text) {
+      const el = document.getElementById('crt-a11y-live');
+      if (el) el.textContent = text;
+    }
+
+    // Unified action function for CRT console (click or keyboard Space/Enter)
+    function triggerCrtAction(option) {
+      if (activeCart === 'brake') {
+        if (brakePhase === 'ready') {
+          brakePhase = 'accel';
+          brakeSpeed = 5.2;
+          play8BitSound('select');
+          showRetroToast('🏎️ [アクセル全開！] 崖の手前でキーまたはクリック！');
+          announceA11y('アクセル全開！崖の手前でもう一度キーまたはクリックしてブレーキ！');
+          const osd = document.getElementById('crt-osd-action');
+          if (osd) osd.textContent = 'STOP / BRAKE!! 🛑';
+        } else if (brakePhase === 'accel') {
+          brakePhase = 'braking';
+          play8BitSound('jump');
+          showRetroToast('🛑 [急ブレーキ！] 止まれえぇぇ！');
+          announceA11y('急ブレーキ作動！');
+          const osd = document.getElementById('crt-osd-action');
+          if (osd) osd.textContent = 'BRAKING... 🛑';
+        } else if (brakePhase === 'stopped' || brakePhase === 'fell') {
+          resetBrakeMini();
+          announceA11y('ギリギリブレーキをリセットしました');
+        }
+      } else if (activeCart === 'mirror') {
+        if (option === 'm2' || option === 'bottom') {
+          mirrorAngle2 = mirrorAngle2 === 45 ? 135 : 45;
+          showRetroToast(`💎 [下段ミラー] 角度を ${mirrorAngle2}° に回転！`);
+          announceA11y(`下段ミラーを${mirrorAngle2}度に回転`);
+        } else {
+          mirrorAngle1 = mirrorAngle1 === 45 ? 135 : 45;
+          showRetroToast(`💎 [上段ミラー] 角度を ${mirrorAngle1}° に回転！`);
+          announceA11y(`上段ミラーを${mirrorAngle1}度に回転`);
+        }
+        play8BitSound('select');
+      } else if (activeCart === 'mikiri') {
+        if (mikiriPhase === 'trigger') {
+          const reaction = ((performance.now() - mikiriTriggerTime) / 1000).toFixed(2);
+          mikiriReactionTime = reaction;
+          mikiriPhase = 'hit';
+          mikiriStreak++;
+          mikiriSlashAnim = 18;
+
+          if (reaction < 0.16) {
+            mikiriRank = '【神速・居合の極み】 (RANK S+) 👑';
+          } else if (reaction <= 0.23) {
+            mikiriRank = '【達人・見事な一閃】 (RANK A) ⭐';
+          } else if (reaction <= 0.32) {
+            mikiriRank = '【一本！見切ったり】 (RANK B)';
+          } else {
+            mikiriRank = '【紙一重…】 (RANK C)';
+          }
+
+          play8BitSound('sword');
+          showRetroToast(`⚡ [一閃成功！] ${reaction}秒 ${mikiriRank} (連勝: ${mikiriStreak})`);
+          announceA11y(`一閃成功！反応速度${reaction}秒、${mikiriRank}、連勝${mikiriStreak}`);
+          setTimeout(() => { if (activeCart === 'mikiri') resetMikiriMini(); }, 2800);
+        } else if (mikiriPhase === 'waiting') {
+          mikiriPhase = 'early';
+          mikiriStreak = 0;
+          play8BitSound('select');
+          showRetroToast('⚠️ [お手つき！] まだ合図が出ていません！連勝リセット');
+          announceA11y('早すぎた！お手つき！連勝がリセットされました');
+          setTimeout(() => { if (activeCart === 'mikiri') resetMikiriMini(); }, 2000);
+        } else {
+          resetMikiriMini();
+        }
+      } else if (activeCart === 'duel') {
+        play8BitSound('alert');
+        showRetroToast('⚡ [POCKET DUEL] — 雷光一閃！');
+        announceA11y('ポケットデュエル、雷光一閃！');
+        crtNoiseTimer = 6;
+      }
+    }
+
+    // Cartridge buttons event binding (Click & Keyboard Enter/Space)
     document.querySelectorAll('.mini-cart-item').forEach(el => {
-      el.addEventListener('click', () => {
+      const selectCart = () => {
         const c = el.getAttribute('data-cart');
-        if (c) switchCartridge(c);
+        if (c) {
+          switchCartridge(c);
+          document.querySelectorAll('.mini-cart-item').forEach(item => {
+            item.setAttribute('aria-pressed', item === el ? 'true' : 'false');
+          });
+          announceA11y(`カセット${c}を読み込みました`);
+        }
+      };
+      el.addEventListener('click', selectCart);
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          selectCart();
+        }
       });
     });
 
-    // CRT Screen click interaction
+    // CRT Screen click & keyboard interaction
     const crtScreen = document.getElementById('crt-screen-bezel');
     if (crtScreen) {
       crtScreen.addEventListener('click', (e) => {
-        if (activeCart === 'brake') {
-          if (brakePhase === 'ready') {
-            brakePhase = 'accel';
-            brakeSpeed = 5.2;
-            play8BitSound('select');
-            showRetroToast('🏎️ [アクセル全開！] 崖の手前でクリックしてブレーキ！');
-            const osd = document.getElementById('crt-osd-action');
-            if (osd) osd.textContent = 'CLICK TO BRAKE!! 🛑';
-          } else if (brakePhase === 'accel') {
-            brakePhase = 'braking';
-            play8BitSound('jump');
-            showRetroToast('🛑 [急ブレーキ！] 止まれえぇぇ！');
-            const osd = document.getElementById('crt-osd-action');
-            if (osd) osd.textContent = 'BRAKING... 🛑';
-          } else if (brakePhase === 'stopped' || brakePhase === 'fell') {
-            resetBrakeMini();
-          }
-        } else if (activeCart === 'mirror') {
-          // Click top half toggles mirror 1, bottom half toggles mirror 2
+        let opt = 'default';
+        if (activeCart === 'mirror') {
           const rect = crtScreen.getBoundingClientRect();
           const clickY = e.clientY - rect.top;
-          if (clickY < rect.height * 0.5) {
-            mirrorAngle1 = mirrorAngle1 === 45 ? 135 : 45;
-            showRetroToast(`💎 [上段ミラー] 角度を ${mirrorAngle1}° に回転！`);
-          } else {
-            mirrorAngle2 = mirrorAngle2 === 45 ? 135 : 45;
-            showRetroToast(`💎 [下段ミラー] 角度を ${mirrorAngle2}° に回転！`);
-          }
-          play8BitSound('select');
-        } else if (activeCart === 'mikiri') {
-          if (mikiriPhase === 'trigger') {
-            const reaction = ((performance.now() - mikiriTriggerTime) / 1000).toFixed(2);
-            mikiriReactionTime = reaction;
-            mikiriPhase = 'hit';
-            mikiriStreak++;
-            mikiriSlashAnim = 18;
+          opt = clickY < rect.height * 0.5 ? 'm1' : 'm2';
+        }
+        triggerCrtAction(opt);
+      });
 
-            if (reaction < 0.16) {
-              mikiriRank = '【神速・居合の極み】 (RANK S+) 👑';
-            } else if (reaction <= 0.23) {
-              mikiriRank = '【達人・見事な一閃】 (RANK A) ⭐';
-            } else if (reaction <= 0.32) {
-              mikiriRank = '【一本！見切ったり】 (RANK B)';
-            } else {
-              mikiriRank = '【紙一重…】 (RANK C)';
-            }
-
-            play8BitSound('sword');
-            showRetroToast(`⚡ [一閃成功！] ${reaction}秒 ${mikiriRank} (連勝: ${mikiriStreak})`);
-            setTimeout(() => { if (activeCart === 'mikiri') resetMikiriMini(); }, 2800);
-          } else if (mikiriPhase === 'waiting') {
-            mikiriPhase = 'early';
-            mikiriStreak = 0;
-            play8BitSound('select');
-            showRetroToast('⚠️ [お手つき！] まだ合図が出ていません！連勝リセット');
-            setTimeout(() => { if (activeCart === 'mikiri') resetMikiriMini(); }, 2000);
-          } else {
-            resetMikiriMini();
-          }
-        } else if (activeCart === 'duel') {
-          play8BitSound('alert');
-          showRetroToast('⚡ [POCKET DUEL] — 雷光一閃！');
-          crtNoiseTimer = 6;
+      crtScreen.addEventListener('keydown', (e) => {
+        if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          triggerCrtAction('m1');
+        } else if (e.key === 'ArrowUp' || e.key === '1') {
+          e.preventDefault();
+          triggerCrtAction('m1');
+        } else if (e.key === 'ArrowDown' || e.key === '2') {
+          e.preventDefault();
+          triggerCrtAction('m2');
         }
       });
     }
@@ -3929,6 +3996,25 @@
       }
     }
 
+    // IntersectionObserver to pause rendering when off-screen (Battery & Performance Saver)
+    let isHeroVisible = true;
+    let isCrtVisible = true;
+
+    if ('IntersectionObserver' in window) {
+      const heroEl = document.getElementById('hero-pixel-canvas');
+      if (heroEl) {
+        new IntersectionObserver((entries) => {
+          isHeroVisible = entries[0].isIntersecting;
+        }, { threshold: 0.05 }).observe(heroEl);
+      }
+      const crtEl = document.getElementById('mini-crt-canvas');
+      if (crtEl) {
+        new IntersectionObserver((entries) => {
+          isCrtVisible = entries[0].isIntersecting;
+        }, { threshold: 0.05 }).observe(crtEl);
+      }
+    }
+
     // Initial immediate draw
     if (typeof drawHeroPixelScene === 'function') {
       try { drawHeroPixelScene(0); } catch(err) { console.error('Hero scene initial draw:', err); }
@@ -3938,10 +4024,10 @@
     }
 
     function animateScene(now) {
-      if (typeof drawHeroPixelScene === 'function') {
+      if (isHeroVisible && typeof drawHeroPixelScene === 'function') {
         drawHeroPixelScene(now || 0);
       }
-      if (typeof drawMiniCrtFrame === 'function') {
+      if (isCrtVisible && typeof drawMiniCrtFrame === 'function') {
         drawMiniCrtFrame();
       }
       requestAnimationFrame(animateScene);
