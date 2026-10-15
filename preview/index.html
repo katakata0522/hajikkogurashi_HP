@@ -1137,26 +1137,58 @@
       padding-bottom: 0;
     }
 
-    /* Circular White/Retro Icon (スクリーンショットの白丸デザインをリスペクト) */
-    .dispatch-circle-icon {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      background: #f1f5f9;
-      color: #0b0c13;
+    /* Cyberpunk Pixel Icon Badges (脱・白丸／世界観完全統一ネオンピクセルバッジ) */
+    .dispatch-pixel-badge {
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      background: #141624;
+      border: 1.5px solid #282f48;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 18px;
       flex-shrink: 0;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.25);
-      border: 2px solid #ffffff;
-      transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+      position: relative;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
     }
-    .dispatch-row:hover .dispatch-circle-icon {
-      transform: scale(1.06);
-      box-shadow: 0 0 14px rgba(0, 245, 255, 0.6);
+    .dispatch-badge-mail {
+      border-color: rgba(0, 245, 255, 0.45);
+      box-shadow: 0 0 10px rgba(0, 245, 255, 0.18), inset 0 0 8px rgba(0, 245, 255, 0.08);
+    }
+    .dispatch-row:hover .dispatch-badge-mail {
+      transform: translateY(-2px) scale(1.05);
       border-color: #00f5ff;
+      box-shadow: 0 0 16px rgba(0, 245, 255, 0.55), inset 0 0 10px rgba(0, 245, 255, 0.2);
+    }
+    .dispatch-badge-base {
+      border-color: rgba(251, 191, 36, 0.45);
+      box-shadow: 0 0 10px rgba(251, 191, 36, 0.18), inset 0 0 8px rgba(251, 191, 36, 0.08);
+    }
+    .dispatch-row:hover .dispatch-badge-base {
+      transform: translateY(-2px) scale(1.05);
+      border-color: #fbbf24;
+      box-shadow: 0 0 16px rgba(251, 191, 36, 0.55), inset 0 0 10px rgba(251, 191, 36, 0.2);
+    }
+    .dispatch-badge-sns {
+      border-color: rgba(255, 42, 157, 0.45);
+      box-shadow: 0 0 10px rgba(255, 42, 157, 0.18), inset 0 0 8px rgba(255, 42, 157, 0.08);
+    }
+    .dispatch-row:hover .dispatch-badge-sns {
+      transform: translateY(-2px) scale(1.05);
+      border-color: #ff2a9d;
+      box-shadow: 0 0 16px rgba(255, 42, 157, 0.55), inset 0 0 10px rgba(255, 42, 157, 0.2);
+    }
+    .dispatch-circle-icon {
+      /* Fallback compatibility */
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      background: #141624;
+      border: 1.5px solid #282f48;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
     }
 
     .dispatch-info {
@@ -1255,16 +1287,32 @@
     .sns-micro-icon {
       width: 28px;
       height: 28px;
-      border-radius: 50%;
-      background: #f8fafc;
-      color: #0f172a;
+      border-radius: 4px;
+      background: #141724;
+      border: 1px solid #282f45;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 13px;
       font-weight: bold;
       flex-shrink: 0;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+      box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.4);
+      transition: all 0.15s ease;
+    }
+    .sns-card-note .sns-micro-icon {
+      background: #0d2116;
+      border-color: #22c55e;
+      color: #4ade80;
+    }
+    .sns-card-x .sns-micro-icon {
+      background: #151827;
+      border-color: #475569;
+      color: #f8fafc;
+    }
+    .sns-card-yt .sns-micro-icon {
+      background: #261114;
+      border-color: #ef4444;
+      color: #f87171;
     }
     .sns-card-texts {
       display: flex;
@@ -2048,18 +2096,18 @@
 
               <!-- CRT Bezel & Dynamic Canvas -->
               <div class="crt-screen-bezel" id="crt-screen-bezel" title="画面をクリックして操作・遊ぶ！">
-                <div class="crt-osd-channel" id="crt-osd-channel">CH.01 [NEON SLICER]</div>
-                <div class="crt-osd-action" id="crt-osd-action">CLICK TO SLICE ⚔️</div>
+                <div class="crt-osd-channel" id="crt-osd-channel">CH.01 [ギリギリ・ブレーキ！]</div>
+                <div class="crt-osd-action" id="crt-osd-action">CLICK TO ACCEL! 🏎️</div>
                 <canvas id="mini-crt-canvas" width="320" height="200"></canvas>
               </div>
             </div>
 
             <!-- 4 Mini Cartridge Slots -->
             <div class="mini-cart-rack" id="mini-cart-rack">
-              <div class="mini-cart-item active" data-cart="slicer" title="漢字スライサー・マージ">
-                <span class="mini-cart-icon">🌸</span>
-                <span class="mini-cart-label">NEON SLICER</span>
-                <span class="mini-cart-tag" style="background:#3d123a; color:#ff4db8; border:1px solid #ff4db8;">ROM 01</span>
+              <div class="mini-cart-item active" data-cart="brake" title="ギリギリ・ブレーキ！">
+                <span class="mini-cart-icon">🏎️</span>
+                <span class="mini-cart-label">ギリギリ・ブレーキ</span>
+                <span class="mini-cart-tag" style="background:#3b1318; color:#f87171; border:1px solid #ef4444;">ROM 01</span>
               </div>
               <div class="mini-cart-item" data-cart="mirror" title="LUMEN_MIRROR（光学反射）">
                 <span class="mini-cart-icon">💎</span>
@@ -2081,10 +2129,10 @@
             <!-- Mini Console Bottom Action Buttons -->
             <div class="mini-console-footer">
               <div style="font-family:var(--font-pixel-jp); font-size:10px; color:#8e96b0;">
-                <span id="crt-status-desc">漢字をスワイプ＆合体させる物理パズル</span>
+                <span id="crt-status-desc">崖っぷちまで突っ走れ！0.01m極限チキンレース</span>
               </div>
               <div style="display:flex; gap:8px;">
-                <a id="btn-mini-play-full" href="https://hajikkoroom.xsrv.jp/kanji-slicer/" target="_blank" rel="noopener" class="btn-card-action" style="padding:4px 12px; font-size:10px; text-decoration:none; display:inline-flex; align-items:center; gap:4px;">
+                <a id="btn-mini-play-full" href="https://hajikkoroom.xsrv.jp/girigiri-brake/" target="_blank" rel="noopener" class="btn-card-action" style="padding:4px 12px; font-size:10px; text-decoration:none; display:inline-flex; align-items:center; gap:4px;">
                   <span>🕹️ FULL PLAY ▸</span>
                 </a>
               </div>
@@ -2103,8 +2151,17 @@
 
             <!-- ROW 1: MAIL / CONTACT -->
             <div class="dispatch-row">
-              <div class="dispatch-circle-icon" title="Email Contact">
-                ✉️
+              <div class="dispatch-pixel-badge dispatch-badge-mail" title="Email Contact">
+                <svg width="22" height="22" viewBox="0 0 22 22" shape-rendering="crispEdges">
+                  <rect x="2" y="5" width="18" height="12" fill="#141a2e" stroke="#00f5ff" stroke-width="1"/>
+                  <rect x="3" y="6" width="16" height="2" fill="#00f5ff"/>
+                  <rect x="4" y="8" width="2" height="2" fill="#67e8f9"/>
+                  <rect x="16" y="8" width="2" height="2" fill="#67e8f9"/>
+                  <rect x="6" y="9" width="3" height="2" fill="#67e8f9"/>
+                  <rect x="13" y="9" width="3" height="2" fill="#67e8f9"/>
+                  <rect x="9" y="10" width="4" height="2" fill="#ffffff"/>
+                  <rect x="10" y="11" width="2" height="2" fill="#00f5ff"/>
+                </svg>
               </div>
               <div class="dispatch-info">
                 <div class="dispatch-label">
@@ -2127,8 +2184,18 @@
 
             <!-- ROW 2: BASE / 案D (日本のどこかのはじっこ + 夜間工房演出) -->
             <div class="dispatch-row">
-              <div class="dispatch-circle-icon" title="Base Location">
-                🏠
+              <div class="dispatch-pixel-badge dispatch-badge-base" title="Base Location">
+                <svg width="22" height="22" viewBox="0 0 22 22" shape-rendering="crispEdges">
+                  <polygon points="11,2 3,9 19,9" fill="#d97706"/>
+                  <rect x="10" y="3" width="2" height="2" fill="#fde68a"/>
+                  <rect x="15" y="3" width="2" height="4" fill="#78350f"/>
+                  <rect x="16" y="1" width="2" height="1" fill="#94a3b8"/>
+                  <rect x="4" y="9" width="14" height="10" fill="#241a15" stroke="#f59e0b" stroke-width="1"/>
+                  <rect x="6" y="11" width="4" height="4" fill="#fbbf24"/>
+                  <rect x="7" y="12" width="2" height="2" fill="#fef08a"/>
+                  <rect x="12" y="11" width="4" height="8" fill="#451a03"/>
+                  <rect x="14" y="14" width="1" height="1" fill="#fde68a"/>
+                </svg>
               </div>
               <div class="dispatch-info">
                 <div class="dispatch-label">
@@ -2148,8 +2215,17 @@
 
             <!-- ROW 3: EXPANDED SNS (note, 𝕏, YouTube) -->
             <div class="dispatch-row" style="border-bottom:none; padding-bottom:0;">
-              <div class="dispatch-circle-icon" title="Official SNS Channels">
-                🌐
+              <div class="dispatch-pixel-badge dispatch-badge-sns" title="Official SNS Channels">
+                <svg width="22" height="22" viewBox="0 0 22 22" shape-rendering="crispEdges">
+                  <rect x="10" y="7" width="2" height="12" fill="#ff2a9d"/>
+                  <rect x="7" y="18" width="8" height="2" fill="#e11d48"/>
+                  <rect x="8" y="14" width="6" height="1.5" fill="#ff2a9d"/>
+                  <rect x="9" y="5" width="4" height="4" fill="#ffffff"/>
+                  <rect x="5" y="4" width="2" height="6" fill="#ff70c0"/>
+                  <rect x="15" y="4" width="2" height="6" fill="#ff70c0"/>
+                  <rect x="2" y="2" width="2" height="10" fill="#f43f5e" opacity="0.6"/>
+                  <rect x="18" y="2" width="2" height="10" fill="#f43f5e" opacity="0.6"/>
+                </svg>
               </div>
               <div class="dispatch-info">
                 <div class="dispatch-label">
@@ -3122,55 +3198,89 @@
       miniCrtCtx = miniCrtCanvas.getContext('2d');
     }
 
-    let activeCart = 'slicer'; // 'slicer' | 'mirror' | 'mikiri' | 'duel'
+    let activeCart = 'brake'; // 'brake' | 'mirror' | 'mikiri' | 'duel'
     let crtNoiseTimer = 0;
     let crtAnimTime = 0;
 
-    // Slicer Mini state
-    const slicerParticles = [
-      { x: 70, y: 30, vx: 0.3, vy: 0.5, char: '木', cut: false },
-      { x: 190, y: 40, vx: -0.4, vy: 0.45, char: '火', cut: false },
-      { x: 130, y: 15, vx: 0.2, vy: 0.6, char: '水', cut: false }
-    ];
-    let sliceSlashAnim = 0;
+    // ==========================================
+    // 1. BRAKE MINI STATE (ギリギリ・ブレーキ！)
+    // ==========================================
+    let brakePhase = 'ready'; // 'ready' | 'accel' | 'braking' | 'stopped' | 'fell'
+    let brakeCarX = 25;
+    let brakeCarY = 136;
+    let brakeSpeed = 0;
+    let brakeCliffX = 230;
+    let brakeDistance = 0;
+    let brakeBest = 0.12;
+    let brakeSparks = [];
+    let brakeVerdict = '';
 
-    // Mirror Mini state
-    let mirrorAngle = 45; // 45 or 135
+    function resetBrakeMini() {
+      brakePhase = 'ready';
+      brakeCarX = 25;
+      brakeCarY = 136;
+      brakeSpeed = 0;
+      brakeDistance = 0;
+      brakeSparks = [];
+      brakeVerdict = '';
+      const osd = document.getElementById('crt-osd-action');
+      if (osd && activeCart === 'brake') osd.textContent = 'CLICK TO ACCEL! 🏎️';
+    }
 
-    // Mikiri Mini state
+    // ==========================================
+    // 2. LUMEN MIRROR MINI STATE (光学パズル)
+    // ==========================================
+    let mirrorAngle1 = 45; // Top Mirror: 45 or 135
+    let mirrorAngle2 = 135; // Bottom Mirror: 45 or 135
+    let mirrorSolved = false;
+    let mirrorSolvedAnim = 0;
+    let mirrorGlowParticles = [];
+
+    // ==========================================
+    // 3. MIKIRI MINI STATE (超反応みきり一閃)
+    // ==========================================
     let mikiriPhase = 'waiting'; // 'ready' | 'waiting' | 'trigger' | 'hit' | 'early'
     let mikiriTriggerTime = 0;
     let mikiriReactionTime = 0;
     let mikiriTimer = null;
+    let mikiriStreak = 0;
+    let mikiriSlashAnim = 0;
+    let mikiriFlash = 0;
+    let mikiriRank = '';
 
     function resetMikiriMini() {
       clearTimeout(mikiriTimer);
       mikiriPhase = 'waiting';
       mikiriTriggerTime = 0;
       mikiriReactionTime = 0;
-      const delay = 1800 + Math.random() * 2200;
+      mikiriSlashAnim = 0;
+      mikiriFlash = 0;
+      const osd = document.getElementById('crt-osd-action');
+      if (osd && activeCart === 'mikiri') osd.textContent = '… 構え … [！] を待て ⚡';
+      const delay = 1800 + Math.random() * 2400;
       mikiriTimer = setTimeout(() => {
         if (activeCart === 'mikiri') {
           mikiriPhase = 'trigger';
           mikiriTriggerTime = performance.now();
+          mikiriFlash = 6;
           play8BitSound('alert');
-          const osd = document.getElementById('crt-osd-action');
-          if (osd) osd.textContent = '！！ 今だ！斬れ！ ⚔️';
+          const osdAct = document.getElementById('crt-osd-action');
+          if (osdAct) osdAct.textContent = '！！ 今だ！斬れ！ ⚔️';
         }
       }, delay);
     }
 
     const CART_CONFIGS = {
-      slicer: {
-        channel: 'CH.01 [NEON SLICER]',
-        action: 'CLICK TO SLICE ⚔️',
-        desc: 'ネオン漢字をスワイプ＆合体！物理マージパズル',
-        url: 'https://hajikkoroom.xsrv.jp/kanji-slicer/'
+      brake: {
+        channel: 'CH.01 [ギリギリ・ブレーキ！]',
+        action: 'CLICK TO ACCEL! 🏎️',
+        desc: '崖っぷちまで突っ走れ！0.01m極限チキンレース',
+        url: 'https://hajikkoroom.xsrv.jp/girigiri-brake/'
       },
       mirror: {
         channel: 'CH.02 [LUMEN MIRROR]',
-        action: 'CLICK TO ROTATE 💎',
-        desc: '鏡の角度を操作して光を導く光学反射パズル',
+        action: 'CLICK MIRRORS TO REFLECT 💎',
+        desc: '鏡の角度を回転させ、光をクリスタルへ導け！',
         url: 'https://hajikkoroom.xsrv.jp/lumen-mirror/'
       },
       mikiri: {
@@ -3191,7 +3301,7 @@
       if (activeCart === cartId && crtNoiseTimer <= 0) return;
       activeCart = cartId;
       play8BitSound('cartridge');
-      crtNoiseTimer = 14; // Frames of retro TV static
+      crtNoiseTimer = 12; // Frames of retro TV static
 
       // Update Active Cartridge UI
       document.querySelectorAll('.mini-cart-item').forEach(el => {
@@ -3210,7 +3320,9 @@
         if (playBtn) playBtn.href = conf.url;
       }
 
-      if (cartId === 'mikiri') {
+      if (cartId === 'brake') {
+        resetBrakeMini();
+      } else if (cartId === 'mikiri') {
         resetMikiriMini();
       }
     }
@@ -3226,30 +3338,62 @@
     // CRT Screen click interaction
     const crtScreen = document.getElementById('crt-screen-bezel');
     if (crtScreen) {
-      crtScreen.addEventListener('click', () => {
-        if (activeCart === 'slicer') {
-          sliceSlashAnim = 12;
-          play8BitSound('sword');
-          showRetroToast('⚔️ [NEON SLICER] — 漢字を一刀両断！');
-          slicerParticles.forEach(p => {
-            if (p.y > 40 && p.y < 150) p.cut = true;
-          });
+      crtScreen.addEventListener('click', (e) => {
+        if (activeCart === 'brake') {
+          if (brakePhase === 'ready') {
+            brakePhase = 'accel';
+            brakeSpeed = 5.2;
+            play8BitSound('select');
+            showRetroToast('🏎️ [アクセル全開！] 崖の手前でクリックしてブレーキ！');
+            const osd = document.getElementById('crt-osd-action');
+            if (osd) osd.textContent = 'CLICK TO BRAKE!! 🛑';
+          } else if (brakePhase === 'accel') {
+            brakePhase = 'braking';
+            play8BitSound('jump');
+            showRetroToast('🛑 [急ブレーキ！] 止まれえぇぇ！');
+            const osd = document.getElementById('crt-osd-action');
+            if (osd) osd.textContent = 'BRAKING... 🛑';
+          } else if (brakePhase === 'stopped' || brakePhase === 'fell') {
+            resetBrakeMini();
+          }
         } else if (activeCart === 'mirror') {
-          mirrorAngle = mirrorAngle === 45 ? 135 : 45;
+          // Click top half toggles mirror 1, bottom half toggles mirror 2
+          const rect = crtScreen.getBoundingClientRect();
+          const clickY = e.clientY - rect.top;
+          if (clickY < rect.height * 0.5) {
+            mirrorAngle1 = mirrorAngle1 === 45 ? 135 : 45;
+            showRetroToast(`💎 [上段ミラー] 角度を ${mirrorAngle1}° に回転！`);
+          } else {
+            mirrorAngle2 = mirrorAngle2 === 45 ? 135 : 45;
+            showRetroToast(`💎 [下段ミラー] 角度を ${mirrorAngle2}° に回転！`);
+          }
           play8BitSound('select');
-          showRetroToast(`💎 [LUMEN MIRROR] — 鏡を ${mirrorAngle}° に回転！`);
         } else if (activeCart === 'mikiri') {
           if (mikiriPhase === 'trigger') {
             const reaction = ((performance.now() - mikiriTriggerTime) / 1000).toFixed(2);
             mikiriReactionTime = reaction;
             mikiriPhase = 'hit';
+            mikiriStreak++;
+            mikiriSlashAnim = 18;
+
+            if (reaction < 0.16) {
+              mikiriRank = '【神速・居合の極み】 (RANK S+) 👑';
+            } else if (reaction <= 0.23) {
+              mikiriRank = '【達人・見事な一閃】 (RANK A) ⭐';
+            } else if (reaction <= 0.32) {
+              mikiriRank = '【一本！見切ったり】 (RANK B)';
+            } else {
+              mikiriRank = '【紙一重…】 (RANK C)';
+            }
+
             play8BitSound('sword');
-            showRetroToast(`⚡ [一閃成功！] 反応速度: ${reaction}秒！ 見事！`);
-            setTimeout(() => { if (activeCart === 'mikiri') resetMikiriMini(); }, 2400);
+            showRetroToast(`⚡ [一閃成功！] ${reaction}秒 ${mikiriRank} (連勝: ${mikiriStreak})`);
+            setTimeout(() => { if (activeCart === 'mikiri') resetMikiriMini(); }, 2800);
           } else if (mikiriPhase === 'waiting') {
             mikiriPhase = 'early';
+            mikiriStreak = 0;
             play8BitSound('select');
-            showRetroToast('⚠️ [お手つき！] まだ合図が出ていません！');
+            showRetroToast('⚠️ [お手つき！] まだ合図が出ていません！連勝リセット');
             setTimeout(() => { if (activeCart === 'mikiri') resetMikiriMini(); }, 2000);
           } else {
             resetMikiriMini();
@@ -3291,280 +3435,477 @@
       ctx.fillStyle = '#0a0c18';
       ctx.fillRect(0, 0, W, H);
 
-      // Render Scene by Cartridge
-      if (activeCart === 'slicer') {
-        // Neon Slicer Mode
-        // Cyberpunk city background silhouettes
-        ctx.fillStyle = '#101328';
-        ctx.fillRect(20, 95, 45, 105);
-        ctx.fillRect(80, 75, 55, 125);
-        ctx.fillRect(150, 105, 40, 95);
-        ctx.fillRect(210, 65, 60, 135);
-        ctx.fillRect(280, 85, 40, 115);
+      // ====================================================
+      // A. BRAKE MINI SCENE (ギリギリ・ブレーキ！)
+      // ==========================================
+      if (activeCart === 'brake') {
+        // Starry night sky & cyber skyline
+        ctx.fillStyle = '#101426';
+        ctx.fillRect(10, 80, 40, 75);
+        ctx.fillRect(60, 65, 50, 90);
+        ctx.fillRect(120, 85, 35, 70);
+        ctx.fillRect(170, 70, 45, 85);
 
-        // Neon roof edge highlights
-        ctx.fillStyle = '#00f5ff';
-        ctx.fillRect(80, 75, 55, 2);
-        ctx.fillStyle = '#ff2a9d';
-        ctx.fillRect(210, 65, 60, 2);
-
-        // Lit cyber windows
-        ctx.fillStyle = '#1e284a';
-        for (let wy = 85; wy < 180; wy += 14) {
-          for (let wx = 88; wx < 130; wx += 14) {
-            if ((wx + wy + crtAnimTime) % 7 === 0) {
+        // Lit Windows
+        ctx.fillStyle = '#1e2c4c';
+        for (let y = 80; y < 145; y += 10) {
+          for (let x = 65; x < 105; x += 10) {
+            if ((x + y + Math.floor(crtAnimTime / 8)) % 5 === 0) {
               ctx.fillStyle = '#00f5ff';
-            } else if ((wx * 2 + wy) % 5 === 0) {
-              ctx.fillStyle = '#ff2a9d';
             } else {
-              ctx.fillStyle = '#141a30';
+              ctx.fillStyle = '#141d33';
             }
-            ctx.fillRect(wx, wy, 5, 5);
+            ctx.fillRect(x, y, 4, 4);
           }
         }
 
-        // Perspective Grid floor
-        ctx.strokeStyle = '#182038';
+        // Road surface
+        ctx.fillStyle = '#181b2a';
+        ctx.fillRect(0, 155, brakeCliffX, 45);
+        ctx.strokeStyle = '#2d334d';
         ctx.lineWidth = 1;
         ctx.beginPath();
-        for (let x = 0; x <= W; x += 32) {
-          ctx.moveTo(x, 155);
-          ctx.lineTo(x, H);
-        }
-        for (let y = 155; y <= H; y += 12) {
-          ctx.moveTo(0, y);
-          ctx.lineTo(W, y);
-        }
+        ctx.moveTo(0, 155);
+        ctx.lineTo(brakeCliffX, 155);
         ctx.stroke();
 
-        // Top Game HUD (Score & Combo)
+        // Speed road stripes
+        const stripeOffset = (crtAnimTime * (brakePhase === 'accel' ? 8 : (brakePhase === 'braking' ? 3 : 0))) % 30;
+        ctx.fillStyle = '#3b4263';
+        for (let sx = -stripeOffset; sx < brakeCliffX; sx += 30) {
+          ctx.fillRect(sx, 175, 14, 3);
+        }
+
+        // The Cliff / Finish Line (Checker pattern border)
+        ctx.fillStyle = '#dc2626';
+        ctx.fillRect(brakeCliffX - 4, 155, 4, 45);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(brakeCliffX - 2, 155, 2, 45);
+
+        // Abyss / Waterfall beneath cliff
+        ctx.fillStyle = '#06070d';
+        ctx.fillRect(brakeCliffX, 155, W - brakeCliffX, 45);
+        ctx.fillStyle = 'rgba(239, 68, 68, 0.2)';
+        ctx.fillRect(brakeCliffX, 155, 6, 45);
+
+        // Top HUD
         ctx.font = '10px "Share Tech Mono", monospace';
         ctx.fillStyle = '#f59e0b';
         ctx.textAlign = 'left';
-        ctx.fillText('SCORE: 028400', 12, 34);
-        ctx.fillStyle = '#00f5ff';
+        ctx.fillText(`BEST: ${brakeBest.toFixed(2)}m`, 12, 34);
+        ctx.fillStyle = '#ef4444';
         ctx.textAlign = 'right';
-        ctx.fillText('COMBO x4', W - 12, 34);
+        ctx.fillText(`SPEED: ${(brakeSpeed * 24).toFixed(0)} km/h`, W - 12, 34);
 
-        // Floating falling Kanji Blocks
-        ctx.font = 'bold 24px "DotGothic16", sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-
-        slicerParticles.forEach((p, idx) => {
-          p.y += p.vy;
-          p.x += Math.sin(crtAnimTime * 0.05 + idx) * 0.35;
-          if (p.y > H - 20) {
-            p.y = 45;
-            p.x = 45 + Math.random() * (W - 90);
-            p.cut = false;
+        // Update Car Physics
+        if (brakePhase === 'accel') {
+          brakeCarX += brakeSpeed;
+          brakeSpeed = Math.min(6.8, brakeSpeed + 0.12);
+        } else if (brakePhase === 'braking') {
+          brakeCarX += brakeSpeed;
+          brakeSpeed = Math.max(0, brakeSpeed - 0.22);
+          // Spawn brake sparks
+          if (brakeSpeed > 0.4) {
+            for (let s = 0; s < 3; s++) {
+              brakeSparks.push({
+                x: brakeCarX + 4,
+                y: 153,
+                vx: -1.5 - Math.random() * 2.5,
+                vy: -Math.random() * 2,
+                life: 10
+              });
+            }
           }
-
-          if (p.cut) {
-            // Cut Kanji falling apart
-            ctx.fillStyle = 'rgba(255, 42, 157, 0.18)';
-            ctx.strokeStyle = '#ff2a9d';
-            ctx.lineWidth = 1.5;
-            ctx.strokeRect(p.x - 22, p.y - 15, 18, 30);
-            ctx.strokeRect(p.x + 4, p.y - 12, 18, 30);
-
-            ctx.fillStyle = '#ff2a9d';
-            ctx.fillText(p.char, p.x - 12, p.y);
-            ctx.fillText(p.char, p.x + 14, p.y + 4);
-          } else {
-            // Neon Kanji Block Frame
-            const glow = idx % 2 === 0 ? '#00f5ff' : '#ff4db8';
-            ctx.fillStyle = '#12162a';
-            ctx.fillRect(p.x - 18, p.y - 18, 36, 36);
-            ctx.strokeStyle = glow;
-            ctx.lineWidth = 1.8;
-            ctx.strokeRect(p.x - 18, p.y - 18, 36, 36);
-
-            ctx.fillStyle = '#ffffff';
-            ctx.fillText(p.char, p.x, p.y);
+          if (brakeSpeed <= 0) {
+            // Evaluated Stop
+            if (brakeCarX <= brakeCliffX - 18) {
+              brakePhase = 'stopped';
+              const dist = ((brakeCliffX - 18 - brakeCarX) / 22).toFixed(2);
+              brakeDistance = parseFloat(dist);
+              if (brakeDistance < brakeBest && brakeDistance > 0) {
+                brakeBest = brakeDistance;
+              }
+              if (brakeDistance <= 0.35) {
+                brakeVerdict = `🏆 神技！！ 残り ${brakeDistance}m！！`;
+                play8BitSound('coin');
+              } else {
+                brakeVerdict = `⚠️ 安全停止！ 残り ${brakeDistance}m`;
+              }
+              const osd = document.getElementById('crt-osd-action');
+              if (osd) osd.textContent = 'CLICK TO RETRY 🔄';
+            }
           }
+        }
+
+        // Falling off cliff check
+        if ((brakePhase === 'accel' || brakePhase === 'braking') && brakeCarX > brakeCliffX - 18) {
+          brakePhase = 'fell';
+          play8BitSound('sword');
+          brakeVerdict = '💥 落下！！ CRASH!!';
+          const osd = document.getElementById('crt-osd-action');
+          if (osd) osd.textContent = 'CLICK TO RETRY 🔄';
+        }
+
+        if (brakePhase === 'fell') {
+          brakeCarX += 1.2;
+          brakeCarY += 3.5; // Fall down abyss
+        }
+
+        // Render Sparks
+        brakeSparks.forEach((sp, i) => {
+          sp.x += sp.vx;
+          sp.y += sp.vy;
+          sp.life--;
+          ctx.fillStyle = sp.life % 2 === 0 ? '#fde047' : '#ea580c';
+          ctx.fillRect(sp.x, sp.y, 2, 2);
         });
+        brakeSparks = brakeSparks.filter(sp => sp.life > 0);
 
-        // Laser blade beam on bottom
-        ctx.fillStyle = '#ff00a0';
-        ctx.fillRect(0, 188, W, 2);
-        ctx.fillStyle = 'rgba(255, 0, 160, 0.25)';
-        ctx.fillRect(0, 184, W, 10);
-
-        // Slash effect
-        if (sliceSlashAnim > 0) {
-          sliceSlashAnim--;
-          ctx.strokeStyle = '#ff00a0';
-          ctx.lineWidth = 5;
-          ctx.beginPath();
-          ctx.moveTo(20, 175);
-          ctx.lineTo(300, 45);
-          ctx.stroke();
-
-          ctx.strokeStyle = '#ffffff';
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.moveTo(20, 175);
-          ctx.lineTo(300, 45);
-          ctx.stroke();
-
-          ctx.fillStyle = '#ff2a9d';
-          ctx.font = 'bold 12px "Silkscreen", monospace';
-          ctx.fillText('SLASH!!', 160, 100);
+        // Draw Cyber Sports Car (Red Pixel Racer)
+        const cx = brakeCarX;
+        const cy = brakeCarY;
+        if (cy < H + 20) {
+          // Chassis
+          ctx.fillStyle = '#dc2626';
+          ctx.fillRect(cx, cy + 8, 28, 9);
+          ctx.fillStyle = '#b91c1c';
+          ctx.fillRect(cx + 6, cy + 2, 16, 7);
+          // Windshield
+          ctx.fillStyle = '#38bdf8';
+          ctx.fillRect(cx + 12, cy + 3, 7, 4);
+          // Headlight beam
+          ctx.fillStyle = '#fef08a';
+          ctx.fillRect(cx + 26, cy + 9, 3, 3);
+          if (brakePhase === 'accel' || brakePhase === 'braking') {
+            ctx.fillStyle = 'rgba(254, 240, 138, 0.25)';
+            ctx.beginPath();
+            ctx.moveTo(cx + 29, cy + 10);
+            ctx.lineTo(cx + 55, cy + 5);
+            ctx.lineTo(cx + 55, cy + 22);
+            ctx.closePath();
+            ctx.fill();
+          }
+          // Wheels
+          ctx.fillStyle = '#090d16';
+          ctx.fillRect(cx + 4, cy + 15, 6, 4);
+          ctx.fillRect(cx + 19, cy + 15, 6, 4);
+          ctx.fillStyle = '#94a3b8';
+          ctx.fillRect(cx + 6, cy + 16, 2, 2);
+          ctx.fillRect(cx + 21, cy + 16, 2, 2);
+          // Rear Spoiler
+          ctx.fillStyle = '#ef4444';
+          ctx.fillRect(cx, cy + 3, 4, 6);
         }
 
-      } else if (activeCart === 'mirror') {
-        // Lumen Mirror Mode (Rooftop Optical Reflection)
-        // City skyline backdrop
-        ctx.fillStyle = '#0f1322';
-        ctx.fillRect(40, 90, 50, 110);
-        ctx.fillRect(110, 70, 60, 130);
-        ctx.fillRect(200, 100, 70, 100);
-
-        // Windows
-        ctx.fillStyle = '#1e2942';
-        for (let wy = 80; wy < 180; wy += 12) {
-          for (let wx = 118; wx < 160; wx += 12) {
-            if ((wx + wy) % 5 === 0) ctx.fillRect(wx, wy, 4, 4);
+        // Verdict Display
+        if (brakeVerdict) {
+          ctx.textAlign = 'center';
+          ctx.font = 'bold 16px "DotGothic16", sans-serif';
+          if (brakePhase === 'stopped') {
+            ctx.fillStyle = brakeDistance <= 0.35 ? '#fde047' : '#38bdf8';
+            ctx.shadowColor = ctx.fillStyle;
+            ctx.shadowBlur = 8;
+            ctx.fillText(brakeVerdict, 160, 95);
+            ctx.shadowBlur = 0;
+          } else if (brakePhase === 'fell') {
+            ctx.fillStyle = '#ef4444';
+            ctx.shadowColor = '#ef4444';
+            ctx.shadowBlur = 10;
+            ctx.fillText(brakeVerdict, 160, 95);
+            ctx.shadowBlur = 0;
           }
         }
+      }
 
-        // Top Moon
-        ctx.fillStyle = '#e2e8f0';
+      // ====================================================
+      // B. LUMEN MIRROR MINI SCENE (ちゃんと解ける本格パズル)
+      // ==========================================
+      else if (activeCart === 'mirror') {
+        // Rooftop skyline
+        ctx.fillStyle = '#0f1322';
+        ctx.fillRect(30, 90, 50, 110);
+        ctx.fillRect(100, 70, 60, 130);
+        ctx.fillRect(180, 95, 70, 105);
+
+        // Moon
+        ctx.fillStyle = '#f8fafc';
         ctx.beginPath();
-        ctx.arc(280, 45, 14, 0, Math.PI * 2);
+        ctx.arc(285, 45, 14, 0, Math.PI * 2);
         ctx.fill();
 
-        // Laser emitter (Left)
-        ctx.fillStyle = '#1e2238';
-        ctx.fillRect(18, 92, 26, 20);
+        // Laser Source (Top-left)
+        const lx = 30;
+        const ly = 55;
+        ctx.fillStyle = '#1e2438';
+        ctx.fillRect(lx - 12, ly - 10, 24, 20);
         ctx.fillStyle = '#00f5ff';
-        ctx.fillRect(40, 97, 8, 8);
+        ctx.fillRect(lx + 8, ly - 4, 8, 8);
 
-        // Mirror in center
+        // Top Mirror 1 (x: 140, y: 55)
+        const m1x = 140;
+        const m1y = 55;
         ctx.save();
-        ctx.translate(160, 101);
-        ctx.rotate((mirrorAngle * Math.PI) / 180);
+        ctx.translate(m1x, m1y);
+        ctx.rotate((mirrorAngle1 * Math.PI) / 180);
         ctx.fillStyle = '#cbd5e1';
-        ctx.fillRect(-3, -26, 6, 52);
+        ctx.fillRect(-3, -24, 6, 48);
         ctx.fillStyle = '#38bdf8';
-        ctx.fillRect(-1, -24, 2, 48);
+        ctx.fillRect(-1, -22, 2, 44);
         ctx.restore();
+        ctx.font = '8px "Share Tech Mono", monospace';
+        ctx.fillStyle = '#94a3b8';
+        ctx.textAlign = 'center';
+        ctx.fillText(`M1 [${mirrorAngle1}°]`, m1x, m1y - 28);
 
-        // Laser beam path
+        // Bottom Mirror 2 (x: 140, y: 155)
+        const m2x = 140;
+        const m2y = 155;
+        ctx.save();
+        ctx.translate(m2x, m2y);
+        ctx.rotate((mirrorAngle2 * Math.PI) / 180);
+        ctx.fillStyle = '#cbd5e1';
+        ctx.fillRect(-3, -24, 6, 48);
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillRect(-1, -22, 2, 44);
+        ctx.restore();
+        ctx.fillText(`M2 [${mirrorAngle2}°]`, m2x, m2y + 36);
+
+        // Target Crystal (x: 265, y: 155)
+        const tx = 265;
+        const ty = 155;
+
+        // Check if Puzzle is Solved: Mirror 1 must deflect down (135°), Mirror 2 must deflect right (45°)
+        const isAligned = (mirrorAngle1 === 135 && mirrorAngle2 === 45);
+        if (isAligned && !mirrorSolved) {
+          mirrorSolved = true;
+          mirrorSolvedAnim = 30;
+          play8BitSound('coin');
+          showRetroToast('🌟 [LUMEN MIRROR] — 結晶覚醒！パズルクリア！');
+          const osd = document.getElementById('crt-osd-action');
+          if (osd) osd.textContent = '★ CLEAR!! 結晶覚醒 ★';
+        }
+
+        // Draw Laser Beams
         ctx.strokeStyle = '#00f5ff';
         ctx.shadowColor = '#00f5ff';
         ctx.shadowBlur = 10;
         ctx.lineWidth = 3.5;
         ctx.beginPath();
-        ctx.moveTo(46, 101);
-        ctx.lineTo(160, 101);
+        ctx.moveTo(lx + 12, ly);
+        ctx.lineTo(m1x, ly);
 
-        if (mirrorAngle === 45) {
-          ctx.lineTo(160, 32); // Reflected Upwards
-          ctx.stroke();
-          ctx.shadowBlur = 0;
-          // Target Crystal at Top
-          ctx.fillStyle = '#ff2a9d';
-          ctx.beginPath();
-          ctx.arc(160, 32, 10 + Math.sin(crtAnimTime * 0.1) * 2, 0, Math.PI * 2);
-          ctx.fill();
+        if (mirrorAngle1 === 135) {
+          // Deflect downwards to mirror 2
+          ctx.lineTo(m2x, m2y);
+          if (mirrorAngle2 === 45) {
+            // Deflect rightwards to target crystal!
+            ctx.lineTo(tx, ty);
+          } else {
+            // Deflect leftwards into abyss
+            ctx.lineTo(20, m2y);
+          }
         } else {
-          ctx.lineTo(160, 168); // Reflected Downwards
-          ctx.stroke();
-          ctx.shadowBlur = 0;
-          ctx.fillStyle = '#fbbf24';
-          ctx.beginPath();
-          ctx.arc(160, 168, 10 + Math.sin(crtAnimTime * 0.1) * 2, 0, Math.PI * 2);
-          ctx.fill();
+          // Deflect upwards into sky
+          ctx.lineTo(m1x, 10);
         }
+        ctx.stroke();
+        ctx.shadowBlur = 0;
 
-      } else if (activeCart === 'mikiri') {
-        // Mikiri Issen Mini Arena
-        // Ground & Huge Moon
-        ctx.fillStyle = '#fef08a';
+        // Draw Target Crystal
+        ctx.fillStyle = isAligned ? '#ff2a9d' : '#334155';
+        ctx.strokeStyle = isAligned ? '#ffffff' : '#64748b';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(tx, ty, isAligned ? 11 + Math.sin(crtAnimTime * 0.15) * 2 : 9, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Crystal Glow Particles when Solved
+        if (isAligned) {
+          if (Math.random() < 0.4) {
+            mirrorGlowParticles.push({
+              x: tx, y: ty,
+              vx: (Math.random() - 0.5) * 3,
+              vy: (Math.random() - 0.5) * 3,
+              life: 15
+            });
+          }
+        }
+        mirrorGlowParticles.forEach(p => {
+          p.x += p.vx; p.y += p.vy; p.life--;
+          ctx.fillStyle = p.life % 2 === 0 ? '#ff2a9d' : '#00f5ff';
+          ctx.fillRect(p.x, p.y, 2, 2);
+        });
+        mirrorGlowParticles = mirrorGlowParticles.filter(p => p.life > 0);
+
+        // Cleared Banner
+        if (isAligned) {
+          ctx.textAlign = 'center';
+          ctx.font = 'bold 15px "DotGothic16", sans-serif';
+          ctx.fillStyle = '#fde047';
+          ctx.shadowColor = '#fde047';
+          ctx.shadowBlur = 12;
+          ctx.fillText('★ CLEAR!! 光学反射成功 ★', 160, 100);
+          ctx.shadowBlur = 0;
+        } else {
+          ctx.textAlign = 'center';
+          ctx.font = '10px "DotGothic16", sans-serif';
+          ctx.fillStyle = '#64748b';
+          ctx.fillText('画面の上下をクリックして鏡を回転', 160, 100);
+        }
+      }
+
+      // ====================================================
+      // C. MIKIRI ISSEN MINI ARENA (超反応・居合バトル)
+      // ==========================================
+      else if (activeCart === 'mikiri') {
+        // Blood Moon
+        ctx.fillStyle = mikiriPhase === 'hit' ? '#ef4444' : '#fef08a';
         ctx.beginPath();
         ctx.arc(160, 52, 28, 0, Math.PI * 2);
         ctx.fill();
 
+        // Screen Flash on trigger
+        if (mikiriFlash > 0) {
+          mikiriFlash--;
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+          ctx.fillRect(0, 0, W, H);
+        }
+
+        // Night Ground
         ctx.fillStyle = '#141728';
         ctx.fillRect(0, 145, W, 55);
 
-        // Torii gate silhouette in distance
+        // Swaying Grass / Reeds
+        ctx.strokeStyle = '#22283e';
+        ctx.lineWidth = 1.5;
+        for (let gx = 10; gx < W; gx += 16) {
+          const sway = Math.sin(crtAnimTime * 0.06 + gx) * 3;
+          ctx.beginPath();
+          ctx.moveTo(gx, 145);
+          ctx.lineTo(gx + sway, 125);
+          ctx.stroke();
+        }
+
+        // Torii gate silhouette
         ctx.fillStyle = '#221833';
-        ctx.fillRect(142, 90, 36, 4);
-        ctx.fillRect(146, 94, 5, 51);
-        ctx.fillRect(169, 94, 5, 51);
+        ctx.fillRect(142, 86, 36, 4);
+        ctx.fillRect(146, 90, 5, 55);
+        ctx.fillRect(169, 90, 5, 55);
+
+        // Top Streak Counter HUD
+        ctx.font = '10px "Share Tech Mono", monospace';
+        ctx.fillStyle = '#f59e0b';
+        ctx.textAlign = 'left';
+        ctx.fillText(`STREAK: ${mikiriStreak} WINS`, 12, 34);
 
         // Samurai 1 (Player, Left)
+        const pBreath = Math.floor(crtAnimTime / 20) % 2;
         ctx.fillStyle = '#38bdf8';
-        ctx.fillRect(70, 116, 16, 34); // Body
+        ctx.fillRect(70, 116 + pBreath, 16, 34 - pBreath);
         ctx.fillStyle = '#fed7aa';
-        ctx.fillRect(73, 106, 10, 10); // Head
+        ctx.fillRect(73, 106 + pBreath, 10, 10);
         ctx.fillStyle = '#0f172a';
-        ctx.fillRect(70, 102, 16, 6);  // Hat
-        // Blade
+        ctx.fillRect(70, 102 + pBreath, 16, 6);
+        // Player Katana Blade
         ctx.strokeStyle = '#e2e8f0';
         ctx.lineWidth = 2.5;
         ctx.beginPath();
         ctx.moveTo(86, 126);
-        ctx.lineTo(106, 112);
+        if (mikiriPhase === 'hit') {
+          ctx.lineTo(125, 138); // Slashing forward!
+        } else {
+          ctx.lineTo(106, 112); // Ready stance
+        }
         ctx.stroke();
 
         // Samurai 2 (Rival, Right)
-        ctx.fillStyle = '#f43f5e';
-        ctx.fillRect(234, 116, 16, 34); // Body
-        ctx.fillStyle = '#fed7aa';
-        ctx.fillRect(237, 106, 10, 10); // Head
-        ctx.fillStyle = '#0f172a';
-        ctx.fillRect(234, 102, 16, 6);  // Hat
-        // Blade
-        ctx.beginPath();
-        ctx.moveTo(234, 126);
-        ctx.lineTo(214, 112);
-        ctx.stroke();
+        if (mikiriPhase === 'hit') {
+          // Rival sliced down
+          ctx.fillStyle = '#f43f5e';
+          ctx.fillRect(230, 138, 30, 12);
+          ctx.fillStyle = '#fed7aa';
+          ctx.fillRect(256, 134, 10, 10);
+        } else {
+          ctx.fillStyle = '#f43f5e';
+          ctx.fillRect(234, 116 + pBreath, 16, 34 - pBreath);
+          ctx.fillStyle = '#fed7aa';
+          ctx.fillRect(237, 106 + pBreath, 10, 10);
+          ctx.fillStyle = '#0f172a';
+          ctx.fillRect(234, 102 + pBreath, 16, 6);
+          // Rival Blade
+          ctx.beginPath();
+          ctx.moveTo(234, 126);
+          ctx.lineTo(214, 112);
+          ctx.stroke();
+        }
+
+        // Dynamic Neon Slash Line & Cherry Blossoms
+        if (mikiriSlashAnim > 0) {
+          mikiriSlashAnim--;
+          ctx.strokeStyle = '#00f5ff';
+          ctx.shadowColor = '#00f5ff';
+          ctx.shadowBlur = 14;
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.moveTo(60, 160);
+          ctx.lineTo(270, 90);
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+
+          // Falling Sakura Petals
+          ctx.fillStyle = '#f472b6';
+          for (let p = 0; p < 6; p++) {
+            ctx.fillRect(160 + (p * 23) % 80, 80 + (p * 17) % 60, 3, 2);
+          }
+        }
 
         // Game State Display
         ctx.textAlign = 'center';
         if (mikiriPhase === 'waiting') {
-          ctx.font = '14px "DotGothic16", sans-serif';
+          ctx.font = '13px "DotGothic16", sans-serif';
           ctx.fillStyle = '#cbd5e1';
-          ctx.fillText('… 構え …', 160, 95);
+          const dotCount = Math.floor(crtAnimTime / 15) % 4;
+          ctx.fillText(`… 心を研ぎ澄ませ ${'.'.repeat(dotCount)}`, 160, 95);
         } else if (mikiriPhase === 'trigger') {
-          ctx.font = 'bold 30px "DotGothic16", sans-serif';
+          ctx.font = 'bold 32px "DotGothic16", sans-serif';
           ctx.fillStyle = '#ff2a85';
           ctx.shadowColor = '#ff2a85';
-          ctx.shadowBlur = 14;
-          ctx.fillText('！！ 斬 ！！', 160, 95);
+          ctx.shadowBlur = 16;
+          ctx.fillText('『 ！！ 斬 』', 160, 95);
           ctx.shadowBlur = 0;
         } else if (mikiriPhase === 'hit') {
-          ctx.font = 'bold 18px "DotGothic16", sans-serif';
+          ctx.font = 'bold 17px "DotGothic16", sans-serif';
           ctx.fillStyle = '#22c55e';
           ctx.shadowColor = '#22c55e';
           ctx.shadowBlur = 10;
-          ctx.fillText(`一閃成功！ ${mikiriReactionTime}秒`, 160, 85);
+          ctx.fillText(`一閃成功！ ${mikiriReactionTime}秒`, 160, 80);
           ctx.font = '12px "DotGothic16", sans-serif';
           ctx.fillStyle = '#fde047';
-          ctx.fillText('勝負あり！', 160, 104);
+          ctx.fillText(mikiriRank, 160, 102);
           ctx.shadowBlur = 0;
         } else if (mikiriPhase === 'early') {
           ctx.font = 'bold 16px "DotGothic16", sans-serif';
           ctx.fillStyle = '#ef4444';
-          ctx.fillText('お手つき！早すぎた！', 160, 95);
+          ctx.shadowColor = '#ef4444';
+          ctx.shadowBlur = 8;
+          ctx.fillText('早すぎた！【切腹】', 160, 95);
+          ctx.shadowBlur = 0;
         }
+      }
 
-      } else if (activeCart === 'duel') {
-        // Pocket Duel Mode
+      // ====================================================
+      // D. POCKET DUEL MINI SCENE
+      // ==========================================
+      else if (activeCart === 'duel') {
         ctx.fillStyle = '#10121d';
         ctx.fillRect(0, 0, W, H);
 
-        // Distant lightning flash
         if (Math.random() < 0.04) {
           ctx.fillStyle = 'rgba(192, 132, 252, 0.28)';
           ctx.fillRect(0, 0, W, H);
         }
 
-        // Rain in mini CRT
         ctx.strokeStyle = 'rgba(125, 211, 252, 0.4)';
         ctx.lineWidth = 1;
         for (let r = 0; r < 20; r++) {
@@ -3576,7 +3917,6 @@
           ctx.stroke();
         }
 
-        // 2 Cyber Ninjas
         ctx.fillStyle = '#00f5ff';
         ctx.fillRect(90, 120, 20, 40);
         ctx.fillStyle = '#ff2a9d';
