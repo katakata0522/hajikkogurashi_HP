@@ -668,7 +668,12 @@
     .desktop-nav-group {
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: 16px;
+    }
+    .desktop-nav-links {
+      display: flex;
+      align-items: center;
+      gap: 16px;
     }
     .mobile-header-actions {
       display: none;
@@ -769,7 +774,7 @@
       }
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 960px) {
       .desktop-nav-group {
         display: none !important;
       }
@@ -779,6 +784,9 @@
       .mobile-menu-btn {
         display: inline-flex !important;
       }
+    }
+
+    @media (max-width: 768px) {
       .hero-frame {
         height: auto;
       }
@@ -1542,6 +1550,21 @@
     .btn-pixel-top:hover .btn-pixel-top-text {
       color: #fde047;
     }
+    @media (max-width: 640px) {
+      .btn-pixel-top {
+        bottom: 14px;
+        right: 14px;
+        width: 38px;
+        height: 38px;
+        box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+      }
+      .btn-pixel-top-text {
+        display: none;
+      }
+      .site-footer {
+        padding-bottom: 56px;
+      }
+    }
 
     .inquiry-box {
       margin-top: 28px;
@@ -1740,6 +1763,7 @@
 
           <!-- Right Nav Links + SFX Toggle + PLAY NOW CTA (Desktop) -->
           <div class="desktop-nav-group">
+            <nav class="desktop-nav-links" aria-label="Main Navigation">
               <a href="#games" class="nav-link active" data-nav="games">GAMES</a>
               <a href="/portfolio.html" class="nav-link" data-nav="portfolio">PORTFOLIO</a>
               <a href="/members.html" class="nav-link" data-nav="members">MEMBERS</a>
@@ -2674,12 +2698,12 @@
 
     // Deterministic Rain Streaks & Rooftop Puddle Ripples
     const rainDrops = [];
-    for (let i = 0; i < 85; i++) {
+    for (let i = 0; i < 90; i++) {
       rainDrops.push({
-        x: 220 + ((i * 41) % 415),
-        y: (i * 29) % 165,
-        len: 5 + (i % 5),
-        speed: 0.75 + (i % 3) * 0.3
+        x: 270 + ((i * 37) % 375),
+        y: (i * 19) % 136,
+        len: 4 + (i % 4),
+        speed: 0.8 + (i % 4) * 0.28
       });
     }
 
@@ -2699,56 +2723,86 @@
       if (boostPulse > 0) boostPulse *= 0.95;
 
       // ====================================================================
-      // A. RIGHT HALF: RAINY CYBERPUNK NIGHT SKYLINE & CRESCENT MOON
+      // A. RIGHT HALF: RAINY CYBERPUNK NIGHT SKYLINE, LIGHTNING, UFO & MOON
+      // Strictly clipped to the window glass boundary (x >= 268, y <= 136)
+      // so rain and weather never enter the developer room.
       // ====================================================================
-      const skyGrad = ctx.createLinearGradient(220, 0, 220, H);
-      skyGrad.addColorStop(0, '#0a1526');
-      skyGrad.addColorStop(0.5, '#11243d');
-      skyGrad.addColorStop(1, '#193759');
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(268, 0, W - 268, 136);
+      ctx.clip();
+
+      // --- 1. Lightning Timing & Ambient Sky Flash ---
+      const lightningCycle = 22000;
+      const lightningT = (time + 7500) % lightningCycle;
+      const isLightning = lightningT < 340;
+      let lightningFlash = 0;
+      if (isLightning) {
+        if (lightningT < 60) lightningFlash = 0.92;
+        else if (lightningT < 110) lightningFlash = 0.28;
+        else if (lightningT < 210) lightningFlash = 0.85;
+        else lightningFlash = Math.max(0, 0.85 - (lightningT - 210) / 130);
+      }
+
+      const skyGrad = ctx.createLinearGradient(268, 0, 268, 136);
+      if (lightningFlash > 0.45) {
+        skyGrad.addColorStop(0, '#384878');
+        skyGrad.addColorStop(0.5, '#4f629d');
+        skyGrad.addColorStop(1, '#677dbd');
+      } else if (lightningFlash > 0.1) {
+        skyGrad.addColorStop(0, '#1c294a');
+        skyGrad.addColorStop(0.5, '#263b63');
+        skyGrad.addColorStop(1, '#334e80');
+      } else {
+        skyGrad.addColorStop(0, '#0a1526');
+        skyGrad.addColorStop(0.5, '#11243d');
+        skyGrad.addColorStop(1, '#193759');
+      }
       ctx.fillStyle = skyGrad;
-      ctx.fillRect(220, 0, W - 220, H);
+      ctx.fillRect(268, 0, W - 268, 136);
 
       // Distant Atmospheric Mist Layer
-      px(ctx, 220, 95, 420, 35, 'rgba(34, 211, 238, 0.05)');
+      px(ctx, 268, 95, W - 268, 35, lightningFlash > 0.3 ? 'rgba(165, 243, 252, 0.15)' : 'rgba(34, 211, 238, 0.05)');
 
       // Crescent Moon with subtle outer pixel halo (x: 486, y: 14)
       px(ctx, 481, 10, 18, 18, 'rgba(200, 247, 255, 0.08)');
       px(ctx, 485, 12, 13, 15, '#d8f9ff');
       px(ctx, 483, 14, 16, 11, '#d8f9ff');
-      px(ctx, 488, 12, 12, 11, '#0c1a2e'); // Crescent cutout
+      px(ctx, 488, 12, 12, 11, lightningFlash > 0.45 ? '#4f629d' : '#0c1a2e'); // Crescent cutout matches sky
 
       // Distant Flying Cyber Spinner Vehicle moving across skyline
-      const spinnerX = 240 + ((time * 0.015) % 360);
+      const spinnerX = 270 + ((time * 0.015) % 360);
       px(ctx, spinnerX, 28, 5, 2, '#00f5ff');
       px(ctx, spinnerX - 2, 28, 2, 1, '#ff2a9d');
 
-      // Multi-Layered Background Skyscrapers
+      // --- 2. Multi-Layered Background Skyscrapers ---
       const towers = [
-        { x: 248, y: 54, w: 24, h: 98, c: '#0f1f34', edge: '#1d3b5e' },
-        { x: 276, y: 34, w: 30, h: 118, c: '#132842', edge: '#234873' },
-        { x: 312, y: 50, w: 26, h: 102, c: '#0d1c30', edge: '#1b3657' },
-        { x: 342, y: 40, w: 22, h: 112, c: '#152c47', edge: '#274f7d' },
-        { x: 370, y: 36, w: 33, h: 116, c: '#11243b', edge: '#22456e' },
-        { x: 408, y: 28, w: 25, h: 124, c: '#142a45', edge: '#264d7a' },
-        { x: 440, y: 16, w: 30, h: 136, c: '#17304d', edge: '#2b578a' },
-        { x: 475, y: 42, w: 25, h: 110, c: '#12263f', edge: '#21446e' },
-        { x: 506, y: 25, w: 34, h: 127, c: '#152e4a', edge: '#295485' },
-        { x: 546, y: 35, w: 30, h: 117, c: '#11233b', edge: '#204069' },
-        { x: 582, y: 18, w: 38, h: 134, c: '#142b46', edge: '#285180' }
+        { x: 276, y: 34, w: 30, h: 102, c: '#132842', edge: '#234873' },
+        { x: 312, y: 50, w: 26, h: 86, c: '#0d1c30', edge: '#1b3657' },
+        { x: 342, y: 40, w: 22, h: 96, c: '#152c47', edge: '#274f7d' },
+        { x: 370, y: 36, w: 33, h: 100, c: '#11243b', edge: '#22456e' },
+        { x: 408, y: 28, w: 25, h: 108, c: '#142a45', edge: '#264d7a' },
+        { x: 440, y: 16, w: 30, h: 120, c: '#17304d', edge: '#2b578a' },
+        { x: 475, y: 42, w: 25, h: 94, c: '#12263f', edge: '#21446e' },
+        { x: 506, y: 25, w: 34, h: 111, c: '#152e4a', edge: '#295485' },
+        { x: 546, y: 35, w: 30, h: 101, c: '#11233b', edge: '#204069' },
+        { x: 582, y: 18, w: 38, h: 118, c: '#142b46', edge: '#285180' }
       ];
 
       towers.forEach((b, idx) => {
-        px(ctx, b.x, b.y, b.w, b.h, b.c);
-        px(ctx, b.x, b.y, 1, b.h, b.edge);
+        const towerColor = lightningFlash > 0.4 ? '#050811' : b.c;
+        const edgeColor = lightningFlash > 0.4 ? '#1e293b' : b.edge;
+        px(ctx, b.x, b.y, b.w, b.h, towerColor);
+        px(ctx, b.x, b.y, 1, b.h, edgeColor);
         // Roof antennas & blinking red beacons
         if (idx % 2 === 0) {
-          px(ctx, b.x + Math.floor(b.w / 2), b.y - 6, 1, 6, '#1e3a5f');
+          px(ctx, b.x + Math.floor(b.w / 2), b.y - 6, 1, 6, lightningFlash > 0.4 ? '#090d16' : '#1e3a5f');
           if (Math.floor(time / 600 + idx) % 2 === 0) {
             px(ctx, b.x + Math.floor(b.w / 2), b.y - 7, 2, 2, '#ff2a85');
           }
         }
         // Lit pixel window grids
-        for (let wy = b.y + 5; wy < b.y + b.h - 14; wy += 5) {
+        for (let wy = b.y + 5; wy < Math.min(130, b.y + b.h - 8); wy += 5) {
           for (let wx = b.x + 4; wx < b.x + b.w - 4; wx += 5) {
             const seed = (wx * 7 + wy * 13 + idx * 5) % 19;
             if (seed < 4) {
@@ -2762,30 +2816,156 @@
         }
       });
 
-      // Lower Foreground Rooftops & Industrial Structures
-      px(ctx, 365, 130, 86, 50, '#172336');
-      px(ctx, 368, 133, 80, 47, '#20304a');
-      px(ctx, 378, 142, 11, 7, '#0c1421');
-      px(ctx, 400, 142, 11, 7, '#0c1421');
-      px(ctx, 450, 120, 190, 60, '#0e1b2d');
-      px(ctx, 482, 130, 38, 50, '#142a42');
-      px(ctx, 487, 136, 25, 5, '#00f5ff');
-      px(ctx, 487, 146, 25, 4, '#38bdf8');
-      // Utility poles & power cables
-      px(ctx, 468, 126, 3, 54, '#090d16');
-      px(ctx, 462, 131, 15, 2, '#090d16');
-      px(ctx, 536, 124, 3, 56, '#090d16');
-      px(ctx, 530, 129, 15, 2, '#090d16');
+      // --- 3. Lightning Bolt Animation ---
+      if (isLightning && lightningFlash > 0.3) {
+        const boltPoints = [
+          [418, 0], [414, 18], [423, 30], [412, 46], [419, 58], [408, 76], [414, 90], [403, 108]
+        ];
+        // Outer halo
+        ctx.strokeStyle = 'rgba(199, 210, 254, 0.75)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        boltPoints.forEach((pt, idx) => {
+          if (idx === 0) ctx.moveTo(pt[0], pt[1]);
+          else ctx.lineTo(pt[0], pt[1]);
+        });
+        ctx.stroke();
+        // Bright white electric core
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        boltPoints.forEach((pt, idx) => {
+          if (idx === 0) ctx.moveTo(pt[0], pt[1]);
+          else ctx.lineTo(pt[0], pt[1]);
+        });
+        ctx.stroke();
+        // Secondary fork branch
+        ctx.strokeStyle = 'rgba(224, 231, 255, 0.9)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(423, 30);
+        ctx.lineTo(436, 42);
+        ctx.lineTo(441, 60);
+        ctx.stroke();
+      }
 
-      // Animated Diagonal Pixel Rain Streaks & Puddle Ripples
+      // --- 4. UFO Easter Egg: Rare Alien Flyby & Rooftop Tractor Beam ---
+      const ufoCycle = 48000;
+      const ufoT = (time + 19000) % ufoCycle;
+      if (ufoT < 7000) {
+        let ufoX = 480;
+        let ufoY = 24;
+        let showBeam = false;
+        let warpTrail = false;
+
+        if (ufoT < 1800) {
+          // Phase 1: Gliding in smoothly from upper-right
+          const p = ufoT / 1800;
+          ufoX = 640 - p * 160;
+          ufoY = 18 + Math.sin(p * Math.PI) * 10;
+        } else if (ufoT < 5200) {
+          // Phase 2: Hovering above skyscraper rooftop with tractor beam
+          const hp = (ufoT - 1800) / 3400;
+          ufoX = 480 + Math.sin(hp * Math.PI * 4) * 3;
+          ufoY = 24 + Math.cos(hp * Math.PI * 3) * 2;
+          showBeam = true;
+        } else if (ufoT < 6000) {
+          // Phase 3: Beam off, charging energy with slight wobble
+          ufoX = 480 + (Math.sin(time * 0.05) * 1.5);
+          ufoY = 24 + (Math.cos(time * 0.05) * 1.5);
+        } else {
+          // Phase 4: Warp dash exit to upper-left
+          const wp = (ufoT - 6000) / 1000;
+          ufoX = 480 - Math.pow(wp, 2.5) * 260;
+          ufoY = 24 - wp * 36;
+          warpTrail = true;
+        }
+
+        // Translucent green/cyan pulsating tractor beam cone
+        if (showBeam) {
+          const beamPulse = 0.16 + Math.sin(time * 0.015) * 0.08;
+          const bg = ctx.createLinearGradient(ufoX, ufoY + 4, ufoX, 126);
+          bg.addColorStop(0, `rgba(74, 222, 128, ${beamPulse * 1.5})`);
+          bg.addColorStop(0.7, `rgba(34, 211, 238, ${beamPulse * 0.9})`);
+          bg.addColorStop(1, 'rgba(34, 211, 238, 0.01)');
+          ctx.fillStyle = bg;
+          ctx.beginPath();
+          ctx.moveTo(ufoX - 3, ufoY + 4);
+          ctx.lineTo(ufoX + 15, ufoY + 4);
+          ctx.lineTo(ufoX + 28, 126);
+          ctx.lineTo(ufoX - 16, 126);
+          ctx.closePath();
+          ctx.fill();
+
+          // Levitating scan particle & rooftop object
+          const scanRingY = ufoY + 14 + ((time * 0.04) % 80);
+          px(ctx, ufoX - 4 + ((time * 0.06) % 20), scanRingY, 2, 2, '#86efac');
+          px(ctx, ufoX + 2, 120, 6, 4, '#fbbf24'); // Mysterious rooftop crate
+        }
+
+        // Warp dash speed trail
+        if (warpTrail) {
+          ctx.strokeStyle = 'rgba(0, 245, 255, 0.65)';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(ufoX + 14, ufoY + 2);
+          ctx.lineTo(ufoX + 54, ufoY + 8);
+          ctx.stroke();
+        }
+
+        // UFO Saucer Pixel Construction
+        // Cockpit glass dome (cyan with tiny alien pilot dot)
+        px(ctx, ufoX + 3, ufoY - 3, 6, 4, '#38bdf8');
+        px(ctx, ufoX + 4, ufoY - 2, 4, 2, '#a5f3fc');
+        px(ctx, ufoX + 5, ufoY - 2, 2, 2, '#22c55e'); // Green alien dot
+        // Upper hull (silver)
+        px(ctx, ufoX, ufoY, 12, 3, '#94a3b8');
+        px(ctx, ufoX - 2, ufoY + 1, 16, 3, '#cbd5e1');
+        // Lower hull
+        px(ctx, ufoX - 1, ufoY + 3, 14, 2, '#475569');
+        // Rotating multicolored rim lights
+        const ufoLightStep = Math.floor(time / 110) % 4;
+        const ufoColors = ['#facc15', '#22c55e', '#00f5ff', '#ff2a9d'];
+        px(ctx, ufoX - 1, ufoY + 2, 2, 1.5, ufoColors[ufoLightStep]);
+        px(ctx, ufoX + 3, ufoY + 2, 2, 1.5, ufoColors[(ufoLightStep + 1) % 4]);
+        px(ctx, ufoX + 7, ufoY + 2, 2, 1.5, ufoColors[(ufoLightStep + 2) % 4]);
+        px(ctx, ufoX + 11, ufoY + 2, 2, 1.5, ufoColors[(ufoLightStep + 3) % 4]);
+        // Anti-gravity emitter glow
+        px(ctx, ufoX + 3, ufoY + 4, 6, 1.5, '#00f5ff');
+      }
+
+      // --- 5. Lower Foreground Rooftops & Industrial Structures ---
+      px(ctx, 365, 124, 86, 20, '#172336');
+      px(ctx, 368, 126, 80, 18, '#20304a');
+      px(ctx, 450, 118, 190, 20, '#0e1b2d');
+      px(ctx, 482, 124, 38, 14, '#142a42');
+      px(ctx, 487, 127, 25, 4, '#00f5ff');
+      // Utility poles & cables
+      px(ctx, 468, 116, 3, 22, '#090d16');
+      px(ctx, 462, 121, 15, 2, '#090d16');
+      px(ctx, 536, 114, 3, 24, '#090d16');
+      px(ctx, 530, 119, 15, 2, '#090d16');
+
+      // --- 6. Animated Diagonal Pixel Rain (STRICTLY CLIPPED AT WINDOW) ---
+      // Rain only renders within window boundary (y <= 135, x >= 268)
+      // and splashes only on the exterior sill ledge at y = 135
       rainDrops.forEach((d, i) => {
-        const ry = (d.y + time * 0.042 * d.speed) % 158;
-        const rx = d.x - (ry * 0.16);
-        px(ctx, rx, ry, 1, d.len, 'rgba(125, 211, 252, 0.36)');
-        if (ry > 152 && i % 4 === 0) {
-          px(ctx, rx - 1, 138, 3, 1, 'rgba(0, 245, 255, 0.45)');
+        const ry = (d.y + time * 0.052 * d.speed) % 136;
+        const rx = d.x - (ry * 0.14);
+        if (rx >= 268 && rx <= W && ry <= 135) {
+          const rainLen = Math.min(d.len, 135 - ry);
+          if (rainLen > 0) {
+            px(ctx, rx, ry, 1, rainLen, lightningFlash > 0.4 ? 'rgba(224, 231, 255, 0.75)' : 'rgba(125, 211, 252, 0.38)');
+          }
+          // Splashes ONLY on the exterior windowsill ledge at y = 134-135
+          if (ry >= 132 && i % 3 === 0) {
+            px(ctx, rx - 1, 135, 3, 1, 'rgba(0, 245, 255, 0.55)');
+          }
         }
       });
+
+      // Restore clipping so developer room interior is unaffected
+      ctx.restore();
 
       // ====================================================================
       // B. LOFT WINDOW MULLIONS, TRANSOMS & SKYLIGHT BEAMS
@@ -2860,12 +3040,55 @@
       px(ctx, 14, 18, 50, 4, '#17132b');
       px(ctx, 59, 10, 4, 2.5, '#00f5ff');
 
-      // Circular Wall Fan Vent (Animated rotation tick)
-      px(ctx, 144, 10, 18, 18, '#251f42');
-      px(ctx, 147, 13, 12, 12, '#120e24');
-      const fanTick = Math.floor(time / 120) % 2;
-      px(ctx, 151, 14 + fanTick, 4, 9, '#3b3363');
-      px(ctx, 148 + fanTick, 17, 9, 4, '#3b3363');
+      // Upgraded Industrial Wall Fan (換気扇)
+      // Metallic outer chassis & bevel
+      px(ctx, 139, 7, 24, 24, '#332b52');
+      px(ctx, 140, 8, 22, 22, '#483f6b');
+      px(ctx, 141, 9, 20, 20, '#2a2245');
+      // 4 Corner Mounting Rivets / Screws
+      px(ctx, 140, 8, 2, 2, '#94a3b8');
+      px(ctx, 160, 8, 2, 2, '#94a3b8');
+      px(ctx, 140, 28, 2, 2, '#94a3b8');
+      px(ctx, 160, 28, 2, 2, '#94a3b8');
+      // Recessed circular exhaust cavity
+      px(ctx, 143, 11, 16, 16, '#0d091a');
+      px(ctx, 144, 12, 14, 14, '#080512');
+      // Smooth 4-Phase Rotating Propeller Blades
+      const fanStep = Math.floor(time / 45) % 4;
+      const bladeColor = '#7c719e';
+      const bladeShade = '#554a73';
+      if (fanStep === 0) {
+        px(ctx, 150, 12, 2, 6, bladeColor);
+        px(ctx, 150, 20, 2, 6, bladeColor);
+        px(ctx, 144, 18, 6, 2, bladeShade);
+        px(ctx, 152, 18, 6, 2, bladeShade);
+      } else if (fanStep === 1) {
+        px(ctx, 146, 13, 4, 4, bladeColor);
+        px(ctx, 152, 21, 4, 4, bladeColor);
+        px(ctx, 152, 13, 4, 4, bladeShade);
+        px(ctx, 146, 21, 4, 4, bladeShade);
+      } else if (fanStep === 2) {
+        px(ctx, 145, 14, 5, 3, bladeColor);
+        px(ctx, 152, 21, 5, 3, bladeColor);
+        px(ctx, 152, 14, 5, 3, bladeShade);
+        px(ctx, 145, 21, 5, 3, bladeShade);
+      } else {
+        px(ctx, 149, 12, 3, 6, bladeColor);
+        px(ctx, 150, 20, 3, 6, bladeColor);
+        px(ctx, 144, 17, 6, 3, bladeShade);
+        px(ctx, 152, 17, 6, 3, bladeShade);
+      }
+      // Central brass rotor cap
+      px(ctx, 149, 17, 4, 4, '#fbbf24');
+      px(ctx, 150, 18, 2, 2, '#d97706');
+      // Power LED (Green, pulsing with slight glow)
+      const fanLedGlow = Math.sin(time * 0.006) > 0 ? '#22c55e' : '#16a34a';
+      px(ctx, 158, 9, 2, 2, fanLedGlow);
+      // Swaying Pull-String Cord with round tassel
+      const cordSway = Math.sin(time * 0.0035) * 1.5;
+      px(ctx, 160 + cordSway * 0.3, 29, 1, 6, '#cbd5e1');
+      px(ctx, 160 + cordSway * 0.7, 35, 1, 6, '#cbd5e1');
+      px(ctx, 159 + cordSway, 41, 3, 3, '#fbbf24'); // Golden pull tassel
 
       // Hanging Ceiling Cables
       ctx.strokeStyle = '#0d0a1a';
@@ -2913,52 +3136,213 @@
       px(ctx, 33, 122, 4, 5, '#ff2a9d');
 
       // ====================================================================
-      // F. MULTI-MONITOR DEVELOPER DESK SETUP
+      // F. MULTI-MONITOR DEVELOPER DESK SETUP & ADVANCED SCREEN DYNAMICS
       // ====================================================================
-      // Top-left hanging monitor 1
+      // Top-left hanging monitor 1: Phosphor Green Radar Screen
       px(ctx, 92, 16, 22, 19, '#3b335e');
-      px(ctx, 95, 19, 16, 13, '#3b82f6');
-      px(ctx, 98, 22, 10, 8, '#93c5fd');
+      px(ctx, 95, 19, 16, 13, '#062814');
+      px(ctx, 99, 20, 8, 1, '#166534');
+      px(ctx, 99, 30, 8, 1, '#166534');
+      px(ctx, 96, 23, 1, 6, '#166534');
+      px(ctx, 109, 23, 1, 6, '#166534');
+      const sweepAngle = (time * 0.003) % (Math.PI * 2);
+      const swX = 103 + Math.cos(sweepAngle) * 5.5;
+      const swY = 25 + Math.sin(sweepAngle) * 4.5;
+      ctx.strokeStyle = '#22c55e';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(103, 25);
+      ctx.lineTo(swX, swY);
+      ctx.stroke();
+      if (Math.sin(time * 0.005) > 0.15) px(ctx, 106, 22, 2, 2, '#86efac');
 
-      // Top-right hanging monitor 2
+      // Top-right hanging monitor 2: Audio Spectrum Equalizer (5 dancing bars)
       px(ctx, 117, 22, 22, 19, '#3b335e');
-      px(ctx, 120, 25, 16, 13, '#00f5ff');
-      px(ctx, 123, 28, 10, 8, '#cffafe');
+      px(ctx, 120, 25, 16, 13, '#091524');
+      const eqFreqs = [0.012, 0.017, 0.021, 0.015, 0.025];
+      const eqColors = ['#38bdf8', '#4ade80', '#facc15', '#f43f5e', '#c084fc'];
+      for (let b = 0; b < 5; b++) {
+        const barH = 2 + Math.floor((Math.sin(time * eqFreqs[b] + b * 1.3) + 1) * 4.2);
+        px(ctx, 122 + b * 3, 36 - barH, 2, barH, eqColors[b]);
+      }
 
-      // Mid-upper CRT Monitor
+      // Mid-upper CRT Monitor: Live Network & Git Branch Graph
       px(ctx, 71, 37, 34, 27, '#4a436e');
-      px(ctx, 75, 41, 26, 19, '#00d4ff');
-      px(ctx, 78, 44, 20, 13, '#a5f3fc');
+      px(ctx, 75, 41, 26, 19, '#0b162c');
+      px(ctx, 78, 47, 20, 1.5, '#1e3a8a');
+      px(ctx, 84, 53, 14, 1.5, '#4338ca');
+      px(ctx, 81, 48, 2, 2, '#4338ca');
+      px(ctx, 83, 50, 2, 2, '#4338ca');
+      const pulseNode = Math.floor(time / 420) % 3;
+      px(ctx, 78, 46, 3, 3, pulseNode === 0 ? '#60a5fa' : '#2563eb');
+      px(ctx, 86, 46, 3, 3, pulseNode === 1 ? '#38bdf8' : '#0284c7');
+      px(ctx, 93, 46, 3, 3, pulseNode === 2 ? '#22d3ee' : '#0891b2');
+      px(ctx, 87, 52, 3, 3, '#a855f7');
+      px(ctx, 94, 52, 3, 3, '#ec4899');
 
-      // Mid-small Pink CRT Monitor
+      // Mid-small Pink CRT Monitor: Live Chat / Discord Feed
       px(ctx, 106, 46, 19, 18, '#4a436e');
-      px(ctx, 109, 49, 13, 12, '#ff2a9d');
-      px(ctx, 111, 51, 9, 7, '#fbcfe8');
+      px(ctx, 109, 49, 13, 12, '#1e112a');
+      const chatScroll = Math.floor(time / 600) % 2;
+      px(ctx, 111, 51 + chatScroll, 8, 2, '#f472b6');
+      px(ctx, 111, 55 + chatScroll, 10, 2, '#e879f9');
+      px(ctx, 111, 59, 7, 2, '#38bdf8');
 
-      // Mid-right Cyan CRT Monitor
+      // Mid-right Cyan CRT Monitor: Memory Hex / Diagnostics
       px(ctx, 127, 48, 22, 19, '#4a436e');
-      px(ctx, 130, 51, 16, 13, '#22d3ee');
-      px(ctx, 133, 54, 10, 8, '#cffafe');
+      px(ctx, 130, 51, 16, 13, '#0e2433');
+      const hexScroll = Math.floor(time / 260) % 3;
+      px(ctx, 132, 53 + hexScroll, 12, 1.5, '#22d3ee');
+      px(ctx, 132, 56 + hexScroll, 9, 1.5, '#67e8f9');
+      px(ctx, 132, 60, 11, 1.5, '#a5f3fc');
 
-      // Left Stacked Amber CRT & Vertical Tower
+      // Left Stacked Amber CRT & Vertical Server Tower
       px(ctx, 56, 56, 20, 22, '#5c527d');
-      px(ctx, 59, 60, 14, 14, '#d97706');
-      px(ctx, 61, 63, 10, 8, '#fde68a');
-      px(ctx, 56, 79, 30, 72, '#2a224a');
-      px(ctx, 65, 84, 16, 20, '#1d4ed8');
-      px(ctx, 68, 87, 10, 14, '#60a5fa');
+      px(ctx, 59, 60, 14, 14, '#241403');
+      const amberScroll = Math.floor(time / 300) % 3;
+      px(ctx, 61, 62 + amberScroll, 10, 1.5, '#f59e0b');
+      px(ctx, 61, 66 + amberScroll, 7, 1.5, '#d97706');
+      px(ctx, 61, 70, 9, 1.5, '#fbbf24');
 
-      // MAIN CENTER LARGE CODE CRT MONITOR
+      // Server Tower with rapidly flickering HDD & LAN activity LEDs
+      px(ctx, 56, 79, 30, 72, '#2a224a');
+      px(ctx, 65, 84, 16, 20, '#121829');
+      const hddFlicker = Math.sin(time * 0.035) > 0.1;
+      px(ctx, 59, 84, 2, 2, hddFlicker ? '#f59e0b' : '#78350f');
+      px(ctx, 59, 88, 2, 2, Math.sin(time * 0.02) > 0 ? '#22c55e' : '#14532d');
+      px(ctx, 59, 92, 2, 2, '#00f5ff');
+      px(ctx, 67, 110, 14, 2, '#18122e');
+      px(ctx, 67, 116, 14, 2, '#18122e');
+
+      // ====================================================================
+      // MAIN CENTER LARGE CRT MONITOR (5 Dynamic Developer Screen Modes)
+      // Cycles smoothly every 5 seconds through rich development tools!
+      // ====================================================================
       const pulse = Math.sin(time * 0.004) * 10 + boostPulse * 20;
       px(ctx, 87, 65, 41, 34, '#524b75');
-      px(ctx, 91, 69, 33, 26, '#00f5ff');
-      px(ctx, 94, 72, 27, 20, `rgb(${Math.min(255, 165 + pulse)}, 250, 255)`);
-      // Animated scrolling code lines on main monitor
-      const scrollOffset = Math.floor(time / 350) % 3;
-      px(ctx, 97, 75 + scrollOffset, 14, 1.5, '#0284c7');
-      px(ctx, 97, 79 + scrollOffset, 19, 1.5, '#0284c7');
-      px(ctx, 97, 83 + scrollOffset, 11, 1.5, '#0284c7');
-      px(ctx, 97, 87, 16, 1.5, '#0284c7');
+      px(ctx, 91, 69, 33, 26, '#0f172a');
+      px(ctx, 93, 71, 29, 22, '#090e1a');
+
+      const pcMode = Math.floor(time / 5000) % 5;
+
+      if (pcMode === 0) {
+        // --- MODE 0: VS Code / IDE Code Editor ---
+        // Line number gutter
+        px(ctx, 94, 72, 3, 20, '#1e293b');
+        // Syntax highlighted code lines
+        px(ctx, 99, 74, 7, 1.5, '#38bdf8'); // const
+        px(ctx, 107, 74, 9, 1.5, '#facc15'); // heroData
+        px(ctx, 101, 78, 6, 1.5, '#f472b6'); // function
+        px(ctx, 108, 78, 10, 1.5, '#4ade80'); // 'corner'
+        px(ctx, 101, 82, 5, 1.5, '#c084fc'); // return
+        px(ctx, 107, 82, 8, 1.5, '#38bdf8'); // true
+        // Active typing line with growing/shrinking length
+        const typingLen = 4 + (Math.floor(time / 180) % 5) * 2;
+        px(ctx, 99, 86, typingLen, 1.5, '#e2e8f0');
+        // Blinking Cyan Cursor
+        if (Math.floor(time / 280) % 2 === 0) {
+          px(ctx, 99 + typingLen + 1, 85, 2, 3, '#00f5ff');
+        }
+      } else if (pcMode === 1) {
+        // --- MODE 1: Pixel Art Sprite Editor (Aseprite Style) ---
+        // Checkerboard transparency canvas
+        for (let cy = 73; cy <= 87; cy += 3) {
+          for (let cx = 95; cx <= 118; cx += 3) {
+            px(ctx, cx, cy, 3, 3, (cx + cy) % 6 === 0 ? '#1e293b' : '#334155');
+          }
+        }
+        // Animated 8-bit Character Sprite jumping/running
+        const charJump = Math.floor(time / 160) % 3;
+        const charY = 76 - (charJump === 1 ? 2 : 0);
+        px(ctx, 105, charY, 6, 6, '#facc15'); // Hair/Hat
+        px(ctx, 105, charY + 5, 6, 4, '#38bdf8'); // Shirt
+        px(ctx, 104 + (charJump === 0 ? 0 : 1), charY + 9, 3, 3, '#1e293b'); // Left leg
+        px(ctx, 108 - (charJump === 0 ? 0 : 1), charY + 9, 3, 3, '#1e293b'); // Right leg
+        // Palette swatch bar at bottom
+        px(ctx, 96, 90, 3, 2, '#ef4444');
+        px(ctx, 100, 90, 3, 2, '#facc15');
+        px(ctx, 104, 90, 3, 2, '#22c55e');
+        px(ctx, 108, 90, 3, 2, '#00f5ff');
+        px(ctx, 112, 90, 3, 2, '#ec4899');
+        // Pencil tool cursor
+        px(ctx, 112, charY + 2, 2, 2, '#ffffff');
+      } else if (pcMode === 2) {
+        // --- MODE 2: 3D Wireframe Retro Engine (UE5 / Retro 3D) ---
+        px(ctx, 93, 71, 29, 22, '#030712');
+        // Rotating 3D wireframe polygon
+        const rot = time * 0.0022;
+        const cosR = Math.cos(rot);
+        const sinR = Math.sin(rot);
+        const cx = 107;
+        const cy = 81;
+        const r1 = 8;
+        const r2 = 4;
+        const p1x = cx + cosR * r1;
+        const p1y = cy + sinR * r2;
+        const p2x = cx - sinR * r1;
+        const p2y = cy + cosR * r2;
+        const p3x = cx - cosR * r1;
+        const p3y = cy - sinR * r2;
+        const p4x = cx + sinR * r1;
+        const p4y = cy - cosR * r2;
+
+        ctx.strokeStyle = '#00f5ff';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(p1x, p1y);
+        ctx.lineTo(p2x, p2y);
+        ctx.lineTo(p3x, p3y);
+        ctx.lineTo(p4x, p4y);
+        ctx.closePath();
+        ctx.stroke();
+
+        ctx.strokeStyle = '#ff2a9d';
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - 8);
+        ctx.lineTo(p1x, p1y);
+        ctx.moveTo(cx, cy - 8);
+        ctx.lineTo(p2x, p2y);
+        ctx.moveTo(cx, cy - 8);
+        ctx.lineTo(p3x, p3y);
+        ctx.moveTo(cx, cy - 8);
+        ctx.lineTo(p4x, p4y);
+        ctx.stroke();
+
+        // 60 FPS counter
+        px(ctx, 95, 73, 5, 2, '#4ade80');
+      } else if (pcMode === 3) {
+        // --- MODE 3: Build Stream Terminal ---
+        px(ctx, 93, 71, 29, 22, '#050a06');
+        const termScroll = Math.floor(time / 200) % 4;
+        px(ctx, 95, 74 + termScroll, 12, 1.5, '#4ade80');
+        px(ctx, 95, 78 + termScroll, 16, 1.5, '#22c55e');
+        px(ctx, 95, 82 + termScroll, 20, 1.5, '#16a34a');
+        px(ctx, 95, 87, 14, 2, '#86efac');
+        // Terminal Spinner: | / - \
+        const spinChars = ['|', '/', '-', '\\'];
+        const spinIdx = Math.floor(time / 150) % 4;
+        if (spinIdx === 0) px(ctx, 117, 86, 1, 3, '#4ade80');
+        else if (spinIdx === 1) { px(ctx, 116, 88, 1, 1, '#4ade80'); px(ctx, 118, 86, 1, 1, '#4ade80'); }
+        else if (spinIdx === 2) px(ctx, 116, 87, 3, 1, '#4ade80');
+        else { px(ctx, 116, 86, 1, 1, '#4ade80'); px(ctx, 118, 88, 1, 1, '#4ade80'); }
+      } else {
+        // --- MODE 4: 2D Mini-Game Test Run ---
+        px(ctx, 93, 71, 29, 22, '#071824');
+        // Ground line
+        px(ctx, 94, 88, 27, 1, '#1e3a5f');
+        // Moving track dashes
+        const trackDash = Math.floor(time / 80) % 6;
+        px(ctx, 96 + trackDash, 89, 3, 1, '#38bdf8');
+        px(ctx, 106 + trackDash, 89, 3, 1, '#38bdf8');
+        // Mini game protagonist jumping
+        const jumpY = Math.abs(Math.sin(time * 0.008)) * 6;
+        px(ctx, 100, 83 - jumpY, 5, 5, '#f43f5e');
+        // Approaching hazard obstacle
+        const obstX = 118 - ((time * 0.03) % 24);
+        px(ctx, obstX, 85, 3, 3, '#facc15');
+        // Mini Score HUD
+        px(ctx, 95, 73, 9, 2, '#e0f2fe');
+      }
 
       // RIGHT DESK CODE MONITOR
       px(ctx, 129, 68, 25, 28, '#3f395e');
@@ -2968,14 +3352,18 @@
       px(ctx, 135, 82, 8, 1.5, '#22d3ee');
       px(ctx, 135, 86, 12, 1.5, '#f472b6');
 
-      // Steaming Coffee Mug on Desk
+      // Steaming Coffee Mug on Desk (Smooth Sine-Wave Steam)
       px(ctx, 125, 98, 5, 5, '#f43f5e');
-      if (Math.floor(time / 400) % 2 === 0) {
-        px(ctx, 126, 94, 1, 3, 'rgba(255,255,255,0.45)');
-        px(ctx, 128, 93, 1, 3, 'rgba(255,255,255,0.35)');
+      px(ctx, 126, 97, 3, 1, '#451a03'); // Dark coffee
+      for (let s = 0; s < 3; s++) {
+        const steamT = (time * 0.0022 + s * 0.75) % 2.4;
+        const steamY = 96 - steamT * 4.2;
+        const steamX = 127 + Math.sin(steamT * 4 + s) * 1.6;
+        const steamAlpha = Math.max(0, 0.65 - steamT * 0.25);
+        px(ctx, steamX, steamY, 1.5, 2, `rgba(255, 255, 255, ${steamAlpha})`);
       }
 
-      // Desk Surface & Keyboard
+      // Desk Surface & Keyboard with CRT Monitor Glow
       px(ctx, 84, 103, 76, 5, '#2e294e');
       px(ctx, 84, 103, 76, 1.5, '#67e8f9');
       px(ctx, 95, 100, 24, 3, '#94a3b8');
@@ -4845,8 +5233,10 @@
     }
 
     function animateScene(now) {
-      if (isHeroVisible && typeof drawHeroPixelScene === 'function') {
-        drawHeroPixelScene(now || 0);
+      const renderHero = window.isHeroVisible !== undefined ? window.isHeroVisible : isHeroVisible;
+      if (renderHero && typeof drawHeroPixelScene === 'function') {
+        const timeToUse = window.__heroCustomTime !== undefined ? window.__heroCustomTime : (now || 0);
+        drawHeroPixelScene(timeToUse);
       }
       if (isCrtVisible && typeof drawMiniCrtFrame === 'function') {
         drawMiniCrtFrame();
