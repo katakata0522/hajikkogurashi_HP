@@ -1,0 +1,2622 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Corner Neighbor — 世界の端っこでゲームを作る</title>
+  <meta name="description" content="Unreal Engine 5やWEBでゲームを制作するインディーゲームサークル「Corner Neighbor（コーナーネイバー）」の公式サイトです！作品紹介やブラウザで今すぐ遊べるミニゲームを公開中！" />
+  <meta name="robots" content="index,follow" />
+  <link rel="canonical" href="https://hajikkoroom.xsrv.jp/" />
+  
+  <!-- Open Graph / OGP & Twitter Cards -->
+  <meta property="og:locale" content="ja_JP" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Corner Neighbor公式ホームページ" />
+  <meta property="og:title" content="Corner Neighbor — 世界の端っこでゲームを作る" />
+  <meta property="og:description" content="Unreal Engine 5やWEBでゲームを制作するインディーゲームサークル「Corner Neighbor」の公式サイトです！作品紹介やブラウザで今すぐ遊べるミニゲームを公開中！" />
+  <meta property="og:url" content="https://hajikkoroom.xsrv.jp/" />
+  <meta property="og:image" content="https://hajikkoroom.xsrv.jp/assets/images/banner.webp" />
+  <meta property="og:image:alt" content="Corner Neighbor公式ホームページ" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Corner Neighbor — 世界の端っこでゲームを作る" />
+  <meta name="twitter:description" content="Unreal Engine 5やWEBでゲームを制作するインディーゲームサークル「Corner Neighbor」の公式サイトです！" />
+  <meta name="twitter:image" content="https://hajikkoroom.xsrv.jp/assets/images/banner.webp" />
+
+  <!-- Structured Data JSON-LD -->
+  <script type="application/ld+json">
+  [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Corner Neighbor",
+      "url": "https://hajikkoroom.xsrv.jp/"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Corner Neighbor",
+      "alternateName": "はじっこぐらし",
+      "url": "https://hajikkoroom.xsrv.jp/",
+      "sameAs": [
+        "https://note.com/hajikkogurashi01",
+        "https://x.com/Corner_neighbor",
+        "https://www.youtube.com/@hajikkogurashi"
+      ]
+    }
+  ]
+  </script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Press+Start+2P&family=Share+Tech+Mono&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-void: #08070f;
+      --bg-viewport: #0e0e13;
+      --bg-panel: #161722;
+      --bg-card: #1a1b24;
+      --border-muted: #282a3a;
+      --neon-cyan: #00f5ff;
+      --neon-pink: #ff2a9d;
+      --neon-magenta: #eb1899;
+      --neon-amber: #f59e0b;
+      --neon-green: #22c55e;
+      --font-mono: 'Share Tech Mono', 'DotGothic16', monospace;
+      --font-pixel-jp: 'DotGothic16', monospace;
+      --font-pixel-en: 'Silkscreen', 'Share Tech Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-void);
+      font-family: var(--font-mono);
+      color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Outer Blurred Cyberpunk Environment Backdrop (Desktop Framed Mode) */
+    #outer-bg-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      filter: blur(11px) brightness(0.82);
+      transform: scale(1.06);
+      z-index: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease;
+    }
+
+    /* Stage Container */
+    .stage-wrapper {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 1120px;
+      margin: 24px auto;
+      padding: 0 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: max-width 0.3s ease, padding 0.3s ease, margin 0.3s ease;
+    }
+
+    /* Fullscreen Mode Toggle State on Desktop */
+    body.fullscreen-mode .stage-wrapper {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0;
+      min-height: 100vh;
+      align-items: stretch;
+    }
+    body.fullscreen-mode .browser-window {
+      width: 100%;
+      border-radius: 0;
+      border: none;
+      box-shadow: none;
+      display: flex;
+      flex-direction: column;
+    }
+    body.fullscreen-mode .site-viewport {
+      flex: 1;
+      padding: 28px 6vw 40px 6vw;
+    }
+
+    /* Browser Window Mockup Frame */
+    .browser-window {
+      width: 100%;
+      max-width: 1088px;
+      background: var(--bg-viewport);
+      border-radius: 11px;
+      border: 1px solid #383944;
+      box-shadow:
+        0 32px 85px rgba(0, 0, 0, 0.88),
+        0 0 0 1px rgba(255, 255, 255, 0.06);
+      overflow: hidden;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    /* Browser Top Tab Bar */
+    .browser-tab-bar {
+      height: 34px;
+      background: #141418;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding: 0 14px;
+      border-bottom: 1px solid #1e1e24;
+      user-select: none;
+    }
+
+    .tab-bar-left {
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+      height: 100%;
+    }
+
+    .traffic-lights {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      height: 100%;
+      padding-bottom: 1px;
+    }
+
+    .traffic-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      cursor: pointer;
+      transition: transform 0.15s ease, filter 0.15s ease;
+    }
+    .traffic-dot:hover {
+      transform: scale(1.15);
+      filter: brightness(1.2);
+    }
+    .dot-red { background: #ff5f56; }
+    .dot-yellow { background: #ffbd2e; }
+    .dot-green { background: #27c93f; }
+
+    .browser-tab {
+      width: 196px;
+      height: 26px;
+      background: #282830;
+      border-top-left-radius: 7px;
+      border-top-right-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
+      color: #c2c5d0;
+      font-size: 10.5px;
+      letter-spacing: 0.4px;
+      position: relative;
+    }
+
+    .browser-tab-plus {
+      height: 26px;
+      display: flex;
+      align-items: center;
+      color: #9496a1;
+      font-size: 14px;
+      padding-left: 2px;
+      cursor: pointer;
+    }
+
+    /* Browser URL / Address Bar */
+    .browser-address-bar {
+      height: 36px;
+      background: #282830;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      gap: 10px;
+      border-bottom: 1px solid #121217;
+      user-select: none;
+    }
+
+    .nav-icon {
+      color: #8b8d98;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: color 0.15s, background 0.15s;
+    }
+    .nav-icon:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .url-pill {
+      flex: 1;
+      height: 24px;
+      background: #18181d;
+      border-radius: 12px;
+      margin: 0 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      font-size: 11px;
+      color: #7c7f8c;
+      letter-spacing: 0.4px;
+      border: 1px solid transparent;
+      transition: border-color 0.2s;
+    }
+    .url-pill:hover {
+      border-color: #343746;
+    }
+
+    .profile-circle {
+      width: 17px;
+      height: 17px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #5b5c66, #3b3c45);
+      border: 1px solid #717380;
+    }
+
+    /* Main Website Viewport Area */
+    .site-viewport {
+      position: relative;
+      background: var(--bg-viewport);
+      padding: 18px 64px 28px 64px;
+      min-height: 615px;
+      overflow: hidden;
+    }
+
+    /* Subtle CRT Scanline Overlay (Toggleable) */
+    .site-viewport::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%,
+        rgba(0, 0, 0, 0.18) 50%
+      );
+      background-size: 100% 4px;
+      pointer-events: none;
+      z-index: 30;
+      opacity: 0.45;
+    }
+
+    /* Navigation Links */
+    .nav-link {
+      color: #9498a6;
+      text-decoration: none;
+      position: relative;
+      padding: 4px 2px 5px 2px;
+      font-size: 14.5px;
+      letter-spacing: 0.8px;
+      transition: color 0.18s ease, text-shadow 0.18s ease;
+      white-space: nowrap;
+    }
+    .nav-link:hover,
+    .nav-link.active {
+      color: var(--neon-cyan);
+      text-shadow: 0 0 8px rgba(0, 245, 255, 0.5);
+    }
+    .nav-link.active::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 2px;
+      background: var(--neon-cyan);
+      box-shadow: 0 0 8px var(--neon-cyan);
+    }
+
+    /* Neon Gradient Button (PLAY NOW) */
+    .btn-neon-play {
+      position: relative;
+      background: #14111d;
+      color: #ffffff;
+      font-family: var(--font-mono);
+      font-size: 14.5px;
+      letter-spacing: 0.9px;
+      padding: 6px 17px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      z-index: 1;
+      white-space: nowrap;
+      box-shadow:
+        -3px -2px 12px rgba(255, 0, 128, 0.42),
+        3px 2px 12px rgba(0, 245, 255, 0.42);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .btn-neon-play::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 6px;
+      padding: 2px;
+      background: linear-gradient(125deg, #ff008c 0%, #ff2a85 38%, #00f5ff 100%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+    .btn-neon-play:hover {
+      transform: translateY(-1px);
+      box-shadow:
+        -4px -2px 18px rgba(255, 0, 128, 0.7),
+        4px 2px 18px rgba(0, 245, 255, 0.7);
+    }
+
+    /* SFX Toggle Mini Button */
+    .btn-sfx-toggle {
+      background: #171824;
+      border: 1px solid #2e3247;
+      color: #7e849c;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 5px 9px;
+      border-radius: 5px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+    .btn-sfx-toggle:hover,
+    .btn-sfx-toggle.sfx-on {
+      border-color: var(--neon-cyan);
+      color: var(--neon-cyan);
+      box-shadow: 0 0 8px rgba(0, 245, 255, 0.25);
+    }
+
+    /* Hero Frame with Cyan-to-Magenta Neon Border */
+    .hero-frame {
+      position: relative;
+      width: 100%;
+      height: 274px;
+      border-radius: 13px;
+      padding: 2.5px;
+      background: linear-gradient(135deg, #00f5ff 0%, #00f5ff 42%, #b5179e 68%, #ff0099 100%);
+      box-shadow:
+        -4px -2px 18px rgba(0, 245, 255, 0.42),
+        4px 4px 18px rgba(255, 0, 153, 0.38);
+      margin-top: 12px;
+    }
+
+    .hero-inner {
+      width: 100%;
+      height: 100%;
+      background: #0d1222;
+      border-radius: 10.5px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #hero-pixel-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      cursor: pointer;
+    }
+
+    /* Hero Right Overlay Box */
+    .hero-overlay-card {
+      position: absolute;
+      right: 26px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 288px;
+      background: rgba(14, 15, 23, 0.92);
+      backdrop-filter: blur(3px);
+      border: 2px solid #2d3042;
+      border-radius: 6px;
+      padding: 16px 16px 15px;
+      text-align: center;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.72);
+      z-index: 5;
+    }
+    .hero-overlay-card::before {
+      content: "";
+      position: absolute;
+      top: -2px;
+      right: 12px;
+      width: 26px;
+      height: 2px;
+      background: #ff0099;
+      box-shadow: 0 0 6px #ff0099;
+    }
+    .hero-overlay-card::after {
+      content: "";
+      position: absolute;
+      bottom: -2px;
+      left: 16px;
+      width: 38px;
+      height: 2px;
+      background: linear-gradient(90deg, #00f5ff, #ff0099);
+    }
+
+    .hero-title-en {
+      font-family: var(--font-mono);
+      font-size: 21px;
+      line-height: 1.15;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      color: #ffffff;
+      margin: 0 0 6px 0;
+      text-shadow: 0 2px 0 rgba(0, 0, 0, 0.7);
+    }
+
+    .hero-title-jp {
+      font-family: var(--font-pixel-jp);
+      font-size: 13.5px;
+      line-height: 1.35;
+      color: var(--neon-cyan);
+      letter-spacing: 1.2px;
+      margin: 0 0 13px 0;
+      text-shadow: 0 0 8px rgba(0, 245, 255, 0.45);
+    }
+
+    .btn-enter-base {
+      position: relative;
+      display: inline-block;
+      background: #141622;
+      color: #ffffff;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      letter-spacing: 0.8px;
+      padding: 6.5px 18px;
+      border-radius: 5px;
+      cursor: pointer;
+      border: none;
+      box-shadow:
+        -2px 0 8px rgba(0, 245, 255, 0.35),
+        2px 0 8px rgba(255, 0, 153, 0.35);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .btn-enter-base::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 5px;
+      padding: 1.8px;
+      background: linear-gradient(90deg, #00f5ff 0%, #00f5ff 55%, #ff00a0 100%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+    .btn-enter-base:hover {
+      transform: scale(1.04);
+      box-shadow:
+        -3px 0 14px rgba(0, 245, 255, 0.7),
+        3px 0 14px rgba(255, 0, 153, 0.7);
+    }
+
+    /* Interactive Cat Tooltip Bubble inside Hero */
+    .cat-speech-bubble {
+      position: absolute;
+      left: 33%;
+      bottom: 24%;
+      background: rgba(14, 15, 24, 0.94);
+      border: 1.5px solid var(--neon-cyan);
+      color: #ffffff;
+      font-family: var(--font-pixel-jp);
+      font-size: 11px;
+      padding: 4px 9px;
+      border-radius: 4px;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      box-shadow: 0 0 10px rgba(0, 245, 255, 0.35);
+      z-index: 6;
+      white-space: nowrap;
+    }
+    .cat-speech-bubble.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Lower 2-Column Layout */
+    .lower-grid {
+      display: flex;
+      gap: 22px;
+      margin-top: 18px;
+      align-items: flex-start;
+    }
+
+    .games-column {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .cartridges-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .transmission-sidebar {
+      width: 192px;
+      flex-shrink: 0;
+    }
+
+    /* Game Selection Card Styling */
+    .game-card {
+      background: var(--bg-card);
+      border: 2px solid #262834;
+      border-radius: 4px;
+      padding: 8px 8px 9px 8px;
+      position: relative;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 6px 14px rgba(0,0,0,0.45);
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .game-card:hover {
+      transform: translateY(-3px);
+      border-color: #383c52;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 12px 22px rgba(0,0,0,0.65);
+    }
+
+    .cartridge-well {
+      background: #101117;
+      border: 2px solid #0b0c10;
+      height: 120px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: visible;
+      cursor: pointer;
+    }
+
+    .cartridge-svg {
+      transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+      max-width: 100%;
+      height: auto;
+    }
+    .game-card:hover .cartridge-svg {
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .well-leds {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 4px 3px 4px;
+    }
+
+    .cart-sub-jp {
+      font-family: var(--font-pixel-jp);
+      font-size: 9.5px;
+      color: #8b92a8;
+      letter-spacing: 0.4px;
+    }
+
+    .led-group {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .led-green {
+      width: 6px;
+      height: 2.5px;
+      background: #22c55e;
+      box-shadow: 0 0 4px #22c55e;
+    }
+
+    .led-pink {
+      width: 6px;
+      height: 2.5px;
+      background: #ec4899;
+      box-shadow: 0 0 4px #ec4899;
+    }
+
+    .card-divider {
+      height: 2px;
+      background: #0d0e13;
+      border-bottom: 1px solid #252734;
+      margin: 0 -8px 8px -8px;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 10px;
+      padding: 0 4px;
+    }
+
+    .btn-card-action {
+      flex: 1;
+      position: relative;
+      background: #13141d;
+      color: #f1f5f9;
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      letter-spacing: 0.6px;
+      padding: 5px 0;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      box-shadow:
+        -1px 0 6px rgba(0, 245, 255, 0.25),
+        1px 0 6px rgba(255, 0, 160, 0.25);
+      transition: all 0.15s ease;
+    }
+    .btn-card-action::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 4px;
+      padding: 1.5px;
+      background: linear-gradient(90deg, #00f5ff 0%, #00d4ff 48%, #ff00a0 100%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+    .btn-card-action:hover {
+      background: #1d2030;
+      color: #ffffff;
+      box-shadow:
+        -2px 0 11px rgba(0, 245, 255, 0.6),
+        2px 0 11px rgba(255, 0, 160, 0.6);
+    }
+
+    /* Circular Stamp Badges on Cartridges */
+    .cart-badge {
+      position: absolute;
+      top: -8px;
+      right: 5px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 8.5px;
+      line-height: 1.05;
+      letter-spacing: 0.3px;
+      color: #ffffff;
+      z-index: 5;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.65);
+    }
+    .cart-badge::before {
+      content: "";
+      position: absolute;
+      inset: 2px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.75);
+      pointer-events: none;
+    }
+    .badge-pink {
+      background: #3d123a;
+      border: 1.5px solid #e879f9;
+    }
+    .badge-cyan {
+      background: #103542;
+      border: 1.5px solid #67e8f9;
+    }
+    .badge-amber {
+      background: #3b240b;
+      border: 1.5px solid #fcd34d;
+    }
+
+    /* Subscribe Box in Right Sidebar */
+    .subscribe-box {
+      position: relative;
+      background: #101118;
+      border-radius: 5px;
+      padding: 10px;
+      margin-top: 10px;
+      box-shadow:
+        -2px 0 8px rgba(0, 245, 255, 0.2),
+        2px 0 8px rgba(255, 0, 160, 0.2);
+    }
+    .subscribe-box::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 5px;
+      padding: 1.6px;
+      background: linear-gradient(135deg, #00f5ff 0%, #00d2ff 45%, #ff00a0 100%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    /* Hardware Icon Tile */
+    .hw-tile {
+      height: 39px;
+      background: #1d1e27;
+      border: 2px solid #2b2d3a;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      cursor: pointer;
+      box-shadow: inset 0 0 0 1px #14151c;
+      transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .hw-tile:hover {
+      border-color: var(--neon-cyan);
+      transform: translateY(-1px);
+      box-shadow: 0 0 10px rgba(0, 245, 255, 0.3);
+    }
+
+    /* Mobile Hamburger Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      background: #161824;
+      border: 1.5px solid #30344a;
+      color: var(--neon-cyan);
+      width: 36px;
+      height: 34px;
+      border-radius: 5px;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    /* Mobile Drawer Navigation */
+    .mobile-nav-drawer {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      background: #141520;
+      border: 1.5px solid #2c3044;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin: 10px 0 14px 0;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
+    }
+    .mobile-nav-drawer.open {
+      display: flex;
+    }
+
+    /* Modal Backdrop & Dialog for ROM Details & All 9 Mini-Games */
+    .retro-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(6, 7, 13, 0.84);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .retro-modal-backdrop.open {
+      display: flex;
+    }
+
+    .retro-modal {
+      width: 100%;
+      max-width: 760px;
+      max-height: 88vh;
+      overflow-y: auto;
+      background: #12131d;
+      border: 2px solid var(--neon-cyan);
+      border-radius: 10px;
+      box-shadow:
+        -6px -4px 24px rgba(0, 245, 255, 0.35),
+        6px 6px 24px rgba(255, 0, 153, 0.35);
+      padding: 20px 22px;
+      position: relative;
+    }
+
+    /* ====================================================================
+       RESPONSIVE BREAKPOINTS: TABLET (<= 1024px) & MOBILE (<= 640px)
+       ==================================================================== */
+    @media (max-width: 1024px) {
+      #outer-bg-canvas {
+        display: none;
+      }
+      .stage-wrapper {
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      .browser-window {
+        max-width: 100%;
+        border-radius: 0;
+        border: none;
+        box-shadow: none;
+        min-height: 100vh;
+      }
+      .site-viewport {
+        padding: 20px 28px 36px 28px;
+      }
+      .lower-grid {
+        flex-direction: column;
+        gap: 28px;
+      }
+      .games-column {
+        width: 100%;
+      }
+      .transmission-sidebar {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+        background: #14151f;
+        border: 1px solid #26293a;
+        border-radius: 8px;
+        padding: 16px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .browser-tab-bar,
+      .browser-address-bar {
+        display: none;
+      }
+      .site-viewport {
+        padding: 16px 16px 32px 16px;
+      }
+      .desktop-nav-group {
+        display: none !important;
+      }
+      .mobile-menu-btn {
+        display: inline-flex;
+      }
+      .hero-frame {
+        height: auto;
+      }
+      .hero-inner {
+        display: flex;
+        flex-direction: column;
+      }
+      #hero-pixel-canvas {
+        height: 210px;
+        object-fit: cover;
+      }
+      .hero-overlay-card {
+        position: relative;
+        right: auto;
+        top: auto;
+        transform: none;
+        width: 100%;
+        border-radius: 0 0 9px 9px;
+        border-left: none;
+        border-right: none;
+        border-bottom: none;
+        padding: 16px 14px;
+      }
+      .cartridges-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .transmission-sidebar {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .cartridges-grid {
+        grid-template-columns: 1fr;
+      }
+      .hero-title-en {
+        font-size: 18px;
+      }
+      .hero-title-jp {
+        font-size: 13px;
+      }
+    }
+
+    /* --- NEW WORLD-CLASS EXTENSIONS (UE5 Project, Crew Roster, Inquiry & Footer) --- */
+    .ue5-flagship-card {
+      margin-top: 20px;
+      margin-bottom: 22px;
+      background: linear-gradient(135deg, rgba(20, 22, 38, 0.95) 0%, rgba(14, 15, 26, 0.98) 100%);
+      border: 1px solid rgba(0, 245, 255, 0.35);
+      border-radius: 8px;
+      padding: 18px 22px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), inset 0 0 16px rgba(0, 245, 255, 0.05);
+      transition: all 0.25s ease;
+    }
+    .ue5-flagship-card:hover {
+      border-color: rgba(0, 245, 255, 0.65);
+      box-shadow: 0 12px 38px rgba(0, 245, 255, 0.15), inset 0 0 24px rgba(0, 245, 255, 0.08);
+    }
+    .ue5-flagship-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, #00f5ff, #ff2a9d, #f59e0b);
+      opacity: 0.85;
+    }
+    .ue5-badge-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .ue5-pill {
+      font-family: var(--font-pixel-en);
+      font-size: 9px;
+      padding: 3px 8px;
+      border-radius: 3px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+    .pill-cyan { background: rgba(0, 245, 255, 0.15); color: #00f5ff; border: 1px solid rgba(0, 245, 255, 0.4); }
+    .pill-pink { background: rgba(255, 42, 157, 0.15); color: #ff2a9d; border: 1px solid rgba(255, 42, 157, 0.4); }
+    .pill-amber { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.4); }
+
+    .crew-section {
+      margin-top: 32px;
+      margin-bottom: 24px;
+    }
+    .crew-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .crew-card {
+      background: #141624;
+      border: 1px solid #282c3f;
+      border-radius: 6px;
+      padding: 12px 10px;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .crew-card:hover {
+      transform: translateY(-3px);
+      border-color: #00f5ff;
+      box-shadow: 0 6px 18px rgba(0, 245, 255, 0.2);
+    }
+    .crew-avatar {
+      font-size: 24px;
+      line-height: 1;
+      margin-bottom: 6px;
+      filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
+    }
+    .crew-name {
+      font-family: var(--font-pixel-en);
+      font-size: 11px;
+      color: #ffffff;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .crew-role {
+      font-family: var(--font-pixel-jp);
+      font-size: 9.5px;
+      color: #00f5ff;
+      margin: 3px 0;
+    }
+    .crew-tag {
+      font-family: var(--font-pixel-jp);
+      font-size: 8px;
+      color: #8c92a8;
+      background: #1b1e30;
+      padding: 2px 6px;
+      border-radius: 3px;
+      margin-top: 4px;
+      border: 1px solid #2e344a;
+    }
+
+    .inquiry-box {
+      margin-top: 28px;
+      background: #121422;
+      border: 1px solid #272a3d;
+      border-radius: 8px;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .site-footer {
+      margin-top: 36px;
+      padding: 24px 0 16px 0;
+      border-top: 1px solid #212435;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #7b8196;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .footer-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+    .footer-links {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .footer-links a {
+      color: #9aa1b8;
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+    .footer-links a:hover {
+      color: #00f5ff;
+      text-decoration: underline;
+    }
+    .social-pills {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .social-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 9px;
+      border-radius: 4px;
+      font-size: 10px;
+      text-decoration: none;
+      border: 1px solid #30354c;
+      background: #161826;
+      color: #cbd5e1;
+      transition: all 0.15s ease;
+    }
+    .social-pill:hover {
+      color: #ffffff;
+      border-color: #00f5ff;
+      transform: translateY(-1px);
+    }
+    .social-pill-x:hover { border-color: #ffffff; color: #ffffff; }
+    .social-pill-note:hover { border-color: #22c55e; color: #4ade80; }
+    .social-pill-yt:hover { border-color: #ef4444; color: #f87171; }
+
+  </style>
+</head>
+<body>
+
+  <!-- Outer Blurred Cyberpunk Backdrop (Desktop Mockup Presentation) -->
+  <canvas id="outer-bg-canvas" width="1440" height="900"></canvas>
+
+  <div class="stage-wrapper" id="stage-wrapper">
+    <div class="browser-window" id="browser-window">
+
+      <!-- BROWSER TAB BAR (Desktop) -->
+      <div class="browser-tab-bar" id="browser-chrome-top">
+        <div class="tab-bar-left">
+          <div class="traffic-lights" title="Click Green Dot to Toggle Fullscreen / Framed Mode">
+            <span class="traffic-dot dot-red" id="dot-close"></span>
+            <span class="traffic-dot dot-yellow" id="dot-min"></span>
+            <span class="traffic-dot dot-green" id="dot-fullscreen" title="フレーム表示 / 全画面表示 切替"></span>
+          </div>
+          <div class="browser-tab">
+            <span style="display:flex; align-items:center; gap:6px;">
+              <span style="width:6px; height:6px; border-radius:50%; background:#00f5ff; box-shadow:0 0 6px #00f5ff;"></span>
+              Corner Neighbor
+            </span>
+            <span style="cursor:pointer; font-family: sans-serif; font-size: 11px; line-height: 1;">×</span>
+          </div>
+          <div class="browser-tab-plus" id="btn-new-tab" title="All 9 Mini-Games Archive">+</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; height:100%; font-size:10px; color:#787c8c;">
+          <button id="btn-frame-mode" style="background:none; border:none; color:#8b90a0; font-family:var(--font-mono); font-size:10px; cursor:pointer; padding:2px 6px;">
+            [FRAME VIEW: ON]
+          </button>
+        </div>
+      </div>
+
+      <!-- BROWSER ADDRESS BAR (Desktop) -->
+      <div class="browser-address-bar" id="browser-chrome-url">
+        <div class="nav-icon" title="Back">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M13 8H3M7 4L3 8l4 4"/>
+          </svg>
+        </div>
+        <div class="nav-icon" title="Forward">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M3 8h10M9 4l4 4-4 4"/>
+          </svg>
+        </div>
+        <div class="nav-icon" id="btn-reload-scene" title="Rain / Neon Pulse Boost">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M13.5 8a5.5 5.5 0 1 1-1.4-3.7M13.5 2.5v3h-3"/>
+          </svg>
+        </div>
+        <div class="url-pill">
+          <span>🔒 https://hajikkoroom.xsrv.jp/</span>
+          <span style="color:#00f5ff; font-size:10px;">MIDNIGHT BASE v2.6</span>
+        </div>
+        <div class="profile-circle" title="Corner Neighbor Member"></div>
+        <div class="nav-icon" style="width: 14px;">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+            <circle cx="8" cy="3" r="1.4"/>
+            <circle cx="8" cy="8" r="1.4"/>
+            <circle cx="8" cy="13" r="1.4"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- MAIN SITE VIEWPORT -->
+      <main class="site-viewport">
+
+        <!-- TOP-LEFT PIXEL SPARKLE CLUSTER -->
+        <svg style="position:absolute; top: 8px; left: 8px; width: 48px; height: 95px; pointer-events:none; z-index:2;" viewBox="0 0 48 95" shape-rendering="crispEdges">
+          <rect x="6" y="2" width="2" height="10" fill="#ff66d9"/>
+          <rect x="2" y="6" width="10" height="2" fill="#ff66d9"/>
+          <rect x="5" y="5" width="4" height="4" fill="#ffffff"/>
+          <rect x="17" y="6" width="2" height="2" fill="#ffd700"/>
+          <rect x="23" y="7" width="3" height="2" fill="#7b2cbf"/>
+          <rect x="33" y="7" width="3" height="2" fill="#ffffff"/>
+          <rect x="8" y="16" width="3" height="2" fill="#00f5ff"/>
+          <rect x="16" y="21" width="7" height="2.5" fill="#00f5ff"/>
+          <rect x="25" y="21" width="5" height="2.5" fill="#ff00a0"/>
+          <rect x="6" y="25" width="2" height="2" fill="#ff00a0"/>
+          <rect x="5" y="38" width="2" height="2" fill="#00f5ff"/>
+          <rect x="5" y="52" width="2" height="2" fill="#ff66d9"/>
+          <rect x="5" y="62" width="2" height="2" fill="#ffd700"/>
+          <rect x="5" y="83" width="2" height="2" fill="#7b2cbf"/>
+        </svg>
+
+        <!-- TOP-RIGHT PIXEL SPARKLE CLUSTER -->
+        <svg style="position:absolute; top: 8px; right: 8px; width: 56px; height: 90px; pointer-events:none; z-index:2;" viewBox="0 0 56 90" shape-rendering="crispEdges">
+          <rect x="6" y="7" width="4" height="2" fill="#7b2cbf"/>
+          <rect x="13" y="7" width="4" height="2" fill="#00f5ff"/>
+          <rect x="26" y="7" width="2" height="2" fill="#ffd700"/>
+          <rect x="35" y="7" width="2" height="2" fill="#ff00a0"/>
+          <rect x="44" y="2" width="3" height="11" fill="#ffb703"/>
+          <rect x="40" y="6" width="11" height="3" fill="#ff4d94"/>
+          <rect x="43" y="5" width="5" height="5" fill="#fff3b0"/>
+          <rect x="28" y="20" width="8" height="2" fill="#00f5ff"/>
+          <rect x="38" y="20" width="4" height="2" fill="#ff00a0"/>
+          <rect x="22" y="24" width="13" height="2" fill="#00f5ff"/>
+          <rect x="38" y="24" width="7" height="2" fill="#7b2cbf"/>
+          <rect x="47" y="21" width="2" height="2" fill="#ffd700"/>
+          <rect x="47" y="36" width="2" height="2" fill="#ffd700"/>
+          <rect x="47" y="45" width="2" height="2" fill="#ff00a0"/>
+          <rect x="47" y="53" width="2" height="2" fill="#00f5ff"/>
+          <rect x="47" y="69" width="2" height="2" fill="#00f5ff"/>
+        </svg>
+
+        <!-- BOTTOM-LEFT PIXEL SPARKLE CLUSTER -->
+        <svg style="position:absolute; bottom: 8px; left: 8px; width: 58px; height: 68px; pointer-events:none; z-index:2;" viewBox="0 0 58 68" shape-rendering="crispEdges">
+          <rect x="6" y="2" width="2" height="2" fill="#ff00a0"/>
+          <rect x="6" y="9" width="2" height="4" fill="#7b2cbf"/>
+          <rect x="6" y="16" width="2" height="2" fill="#ffffff"/>
+          <rect x="6" y="27" width="2" height="6" fill="#00f5ff"/>
+          <rect x="4" y="29" width="6" height="2" fill="#00f5ff"/>
+          <rect x="6" y="39" width="2" height="2" fill="#00f5ff"/>
+          <rect x="9" y="45" width="3" height="13" fill="#e0aaff"/>
+          <rect x="4" y="50" width="13" height="3" fill="#ff66d9"/>
+          <rect x="8" y="49" width="5" height="5" fill="#ffffff"/>
+          <rect x="16" y="45" width="2" height="2" fill="#00f5ff"/>
+          <rect x="25" y="51" width="2" height="6" fill="#c77dff"/>
+          <rect x="23" y="53" width="6" height="2" fill="#c77dff"/>
+          <rect x="34" y="54" width="3" height="2" fill="#7b2cbf"/>
+          <rect x="42" y="54" width="2" height="2" fill="#ffd700"/>
+          <rect x="49" y="54" width="2" height="2" fill="#ff66d9"/>
+        </svg>
+
+        <!-- HEADER / NAVIGATION ("Corner Neighbor") -->
+        <header style="display:flex; align-items:center; justify-content:space-between; min-height: 48px; margin-bottom: 4px; position:relative; z-index:10;">
+          <!-- Left Brand Logo + "Corner Neighbor" -->
+          <a href="/preview/" style="display:flex; align-items:center; gap: 13px; text-decoration:none; color:#ffffff;">
+            <!-- High-Detail Tilted Neon Retro Cassette SVG Icon -->
+            <div style="transform: rotate(-13deg); filter: drop-shadow(-2px 0 7px rgba(0,245,255,0.85)) drop-shadow(2px 2px 7px rgba(255,0,160,0.8)); display:flex; align-items:center;">
+              <svg width="44" height="32" viewBox="0 0 44 32" shape-rendering="crispEdges">
+                <rect x="1" y="1" width="42" height="30" rx="3" fill="#131629" stroke="#00f5ff" stroke-width="2"/>
+                <rect x="30" y="1" width="13" height="30" fill="none" stroke="#ff2a9d" stroke-width="2"/>
+                <rect x="5" y="5" width="13" height="2" fill="#00f5ff"/>
+                <rect x="5" y="9" width="13" height="2" fill="#00f5ff"/>
+                <rect x="5" y="13" width="13" height="2" fill="#00f5ff"/>
+                <rect x="5" y="17" width="13" height="2" fill="#00f5ff"/>
+                <rect x="5" y="21" width="17" height="3.5" fill="#00f5ff"/>
+                <rect x="21" y="6" width="17" height="13" fill="#1f1b38" stroke="#ff66c4" stroke-width="1.5"/>
+                <rect x="24" y="10" width="4" height="4" fill="#00f5ff"/>
+                <rect x="31" y="10" width="4" height="4" fill="#ffb703"/>
+                <rect x="26" y="22" width="12" height="3" fill="#ff2a9d"/>
+              </svg>
+            </div>
+            <div style="font-family: var(--font-mono); font-size: 18px; line-height: 1.06; color: #ffffff; letter-spacing: 0.5px;">
+              <div>Corner</div>
+              <div>Neighbor</div>
+            </div>
+          </a>
+
+          <!-- Right Nav Links + SFX Toggle + PLAY NOW CTA (Desktop) -->
+          <div class="desktop-nav-group" style="display:flex; align-items:center; gap: 20px;">
+            <nav style="display:flex; align-items:center; gap: 22px;" aria-label="Main Navigation">
+              <a href="#games" class="nav-link active" data-nav="games">GAMES</a>
+              <a href="/portfolio.html" class="nav-link" data-nav="portfolio">PORTFOLIO</a>
+              <a href="/members.html" class="nav-link" data-nav="members">MEMBERS</a>
+              <a href="/aboutus.html" class="nav-link" data-nav="about">ABOUT / NEWS</a>
+              <a href="/contact.php" class="nav-link" data-nav="contact">CONTACT</a>
+            </nav>
+            <div class="social-pills" style="margin-left: -6px;">
+              <a href="https://x.com/Corner_neighbor" target="_blank" rel="noopener noreferrer" class="social-pill social-pill-x" title="公式 X (Twitter)">
+                <span>𝕏</span>
+              </a>
+              <a href="https://note.com/hajikkogurashi01" target="_blank" rel="noopener noreferrer" class="social-pill social-pill-note" title="開発ノート note">
+                <span>note</span>
+              </a>
+              <a href="https://www.youtube.com/@hajikkogurashi" target="_blank" rel="noopener noreferrer" class="social-pill social-pill-yt" title="公式 YouTube">
+                <span>▶ YT</span>
+              </a>
+            </div>
+            <button class="btn-sfx-toggle" id="btn-sfx" title="8-bit Sound Effects On/Off">
+              <span id="sfx-icon">🔇</span> SFX
+            </button>
+            <button class="btn-neon-play" id="btn-play-now">PLAY NOW</button>
+          </div>
+
+          <!-- Mobile Hamburger Button -->
+          <div style="display:flex; align-items:center; gap:8px;" class="md:hidden">
+            <button class="btn-neon-play" id="btn-play-now-mobile" style="font-size:12px; padding:5px 12px;">PLAY NOW</button>
+            <button class="mobile-menu-btn" id="btn-mobile-menu" aria-label="Toggle Menu">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M2 4h14M2 9h14M2 14h14"/>
+              </svg>
+            </button>
+          </div>
+        </header>
+
+        <!-- MOBILE DRAWER MENU -->
+        <nav class="mobile-nav-drawer" id="mobile-nav-drawer" aria-label="Mobile Navigation">
+          <a href="#games" class="nav-link active" style="font-size:15px;">GAMES — ミニゲーム一覧</a>
+          <a href="/portfolio.html" class="nav-link" style="font-size:15px;">PORTFOLIO — 制作実績・作品集</a>
+          <a href="/members.html" class="nav-link" style="font-size:15px;">MEMBERS — メンバー紹介</a>
+          <a href="/aboutus.html" class="nav-link" style="font-size:15px;">ABOUT / NEWS — サークル紹介・お知らせ</a>
+          <a href="/contact.php" class="nav-link" style="font-size:15px;">CONTACT — お問い合わせ</a>
+          <div style="display:flex; gap:8px; padding:6px 0;">
+            <a href="https://x.com/Corner_neighbor" target="_blank" rel="noopener noreferrer" class="social-pill social-pill-x" style="flex:1; justify-content:center;">𝕏 X</a>
+            <a href="https://note.com/hajikkogurashi01" target="_blank" rel="noopener noreferrer" class="social-pill social-pill-note" style="flex:1; justify-content:center;">note</a>
+            <a href="https://www.youtube.com/@hajikkogurashi" target="_blank" rel="noopener noreferrer" class="social-pill social-pill-yt" style="flex:1; justify-content:center;">YouTube</a>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; padding-top:6px; border-top:1px solid #26293a;">
+            <span style="font-size:11px; color:#7c8299;">8-BIT SOUND ENGINE</span>
+            <button class="btn-sfx-toggle" id="btn-sfx-mobile">🔇 SFX</button>
+          </div>
+        </nav>
+
+        <!-- HERO BANNER SECTION -->
+        <section class="hero-frame" aria-label="Hero Banner">
+          <div class="hero-inner">
+            <!-- Upgraded High-Density Pixel Art Scene Canvas (640x180 virtual pixels) -->
+            <canvas id="hero-pixel-canvas" width="640" height="180" title="Click the sleeping cat or arcade cabinets!"></canvas>
+
+            <!-- Interactive Cat Speech Bubble -->
+            <div class="cat-speech-bubble" id="cat-bubble">🐾 ゴロゴロ… 世界の端っこで開発中ニャ</div>
+
+            <!-- Hero Callout Box (Right Side) -->
+            <div class="hero-overlay-card">
+              <div class="hero-title-en">
+                WE BUILD WORLDS<br/>IN THE SHADOWS
+              </div>
+              <h1 class="hero-title-jp">
+                世界の端っこでゲームを作る
+              </h1>
+              <button class="btn-enter-base" id="btn-enter-base">ENTER THE BASE</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- UNREAL ENGINE 5 FLAGSHIP PROJECT CARD -->
+        <section class="ue5-flagship-card" aria-label="Flagship Project">
+          <div class="ue5-badge-row">
+            <span class="ue5-pill pill-cyan">⚡ FLAGSHIP PROJECT</span>
+            <span class="ue5-pill pill-pink">UNREAL ENGINE 5</span>
+            <span class="ue5-pill pill-amber">IN ACTIVE DEVELOPMENT</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
+            <div style="max-width: 680px;">
+              <h2 style="margin:0 0 6px 0; font-family:var(--font-mono); font-size:19px; font-weight:700; color:#ffffff; letter-spacing:0.4px;">
+                Re:青春！はじっこから創る、Unreal Engine 5 本格インディーゲーム
+              </h2>
+              <p style="margin:0; font-family:var(--font-pixel-jp); font-size:11.5px; line-height:1.7; color:#a2a9c2;">
+                Corner Neighbor の大本命プロジェクト。UE5のハイエンドなグラフィックと独自のゲーム性を融合させた本格タイトルを鋭意開発中です。開発メモやイベント参加記録は公式noteで公開中！
+              </p>
+            </div>
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:4px;">
+              <a href="/coming-soon.html" style="background:linear-gradient(135deg, #00f5ff, #0099ff); color:#08070f; font-family:var(--font-mono); font-size:11px; font-weight:bold; padding:7px 16px; border-radius:4px; text-decoration:none; display:inline-flex; align-items:center; gap:6px; box-shadow:0 0 14px rgba(0,245,255,0.4); transition:all 0.15s;">
+                <span>制作中ページを見る</span> ▸
+              </a>
+              <a href="https://note.com/hajikkogurashi01" target="_blank" rel="noopener noreferrer" style="background:#191c2b; border:1px solid #383f5c; color:#e2e8f0; font-family:var(--font-mono); font-size:11px; padding:6px 14px; border-radius:4px; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:all 0.15s;">
+                <span>開発note</span> ↗
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <!-- LOWER 2-COLUMN SECTION -->
+        <section class="lower-grid" id="games">
+
+          <!-- LEFT COLUMN: game selection + 3 Featured Famicom Cartridge Cards -->
+          <div class="games-column">
+            <!-- Section Header Bar -->
+            <div style="display:flex; align-items:center; gap: 12px; margin-bottom: 11px;">
+              <h2 style="margin:0; font-size: 21px; font-weight: 700; color: #e2e8f0; letter-spacing: 0.4px; white-space:nowrap;">
+                game selection
+              </h2>
+              <div style="flex:1; height: 1px; background: #262836; margin-top: 4px;"></div>
+
+              <!-- Quick Archive Button + 3 Pixel Status Squares -->
+              <button id="btn-open-archive" style="background:#151722; border:1px solid #2e3348; color:#00f5ff; font-family:var(--font-pixel-jp); font-size:10px; padding:2px 8px; border-radius:3px; cursor:pointer; transition:all 0.15s;">
+                ALL 9 GAMES ▸
+              </button>
+              <div style="display:flex; gap: 3px; margin-top: 2px;">
+                <svg width="11" height="11" viewBox="0 0 11 11" shape-rendering="crispEdges">
+                  <rect x="0.5" y="0.5" width="10" height="10" fill="#14151e" stroke="#2c2f40" stroke-width="1"/>
+                  <rect x="4" y="4" width="3" height="3" fill="#5b6078"/>
+                </svg>
+                <svg width="11" height="11" viewBox="0 0 11 11" shape-rendering="crispEdges">
+                  <rect x="0.5" y="0.5" width="10" height="10" fill="#14151e" stroke="#2c2f40" stroke-width="1"/>
+                  <rect x="3" y="3" width="5" height="5" fill="#5b6078"/>
+                </svg>
+                <svg width="11" height="11" viewBox="0 0 11 11" shape-rendering="crispEdges">
+                  <rect x="0.5" y="0.5" width="10" height="10" fill="#102419" stroke="#2c4c38" stroke-width="1"/>
+                  <rect x="3" y="3" width="5" height="5" fill="#00e676"/>
+                  <rect x="5" y="5" width="1" height="1" fill="#102419"/>
+                </svg>
+              </div>
+            </div>
+
+            <!-- 3 Featured Cartridge Cards Grid -->
+            <div class="cartridges-grid">
+
+              <!-- CARD 1: NEON SLICER (漢字スライサー・マージ) -->
+              <article class="game-card">
+                <div class="cartridge-well" data-game-id="kanji-slicer" data-action="details">
+                  <div class="cart-badge badge-pink">
+                    <span>OUT</span>
+                    <span>NOW</span>
+                  </div>
+                  <!-- Hot Pink Famicom Cartridge SVG -->
+                  <svg class="cartridge-svg" width="194" height="104" viewBox="0 0 194 104" shape-rendering="crispEdges" style="filter: drop-shadow(0 0 10px rgba(235, 24, 153, 0.55));">
+                    <rect x="18" y="6" width="158" height="10" fill="#ff4db8"/>
+                    <rect x="14" y="10" width="166" height="68" fill="#e61994"/>
+                    <!-- Left & Right Ribbed Grips -->
+                    <rect x="10" y="16" width="4" height="4" fill="#c4127d"/>
+                    <rect x="10" y="22" width="4" height="4" fill="#c4127d"/>
+                    <rect x="10" y="28" width="4" height="4" fill="#c4127d"/>
+                    <rect x="10" y="34" width="4" height="4" fill="#c4127d"/>
+                    <rect x="180" y="16" width="4" height="4" fill="#c4127d"/>
+                    <rect x="180" y="22" width="4" height="4" fill="#c4127d"/>
+                    <rect x="180" y="28" width="4" height="4" fill="#c4127d"/>
+                    <rect x="180" y="34" width="4" height="4" fill="#c4127d"/>
+                    <!-- Stepped Bottom Connector Base -->
+                    <rect x="24" y="78" width="146" height="19" fill="#d11385"/>
+                    <rect x="24" y="94" width="146" height="3" fill="#ff5cc2"/>
+                    <rect x="22" y="8" width="150" height="3" fill="#ff99d6"/>
+                    <!-- Recessed Inner Label -->
+                    <rect x="28" y="17" width="138" height="58" fill="#1a1033" stroke="#3c1b5c" stroke-width="2"/>
+                    <rect x="33" y="22" width="12" height="2" fill="#00f5ff"/>
+                    <rect x="33" y="26" width="8" height="2" fill="#ff4db8"/>
+                    <text x="51" y="30" fill="#ffffff" font-family="'Share Tech Mono', monospace" font-weight="bold" font-size="13.5" letter-spacing="0.5">NEON SLICER</text>
+                    <!-- Label Pixel Artwork: Cyber Ninjas Dueling -->
+                    <rect x="48" y="34" width="96" height="38" fill="#140c29"/>
+                    <rect x="52" y="36" width="10" height="34" fill="#3b165e"/>
+                    <rect x="74" y="35" width="14" height="35" fill="#59156e"/>
+                    <rect x="116" y="38" width="12" height="32" fill="#381954"/>
+                    <polygon points="50,62 94,35 100,35 56,65" fill="#ff00a0"/>
+                    <rect x="64" y="45" width="7" height="7" fill="#090d16"/>
+                    <rect x="65" y="47" width="5" height="2" fill="#00f5ff"/>
+                    <polygon points="58,52 74,52 78,72 54,72" fill="#121829"/>
+                    <polygon points="60,55 72,55 68,70 58,70" fill="#253459"/>
+                    <rect x="92" y="43" width="7" height="7" fill="#090d16"/>
+                    <rect x="93" y="45" width="4" height="2" fill="#ff00a0"/>
+                    <polygon points="86,50 104,50 112,72 82,72" fill="#111827"/>
+                    <polygon points="90,53 102,53 106,70 88,70" fill="#1e3a5f"/>
+                    <polygon points="98,54 142,38 144,41 100,57" fill="#ffffff"/>
+                    <polygon points="96,53 143,37 145,42 98,58" fill="#00f5ff" opacity="0.75"/>
+                    <rect x="33" y="55" width="13" height="15" fill="#2a1847"/>
+                    <rect x="35" y="57" width="3" height="3" fill="#ff4db8"/>
+                    <rect x="40" y="57" width="4" height="3" fill="#00f5ff"/>
+                    <rect x="35" y="62" width="5" height="2" fill="#ffffff"/>
+                    <rect x="41" y="62" width="3" height="5" fill="#ff4db8"/>
+                    <rect x="35" y="66" width="4" height="3" fill="#00f5ff"/>
+                    <ellipse cx="153" cy="63" rx="8" ry="6" fill="#d97706"/>
+                    <ellipse cx="153" cy="63" rx="6" ry="4.2" fill="#fef3c7"/>
+                  </svg>
+                </div>
+                <div class="well-leds">
+                  <span class="cart-sub-jp">漢字スライサー・マージ</span>
+                  <div class="led-group">
+                    <span class="led-green"></span>
+                    <span class="led-pink"></span>
+                  </div>
+                </div>
+                <div class="card-divider"></div>
+                <div class="card-actions">
+                  <button class="btn-card-action" data-game-id="kanji-slicer" data-action="coin">INSERT COIN</button>
+                  <button class="btn-card-action" data-game-id="kanji-slicer" data-action="details">DETAILS</button>
+                </div>
+              </article>
+
+              <!-- CARD 2: ROOFTOP CHILL (LUMEN_MIRROR) -->
+              <article class="game-card">
+                <div class="cartridge-well" data-game-id="lumen-mirror" data-action="details">
+                  <div class="cart-badge badge-cyan">
+                    <span style="font-size: 7px;">WISHLIST</span>
+                    <span>NOW</span>
+                  </div>
+                  <!-- Cyan Famicom Cartridge SVG -->
+                  <svg class="cartridge-svg" width="194" height="104" viewBox="0 0 194 104" shape-rendering="crispEdges" style="filter: drop-shadow(0 0 10px rgba(0, 245, 255, 0.45));">
+                    <rect x="18" y="6" width="158" height="10" fill="#67e8f9"/>
+                    <rect x="14" y="10" width="166" height="68" fill="#14d2eb"/>
+                    <rect x="10" y="16" width="4" height="4" fill="#0891b2"/>
+                    <rect x="10" y="22" width="4" height="4" fill="#0891b2"/>
+                    <rect x="10" y="28" width="4" height="4" fill="#0891b2"/>
+                    <rect x="10" y="34" width="4" height="4" fill="#0891b2"/>
+                    <rect x="180" y="16" width="4" height="4" fill="#0891b2"/>
+                    <rect x="180" y="22" width="4" height="4" fill="#0891b2"/>
+                    <rect x="180" y="28" width="4" height="4" fill="#0891b2"/>
+                    <rect x="180" y="34" width="4" height="4" fill="#0891b2"/>
+                    <rect x="24" y="78" width="146" height="19" fill="#0cb8d4"/>
+                    <rect x="24" y="94" width="146" height="3" fill="#a5f3fc"/>
+                    <rect x="22" y="8" width="150" height="3" fill="#cffafe"/>
+                    <rect x="28" y="17" width="138" height="58" fill="#102136" stroke="#1e3a5f" stroke-width="2"/>
+                    <rect x="33" y="22" width="12" height="2" fill="#00f5ff"/>
+                    <rect x="33" y="26" width="8" height="2" fill="#67e8f9"/>
+                    <text x="51" y="29" fill="#ffffff" font-family="'Share Tech Mono', monospace" font-weight="bold" font-size="12" letter-spacing="0.4">ROOFTOP CHILL</text>
+                    <rect x="48" y="34" width="96" height="38" fill="#162c46"/>
+                    <circle cx="99" cy="43" r="5.5" fill="#ffffff"/>
+                    <rect x="52" y="36" width="16" height="36" fill="#0d1829"/>
+                    <rect x="70" y="42" width="18" height="30" fill="#112036"/>
+                    <rect x="108" y="45" width="14" height="27" fill="#0f1d30"/>
+                    <rect x="124" y="39" width="16" height="33" fill="#0b1524"/>
+                    <rect x="48" y="55" width="60" height="17" fill="#23293d"/>
+                    <rect x="52" y="59" width="52" height="10" fill="#181c2b"/>
+                    <rect x="55" y="40" width="8" height="2" fill="#38bdf8"/>
+                    <rect x="74" y="46" width="10" height="2" fill="#f472b6"/>
+                    <rect x="128" y="44" width="8" height="2" fill="#38bdf8"/>
+                    <rect x="112" y="52" width="6" height="2" fill="#facc15"/>
+                    <rect x="33" y="55" width="13" height="15" fill="#17334f"/>
+                    <rect x="35" y="57" width="3" height="3" fill="#67e8f9"/>
+                    <rect x="40" y="57" width="4" height="3" fill="#38bdf8"/>
+                    <rect x="35" y="62" width="9" height="2" fill="#cffafe"/>
+                    <rect x="35" y="66" width="5" height="3" fill="#00f5ff"/>
+                    <ellipse cx="153" cy="63" rx="8" ry="6" fill="#d97706"/>
+                    <ellipse cx="153" cy="63" rx="6" ry="4.2" fill="#fef3c7"/>
+                  </svg>
+                </div>
+                <div class="well-leds">
+                  <span class="cart-sub-jp">LUMEN_MIRROR</span>
+                  <div class="led-group">
+                    <span class="led-green"></span>
+                    <span class="led-pink"></span>
+                  </div>
+                </div>
+                <div class="card-divider"></div>
+                <div class="card-actions">
+                  <button class="btn-card-action" data-game-id="lumen-mirror" data-action="coin">INSERT COIN</button>
+                  <button class="btn-card-action" data-game-id="lumen-mirror" data-action="details">DETAILS</button>
+                </div>
+              </article>
+
+              <!-- CARD 3: CRT QUEST (みきり一閃) -->
+              <article class="game-card">
+                <div class="cartridge-well" data-game-id="crt-quest" data-action="details">
+                  <div class="cart-badge badge-amber">
+                    <span>DEMA</span>
+                    <span>PLAY</span>
+                  </div>
+                  <!-- Golden Orange Famicom Cartridge SVG -->
+                  <svg class="cartridge-svg" width="194" height="104" viewBox="0 0 194 104" shape-rendering="crispEdges" style="filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.45));">
+                    <rect x="18" y="6" width="158" height="10" fill="#fcd34d"/>
+                    <rect x="14" y="10" width="166" height="68" fill="#f59e0b"/>
+                    <rect x="10" y="16" width="4" height="4" fill="#b45309"/>
+                    <rect x="10" y="22" width="4" height="4" fill="#b45309"/>
+                    <rect x="10" y="28" width="4" height="4" fill="#b45309"/>
+                    <rect x="10" y="34" width="4" height="4" fill="#b45309"/>
+                    <rect x="180" y="16" width="4" height="4" fill="#b45309"/>
+                    <rect x="180" y="22" width="4" height="4" fill="#b45309"/>
+                    <rect x="180" y="28" width="4" height="4" fill="#b45309"/>
+                    <rect x="180" y="34" width="4" height="4" fill="#b45309"/>
+                    <rect x="24" y="78" width="146" height="19" fill="#d97706"/>
+                    <rect x="24" y="94" width="146" height="3" fill="#fde68a"/>
+                    <rect x="22" y="8" width="150" height="3" fill="#fef3c7"/>
+                    <rect x="28" y="17" width="138" height="58" fill="#261c14" stroke="#523718" stroke-width="2"/>
+                    <rect x="33" y="22" width="12" height="2" fill="#fbbf24"/>
+                    <rect x="33" y="26" width="8" height="2" fill="#f59e0b"/>
+                    <text x="58" y="30" fill="#ffffff" font-family="'Share Tech Mono', monospace" font-weight="bold" font-size="13.5" letter-spacing="0.6">CRT QUEST</text>
+                    <rect x="48" y="34" width="96" height="38" fill="#1e2229"/>
+                    <rect x="50" y="36" width="92" height="28" fill="#2b2623"/>
+                    <rect x="55" y="40" width="22" height="22" fill="#d6d3c4"/>
+                    <rect x="58" y="43" width="16" height="12" fill="#143326"/>
+                    <rect x="60" y="45" width="8" height="2" fill="#4ade80"/>
+                    <rect x="60" y="49" width="11" height="2" fill="#4ade80"/>
+                    <rect x="103" y="39" width="12" height="7" fill="#ea580c"/>
+                    <rect x="105" y="45" width="9" height="6" fill="#fed7aa"/>
+                    <rect x="102" y="51" width="14" height="11" fill="#16a34a"/>
+                    <rect x="92" y="54" width="10" height="3" fill="#cbd5e1"/>
+                    <rect x="104" y="62" width="4" height="5" fill="#78350f"/>
+                    <rect x="111" y="62" width="4" height="5" fill="#78350f"/>
+                    <rect x="48" y="66" width="96" height="6" fill="#22c55e"/>
+                    <rect x="48" y="69" width="96" height="3" fill="#15803d"/>
+                    <rect x="33" y="55" width="13" height="15" fill="#422c13"/>
+                    <rect x="35" y="57" width="4" height="3" fill="#fbbf24"/>
+                    <rect x="40" y="57" width="4" height="3" fill="#f59e0b"/>
+                    <rect x="35" y="62" width="9" height="2" fill="#fef3c7"/>
+                    <rect x="35" y="66" width="5" height="3" fill="#fbbf24"/>
+                    <ellipse cx="153" cy="63" rx="8" ry="6" fill="#d97706"/>
+                    <ellipse cx="153" cy="63" rx="6" ry="4.2" fill="#fef3c7"/>
+                  </svg>
+                </div>
+                <div class="well-leds">
+                  <span class="cart-sub-jp">みきり一閃 / 0.01秒居合</span>
+                  <div class="led-group">
+                    <span class="led-green"></span>
+                    <span class="led-pink"></span>
+                  </div>
+                </div>
+                <div class="card-divider"></div>
+                <div class="card-actions">
+                  <button class="btn-card-action" data-game-id="crt-quest" data-action="coin">INSERT COIN</button>
+                  <button class="btn-card-action" data-game-id="crt-quest" data-action="details">DETAILS</button>
+                </div>
+              </article>
+
+            </div>
+          </div>
+
+          <!-- RIGHT SIDEBAR COLUMN: Latest Transmission -->
+          <aside class="transmission-sidebar" aria-label="Latest Transmission">
+            <div>
+              <div style="display:flex; align-items:center; justify-content:space-between; margin: 2px 0 8px 0;">
+                <h3 style="margin: 0; font-size: 14px; font-weight: 700; color: #f1f5f9; letter-spacing: 0.3px;">
+                  Latest Transmission
+                </h3>
+                <button id="btn-decode-log" style="background:none; border:1px solid #2e3346; color:#00f5ff; font-family:var(--font-pixel-jp); font-size:8.5px; padding:1px 5px; border-radius:3px; cursor:pointer;" title="日本語ログ / 暗号ログ切替">
+                  JP/RAW
+                </button>
+              </div>
+
+              <!-- 8-Line Micro-Text Block (Toggles between Mockup Cipher & Japanese News Log) -->
+              <div id="transmission-cipher" style="font-size: 5.5px; line-height: 1.48; color: #7e8291; letter-spacing: 0.22px; font-family: var(--font-mono); white-space: nowrap; overflow: hidden;">
+                <div>OCTUNS IL TEBDI CUACNT, CIDUT ERE ANEE, ENHER IORMO2</div>
+                <div>DOSTLHEO DOE OATT, ONII DHEXI SU8ND INDLAX TITI</div>
+                <div>EEAVOGSO M NI: OTTNTIHS CONUITANES UPLORTER</div>
+                <div>OOGNANIGE OEFOTHIIK. AWIIKE ANEE CWES RNOS PR CHROM.</div>
+                <div>CHENSNGO UHTSHC FEMIOS TABINCE DAOIMHAN DO FNIIITE</div>
+                <div>OCEGOHNS COUFOWY OENUIS OESSNTC ENRINAUN DET</div>
+                <div>EOANINOEN CHRUNS EONI COWOHOB DYARECAIK FISOEIOONLIS</div>
+                <div>GHHIIOR NIAIIN EXCLOIATRC AAIUKN TACUS IEOEGY.</div>
+              </div>
+
+              <div id="transmission-jp" style="display:none; font-size: 10px; line-height: 1.55; color: #a3aac2; font-family: var(--font-pixel-jp);">
+                <div><span style="color:#00f5ff;">[NEW]</span> 新トップページ稼働開始</div>
+                <div><span style="color:#ff2a9d;">[ROM]</span> ミニゲーム全9作品を公開中</div>
+                <div><span style="color:#fbbf24;">[LOG]</span> <a href="/news.html" style="color:#e2e8f0; text-decoration:underline;">最新のお知らせ一覧へ ▸</a></div>
+              </div>
+            </div>
+
+            <div>
+              <!-- SUBSCRIBE FOR INTEL Neon Box -->
+              <div class="subscribe-box">
+                <div style="font-size: 11px; color: #ffffff; letter-spacing: 0.4px; font-weight: 700;">
+                  SUBSCRIBE FOR INTEL
+                </div>
+                <div style="font-size: 5.5px; color: #6c7080; letter-spacing: 0.3px; margin: 3px 0 7px 0;">
+                  CIHNNLOAD IO EOUUE SSIVP EIENOIE.
+                </div>
+                <form id="intel-form" style="margin:0; display:flex; gap:4px;">
+                  <input
+                    type="text"
+                    id="intel-input"
+                    value="SO2(MBION"
+                    aria-label="Subscribe for intel or enter secret code"
+                    style="width: 100%; background: #252836; border: 1px solid #35394c; border-radius: 3px; padding: 4.5px 7px; color: #8c92a6; font-family: var(--font-mono); font-size: 7.5px; letter-spacing: 0.5px; outline: none;"
+                  />
+                </form>
+              </div>
+
+              <!-- Bottom 3 Pixel Hardware / Controller Tiles -->
+              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin-top: 12px;">
+                <!-- Tile 1: D-Pad Cross 1 -->
+                <div class="hw-tile" data-hw="dpad" title="All 9 Mini-Games Launcher">
+                  <svg width="28" height="28" viewBox="0 0 28 28" shape-rendering="crispEdges">
+                    <rect x="10" y="3" width="8" height="22" fill="#464959"/>
+                    <rect x="3" y="10" width="22" height="8" fill="#464959"/>
+                    <rect x="11" y="4" width="6" height="20" fill="#55586b"/>
+                    <rect x="4" y="11" width="20" height="6" fill="#55586b"/>
+                    <rect x="13" y="6" width="2" height="2" fill="#232530"/>
+                    <rect x="13" y="20" width="2" height="2" fill="#232530"/>
+                    <rect x="6" y="13" width="2" height="2" fill="#232530"/>
+                    <rect x="20" y="13" width="2" height="2" fill="#232530"/>
+                    <rect x="12" y="13" width="2" height="2" fill="#ef4444"/>
+                    <rect x="14" y="13" width="2" height="2" fill="#38bdf8"/>
+                  </svg>
+                </div>
+
+                <!-- Tile 2: D-Pad Cross 2 with Red/Orange & Blue LEDs -->
+                <div class="hw-tile" data-hw="axis" title="Members / メンバー紹介">
+                  <svg width="28" height="28" viewBox="0 0 28 28" shape-rendering="crispEdges">
+                    <rect x="10" y="3" width="8" height="22" fill="#464959"/>
+                    <rect x="5" y="9" width="18" height="10" fill="#464959"/>
+                    <rect x="11" y="4" width="6" height="20" fill="#55586b"/>
+                    <rect x="6" y="10" width="16" height="8" fill="#55586b"/>
+                    <rect x="13" y="6" width="2" height="3" fill="#ef4444"/>
+                    <rect x="13" y="19" width="2" height="3" fill="#f97316"/>
+                    <rect x="8" y="13" width="2" height="2" fill="#232530"/>
+                    <rect x="18" y="13" width="2" height="2" fill="#232530"/>
+                    <rect x="13" y="13" width="2" height="2" fill="#3b82f6"/>
+                  </svg>
+                </div>
+
+                <!-- Tile 3: Retro Gamepad Icon -->
+                <div class="hw-tile" data-hw="gamepad" title="About & News / 秘密基地について">
+                  <svg width="30" height="24" viewBox="0 0 30 24" shape-rendering="crispEdges">
+                    <rect x="5" y="5" width="20" height="11" fill="#55586b"/>
+                    <rect x="3" y="8" width="5" height="11" fill="#464959"/>
+                    <rect x="22" y="8" width="5" height="11" fill="#464959"/>
+                    <rect x="7" y="7" width="16" height="7" fill="#64687d"/>
+                    <rect x="7" y="9" width="5" height="2" fill="#232530"/>
+                    <rect x="8.5" y="7.5" width="2" height="5" fill="#232530"/>
+                    <rect x="13" y="11" width="2" height="2" fill="#ef4444"/>
+                    <rect x="16" y="11" width="2" height="2" fill="#3b82f6"/>
+                    <rect x="21" y="8" width="2" height="2" fill="#eab308"/>
+                    <rect x="19" y="10" width="2" height="2" fill="#3b82f6"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+        </section>
+
+        <!-- NON-INTRUSIVE RETRO TOAST -->
+        <div id="retro-toast" style="display:none; position:fixed; bottom: 22px; right: 24px; background: rgba(14, 15, 24, 0.96); border: 2px solid #00f5ff; box-shadow: 0 0 20px rgba(0,245,255,0.45); border-radius: 6px; padding: 10px 16px; z-index: 120; font-family: var(--font-pixel-jp); font-size: 12px; color: #fff;">
+          <span id="retro-toast-text" style="color:#00f5ff;"></span>
+        </div>
+
+
+        <!-- CREW ROSTER: 7 MEMBERS -->
+        <section class="crew-section" aria-label="Development Crew">
+          <div style="display:flex; align-items:center; gap: 12px; margin-bottom: 12px;">
+            <h2 style="margin:0; font-size: 19px; font-weight: 700; color: #e2e8f0; letter-spacing: 0.4px;">
+              SECRET BASE CREW <span style="font-size:12px; color:#00f5ff; font-weight:normal;">— 7人のゲーム職人たち</span>
+            </h2>
+            <div style="flex:1; height: 1px; background: #262836; margin-top: 4px;"></div>
+            <a href="/members.html" style="color:#00f5ff; font-family:var(--font-pixel-jp); font-size:10px; text-decoration:none;">全員を見る ▸</a>
+          </div>
+
+          <div class="crew-grid">
+            <a href="/members.html#vorei" class="crew-card">
+              <span class="crew-avatar">🔥</span>
+              <span class="crew-name">Vorei</span>
+              <span class="crew-role">開発 / 言いだしっぺ</span>
+              <span class="crew-tag">🍜 味噌ラーメン</span>
+            </a>
+            <a href="/members.html#jelly" class="crew-card">
+              <span class="crew-avatar">⚡</span>
+              <span class="crew-name">Jelly</span>
+              <span class="crew-role">開発 / エンジニア</span>
+              <span class="crew-tag">🌮 タコベル</span>
+            </a>
+            <a href="/members.html#go" class="crew-card">
+              <span class="crew-avatar">🎮</span>
+              <span class="crew-name">Go</span>
+              <span class="crew-role">広報 / 管理人</span>
+              <span class="crew-tag">🎲 奇数派</span>
+            </a>
+            <a href="/members.html#kei" class="crew-card">
+              <span class="crew-avatar">🎸</span>
+              <span class="crew-name">Kei</span>
+              <span class="crew-role">2Dデザイン</span>
+              <span class="crew-tag">🍩 どら焼き</span>
+            </a>
+            <a href="/members.html#sususu" class="crew-card">
+              <span class="crew-avatar">🐺</span>
+              <span class="crew-name">Sususu</span>
+              <span class="crew-role">3Dデザイン</span>
+              <span class="crew-tag">🌶️ 胡椒</span>
+            </a>
+            <a href="/members.html#volcano-yamamoto" class="crew-card">
+              <span class="crew-avatar">🌋</span>
+              <span class="crew-name">Volcano</span>
+              <span class="crew-role">仕様 / かたかた</span>
+              <span class="crew-tag">🥥 ナタデココ</span>
+            </a>
+            <a href="/members.html#good-sun" class="crew-card">
+              <span class="crew-avatar">☀️</span>
+              <span class="crew-name">Good Sun</span>
+              <span class="crew-role">進行管理</span>
+              <span class="crew-tag">🥁 ドラム</span>
+            </a>
+          </div>
+        </section>
+
+        <!-- INQUIRY & CONTACT HUB -->
+        <section class="inquiry-box" aria-label="Contact and Inquiries">
+          <div>
+            <div style="font-family:var(--font-mono); font-size:15px; font-weight:bold; color:#ffffff; margin-bottom:4px;">
+              📡 COMMUNICATION & INQUIRIES
+            </div>
+            <div style="font-family:var(--font-pixel-jp); font-size:11px; color:#959cb3;">
+              サークルへのご意見、応援メッセージ、コラボ・取材等のご連絡はお気軽にどうぞ。
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <a href="/contact.php" style="background:#ff2a9d; color:#ffffff; font-family:var(--font-mono); font-size:11px; font-weight:bold; padding:7px 16px; border-radius:4px; text-decoration:none; box-shadow:0 0 12px rgba(255,42,157,0.4); transition:all 0.15s;">
+              ✉️ お問い合わせフォーム
+            </a>
+            <span style="font-size:10px; color:#787e94; font-family:var(--font-mono);">または hajikkogurashi.official@gmail.com</span>
+          </div>
+        </section>
+
+        <!-- OFFICIAL FOOTER -->
+        <footer class="site-footer">
+          <div class="footer-top">
+            <div>
+              <div style="font-size:12px; font-weight:bold; color:#e2e8f0; margin-bottom:2px;">
+                Corner Neighbor（コーナー ネイバー）
+              </div>
+              <div style="font-size:10px; color:#6d7285;">
+                Unreal Engine 5 & WEB インディーゲーム制作サークル / 拠点：日本のどこかのはじっこ
+              </div>
+            </div>
+            <div class="social-pills">
+              <a href="https://x.com/Corner_neighbor" target="_blank" rel="noopener noreferrer" class="social-pill social-pill-x">
+                <span>𝕏 Twitter</span>
+              </a>
+              <a href="https://note.com/hajikkogurashi01" target="_blank" rel="noopener noreferrer" class="social-pill social-pill-note">
+                <span>note 開発手記</span>
+              </a>
+              <a href="https://www.youtube.com/@hajikkogurashi" target="_blank" rel="noopener noreferrer" class="social-pill social-pill-yt">
+                <span>YouTube チャンネル</span>
+              </a>
+            </div>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; font-size:10px; padding-top:10px; border-top:1px solid #1a1c2a;">
+            <div>
+              © 2024-2026 Corner Neighbor公式ホームページ. All Rights Reserved.
+            </div>
+            <div class="footer-links">
+              <a href="/aboutus.html">私たちについて</a>
+              <a href="/members.html">メンバー紹介</a>
+              <a href="/portfolio.html">作品一覧</a>
+              <a href="/coming-soon.html">鋭意制作中！</a>
+              <a href="/privacy-policy.html">プライバシーポリシー</a>
+              <a href="/terms-of-service.html">利用規約</a>
+              <a href="/contact.php">お問い合わせ</a>
+            </div>
+          </div>
+        </footer>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       MODAL: ROM CARTRIDGE DETAILS & ALL 9 CORNER NEIGHBOR MINI-GAMES
+       ==================================================================== -->
+  <div class="retro-modal-backdrop" id="retro-modal-backdrop" role="dialog" aria-modal="true">
+    <div class="retro-modal" id="retro-modal-content">
+      <!-- Dynamically populated by JS -->
+    </div>
+  </div>
+
+  <script>
+    /**
+     * ====================================================================
+     * 1. CORNER NEIGHBOR GAME CATALOG DATA (Featured 3 + All 9 Mini-Games)
+     * ====================================================================
+     */
+    const FEATURED_CARTRIDGES = {
+      'kanji-slicer': {
+        code: 'CN-ROM-01',
+        enTitle: 'NEON SLICER',
+        jpTitle: '漢字スライサー・マージ',
+        badge: 'OUT NOW',
+        color: '#ff2a9d',
+        device: '📱 スマホ最適 / 🖱️ PC対応',
+        genre: 'パズル・スイカ系マージアクション',
+        url: 'https://hajikkoroom.xsrv.jp/kanji-slicer/',
+        desc: 'ネオン輝くサイバー空間で漢字パーツをスワイプ切断＆合体！同じ漢字をぶつけて進化させ、ハイスコアを狙う新感覚物理マージパズル。'
+      },
+      'lumen-mirror': {
+        code: 'CN-ROM-02',
+        enTitle: 'ROOFTOP CHILL',
+        jpTitle: 'LUMEN_MIRROR（ルーメン・ミラー）',
+        badge: 'PLAY NOW',
+        color: '#00f5ff',
+        device: '📱 スマホ最適 / 🖱️ PC対応',
+        genre: '光学反射ロジックパズル',
+        url: 'https://hajikkoroom.xsrv.jp/lumen-mirror/',
+        desc: '真夜中のビル群の屋上で鏡の角度を操り、ネオンレーザーをターゲットまで導く静謐で美しい光学リフレクションパズル。'
+      },
+      'crt-quest': {
+        code: 'CN-ROM-03',
+        enTitle: 'CRT QUEST',
+        jpTitle: 'みきり一閃（0.01秒の居合斬り）',
+        badge: 'DEMO PLAY',
+        color: '#f59e0b',
+        device: '📱 スマホ最適 / 🖱️ PC対応',
+        genre: '超反応0.01秒居合アクション',
+        url: 'https://hajikkoroom.xsrv.jp/mikiri-issen/',
+        desc: 'ブラウン管モニターが閃く刹那の合図を見極めろ！0.01秒の反射神経でライバルを斬り伏せる緊張感マックスの一撃必殺居合ゲーム。'
+      }
+    };
+
+    const ALL_MINI_GAMES = [
+      { jp: '漢字スライサー・マージ', en: 'NEON SLICER', tag: 'パズル / 物理', device: '📱 スマホ最適', url: 'https://hajikkoroom.xsrv.jp/kanji-slicer/', color: '#ff2a9d' },
+      { jp: 'LUMEN_MIRROR', en: 'ROOFTOP CHILL', tag: '光学パズル', device: '📱 スマホ最適 / 🖱️ PC推奨', url: 'https://hajikkoroom.xsrv.jp/lumen-mirror/', color: '#00f5ff' },
+      { jp: 'みきり一閃', en: 'CRT QUEST', tag: '0.01秒居合', device: '📱 スマホ最適', url: 'https://hajikkoroom.xsrv.jp/mikiri-issen/', color: '#f59e0b' },
+      { jp: 'ブラックホール・スイーパー', en: 'VOID SWEEPER', tag: '一筆書きアクション', device: '📱 スマホ最適', url: 'https://hajikkoroom.xsrv.jp/blackhole-sweeper/', color: '#a855f7' },
+      { jp: 'ギリギリ・ブレーキ！', en: 'EDGE BRAKE!', tag: 'チキンレース', device: '📱 スマホ最適', url: 'https://hajikkoroom.xsrv.jp/girigiri-brake/', color: '#ef4444' },
+      { jp: '超絶！仕分け工場', en: 'CYBER FACTORY', tag: '脳トレ仕分け', device: '📱 スマホ最適', url: 'https://hajikkoroom.xsrv.jp/sorting-factory/', color: '#22c55e' },
+      { jp: '限界！ステルスサボタージュ', en: 'STEALTH SABOTAGE', tag: 'サボりアクション', device: '📱 スマホ最適', url: 'https://hajikkoroom.xsrv.jp/stealth-slacker/', color: '#38bdf8' },
+      { jp: 'ウォールジャンパー', en: 'WALL JUMPER', tag: '激ムズ登攀', device: '🖱️ PC推奨', url: 'https://hajikkoroom.xsrv.jp/wall-jumper/', color: '#eab308' },
+      { jp: '影まね道場', en: 'SHADOW DOJO', tag: '記憶＆型稽古', device: '📱 スマホ対応', url: 'https://hajikkoroom.xsrv.jp/kage-mane-dojo/', color: '#ec4899' }
+    ];
+
+    /**
+     * ====================================================================
+     * 2. 8-BIT WEB AUDIO SYNTHESIZER (Optional Retro Sound Effects)
+     * ====================================================================
+     */
+    let sfxEnabled = false;
+    let audioCtx = null;
+
+    function play8BitSound(type) {
+      if (!sfxEnabled) return;
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (type === 'coin') {
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(987.77, now); // B5
+          osc.frequency.setValueAtTime(1318.51, now + 0.07); // E6
+          gain.gain.setValueAtTime(0.08, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
+          osc.start(now);
+          osc.stop(now + 0.32);
+        } else if (type === 'select') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(523.25, now);
+          osc.frequency.setValueAtTime(783.99, now + 0.05);
+          gain.gain.setValueAtTime(0.07, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+          osc.start(now);
+          osc.stop(now + 0.16);
+        } else if (type === 'cat') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(440, now);
+          osc.frequency.linearRampToValueAtTime(620, now + 0.12);
+          osc.frequency.linearRampToValueAtTime(510, now + 0.25);
+          gain.gain.setValueAtTime(0.07, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+          osc.start(now);
+          osc.stop(now + 0.28);
+        }
+      } catch (e) {
+        // Ignore audio errors if blocked
+      }
+    }
+
+    /**
+     * ====================================================================
+     * 3. UPGRADED HIGH-DENSITY PIXEL ART HERO SCENE (640x180 virtual px)
+     * ====================================================================
+     */
+    const heroCanvas = document.getElementById('hero-pixel-canvas');
+    const hCtx = heroCanvas.getContext('2d');
+
+    // Deterministic Rain Streaks & Rooftop Puddle Ripples
+    const rainDrops = [];
+    for (let i = 0; i < 85; i++) {
+      rainDrops.push({
+        x: 220 + ((i * 41) % 415),
+        y: (i * 29) % 165,
+        len: 5 + (i % 5),
+        speed: 0.75 + (i % 3) * 0.3
+      });
+    }
+
+    let boostPulse = 0;
+
+    function px(ctx, x, y, w, h, color) {
+      ctx.fillStyle = color;
+      ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+    }
+
+    function drawHeroPixelScene(time) {
+      const ctx = hCtx;
+      const W = 640;
+      const H = 180;
+      ctx.clearRect(0, 0, W, H);
+
+      if (boostPulse > 0) boostPulse *= 0.95;
+
+      // ====================================================================
+      // A. RIGHT HALF: RAINY CYBERPUNK NIGHT SKYLINE & CRESCENT MOON
+      // ====================================================================
+      const skyGrad = ctx.createLinearGradient(220, 0, 220, H);
+      skyGrad.addColorStop(0, '#0a1526');
+      skyGrad.addColorStop(0.5, '#11243d');
+      skyGrad.addColorStop(1, '#193759');
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(220, 0, W - 220, H);
+
+      // Distant Atmospheric Mist Layer
+      px(ctx, 220, 95, 420, 35, 'rgba(34, 211, 238, 0.05)');
+
+      // Crescent Moon with subtle outer pixel halo (x: 486, y: 14)
+      px(ctx, 481, 10, 18, 18, 'rgba(200, 247, 255, 0.08)');
+      px(ctx, 485, 12, 13, 15, '#d8f9ff');
+      px(ctx, 483, 14, 16, 11, '#d8f9ff');
+      px(ctx, 488, 12, 12, 11, '#0c1a2e'); // Crescent cutout
+
+      // Distant Flying Cyber Spinner Vehicle moving across skyline
+      const spinnerX = 240 + ((time * 0.015) % 360);
+      px(ctx, spinnerX, 28, 5, 2, '#00f5ff');
+      px(ctx, spinnerX - 2, 28, 2, 1, '#ff2a9d');
+
+      // Multi-Layered Background Skyscrapers
+      const towers = [
+        { x: 248, y: 54, w: 24, h: 98, c: '#0f1f34', edge: '#1d3b5e' },
+        { x: 276, y: 34, w: 30, h: 118, c: '#132842', edge: '#234873' },
+        { x: 312, y: 50, w: 26, h: 102, c: '#0d1c30', edge: '#1b3657' },
+        { x: 342, y: 40, w: 22, h: 112, c: '#152c47', edge: '#274f7d' },
+        { x: 370, y: 36, w: 33, h: 116, c: '#11243b', edge: '#22456e' },
+        { x: 408, y: 28, w: 25, h: 124, c: '#142a45', edge: '#264d7a' },
+        { x: 440, y: 16, w: 30, h: 136, c: '#17304d', edge: '#2b578a' },
+        { x: 475, y: 42, w: 25, h: 110, c: '#12263f', edge: '#21446e' },
+        { x: 506, y: 25, w: 34, h: 127, c: '#152e4a', edge: '#295485' },
+        { x: 546, y: 35, w: 30, h: 117, c: '#11233b', edge: '#204069' },
+        { x: 582, y: 18, w: 38, h: 134, c: '#142b46', edge: '#285180' }
+      ];
+
+      towers.forEach((b, idx) => {
+        px(ctx, b.x, b.y, b.w, b.h, b.c);
+        px(ctx, b.x, b.y, 1, b.h, b.edge);
+        // Roof antennas & blinking red beacons
+        if (idx % 2 === 0) {
+          px(ctx, b.x + Math.floor(b.w / 2), b.y - 6, 1, 6, '#1e3a5f');
+          if (Math.floor(time / 600 + idx) % 2 === 0) {
+            px(ctx, b.x + Math.floor(b.w / 2), b.y - 7, 2, 2, '#ff2a85');
+          }
+        }
+        // Lit pixel window grids
+        for (let wy = b.y + 5; wy < b.y + b.h - 14; wy += 5) {
+          for (let wx = b.x + 4; wx < b.x + b.w - 4; wx += 5) {
+            const seed = (wx * 7 + wy * 13 + idx * 5) % 19;
+            if (seed < 4) {
+              px(ctx, wx, wy, 3, 1.5, '#00f5ff');
+            } else if (seed === 5) {
+              px(ctx, wx, wy, 3, 1.5, '#ff2a9d');
+            } else if (seed === 6) {
+              px(ctx, wx, wy, 2, 1.5, '#fde047');
+            }
+          }
+        }
+      });
+
+      // Lower Foreground Rooftops & Industrial Structures
+      px(ctx, 365, 130, 86, 50, '#172336');
+      px(ctx, 368, 133, 80, 47, '#20304a');
+      px(ctx, 378, 142, 11, 7, '#0c1421');
+      px(ctx, 400, 142, 11, 7, '#0c1421');
+      px(ctx, 450, 120, 190, 60, '#0e1b2d');
+      px(ctx, 482, 130, 38, 50, '#142a42');
+      px(ctx, 487, 136, 25, 5, '#00f5ff');
+      px(ctx, 487, 146, 25, 4, '#38bdf8');
+      // Utility poles & power cables
+      px(ctx, 468, 126, 3, 54, '#090d16');
+      px(ctx, 462, 131, 15, 2, '#090d16');
+      px(ctx, 536, 124, 3, 56, '#090d16');
+      px(ctx, 530, 129, 15, 2, '#090d16');
+
+      // Animated Diagonal Pixel Rain Streaks & Puddle Ripples
+      rainDrops.forEach((d, i) => {
+        const ry = (d.y + time * 0.042 * d.speed) % 158;
+        const rx = d.x - (ry * 0.16);
+        px(ctx, rx, ry, 1, d.len, 'rgba(125, 211, 252, 0.36)');
+        if (ry > 152 && i % 4 === 0) {
+          px(ctx, rx - 1, 138, 3, 1, 'rgba(0, 245, 255, 0.45)');
+        }
+      });
+
+      // ====================================================================
+      // B. LOFT WINDOW MULLIONS, TRANSOMS & SKYLIGHT BEAMS
+      // ====================================================================
+      ctx.fillStyle = '#121324';
+      ctx.beginPath();
+      ctx.moveTo(224, 0);
+      ctx.lineTo(298, 0);
+      ctx.lineTo(360, 35);
+      ctx.lineTo(224, 35);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#1c3452';
+      ctx.beginPath();
+      ctx.moveTo(238, 3);
+      ctx.lineTo(288, 3);
+      ctx.lineTo(334, 30);
+      ctx.lineTo(238, 30);
+      ctx.closePath();
+      ctx.fill();
+
+      // Window Vertical & Horizontal Frame Bars
+      px(ctx, 268, 0, 4, 144, '#131421');
+      px(ctx, 307, 14, 4, 134, '#131421');
+      px(ctx, 352, 30, 6, 126, '#131421');
+      px(ctx, 268, 31, 88, 4, '#131421');
+      px(ctx, 268, 82, 88, 4, '#131421');
+      px(ctx, 268, 125, 88, 4, '#131421');
+
+      // ====================================================================
+      // C. LEFT HALF: CYBER-DEVELOPER HIDEAWAY WALLS, FLOOR & LEDGE
+      // ====================================================================
+      px(ctx, 0, 0, 270, 146, '#1d1734');
+      // Detailed Brick & Wall Panel Texture
+      for (let wx = 16; wx < 266; wx += 24) {
+        px(ctx, wx, 0, 1, 144, '#140f26');
+      }
+      for (let wy = 14; wy < 135; wy += 18) {
+        px(ctx, 0, wy, 266, 1, '#241d40');
+      }
+
+      // Floor & Perspective Grid
+      px(ctx, 0, 144, 388, 36, '#1a2238');
+      for (let fy = 148; fy < 180; fy += 6) {
+        px(ctx, 0, fy, 375, 1, '#121726');
+      }
+      for (let fx = 14; fx < 375; fx += 26) {
+        px(ctx, fx, 144, 1, 36, '#121726');
+      }
+      // Ambient Cyan & Pink Neon Floor Reflections
+      px(ctx, 84, 152, 98, 18, 'rgba(0, 245, 255, 0.13)');
+      px(ctx, 14, 156, 48, 14, 'rgba(255, 42, 157, 0.10)');
+
+      // Raised Window Ledge & Storage Drawer Unit
+      px(ctx, 292, 138, 98, 22, '#232942');
+      px(ctx, 292, 138, 98, 3, '#3b4263');
+      px(ctx, 324, 116, 36, 30, '#1d1c2b');
+      px(ctx, 327, 119, 30, 11, '#2e2d42');
+      px(ctx, 327, 132, 30, 11, '#2e2d42');
+      px(ctx, 339, 123, 6, 2, '#7c7e96');
+      px(ctx, 339, 136, 6, 2, '#7c7e96');
+      // Soda Can on Drawer
+      px(ctx, 335, 108, 5, 8, '#e11d48');
+      px(ctx, 335, 108, 5, 1.5, '#ffffff');
+
+      // ====================================================================
+      // D. CEILING AC UNIT, FAN VENT, CABLES & NEON WALL SIGN
+      // ====================================================================
+      px(ctx, 8, 4, 62, 23, '#2e294e');
+      px(ctx, 11, 7, 56, 17, '#3d3763');
+      px(ctx, 14, 18, 50, 4, '#17132b');
+      px(ctx, 59, 10, 4, 2.5, '#00f5ff');
+
+      // Circular Wall Fan Vent (Animated rotation tick)
+      px(ctx, 144, 10, 18, 18, '#251f42');
+      px(ctx, 147, 13, 12, 12, '#120e24');
+      const fanTick = Math.floor(time / 120) % 2;
+      px(ctx, 151, 14 + fanTick, 4, 9, '#3b3363');
+      px(ctx, 148 + fanTick, 17, 9, 4, '#3b3363');
+
+      // Hanging Ceiling Cables
+      ctx.strokeStyle = '#0d0a1a';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(70, 8);
+      ctx.quadraticCurveTo(88, 38, 104, 5);
+      ctx.moveTo(82, 5);
+      ctx.quadraticCurveTo(102, 44, 126, 8);
+      ctx.stroke();
+
+      // Glowing Pink/Amber Neon Sign on Left Wall
+      const neonFlicker = Math.sin(time * 0.008) > -0.92 ? 1 : 0.4;
+      ctx.globalAlpha = neonFlicker;
+      px(ctx, 43, 39, 17, 20, 'rgba(255, 0, 128, 0.28)');
+      px(ctx, 46, 42, 11, 15, '#ff2a85');
+      px(ctx, 49, 45, 5, 9, '#fde047');
+      ctx.globalAlpha = 1;
+
+      // ====================================================================
+      // E. FAR-LEFT ARCADE CABINET ("CORNER" / "BRICG8R")
+      // ====================================================================
+      px(ctx, 11, 56, 39, 110, '#231d42');
+      px(ctx, 14, 57, 34, 108, '#352b5e');
+      // Pink Glowing Marquee
+      px(ctx, 14, 57, 32, 9, '#ff2a9d');
+      px(ctx, 17, 60, 26, 4, '#ffd6ec');
+      // Bright Cyan CRT Screen with animated attract-mode bars
+      px(ctx, 15, 69, 27, 24, '#0b2942');
+      px(ctx, 18, 72, 21, 19, '#22d3ee');
+      px(ctx, 20, 74, 17, 15, '#a5f3fc');
+      const attractY = Math.floor(time / 220) % 6;
+      px(ctx, 21, 76 + attractY, 13, 2, '#0891b2');
+      px(ctx, 21, 81, 10, 2, '#ff2a9d');
+      // Control Panel (Joystick + Buttons)
+      px(ctx, 14, 95, 35, 8, '#1e1b38');
+      px(ctx, 20, 91, 2, 4, '#94a3b8');
+      px(ctx, 19, 89, 4, 3, '#ef4444');
+      px(ctx, 30, 96, 3, 2, '#00f5ff');
+      px(ctx, 35, 96, 3, 2, '#ff00a0');
+      // Lower Cabinet Coin Door
+      px(ctx, 15, 104, 31, 60, '#261e45');
+      px(ctx, 20, 111, 21, 46, '#18122e');
+      px(ctx, 25, 122, 4, 5, '#ff2a9d');
+      px(ctx, 33, 122, 4, 5, '#ff2a9d');
+
+      // ====================================================================
+      // F. MULTI-MONITOR DEVELOPER DESK SETUP
+      // ====================================================================
+      // Top-left hanging monitor 1
+      px(ctx, 92, 16, 22, 19, '#3b335e');
+      px(ctx, 95, 19, 16, 13, '#3b82f6');
+      px(ctx, 98, 22, 10, 8, '#93c5fd');
+
+      // Top-right hanging monitor 2
+      px(ctx, 117, 22, 22, 19, '#3b335e');
+      px(ctx, 120, 25, 16, 13, '#00f5ff');
+      px(ctx, 123, 28, 10, 8, '#cffafe');
+
+      // Mid-upper CRT Monitor
+      px(ctx, 71, 37, 34, 27, '#4a436e');
+      px(ctx, 75, 41, 26, 19, '#00d4ff');
+      px(ctx, 78, 44, 20, 13, '#a5f3fc');
+
+      // Mid-small Pink CRT Monitor
+      px(ctx, 106, 46, 19, 18, '#4a436e');
+      px(ctx, 109, 49, 13, 12, '#ff2a9d');
+      px(ctx, 111, 51, 9, 7, '#fbcfe8');
+
+      // Mid-right Cyan CRT Monitor
+      px(ctx, 127, 48, 22, 19, '#4a436e');
+      px(ctx, 130, 51, 16, 13, '#22d3ee');
+      px(ctx, 133, 54, 10, 8, '#cffafe');
+
+      // Left Stacked Amber CRT & Vertical Tower
+      px(ctx, 56, 56, 20, 22, '#5c527d');
+      px(ctx, 59, 60, 14, 14, '#d97706');
+      px(ctx, 61, 63, 10, 8, '#fde68a');
+      px(ctx, 56, 79, 30, 72, '#2a224a');
+      px(ctx, 65, 84, 16, 20, '#1d4ed8');
+      px(ctx, 68, 87, 10, 14, '#60a5fa');
+
+      // MAIN CENTER LARGE CODE CRT MONITOR
+      const pulse = Math.sin(time * 0.004) * 10 + boostPulse * 20;
+      px(ctx, 87, 65, 41, 34, '#524b75');
+      px(ctx, 91, 69, 33, 26, '#00f5ff');
+      px(ctx, 94, 72, 27, 20, `rgb(${Math.min(255, 165 + pulse)}, 250, 255)`);
+      // Animated scrolling code lines on main monitor
+      const scrollOffset = Math.floor(time / 350) % 3;
+      px(ctx, 97, 75 + scrollOffset, 14, 1.5, '#0284c7');
+      px(ctx, 97, 79 + scrollOffset, 19, 1.5, '#0284c7');
+      px(ctx, 97, 83 + scrollOffset, 11, 1.5, '#0284c7');
+      px(ctx, 97, 87, 16, 1.5, '#0284c7');
+
+      // RIGHT DESK CODE MONITOR
+      px(ctx, 129, 68, 25, 28, '#3f395e');
+      px(ctx, 132, 71, 19, 22, '#0f172a');
+      px(ctx, 135, 74, 11, 1.5, '#22d3ee');
+      px(ctx, 135, 78, 14, 1.5, '#4ade80');
+      px(ctx, 135, 82, 8, 1.5, '#22d3ee');
+      px(ctx, 135, 86, 12, 1.5, '#f472b6');
+
+      // Steaming Coffee Mug on Desk
+      px(ctx, 125, 98, 5, 5, '#f43f5e');
+      if (Math.floor(time / 400) % 2 === 0) {
+        px(ctx, 126, 94, 1, 3, 'rgba(255,255,255,0.45)');
+        px(ctx, 128, 93, 1, 3, 'rgba(255,255,255,0.35)');
+      }
+
+      // Desk Surface & Keyboard
+      px(ctx, 84, 103, 76, 5, '#2e294e');
+      px(ctx, 84, 103, 76, 1.5, '#67e8f9');
+      px(ctx, 95, 100, 24, 3, '#94a3b8');
+      px(ctx, 87, 108, 5, 44, '#18142b');
+      px(ctx, 98, 111, 32, 36, '#141124');
+      px(ctx, 111, 124, 3, 3, '#ef4444');
+      px(ctx, 116, 124, 3, 3, '#22c55e');
+
+      // ====================================================================
+      // G. SECOND ARCADE CABINET ("NEIGHBOR" / "ADEIE B8ULD")
+      // ====================================================================
+      px(ctx, 154, 49, 37, 92, '#28304d');
+      px(ctx, 157, 52, 31, 87, '#1b2238');
+      px(ctx, 157, 52, 31, 8, '#ff2a9d');
+      px(ctx, 160, 55, 25, 3, '#fbcfe8');
+      px(ctx, 160, 64, 25, 24, '#0f2922');
+      px(ctx, 162, 66, 21, 19, '#14532d');
+      px(ctx, 165, 69, 11, 2.5, '#4ade80');
+      px(ctx, 165, 74, 15, 2.5, '#facc15');
+      px(ctx, 165, 79, 12, 2.5, '#4ade80');
+
+      // ====================================================================
+      // H. DEVELOPER CHARACTER IN GAMING CHAIR + SLEEPING PIXEL CAT
+      // ====================================================================
+      // Developer Legs & White Sneakers
+      px(ctx, 136, 117, 30, 9, '#1d3b66');
+      px(ctx, 128, 124, 19, 16, '#254c80');
+      px(ctx, 120, 137, 12, 5, '#f8fafc');
+      px(ctx, 139, 140, 12, 5, '#cbd5e1');
+
+      // Developer Torso & Typing Arm
+      const typeBob = Math.floor(time / 180) % 2;
+      px(ctx, 156, 84, 22, 33, '#271f3d');
+      px(ctx, 146, 90 + typeBob, 16, 8, '#eab396');
+      px(ctx, 155, 86, 9, 14, '#f43f5e');
+
+      // Developer Head & Glowing Pink Headphones
+      px(ctx, 158, 65, 16, 16, '#eab396');
+      px(ctx, 159, 62, 16, 8, '#3b251e');
+      px(ctx, 165, 64, 5, 12, '#1e1b2e');
+      px(ctx, 163, 70, 7, 7, '#ff2a9d');
+
+      // High-Back Ergonomic Gaming Chair
+      px(ctx, 173, 68, 19, 52, '#1a162b');
+      px(ctx, 176, 71, 13, 46, '#2b2442');
+      px(ctx, 155, 114, 33, 8, '#1a162b');
+      px(ctx, 158, 100, 16, 4, '#383054');
+      px(ctx, 170, 122, 5, 20, '#12101f');
+      px(ctx, 156, 142, 33, 4, '#1f1b33');
+      px(ctx, 156, 146, 4, 4, '#090812');
+      px(ctx, 171, 146, 4, 4, '#090812');
+      px(ctx, 185, 146, 4, 4, '#090812');
+
+      // Sleeping Pixel Cat on Floor (x: 206, y: 138) with gentle breathing & tail wag
+      const catBreath = Math.floor(time / 700) % 2;
+      px(ctx, 205, 140, 24, 12, '#57463b');
+      px(ctx, 208, 137 + catBreath, 19, 12 - catBreath, '#786252');
+      px(ctx, 207, 134 + catBreath, 4, 4, '#57463b'); // Left ear
+      px(ctx, 215, 134 + catBreath, 4, 4, '#57463b'); // Right ear
+      px(ctx, 209, 141, 3, 1.5, '#1e1b24'); // Closed left eye
+      px(ctx, 215, 141, 3, 1.5, '#1e1b24'); // Closed right eye
+      px(ctx, 224, 144 - catBreath, 8, 5, '#45372e'); // Curled tail
+
+      // Tiny floating pixel "Zzz" above sleeping cat
+      const zPhase = Math.floor(time / 550) % 3;
+      if (zPhase >= 1) px(ctx, 220, 129, 3, 2, 'rgba(0, 245, 255, 0.65)');
+      if (zPhase === 2) px(ctx, 225, 124, 4, 2, 'rgba(255, 42, 157, 0.7)');
+    }
+
+    /**
+     * ====================================================================
+     * 4. OUTER BLURRED BACKDROP RENDERER (Desktop Presentation)
+     * ====================================================================
+     */
+    function drawOuterBackdrop() {
+      const bgCanvas = document.getElementById('outer-bg-canvas');
+      if (!bgCanvas) return;
+      const ctx = bgCanvas.getContext('2d');
+      const w = bgCanvas.width;
+      const h = bgCanvas.height;
+
+      const grad = ctx.createLinearGradient(0, 0, w, h);
+      grad.addColorStop(0, '#0c0b18');
+      grad.addColorStop(0.5, '#101324');
+      grad.addColorStop(1, '#090812');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
+
+      // Left blurred arcade cabinet silhouette
+      ctx.fillStyle = '#1f1638';
+      ctx.fillRect(0, 220, 210, 620);
+      ctx.fillStyle = '#ff2a9d';
+      ctx.fillRect(28, 250, 120, 42);
+      ctx.fillStyle = '#22d3ee';
+      ctx.fillRect(25, 340, 115, 130);
+      ctx.fillStyle = '#a5f3fc';
+      ctx.fillRect(42, 360, 80, 90);
+
+      // Right blurred skyscrapers & bottom-right transmission echo
+      ctx.fillStyle = '#122036';
+      ctx.fillRect(w - 220, 120, 120, 480);
+      ctx.fillStyle = '#172a45';
+      ctx.fillRect(w - 110, 210, 95, 420);
+
+      ctx.strokeStyle = '#ff00a0';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(w - 230, h - 205, 195, 105);
+      ctx.fillStyle = 'rgba(255,255,255,0.35)';
+      ctx.fillRect(w - 210, h - 280, 160, 14);
+      ctx.fillRect(w - 210, h - 180, 150, 12);
+    }
+
+    /**
+     * ====================================================================
+     * 5. INTERACTIVE UI HANDLERS, MODALS & EASTER EGGS
+     * ====================================================================
+     */
+    let toastTimer = null;
+    function showRetroToast(msg) {
+      const toast = document.getElementById('retro-toast');
+      const text = document.getElementById('retro-toast-text');
+      text.textContent = msg;
+      toast.style.display = 'block';
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.style.display = 'none';
+      }, 2800);
+    }
+
+    const modalBackdrop = document.getElementById('retro-modal-backdrop');
+    const modalContent = document.getElementById('retro-modal-content');
+
+    function closeRetroModal() {
+      modalBackdrop.classList.remove('open');
+    }
+
+    modalBackdrop.addEventListener('click', (e) => {
+      if (e.target === modalBackdrop) closeRetroModal();
+    });
+
+    // Open Single Cartridge ROM Details Modal
+    function openCartridgeModal(gameId) {
+      const g = FEATURED_CARTRIDGES[gameId];
+      if (!g) return;
+      play8BitSound('select');
+      modalContent.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:1px solid #282c3e; padding-bottom:12px; margin-bottom:16px;">
+          <div>
+            <div style="font-size:11px; color:${g.color}; letter-spacing:1px;">${g.code} // ${g.badge}</div>
+            <h3 style="margin:4px 0 2px 0; font-size:22px; color:#ffffff; letter-spacing:0.6px;">${g.enTitle}</h3>
+            <div style="font-family:var(--font-pixel-jp); font-size:14px; color:#00f5ff;">${g.jpTitle}</div>
+          </div>
+          <button onclick="closeRetroModal()" style="background:#1c1e2b; border:1px solid #35394f; color:#fff; width:30px; height:30px; border-radius:4px; cursor:pointer; font-size:15px;">×</button>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px; font-family:var(--font-pixel-jp); font-size:11.5px;">
+          <span style="background:#1a1d2b; border:1px solid #2e334d; padding:4px 10px; border-radius:4px; color:#e2e8f0;">ジャンル: ${g.genre}</span>
+          <span style="background:#13262e; border:1px solid #00f5ff; padding:4px 10px; border-radius:4px; color:#00f5ff;">${g.device}</span>
+        </div>
+        <p style="font-family:var(--font-pixel-jp); font-size:13.5px; line-height:1.75; color:#cbd5e1; margin:0 0 20px 0;">
+          ${g.desc}
+        </p>
+        <div style="display:flex; flex-wrap:wrap; gap:12px; justify-content:flex-end;">
+          <button onclick="closeRetroModal()" style="background:#1b1d29; border:1px solid #34384c; color:#94a3b8; font-family:var(--font-pixel-jp); padding:8px 16px; border-radius:5px; cursor:pointer;">閉じる</button>
+          <a href="${g.url}" target="_blank" rel="noopener" class="btn-neon-play" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px; font-family:var(--font-pixel-jp);">
+            🕹️ INSERT COIN — 今すぐ遊ぶ ▸
+          </a>
+        </div>
+      `;
+      modalBackdrop.classList.add('open');
+    }
+
+    // Open All 9 Corner Neighbor Mini-Games Archive Modal
+    function openAllGamesModal() {
+      play8BitSound('select');
+      const cardsHtml = ALL_MINI_GAMES.map((item, idx) => `
+        <a href="${item.url}" target="_blank" rel="noopener" style="text-decoration:none; background:#181a26; border:1.5px solid #2b2f44; border-radius:6px; padding:11px 12px; display:flex; flex-direction:column; justify-content:space-between; gap:8px; transition:all 0.15s;" onmouseover="this.style.borderColor='${item.color}'" onmouseout="this.style.borderColor='#2b2f44'">
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:10px; color:${item.color}; margin-bottom:3px;">
+              <span>ROM #0${idx + 1} // ${item.en}</span>
+              <span>${item.device}</span>
+            </div>
+            <div style="font-family:var(--font-pixel-jp); font-size:13.5px; color:#ffffff; font-weight:bold;">${item.jp}</div>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-pixel-jp); font-size:10.5px; color:#8c93ab; border-top:1px solid #232638; padding-top:6px;">
+            <span>${item.tag}</span>
+            <span style="color:#00f5ff;">PLAY ▸</span>
+          </div>
+        </a>
+      `).join('');
+
+      modalContent.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #282c3e; padding-bottom:12px; margin-bottom:14px;">
+          <div>
+            <div style="font-size:11px; color:#ff2a9d; letter-spacing:1px;">CORNER NEIGHBOR ARCADE DECK</div>
+            <h3 style="margin:2px 0 0 0; font-family:var(--font-pixel-jp); font-size:18px; color:#ffffff;">世界の端っこで作ったミニゲーム全9作品</h3>
+          </div>
+          <button onclick="closeRetroModal()" style="background:#1c1e2b; border:1px solid #35394f; color:#fff; width:30px; height:30px; border-radius:4px; cursor:pointer; font-size:15px;">×</button>
+        </div>
+        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); gap:11px; margin-bottom:16px;">
+          ${cardsHtml}
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; border-top:1px solid #26293a; padding-top:12px; font-family:var(--font-pixel-jp); font-size:12px;">
+          <div style="display:flex; gap:12px;">
+            <a href="/portfolio.html" style="color:#00f5ff; text-decoration:none;">▸ 作品集 (PORTFOLIO)</a>
+            <a href="/members.html" style="color:#ff2a9d; text-decoration:none;">▸ メンバー紹介 (MEMBERS)</a>
+            <a href="/aboutus.html" style="color:#fbbf24; text-decoration:none;">▸ サークル紹介 (ABOUT)</a>
+          </div>
+          <button onclick="closeRetroModal()" style="background:#1b1d29; border:1px solid #34384c; color:#cbd5e1; font-family:var(--font-pixel-jp); padding:6px 14px; border-radius:4px; cursor:pointer;">閉じる</button>
+        </div>
+      `;
+      modalBackdrop.classList.add('open');
+    }
+
+    // Cartridge Buttons Event Listeners
+    document.querySelectorAll('[data-game-id]').forEach(el => {
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const gameId = el.getAttribute('data-game-id');
+        const action = el.getAttribute('data-action');
+        const g = FEATURED_CARTRIDGES[gameId];
+        if (!g) return;
+
+        if (action === 'coin') {
+          play8BitSound('coin');
+          showRetroToast(`🪙 [1 CREDIT INSERTED] — 『${g.jpTitle}』を起動します...`);
+          setTimeout(() => {
+            openCartridgeModal(gameId);
+          }, 350);
+        } else {
+          openCartridgeModal(gameId);
+        }
+      });
+    });
+
+    // Header & Hero CTA Buttons
+    document.getElementById('btn-play-now').addEventListener('click', openAllGamesModal);
+    document.getElementById('btn-play-now-mobile').addEventListener('click', openAllGamesModal);
+    document.getElementById('btn-enter-base').addEventListener('click', openAllGamesModal);
+    document.getElementById('btn-open-archive').addEventListener('click', openAllGamesModal);
+    document.getElementById('btn-new-tab').addEventListener('click', openAllGamesModal);
+
+    // Interactive Sleeping Cat & Arcade Click inside Hero Canvas
+    let catBubbleTimer = null;
+    heroCanvas.addEventListener('click', (e) => {
+      const rect = heroCanvas.getBoundingClientRect();
+      const relX = (e.clientX - rect.left) / rect.width;
+      const relY = (e.clientY - rect.top) / rect.height;
+
+      // Sleeping cat region (~30% to 38% width, bottom 65% to 92% height)
+      if (relX > 0.28 && relX < 0.40 && relY > 0.62) {
+        play8BitSound('cat');
+        const bubble = document.getElementById('cat-bubble');
+        const phrases = [
+          '🐾 ゴロゴロ… 世界の端っこで開発中ニャ',
+          '🐾 ニャー… コーヒー淹れてくるニャ？',
+          '🐾 Zzz… 新作ROMのデバッグ夢見てるニャ'
+        ];
+        bubble.textContent = phrases[Math.floor(Math.random() * phrases.length)];
+        bubble.classList.add('visible');
+        clearTimeout(catBubbleTimer);
+        catBubbleTimer = setTimeout(() => bubble.classList.remove('visible'), 2600);
+      } else {
+        boostPulse = 1.0;
+        play8BitSound('select');
+        showRetroToast('⚡ [MIDNIGHT HIDEAWAY] — CRTモニター出力ブースト！');
+      }
+    });
+
+    // Sound Toggle Buttons
+    function toggleSfx() {
+      sfxEnabled = !sfxEnabled;
+      const label = sfxEnabled ? '🔊 SFX' : '🔇 SFX';
+      const btnDesktop = document.getElementById('btn-sfx');
+      const btnMobile = document.getElementById('btn-sfx-mobile');
+      if (btnDesktop) {
+        btnDesktop.innerHTML = `<span id="sfx-icon">${sfxEnabled ? '🔊' : '🔇'}</span> SFX`;
+        btnDesktop.classList.toggle('sfx-on', sfxEnabled);
+      }
+      if (btnMobile) {
+        btnMobile.textContent = label;
+        btnMobile.classList.toggle('sfx-on', sfxEnabled);
+      }
+      if (sfxEnabled) {
+        play8BitSound('coin');
+        showRetroToast('🔊 8-BIT サウンドエフェクトを有効化しました');
+      } else {
+        showRetroToast('🔇 サウンドエフェクトをミュートしました');
+      }
+    }
+    document.getElementById('btn-sfx').addEventListener('click', toggleSfx);
+    document.getElementById('btn-sfx-mobile').addEventListener('click', toggleSfx);
+
+    // Desktop Framed / Fullscreen Mode Toggle
+    function toggleFullscreenFrame() {
+      document.body.classList.toggle('fullscreen-mode');
+      const isFull = document.body.classList.contains('fullscreen-mode');
+      const btn = document.getElementById('btn-frame-mode');
+      if (btn) btn.textContent = isFull ? '[FRAME VIEW: OFF]' : '[FRAME VIEW: ON]';
+      play8BitSound('select');
+    }
+    document.getElementById('btn-frame-mode').addEventListener('click', toggleFullscreenFrame);
+    document.getElementById('dot-fullscreen').addEventListener('click', toggleFullscreenFrame);
+
+    // Reload Icon boosts CRT pulse
+    document.getElementById('btn-reload-scene').addEventListener('click', () => {
+      boostPulse = 1.2;
+      play8BitSound('select');
+      showRetroToast('🌧️ [RAIN & NEON SYNCED] — 深夜の秘密基地を再同期しました');
+    });
+
+    // Mobile Menu Drawer Toggle
+    document.getElementById('btn-mobile-menu').addEventListener('click', () => {
+      document.getElementById('mobile-nav-drawer').classList.toggle('open');
+      play8BitSound('select');
+    });
+
+    // Latest Transmission JP / RAW Cipher Toggle
+    document.getElementById('btn-decode-log').addEventListener('click', () => {
+      const cipher = document.getElementById('transmission-cipher');
+      const jp = document.getElementById('transmission-jp');
+      const showingCipher = cipher.style.display !== 'none';
+      cipher.style.display = showingCipher ? 'none' : 'block';
+      jp.style.display = showingCipher ? 'block' : 'none';
+      play8BitSound('select');
+    });
+
+    // Subscribe / Secret Code Input
+    document.getElementById('intel-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const val = document.getElementById('intel-input').value.trim();
+      play8BitSound('coin');
+      showRetroToast(`📡 [INTEL CONNECTED] — 公式note & 𝕏 で最新の開発手記を公開中！`);
+      setTimeout(() => {
+        if (confirm('📡 [CORNER NEIGHBOR INTEL]\n公式noteの開発記録ページへ移動しますか？')) {
+          window.open('https://note.com/hajikkogurashi01', '_blank');
+        }
+      }, 400);
+    });
+
+    // Bottom 3 Hardware Controller Tiles
+    document.querySelectorAll('.hw-tile').forEach(tile => {
+      tile.addEventListener('click', () => {
+        const hw = tile.getAttribute('data-hw');
+        play8BitSound('select');
+        if (hw === 'dpad') {
+          openAllGamesModal();
+        } else if (hw === 'axis') {
+          showRetroToast('👾 [MEMBERS] — メンバー紹介ページ (members.html) へ移動します');
+          setTimeout(() => { window.location.href = '/members.html'; }, 700);
+        } else if (hw === 'gamepad') {
+          showRetroToast('🏠 [ABOUT / NEWS] — サークル紹介 (aboutus.html) へ移動します');
+          setTimeout(() => { window.location.href = '/aboutus.html'; }, 700);
+        }
+      });
+    });
+
+    // Start Animation Loop on Window Load
+    window.onload = function () {
+      drawOuterBackdrop();
+      function animate(now) {
+        drawHeroPixelScene(now || 0);
+        requestAnimationFrame(animate);
+      }
+      requestAnimationFrame(animate);
+    };
+  </script>
+</body>
+</html>
