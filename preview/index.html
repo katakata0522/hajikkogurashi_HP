@@ -345,26 +345,89 @@
     /* Interactive Cat Tooltip Bubble inside Hero */
     .cat-speech-bubble {
       position: absolute;
-      left: 33%;
-      bottom: 24%;
-      background: rgba(14, 15, 24, 0.94);
+      left: 28%;
+      bottom: 43%;
+      background: rgba(14, 15, 24, 0.96);
       border: 1.5px solid var(--neon-cyan);
       color: #ffffff;
       font-family: var(--font-pixel-jp);
       font-size: 11px;
-      padding: 4px 9px;
-      border-radius: 4px;
+      padding: 5px 11px;
+      border-radius: 5px;
       pointer-events: none;
       opacity: 0;
-      transform: translateY(4px);
-      transition: opacity 0.2s ease, transform 0.2s ease;
-      box-shadow: 0 0 10px rgba(0, 245, 255, 0.35);
+      transform: translateY(6px);
+      transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 0 14px rgba(0, 245, 255, 0.45);
       z-index: 6;
       white-space: nowrap;
+    }
+    .cat-speech-bubble::after {
+      content: "";
+      position: absolute;
+      bottom: -6px;
+      left: 26px;
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 6px solid var(--neon-cyan);
     }
     .cat-speech-bubble.visible {
       opacity: 1;
       transform: translateY(0);
+    }
+
+    /* Brand Easter Egg Glitch / Flip Animation */
+    .brand-title.flipped {
+      animation: brandFlipGlitch 0.45s ease-out;
+    }
+    @keyframes brandFlipGlitch {
+      0% { transform: scale(1) skewX(0deg); }
+      30% { transform: scale(1.08) skewX(-10deg); filter: drop-shadow(0 0 12px var(--neon-pink)); }
+      60% { transform: scale(0.96) skewX(6deg); filter: drop-shadow(0 0 12px var(--neon-cyan)); }
+      100% { transform: scale(1) skewX(0deg); }
+    }
+    .cassette-spinning {
+      animation: cassetteReelSpin 0.75s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    @keyframes cassetteReelSpin {
+      0% { transform: rotate(-13deg) scale(1); }
+      40% { transform: rotate(347deg) scale(1.18); filter: drop-shadow(0 0 18px var(--neon-cyan)); }
+      75% { transform: rotate(340deg) scale(1.04); }
+      100% { transform: rotate(-13deg) scale(1); }
+    }
+
+    /* Cartridge Physical Insertion Handshake & CRT Power Jolt */
+    @keyframes cartPhysicalInsert {
+      0% { transform: translateY(-12px) scale(0.94); }
+      40% { transform: translateY(6px) scale(1.03); }
+      70% { transform: translateY(-2px); }
+      100% { transform: translateY(1px) scale(1); }
+    }
+    .mini-cart-item.cart-inserting {
+      animation: cartPhysicalInsert 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
+      border-color: var(--neon-cyan) !important;
+      box-shadow: 0 0 18px rgba(0, 245, 255, 0.75) !important;
+    }
+
+    @keyframes crtBezelJolt {
+      0% { box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.95), 0 0 0 rgba(0, 245, 255, 0); }
+      20% { box-shadow: inset 0 0 32px rgba(0, 245, 255, 0.85), 0 0 30px rgba(0, 245, 255, 0.7); }
+      100% { box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.95), 0 0 0 rgba(0, 245, 255, 0); }
+    }
+    .crt-screen-bezel.crt-jolt {
+      animation: crtBezelJolt 0.45s ease-out;
+    }
+
+    @keyframes ledPowerSurge {
+      0% { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
+      25% { background: #ff2a9d; box-shadow: 0 0 18px #ff2a9d; transform: scale(1.45); }
+      60% { background: #00f5ff; box-shadow: 0 0 14px #00f5ff; }
+      100% { background: #22c55e; box-shadow: 0 0 6px #22c55e; transform: scale(1); }
+    }
+    .crt-led-power.led-surge {
+      animation: ledPowerSurge 0.5s ease-out;
     }
 
     /* Lower 2-Column Layout */
@@ -1425,36 +1488,68 @@
 
     .site-footer {
       margin-top: 36px;
-      padding: 24px 0 16px 0;
+      padding: 24px 0 20px 0;
       border-top: 1px solid #212435;
       font-family: var(--font-mono);
       font-size: 11px;
       color: #7b8196;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
     }
-    .footer-top {
+    .footer-layout {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 14px;
+      gap: 20px;
+    }
+    .footer-brand-col {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-width: 440px;
+    }
+    .footer-brand-name {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #f1f5f9;
+      letter-spacing: 0.5px;
+    }
+    .footer-circle-desc {
+      font-family: var(--font-pixel-jp);
+      font-size: 10.5px;
+      color: #8c93ab;
+      line-height: 1.5;
+    }
+    .footer-copyright {
+      font-size: 10px;
+      color: #64748b;
+      margin-top: 4px;
     }
     .footer-links {
       display: flex;
       align-items: center;
-      gap: 16px;
+      justify-content: flex-end;
+      gap: 12px 18px;
       flex-wrap: wrap;
+      max-width: 520px;
     }
     .footer-links a {
       color: #9aa1b8;
       text-decoration: none;
+      font-size: 11px;
       transition: color 0.15s ease;
     }
     .footer-links a:hover {
       color: #00f5ff;
       text-decoration: underline;
+    }
+    @media (max-width: 768px) {
+      .footer-layout {
+        flex-direction: column;
+        gap: 16px;
+      }
+      .footer-links {
+        justify-content: flex-start;
+      }
     }
     .social-pills {
       display: flex;
@@ -1550,9 +1645,9 @@
         <!-- HEADER / NAVIGATION ("Corner Neighbor") -->
         <header style="display:flex; align-items:center; justify-content:space-between; min-height: 48px; margin-bottom: 4px; position:relative; z-index:10;">
           <!-- Left Brand Logo + "Corner Neighbor" -->
-          <a href="/preview/" style="display:flex; align-items:center; gap: 13px; text-decoration:none; color:#ffffff;">
+          <a href="/preview/" id="header-brand-link" style="display:flex; align-items:center; gap: 13px; text-decoration:none; color:#ffffff;" title="Corner Neighbor (3回クリックで…？)">
             <!-- High-Detail Tilted Neon Retro Cassette SVG Icon -->
-            <div style="transform: rotate(-13deg); filter: drop-shadow(-2px 0 7px rgba(0,245,255,0.85)) drop-shadow(2px 2px 7px rgba(255,0,160,0.8)); display:flex; align-items:center;">
+            <div id="header-cassette-icon" style="transform: rotate(-13deg); filter: drop-shadow(-2px 0 7px rgba(0,245,255,0.85)) drop-shadow(2px 2px 7px rgba(255,0,160,0.8)); display:flex; align-items:center; transition: transform 0.3s ease;">
               <svg width="44" height="32" viewBox="0 0 44 32" shape-rendering="crispEdges">
                 <rect x="1" y="1" width="42" height="30" rx="3" fill="#131629" stroke="#00f5ff" stroke-width="2"/>
                 <rect x="30" y="1" width="13" height="30" fill="none" stroke="#ff2a9d" stroke-width="2"/>
@@ -1567,7 +1662,7 @@
                 <rect x="26" y="22" width="12" height="3" fill="#ff2a9d"/>
               </svg>
             </div>
-            <div class="brand-title" style="font-family: var(--font-mono); font-size: 18px; line-height: 1.06; color: #ffffff; letter-spacing: 0.5px;">
+            <div class="brand-title" id="header-brand-title" style="font-family: var(--font-mono); font-size: 18px; line-height: 1.06; color: #ffffff; letter-spacing: 0.5px;">
               <div>Corner</div>
               <div>Neighbor</div>
             </div>
@@ -2290,42 +2385,28 @@
 
         <!-- OFFICIAL FOOTER -->
         <footer class="site-footer">
-          <div class="footer-top">
-            <div>
-              <div style="font-size:12px; font-weight:bold; color:#e2e8f0; margin-bottom:2px;">
-                Corner Neighbor（コーナー ネイバー）
+          <div class="footer-layout">
+            <!-- Left Column: Brand & Circle Info & Copyright -->
+            <div class="footer-brand-col">
+              <div class="footer-brand-name">Corner Neighbor</div>
+              <div class="footer-circle-desc">Unreal Engine 5 & WEB インディーゲーム制作サークル</div>
+              <div class="footer-copyright">© 2024-2026 Corner Neighbor公式ホームページ. All Rights Reserved.</div>
+            </div>
+
+            <!-- Right Column: Navigation Links -->
+            <nav class="footer-nav" aria-label="フッターナビゲーション">
+              <div class="footer-links">
+                <a href="/preview/">ホーム</a>
+                <a href="/aboutus.html">私たちについて</a>
+                <a href="/members.html">メンバー紹介</a>
+                <a href="/portfolio.html">作品一覧</a>
+                <a href="/news.html">お知らせ</a>
+                <a href="/coming-soon.html">鋭意制作中！</a>
+                <a href="/privacy-policy.html">プライバシーポリシー</a>
+                <a href="/terms-of-service.html">利用規約</a>
+                <a href="/contact.php">お問い合わせ</a>
               </div>
-              <div style="font-size:10px; color:#6d7285;">
-                Unreal Engine 5 & WEB インディーゲーム制作サークル / 拠点：日本のどこかのはじっこ
-              </div>
-            </div>
-            <div class="social-pills">
-              <a href="https://x.com/Corner_neighbor" target="_blank" rel="noopener noreferrer" class="social-pill social-pill-x">
-                <span>𝕏 Twitter</span>
-              </a>
-              <a href="https://note.com/hajikkogurashi01" target="_blank" rel="noopener noreferrer" class="social-pill social-pill-note">
-                <span>note 開発手記</span>
-              </a>
-              <a href="https://www.youtube.com/@hajikkogurashi" target="_blank" rel="noopener noreferrer" class="social-pill social-pill-yt">
-                <span>YouTube チャンネル</span>
-              </a>
-            </div>
-          </div>
-          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; font-size:10px; padding-top:10px; border-top:1px solid #1a1c2a;">
-            <div>
-              © 2024-2026 Corner Neighbor公式ホームページ. All Rights Reserved.
-            </div>
-            <div class="footer-links">
-              <a href="/preview/">ホーム</a>
-              <a href="/aboutus.html">私たちについて</a>
-              <a href="/members.html">メンバー紹介</a>
-              <a href="/portfolio.html">作品一覧</a>
-              <a href="/news.html">お知らせ</a>
-              <a href="/coming-soon.html">鋭意制作中！</a>
-              <a href="/privacy-policy.html">プライバシーポリシー</a>
-              <a href="/terms-of-service.html">利用規約</a>
-              <a href="/contact.php">お問い合わせ</a>
-            </div>
+            </nav>
           </div>
         </footer>
 
@@ -2458,15 +2539,39 @@
           gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
           osc.start(now);
           osc.stop(now + 0.22);
-        } else if (type === 'cartridge') {
+        } else if (type === 'cartridge' || type === 'cartridge_clunk') {
+          // Rich physical Famicom insertion clunk ("カシャッ / ガチャン")
           osc.type = 'triangle';
-          osc.frequency.setValueAtTime(220, now);
-          osc.frequency.setValueAtTime(440, now + 0.04);
-          osc.frequency.setValueAtTime(660, now + 0.08);
-          gain.gain.setValueAtTime(0.08, now);
+          osc.frequency.setValueAtTime(180, now);
+          osc.frequency.exponentialRampToValueAtTime(70, now + 0.08);
+          gain.gain.setValueAtTime(0.12, now);
           gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
           osc.start(now);
           osc.stop(now + 0.16);
+
+          // Secondary mechanical latch click
+          const osc2 = audioCtx.createOscillator();
+          const gain2 = audioCtx.createGain();
+          osc2.type = 'square';
+          osc2.connect(gain2);
+          gain2.connect(audioCtx.destination);
+          osc2.frequency.setValueAtTime(620, now + 0.05);
+          osc2.frequency.setValueAtTime(1100, now + 0.09);
+          gain2.gain.setValueAtTime(0.09, now + 0.05);
+          gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+          osc2.start(now + 0.05);
+          osc2.stop(now + 0.22);
+        } else if (type === 'tape_rewind') {
+          // High pitch cassette reel rewind sound ("キュルキュル…")
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(340, now);
+          osc.frequency.exponentialRampToValueAtTime(1400, now + 0.08);
+          osc.frequency.exponentialRampToValueAtTime(580, now + 0.16);
+          osc.frequency.exponentialRampToValueAtTime(1900, now + 0.28);
+          gain.gain.setValueAtTime(0.1, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
+          osc.start(now);
+          osc.stop(now + 0.32);
         } else if (type === 'sword') {
           osc.type = 'sawtooth';
           osc.frequency.setValueAtTime(800, now);
@@ -3060,18 +3165,70 @@
           if (bubble) {
             const phrases = [
               '🐾 ゴロゴロ… 世界の端っこで開発中ニャ',
-              '🐾 ニャー… コーヒー淹れてくるニャ？',
-              '🐾 Zzz… 新作ROMのデバッグ夢見てるニャ'
+              '🐾 ニャー… 今日も深夜の作業、お疲れ様ニャ',
+              '🐾 Zzz… 新作カセットのデバッグ夢見てるニャ',
+              '🐾 カシャッ！カセットを入れ替えて遊ぶニャ！',
+              '🐾 開発室の味噌ラーメン、一口欲しいニャ…🍜',
+              '🐾 0.01秒の見切り一閃、猫パンチなら負けないニャ！🐾',
+              '🐾 世界の端っこで待ってるニャ。ゆっくり遊んでいってね',
+              '🐾 ふぁ〜あ… 雨音を聞きながらコード書くの、落ち着くニャ'
             ];
             bubble.textContent = phrases[Math.floor(Math.random() * phrases.length)];
             bubble.classList.add('visible');
             clearTimeout(catBubbleTimer);
-            catBubbleTimer = setTimeout(() => bubble.classList.remove('visible'), 2600);
+            catBubbleTimer = setTimeout(() => bubble.classList.remove('visible'), 2800);
           }
         } else {
           boostPulse = 1.0;
           play8BitSound('select');
           showRetroToast('⚡ [MIDNIGHT HIDEAWAY] — CRTモニター出力ブースト！');
+        }
+      });
+    }
+
+    // Header Brand Rapid-Click Easter Egg ("Corner Neighbor" -> "はじっこぐらし")
+    let brandClickCount = 0;
+    let brandClickTimer = null;
+    let brandFlipping = false;
+    const brandLink = document.getElementById('header-brand-link');
+    const brandTitle = document.getElementById('header-brand-title');
+    const cassetteIcon = document.getElementById('header-cassette-icon');
+
+    if (brandLink && brandTitle) {
+      brandLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        brandClickCount++;
+        clearTimeout(brandClickTimer);
+        brandClickTimer = setTimeout(() => {
+          brandClickCount = 0;
+        }, 800);
+
+        if (brandClickCount >= 3 && !brandFlipping) {
+          brandFlipping = true;
+          brandClickCount = 0;
+          play8BitSound('tape_rewind');
+
+          if (cassetteIcon) {
+            cassetteIcon.classList.remove('cassette-spinning');
+            void cassetteIcon.offsetWidth; // force reflow
+            cassetteIcon.classList.add('cassette-spinning');
+          }
+
+          const origHtml = brandTitle.innerHTML;
+          brandTitle.classList.add('flipped');
+          brandTitle.innerHTML = `
+            <div style="font-family:var(--font-pixel-jp); font-weight:bold; color:var(--neon-cyan); letter-spacing:1px; font-size:16px;">はじっこ</div>
+            <div style="font-family:var(--font-pixel-jp); font-weight:bold; color:var(--neon-pink); letter-spacing:1px; font-size:16px;">ぐらし</div>
+          `;
+          showRetroToast('📼 [REEL REWIND] キュルキュル… はじっこぐらしモード起動！');
+
+          setTimeout(() => {
+            brandTitle.classList.remove('flipped');
+            brandTitle.innerHTML = origHtml;
+            brandFlipping = false;
+          }, 2400);
         }
       });
     }
@@ -3318,11 +3475,32 @@
       }
     };
 
-    function switchCartridge(cartId) {
-      if (activeCart === cartId && crtNoiseTimer <= 0) return;
+    function switchCartridge(cartId, triggerEl) {
       activeCart = cartId;
-      play8BitSound('cartridge');
-      crtNoiseTimer = 12; // Frames of retro TV static
+      play8BitSound('cartridge_clunk');
+      crtNoiseTimer = 16; // Frames of retro TV static
+
+      // Physical Cartridge Insertion Animation on clicked slot
+      const cartEl = triggerEl || document.querySelector(`.mini-cart-item[data-cart="${cartId}"]`);
+      if (cartEl) {
+        cartEl.classList.remove('cart-inserting');
+        void cartEl.offsetWidth; // force reflow
+        cartEl.classList.add('cart-inserting');
+      }
+
+      // CRT Bezel Power Jolt & LED Surge
+      const bezel = document.getElementById('crt-screen-bezel');
+      if (bezel) {
+        bezel.classList.remove('crt-jolt');
+        void bezel.offsetWidth;
+        bezel.classList.add('crt-jolt');
+      }
+      const led = document.querySelector('.crt-led-power');
+      if (led) {
+        led.classList.remove('led-surge');
+        void led.offsetWidth;
+        led.classList.add('led-surge');
+      }
 
       // Update Active Cartridge UI
       document.querySelectorAll('.mini-cart-item').forEach(el => {
@@ -3339,6 +3517,7 @@
         if (osdAct) osdAct.textContent = conf.action;
         if (descEl) descEl.textContent = conf.desc;
         if (playBtn) playBtn.href = conf.url;
+        showRetroToast(`📼 [ROM INSERTED] ガチャン！ ${conf.channel} を挿入！`);
       }
 
       if (cartId === 'brake') {
@@ -3432,7 +3611,7 @@
       const selectCart = () => {
         const c = el.getAttribute('data-cart');
         if (c) {
-          switchCartridge(c);
+          switchCartridge(c, el);
           document.querySelectorAll('.mini-cart-item').forEach(item => {
             item.setAttribute('aria-pressed', item === el ? 'true' : 'false');
           });

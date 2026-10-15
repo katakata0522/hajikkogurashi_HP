@@ -550,36 +550,68 @@
     /* Site Footer */
     .site-footer {
       margin-top: 48px;
-      padding: 24px 0 16px 0;
+      padding: 24px 0 20px 0;
       border-top: 1px solid #212435;
       font-family: var(--font-mono);
       font-size: 11px;
       color: #7b8196;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
     }
-    .footer-top {
+    .footer-layout {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 14px;
+      gap: 20px;
+    }
+    .footer-brand-col {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-width: 440px;
+    }
+    .footer-brand-name {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #f1f5f9;
+      letter-spacing: 0.5px;
+    }
+    .footer-circle-desc {
+      font-family: var(--font-pixel-jp);
+      font-size: 10.5px;
+      color: #8c93ab;
+      line-height: 1.5;
+    }
+    .footer-copyright {
+      font-size: 10px;
+      color: #64748b;
+      margin-top: 4px;
     }
     .footer-links {
       display: flex;
       align-items: center;
-      gap: 16px;
+      justify-content: flex-end;
+      gap: 12px 18px;
       flex-wrap: wrap;
+      max-width: 520px;
     }
     .footer-links a {
       color: #9aa1b8;
       text-decoration: none;
+      font-size: 11px;
       transition: color 0.15s ease;
     }
     .footer-links a:hover {
       color: var(--neon-cyan);
       text-decoration: underline;
+    }
+    @media (max-width: 768px) {
+      .footer-layout {
+        flex-direction: column;
+        gap: 16px;
+      }
+      .footer-links {
+        justify-content: flex-start;
+      }
     }
 
     /* Floating Back to Top Button */
@@ -885,39 +917,28 @@
 
     <!-- FOOTER -->
     <footer class="site-footer">
-      <div class="footer-top">
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span style="font-family:var(--font-pixel-en); color:var(--neon-cyan);">CORNER NEIGHBOR</span>
-          <span style="color:#4a5068;">//</span>
-          <span>世界の端っこでゲームを作る</span>
+      <div class="footer-layout">
+        <!-- Left Column: Brand & Circle Info & Copyright -->
+        <div class="footer-brand-col">
+          <div class="footer-brand-name">Corner Neighbor</div>
+          <div class="footer-circle-desc">Unreal Engine 5 & WEB インディーゲーム制作サークル</div>
+          <div class="footer-copyright">© 2024-2026 Corner Neighbor公式ホームページ. All Rights Reserved.</div>
         </div>
-        <div class="social-pills">
-          <a href="https://x.com/Corner_neighbor" target="_blank" rel="noopener noreferrer" class="social-pill social-pill-x">
-            <span>𝕏 Twitter</span>
-          </a>
-          <a href="https://note.com/hajikkogurashi01" target="_blank" rel="noopener noreferrer" class="social-pill social-pill-note">
-            <span>note 開発手記</span>
-          </a>
-          <a href="https://www.youtube.com/@hajikkogurashi" target="_blank" rel="noopener noreferrer" class="social-pill social-pill-yt">
-            <span>YouTube チャンネル</span>
-          </a>
-        </div>
-      </div>
-      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; font-size:10px; padding-top:10px; border-top:1px solid #1a1c2a;">
-        <div>
-          © 2024-2026 Corner Neighbor公式ホームページ. All Rights Reserved.
-        </div>
-        <div class="footer-links">
-          <a href="/preview/">ホーム</a>
-          <a href="/aboutus.html">私たちについて</a>
-          <a href="/members.html">メンバー紹介</a>
-          <a href="/portfolio.html">作品一覧</a>
-          <a href="/news.html">お知らせ</a>
-          <a href="/coming-soon.html">鋭意制作中！</a>
-          <a href="/privacy-policy.html">プライバシーポリシー</a>
-          <a href="/terms-of-service.html">利用規約</a>
-          <a href="/contact.php">お問い合わせ</a>
-        </div>
+
+        <!-- Right Column: Navigation Links -->
+        <nav class="footer-nav" aria-label="フッターナビゲーション">
+          <div class="footer-links">
+            <a href="/preview/">ホーム</a>
+            <a href="/aboutus.html">私たちについて</a>
+            <a href="/members.html">メンバー紹介</a>
+            <a href="/portfolio.html">作品一覧</a>
+            <a href="/news.html">お知らせ</a>
+            <a href="/coming-soon.html">鋭意制作中！</a>
+            <a href="/privacy-policy.html">プライバシーポリシー</a>
+            <a href="/terms-of-service.html">利用規約</a>
+            <a href="/contact.php">お問い合わせ</a>
+          </div>
+        </nav>
       </div>
     </footer>
 
