@@ -3053,8 +3053,8 @@
       // Recessed circular exhaust cavity
       px(ctx, 143, 11, 16, 16, '#0d091a');
       px(ctx, 144, 12, 14, 14, '#080512');
-      // Smooth 4-Phase Rotating Propeller Blades
-      const fanStep = Math.floor(time / 45) % 4;
+      // Smooth 4-Phase Rotating Propeller Blades (ゆったり穏やかに回る速度に調整)
+      const fanStep = Math.floor(time / 260) % 4;
       const bladeColor = '#7c719e';
       const bladeShade = '#554a73';
       if (fanStep === 0) {
@@ -3081,11 +3081,11 @@
       // Central brass rotor cap
       px(ctx, 149, 17, 4, 4, '#fbbf24');
       px(ctx, 150, 18, 2, 2, '#d97706');
-      // Power LED (Green, pulsing with slight glow)
-      const fanLedGlow = Math.sin(time * 0.006) > 0 ? '#22c55e' : '#16a34a';
+      // Power LED (Green, gentle soft glow)
+      const fanLedGlow = Math.sin(time * 0.003) > 0 ? '#22c55e' : '#16a34a';
       px(ctx, 158, 9, 2, 2, fanLedGlow);
-      // Swaying Pull-String Cord with round tassel
-      const cordSway = Math.sin(time * 0.0035) * 1.5;
+      // Swaying Pull-String Cord with round tassel (ゆったり微風に揺れる)
+      const cordSway = Math.sin(time * 0.0018) * 0.9;
       px(ctx, 160 + cordSway * 0.3, 29, 1, 6, '#cbd5e1');
       px(ctx, 160 + cordSway * 0.7, 35, 1, 6, '#cbd5e1');
       px(ctx, 159 + cordSway, 41, 3, 3, '#fbbf24'); // Golden pull tassel
@@ -3136,80 +3136,44 @@
       px(ctx, 33, 122, 4, 5, '#ff2a9d');
 
       // ====================================================================
-      // F. MULTI-MONITOR DEVELOPER DESK SETUP & ADVANCED SCREEN DYNAMICS
+      // F. MULTI-MONITOR DEVELOPER DESK SETUP (CALM SUB-MONITORS + DYNAMIC CRT)
+      // Sub-monitors are kept calm and static to preserve focus and aesthetics.
+      // Dynamic animations are focused on Main CRT, Far-Left Arcade, and Fan.
       // ====================================================================
-      // Top-left hanging monitor 1: Phosphor Green Radar Screen
+      // Top-left hanging monitor 1 (Calm Blue Grid Display)
       px(ctx, 92, 16, 22, 19, '#3b335e');
-      px(ctx, 95, 19, 16, 13, '#062814');
-      px(ctx, 99, 20, 8, 1, '#166534');
-      px(ctx, 99, 30, 8, 1, '#166534');
-      px(ctx, 96, 23, 1, 6, '#166534');
-      px(ctx, 109, 23, 1, 6, '#166534');
-      const sweepAngle = (time * 0.003) % (Math.PI * 2);
-      const swX = 103 + Math.cos(sweepAngle) * 5.5;
-      const swY = 25 + Math.sin(sweepAngle) * 4.5;
-      ctx.strokeStyle = '#22c55e';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(103, 25);
-      ctx.lineTo(swX, swY);
-      ctx.stroke();
-      if (Math.sin(time * 0.005) > 0.15) px(ctx, 106, 22, 2, 2, '#86efac');
+      px(ctx, 95, 19, 16, 13, '#3b82f6');
+      px(ctx, 98, 22, 10, 8, '#93c5fd');
 
-      // Top-right hanging monitor 2: Audio Spectrum Equalizer (5 dancing bars)
+      // Top-right hanging monitor 2 (Calm Cyan Level Meter)
       px(ctx, 117, 22, 22, 19, '#3b335e');
-      px(ctx, 120, 25, 16, 13, '#091524');
-      const eqFreqs = [0.012, 0.017, 0.021, 0.015, 0.025];
-      const eqColors = ['#38bdf8', '#4ade80', '#facc15', '#f43f5e', '#c084fc'];
-      for (let b = 0; b < 5; b++) {
-        const barH = 2 + Math.floor((Math.sin(time * eqFreqs[b] + b * 1.3) + 1) * 4.2);
-        px(ctx, 122 + b * 3, 36 - barH, 2, barH, eqColors[b]);
-      }
+      px(ctx, 120, 25, 16, 13, '#00f5ff');
+      px(ctx, 123, 28, 10, 8, '#cffafe');
 
-      // Mid-upper CRT Monitor: Live Network & Git Branch Graph
+      // Mid-upper CRT Monitor (Calm Cyan Status View)
       px(ctx, 71, 37, 34, 27, '#4a436e');
-      px(ctx, 75, 41, 26, 19, '#0b162c');
-      px(ctx, 78, 47, 20, 1.5, '#1e3a8a');
-      px(ctx, 84, 53, 14, 1.5, '#4338ca');
-      px(ctx, 81, 48, 2, 2, '#4338ca');
-      px(ctx, 83, 50, 2, 2, '#4338ca');
-      const pulseNode = Math.floor(time / 420) % 3;
-      px(ctx, 78, 46, 3, 3, pulseNode === 0 ? '#60a5fa' : '#2563eb');
-      px(ctx, 86, 46, 3, 3, pulseNode === 1 ? '#38bdf8' : '#0284c7');
-      px(ctx, 93, 46, 3, 3, pulseNode === 2 ? '#22d3ee' : '#0891b2');
-      px(ctx, 87, 52, 3, 3, '#a855f7');
-      px(ctx, 94, 52, 3, 3, '#ec4899');
+      px(ctx, 75, 41, 26, 19, '#00d4ff');
+      px(ctx, 78, 44, 20, 13, '#a5f3fc');
 
-      // Mid-small Pink CRT Monitor: Live Chat / Discord Feed
+      // Mid-small Pink CRT Monitor (Calm Pink Terminal)
       px(ctx, 106, 46, 19, 18, '#4a436e');
-      px(ctx, 109, 49, 13, 12, '#1e112a');
-      const chatScroll = Math.floor(time / 600) % 2;
-      px(ctx, 111, 51 + chatScroll, 8, 2, '#f472b6');
-      px(ctx, 111, 55 + chatScroll, 10, 2, '#e879f9');
-      px(ctx, 111, 59, 7, 2, '#38bdf8');
+      px(ctx, 109, 49, 13, 12, '#ff2a9d');
+      px(ctx, 111, 51, 9, 7, '#fbcfe8');
 
-      // Mid-right Cyan CRT Monitor: Memory Hex / Diagnostics
+      // Mid-right Cyan CRT Monitor (Calm Code View)
       px(ctx, 127, 48, 22, 19, '#4a436e');
-      px(ctx, 130, 51, 16, 13, '#0e2433');
-      const hexScroll = Math.floor(time / 260) % 3;
-      px(ctx, 132, 53 + hexScroll, 12, 1.5, '#22d3ee');
-      px(ctx, 132, 56 + hexScroll, 9, 1.5, '#67e8f9');
-      px(ctx, 132, 60, 11, 1.5, '#a5f3fc');
+      px(ctx, 130, 51, 16, 13, '#22d3ee');
+      px(ctx, 133, 54, 10, 8, '#cffafe');
 
-      // Left Stacked Amber CRT & Vertical Server Tower
+      // Left Stacked Amber CRT & Vertical Server Tower (Static, no excessive blinking)
       px(ctx, 56, 56, 20, 22, '#5c527d');
-      px(ctx, 59, 60, 14, 14, '#241403');
-      const amberScroll = Math.floor(time / 300) % 3;
-      px(ctx, 61, 62 + amberScroll, 10, 1.5, '#f59e0b');
-      px(ctx, 61, 66 + amberScroll, 7, 1.5, '#d97706');
-      px(ctx, 61, 70, 9, 1.5, '#fbbf24');
-
-      // Server Tower with rapidly flickering HDD & LAN activity LEDs
+      px(ctx, 59, 60, 14, 14, '#d97706');
+      px(ctx, 61, 63, 10, 8, '#fde68a');
       px(ctx, 56, 79, 30, 72, '#2a224a');
-      px(ctx, 65, 84, 16, 20, '#121829');
-      const hddFlicker = Math.sin(time * 0.035) > 0.1;
-      px(ctx, 59, 84, 2, 2, hddFlicker ? '#f59e0b' : '#78350f');
-      px(ctx, 59, 88, 2, 2, Math.sin(time * 0.02) > 0 ? '#22c55e' : '#14532d');
+      px(ctx, 65, 84, 16, 20, '#1d4ed8');
+      px(ctx, 68, 87, 10, 14, '#60a5fa');
+      px(ctx, 59, 84, 2, 2, '#f59e0b');
+      px(ctx, 59, 88, 2, 2, '#22c55e');
       px(ctx, 59, 92, 2, 2, '#00f5ff');
       px(ctx, 67, 110, 14, 2, '#18122e');
       px(ctx, 67, 116, 14, 2, '#18122e');
@@ -3226,22 +3190,62 @@
       const pcMode = Math.floor(time / 5000) % 5;
 
       if (pcMode === 0) {
-        // --- MODE 0: VS Code / IDE Code Editor ---
+        // --- MODE 0: VS Code / IDE Code Editor (Realistic Typing & Scrolling) ---
         // Line number gutter
         px(ctx, 94, 72, 3, 20, '#1e293b');
-        // Syntax highlighted code lines
-        px(ctx, 99, 74, 7, 1.5, '#38bdf8'); // const
-        px(ctx, 107, 74, 9, 1.5, '#facc15'); // heroData
-        px(ctx, 101, 78, 6, 1.5, '#f472b6'); // function
-        px(ctx, 108, 78, 10, 1.5, '#4ade80'); // 'corner'
-        px(ctx, 101, 82, 5, 1.5, '#c084fc'); // return
-        px(ctx, 107, 82, 8, 1.5, '#38bdf8'); // true
-        // Active typing line with growing/shrinking length
-        const typingLen = 4 + (Math.floor(time / 180) % 5) * 2;
-        px(ctx, 99, 86, typingLen, 1.5, '#e2e8f0');
-        // Blinking Cyan Cursor
-        if (Math.floor(time / 280) % 2 === 0) {
-          px(ctx, 99 + typingLen + 1, 85, 2, 3, '#00f5ff');
+
+        // Full code snippet lines with syntax highlighting
+        const codeLines = [
+          [{ w: 4, c: '#38bdf8' }, { w: 6, c: '#facc15' }, { w: 2, c: '#94a3b8' }, { w: 4, c: '#4ade80' }], // const app = run();
+          [{ w: 2, c: '#090e1a' }, { w: 3, c: '#38bdf8' }, { w: 5, c: '#facc15' }, { w: 4, c: '#a5f3fc' }], //   let speed = 4.2;
+          [{ w: 2, c: '#090e1a' }, { w: 4, c: '#f472b6' }, { w: 3, c: '#38bdf8' }, { w: 3, c: '#facc15' }], //   loop(dt => {
+          [{ w: 4, c: '#090e1a' }, { w: 5, c: '#facc15' }, { w: 5, c: '#4ade80' }],                         //     hero.jump();
+          [{ w: 4, c: '#090e1a' }, { w: 6, c: '#4ade80' }, { w: 3, c: '#94a3b8' }],                         //     drawGame();
+          [{ w: 2, c: '#090e1a' }, { w: 3, c: '#c084fc' }]                                                  //   });
+        ];
+
+        // Typing time progression within 5-second mode
+        const cycleT = time % 5000;
+        const lineDuration = 740; // 740ms per line
+        const activeLineIdx = Math.min(codeLines.length - 1, Math.floor(cycleT / lineDuration));
+        const lineElapsed = cycleT - activeLineIdx * lineDuration;
+        const typingProgress = Math.min(1.0, lineElapsed / 560); // Type for 560ms, then brief pause before Enter
+
+        // Max 4 visible lines on CRT: once activeLineIdx > 3, older lines scroll off top!
+        const startLineIdx = Math.max(0, activeLineIdx - 3);
+
+        for (let l = startLineIdx; l <= activeLineIdx; l++) {
+          const rowY = 74 + (l - startLineIdx) * 4;
+          if (rowY > 87) continue;
+
+          // Gutter line number dot
+          px(ctx, 95, rowY, 1.5, 1.5, '#475569');
+
+          const tokens = codeLines[l];
+          const isTypingLine = (l === activeLineIdx);
+          const totalLineW = tokens.reduce((sum, tk) => sum + tk.w, 0);
+          const currentVisibleW = isTypingLine ? Math.floor(typingProgress * totalLineW) : totalLineW;
+
+          let curX = 99;
+          let remainingW = currentVisibleW;
+          for (let tk of tokens) {
+            if (remainingW <= 0) break;
+            const drawW = Math.min(tk.w, remainingW);
+            if (tk.c !== '#090e1a') {
+              px(ctx, curX, rowY, drawW, 1.5, tk.c);
+            }
+            curX += tk.w;
+            remainingW -= tk.w;
+          }
+
+          // Blinking cyan cursor at the typing head of the active line
+          if (isTypingLine) {
+            const cursorX = 99 + currentVisibleW;
+            const isCursorBlink = Math.floor(time / 220) % 2 === 0;
+            if (isCursorBlink && cursorX <= 118) {
+              px(ctx, cursorX + 1, rowY - 0.5, 1.5, 3, '#00f5ff');
+            }
+          }
         }
       } else if (pcMode === 1) {
         // --- MODE 1: Pixel Art Sprite Editor (Aseprite Style) ---
@@ -3326,22 +3330,70 @@
         else if (spinIdx === 2) px(ctx, 116, 87, 3, 1, '#4ade80');
         else { px(ctx, 116, 86, 1, 1, '#4ade80'); px(ctx, 118, 88, 1, 1, '#4ade80'); }
       } else {
-        // --- MODE 4: 2D Mini-Game Test Run ---
+        // --- MODE 4: 2D Dino Runner Mini-Game (Realistic Ground Running & Timed Obstacle Jump) ---
+        // Dark retro canvas
         px(ctx, 93, 71, 29, 22, '#071824');
         // Ground line
         px(ctx, 94, 88, 27, 1, '#1e3a5f');
-        // Moving track dashes
-        const trackDash = Math.floor(time / 80) % 6;
-        px(ctx, 96 + trackDash, 89, 3, 1, '#38bdf8');
-        px(ctx, 106 + trackDash, 89, 3, 1, '#38bdf8');
-        // Mini game protagonist jumping
-        const jumpY = Math.abs(Math.sin(time * 0.008)) * 6;
-        px(ctx, 100, 83 - jumpY, 5, 5, '#f43f5e');
-        // Approaching hazard obstacle
-        const obstX = 118 - ((time * 0.03) % 24);
-        px(ctx, obstX, 85, 3, 3, '#facc15');
-        // Mini Score HUD
-        px(ctx, 95, 73, 9, 2, '#e0f2fe');
+
+        // Obstacle & Jump Cycle (2400ms per obstacle)
+        const dinoCycle = time % 2400;
+        // Obstacle (サボテン) moves from right (x: 126) to left (x: 86)
+        const obstX = 126 - (dinoCycle / 2400) * 40;
+
+        // Player Jump timing:
+        // When dinoCycle < 1200 or > 1720: Grounded & Running (waiting for obstacle)
+        // When dinoCycle 1200..1720 (520ms): Jumps cleanly over approaching obstacle!
+        const isJumping = (dinoCycle >= 1200 && dinoCycle <= 1720);
+        let jumpY = 0;
+        if (isJumping) {
+          const jumpP = (dinoCycle - 1200) / 520; // 0.0 to 1.0
+          jumpY = Math.sin(jumpP * Math.PI) * 7.5;
+        }
+
+        // Moving ground dashes (speed lines)
+        const groundDash = Math.floor(time / 70) % 5;
+        px(ctx, 95 + groundDash, 89, 2, 1, '#22d3ee');
+        px(ctx, 105 + groundDash, 89, 2, 1, '#22d3ee');
+        px(ctx, 115 + groundDash, 89, 2, 1, '#22d3ee');
+
+        // Draw Cactus / Wood Obstacle
+        if (obstX >= 94 && obstX <= 121) {
+          px(ctx, obstX, 84, 2, 4, '#22c55e'); // Main stem
+          px(ctx, obstX - 1, 85, 1, 2, '#16a34a'); // Left arm
+          px(ctx, obstX + 2, 84, 1, 2, '#16a34a'); // Right arm
+        }
+
+        // Draw Dino Runner Character at x = 100
+        const dinoBaseY = 82 - jumpY;
+        // Dino Head & Snout
+        px(ctx, 102, dinoBaseY, 3, 2, '#38bdf8');
+        px(ctx, 104, dinoBaseY + 1, 1, 1, '#ffffff'); // Eye
+        // Dino Neck & Body
+        px(ctx, 100, dinoBaseY + 2, 4, 3, '#0284c7');
+        px(ctx, 99, dinoBaseY + 3, 1, 1, '#0284c7'); // Little tail
+        // Dino Tiny Arms
+        px(ctx, 103, dinoBaseY + 3, 1.5, 1, '#38bdf8');
+        // Dino Legs:
+        if (isJumping) {
+          // Jump pose: legs tucked backwards
+          px(ctx, 100, dinoBaseY + 5, 1.5, 1.5, '#0369a1');
+          px(ctx, 102, dinoBaseY + 5, 1.5, 1.5, '#0369a1');
+        } else {
+          // Ground running: alternating legs
+          const runStep = Math.floor(time / 90) % 2;
+          if (runStep === 0) {
+            px(ctx, 100, dinoBaseY + 5, 1.5, 1.5, '#0369a1');
+            px(ctx, 102, dinoBaseY + 5, 1.5, 0.5, '#0369a1');
+          } else {
+            px(ctx, 100, dinoBaseY + 5, 1.5, 0.5, '#0369a1');
+            px(ctx, 102, dinoBaseY + 5, 1.5, 1.5, '#0369a1');
+          }
+        }
+
+        // Score HUD: "HI 0048" style counting up with time
+        px(ctx, 95, 73, 8, 1.5, '#67e8f9');
+        px(ctx, 105, 73, 10, 1.5, '#e0f2fe');
       }
 
       // RIGHT DESK CODE MONITOR
