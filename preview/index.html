@@ -881,6 +881,477 @@
       border: 1px solid #2e344a;
     }
 
+    /* ATELIER HUB & DISPATCH (案A + 案D + 拡張SNS) */
+    .atelier-hub-section {
+      margin-top: 36px;
+      margin-bottom: 24px;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 22px;
+      align-items: stretch;
+    }
+    @media (max-width: 960px) {
+      .atelier-hub-section {
+        grid-template-columns: 1fr;
+        gap: 22px;
+      }
+    }
+
+    /* Left: Mini CRT Arcade Console (案A) */
+    .mini-console-card {
+      background: #12131d;
+      border: 1.5px solid #282c3f;
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+    .mini-console-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #222538;
+      padding-bottom: 8px;
+    }
+    .mini-console-title {
+      font-family: var(--font-pixel-en);
+      font-size: 11.5px;
+      color: #00f5ff;
+      letter-spacing: 0.8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .mini-console-badge {
+      font-family: var(--font-pixel-jp);
+      font-size: 9.5px;
+      color: #9aa1b8;
+    }
+
+    /* CRT Monitor Frame */
+    .crt-tv-frame {
+      background: #181926;
+      border: 3px solid #0d0e14;
+      border-radius: 8px;
+      padding: 10px 12px 12px 12px;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.8), 0 4px 14px rgba(0,0,0,0.6);
+      position: relative;
+    }
+    .crt-tv-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      padding: 0 4px;
+    }
+    .crt-brand-tag {
+      font-family: var(--font-pixel-en);
+      font-size: 8px;
+      color: #636882;
+      letter-spacing: 1px;
+    }
+    .crt-knobs {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+    }
+    .crt-knob {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #25283b;
+      border: 1px solid #3b3f5c;
+    }
+    .crt-led-power {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 6px #22c55e;
+      animation: pulse-led 2s infinite ease-in-out;
+    }
+    @keyframes pulse-led {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; box-shadow: 0 0 9px #22c55e; }
+    }
+
+    /* Inner Screen Glass */
+    .crt-screen-bezel {
+      background: #08090e;
+      border: 2px solid #1f2233;
+      border-radius: 6px;
+      position: relative;
+      overflow: hidden;
+      aspect-ratio: 16 / 10;
+      box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.95);
+      cursor: crosshair;
+    }
+    .crt-screen-bezel canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      image-rendering: pixelated;
+    }
+    .crt-screen-bezel::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+      background-size: 100% 3px;
+      pointer-events: none;
+      z-index: 10;
+      opacity: 0.55;
+    }
+    .crt-osd-channel {
+      position: absolute;
+      top: 8px;
+      left: 10px;
+      font-family: var(--font-pixel-en);
+      font-size: 9px;
+      color: #00f5ff;
+      text-shadow: 0 0 4px #00f5ff;
+      pointer-events: none;
+      z-index: 12;
+      letter-spacing: 0.5px;
+    }
+    .crt-osd-action {
+      position: absolute;
+      bottom: 8px;
+      right: 10px;
+      font-family: var(--font-pixel-jp);
+      font-size: 8.5px;
+      color: #ffd6ec;
+      background: rgba(26, 16, 40, 0.85);
+      border: 1px solid rgba(255, 42, 157, 0.5);
+      padding: 2px 6px;
+      border-radius: 3px;
+      pointer-events: none;
+      z-index: 12;
+    }
+
+    /* Cartridge Shelf / 4 Mini Cartridges */
+    .mini-cart-rack {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .mini-cart-item {
+      background: #151724;
+      border: 1.5px solid #282c3f;
+      border-radius: 4px;
+      padding: 6px 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      cursor: pointer;
+      transition: all 0.16s ease;
+      user-select: none;
+      text-align: center;
+    }
+    .mini-cart-item:hover {
+      transform: translateY(-2px);
+      border-color: #00f5ff;
+      background: #1b1e30;
+    }
+    .mini-cart-item.active {
+      border-color: #00f5ff;
+      background: #13222e;
+      box-shadow: 0 0 10px rgba(0, 245, 255, 0.35), inset 0 2px 4px rgba(0, 245, 255, 0.2);
+      transform: translateY(1px);
+    }
+    .mini-cart-icon {
+      font-size: 15px;
+      line-height: 1;
+    }
+    .mini-cart-label {
+      font-family: var(--font-pixel-jp);
+      font-size: 8.5px;
+      color: #e2e8f0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+    .mini-cart-tag {
+      font-family: var(--font-pixel-en);
+      font-size: 7px;
+      padding: 1px 3px;
+      border-radius: 2px;
+      letter-spacing: 0.3px;
+    }
+
+    .mini-console-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+      padding-top: 6px;
+      border-top: 1px solid #1f2233;
+    }
+
+    /* Right: Dispatch Hub (スクショ構成 + 案D + 拡張SNS) */
+    .dispatch-card-box {
+      background: #12131d;
+      border: 1.5px solid #282c3f;
+      border-radius: 8px;
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+      position: relative;
+    }
+    .dispatch-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #222538;
+      padding-bottom: 8px;
+    }
+    .dispatch-title {
+      font-family: var(--font-pixel-en);
+      font-size: 11.5px;
+      color: #ff2a9d;
+      letter-spacing: 0.8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dispatch-row {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      padding-bottom: 14px;
+      border-bottom: 1px solid #202334;
+    }
+    .dispatch-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    /* Circular White/Retro Icon (スクリーンショットの白丸デザインをリスペクト) */
+    .dispatch-circle-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #f1f5f9;
+      color: #0b0c13;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.25);
+      border: 2px solid #ffffff;
+      transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+    }
+    .dispatch-row:hover .dispatch-circle-icon {
+      transform: scale(1.06);
+      box-shadow: 0 0 14px rgba(0, 245, 255, 0.6);
+      border-color: #00f5ff;
+    }
+
+    .dispatch-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .dispatch-label {
+      font-family: var(--font-mono);
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 0.6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+    .dispatch-subtext {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: #a5b0cb;
+      word-break: break-all;
+    }
+
+    /* 案D: 拠点「日本のどこかのはじっこ」の情緒的演出 */
+    .base-atmosphere-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: #161a29;
+      border: 1px solid #2b324d;
+      border-radius: 5px;
+      padding: 4px 10px;
+      margin-top: 6px;
+      font-family: var(--font-pixel-jp);
+      font-size: 10px;
+      color: #38bdf8;
+    }
+    .lamp-glow-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #fbbf24;
+      box-shadow: 0 0 8px #fbbf24;
+      animation: lamp-flicker 3.2s infinite ease-in-out;
+    }
+    @keyframes lamp-flicker {
+      0%, 100% { opacity: 0.8; transform: scale(1); }
+      35% { opacity: 0.4; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.15); box-shadow: 0 0 12px #fbbf24; }
+      80% { opacity: 0.9; }
+    }
+
+    /* 拡張SNSカードリスト */
+    .sns-cards-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .sns-card-item {
+      background: #161826;
+      border: 1px solid #282c3f;
+      border-radius: 6px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.18s ease;
+    }
+    .sns-card-item:hover {
+      transform: translateX(3px);
+      background: #1b1e32;
+    }
+    .sns-card-note:hover {
+      border-color: #22c55e;
+      box-shadow: 0 0 12px rgba(34, 197, 94, 0.3);
+    }
+    .sns-card-x:hover {
+      border-color: #ffffff;
+      box-shadow: 0 0 12px rgba(255, 255, 255, 0.3);
+    }
+    .sns-card-yt:hover {
+      border-color: #ef4444;
+      box-shadow: 0 0 12px rgba(239, 68, 68, 0.35);
+    }
+
+    .sns-card-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sns-micro-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #f8fafc;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: bold;
+      flex-shrink: 0;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+    }
+    .sns-card-texts {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+    .sns-card-title {
+      font-family: var(--font-pixel-jp);
+      font-size: 11px;
+      color: #ffffff;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sns-card-desc {
+      font-family: var(--font-pixel-jp);
+      font-size: 9px;
+      color: #8c93ab;
+    }
+    .sns-card-arrow {
+      font-family: var(--font-pixel-en);
+      font-size: 11px;
+      color: #636882;
+      transition: color 0.15s ease, transform 0.15s ease;
+    }
+    .sns-card-item:hover .sns-card-arrow {
+      color: #00f5ff;
+      transform: translateX(2px);
+    }
+
+    /* 案C: 右下 ドット調 TOPへ戻るボタン (FLOATING BACK TO TOP) */
+    .btn-pixel-top {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #141522;
+      border: 2px solid #f59e0b;
+      box-shadow: 0 0 14px rgba(245, 158, 11, 0.4), inset 0 0 6px rgba(245, 158, 11, 0.2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 95;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(12px);
+      transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .btn-pixel-top.visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+    .btn-pixel-top:hover {
+      transform: translateY(-4px) scale(1.06);
+      border-color: #fde047;
+      box-shadow: 0 0 22px rgba(253, 224, 71, 0.7), inset 0 0 8px rgba(253, 224, 71, 0.3);
+    }
+    .btn-pixel-top-arrow {
+      width: 0;
+      height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-bottom: 9px solid #f59e0b;
+      transition: border-bottom-color 0.15s ease, transform 0.15s ease;
+    }
+    .btn-pixel-top:hover .btn-pixel-top-arrow {
+      border-bottom-color: #fde047;
+      transform: translateY(-1.5px);
+    }
+    .btn-pixel-top-text {
+      font-family: var(--font-pixel-en);
+      font-size: 7.5px;
+      color: #f59e0b;
+      margin-top: 1px;
+      letter-spacing: 0.5px;
+      font-weight: bold;
+    }
+    .btn-pixel-top:hover .btn-pixel-top-text {
+      color: #fde047;
+    }
+
     .inquiry-box {
       margin-top: 28px;
       background: #121422;
@@ -1551,22 +2022,194 @@
           </div>
         </section>
 
-        <!-- INQUIRY & CONTACT HUB -->
-        <section class="inquiry-box" aria-label="Contact and Inquiries">
-          <div>
-            <div style="font-family:var(--font-mono); font-size:15px; font-weight:bold; color:#ffffff; margin-bottom:4px;">
-              📡 COMMUNICATION & INQUIRIES
+        <!-- ATELIER HUB & EXPANDED DISPATCH (案A + 案D + 拡張SNS) -->
+        <section class="atelier-hub-section" id="atelier-hub" aria-label="Atelier Mini Arcade and Official Dispatch">
+
+          <!-- LEFT COLUMN: MINI CRT ARCADE CONSOLE (案A) -->
+          <div class="mini-console-card">
+            <div class="mini-console-header">
+              <div class="mini-console-title">
+                <span>🕹️</span>
+                <span>ATELIER MINI CRT CONSOLE</span>
+              </div>
+              <span class="mini-console-badge">作業机の片隅の小さなテレビ</span>
             </div>
-            <div style="font-family:var(--font-pixel-jp); font-size:11px; color:#959cb3;">
-              サークルへのご意見、応援メッセージ、コラボ・取材等のご連絡はお気軽にどうぞ。
+
+            <!-- CRT TV Monitor Frame -->
+            <div class="crt-tv-frame">
+              <div class="crt-tv-top-bar">
+                <span class="crt-brand-tag">CORNER-VISION 1989 // AV-INPUT</span>
+                <div class="crt-knobs">
+                  <div class="crt-knob" title="Channel"></div>
+                  <div class="crt-knob" title="Volume"></div>
+                  <div class="crt-led-power" title="POWER ON"></div>
+                </div>
+              </div>
+
+              <!-- CRT Bezel & Dynamic Canvas -->
+              <div class="crt-screen-bezel" id="crt-screen-bezel" title="画面をクリックして操作・遊ぶ！">
+                <div class="crt-osd-channel" id="crt-osd-channel">CH.01 [NEON SLICER]</div>
+                <div class="crt-osd-action" id="crt-osd-action">CLICK TO SLICE ⚔️</div>
+                <canvas id="mini-crt-canvas" width="320" height="200"></canvas>
+              </div>
+            </div>
+
+            <!-- 4 Mini Cartridge Slots -->
+            <div class="mini-cart-rack" id="mini-cart-rack">
+              <div class="mini-cart-item active" data-cart="slicer" title="漢字スライサー・マージ">
+                <span class="mini-cart-icon">🌸</span>
+                <span class="mini-cart-label">NEON SLICER</span>
+                <span class="mini-cart-tag" style="background:#3d123a; color:#ff4db8; border:1px solid #ff4db8;">ROM 01</span>
+              </div>
+              <div class="mini-cart-item" data-cart="mirror" title="LUMEN_MIRROR（光学反射）">
+                <span class="mini-cart-icon">💎</span>
+                <span class="mini-cart-label">LUMEN MIRROR</span>
+                <span class="mini-cart-tag" style="background:#103542; color:#67e8f9; border:1px solid #67e8f9;">ROM 02</span>
+              </div>
+              <div class="mini-cart-item" data-cart="mikiri" title="みきり一閃（0.01秒居合）">
+                <span class="mini-cart-icon">⚔️</span>
+                <span class="mini-cart-label">みきり一閃</span>
+                <span class="mini-cart-tag" style="background:#3b240b; color:#fcd34d; border:1px solid #fcd34d;">ROM 03</span>
+              </div>
+              <div class="mini-cart-item" data-cart="duel" title="POCKET DUEL（サイバー対決）">
+                <span class="mini-cart-icon">⚡</span>
+                <span class="mini-cart-label">POCKET DUEL</span>
+                <span class="mini-cart-tag" style="background:#28183d; color:#c084fc; border:1px solid #c084fc;">ROM 04</span>
+              </div>
+            </div>
+
+            <!-- Mini Console Bottom Action Buttons -->
+            <div class="mini-console-footer">
+              <div style="font-family:var(--font-pixel-jp); font-size:10px; color:#8e96b0;">
+                <span id="crt-status-desc">漢字をスワイプ＆合体させる物理パズル</span>
+              </div>
+              <div style="display:flex; gap:8px;">
+                <a id="btn-mini-play-full" href="https://hajikkoroom.xsrv.jp/kanji-slicer/" target="_blank" rel="noopener" class="btn-card-action" style="padding:4px 12px; font-size:10px; text-decoration:none; display:inline-flex; align-items:center; gap:4px;">
+                  <span>🕹️ FULL PLAY ▸</span>
+                </a>
+              </div>
             </div>
           </div>
-          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-            <a href="/contact.php" style="background:#ff2a9d; color:#ffffff; font-family:var(--font-mono); font-size:11px; font-weight:bold; padding:7px 16px; border-radius:4px; text-decoration:none; box-shadow:0 0 12px rgba(255,42,157,0.4); transition:all 0.15s;">
-              ✉️ お問い合わせフォーム
-            </a>
-            <span style="font-size:10px; color:#787e94; font-family:var(--font-mono);">または hajikkogurashi.official@gmail.com</span>
+
+          <!-- RIGHT COLUMN: OFFICIAL DISPATCH & EXTENDED SNS (スクショ構成 + 案D + 拡張SNS) -->
+          <div class="dispatch-card-box">
+            <div class="dispatch-header">
+              <div class="dispatch-title">
+                <span>📡</span>
+                <span>CORNER DISPATCH // 公式連絡所</span>
+              </div>
+              <a href="/aboutus.html" style="font-family:var(--font-pixel-jp); font-size:9.5px; color:#00f5ff; text-decoration:none;">ABOUT US ▸</a>
+            </div>
+
+            <!-- ROW 1: MAIL / CONTACT -->
+            <div class="dispatch-row">
+              <div class="dispatch-circle-icon" title="Email Contact">
+                ✉️
+              </div>
+              <div class="dispatch-info">
+                <div class="dispatch-label">
+                  <span>メール</span>
+                  <span style="font-size:10px; color:#71788f; font-weight:normal;">/ CONTACT</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:2px;">
+                  <span class="dispatch-subtext" id="mail-text">hajikkogurashi.official@gmail.com</span>
+                  <button id="btn-copy-mail" style="background:#1c2033; border:1px solid #373e5e; color:#00f5ff; font-family:var(--font-pixel-jp); font-size:9px; padding:2px 7px; border-radius:3px; cursor:pointer; transition:all 0.15s;" title="メールアドレスをコピー">
+                    📋 コピー
+                  </button>
+                </div>
+                <div style="margin-top:6px;">
+                  <a href="/contact.php" style="color:#ff2a9d; font-family:var(--font-pixel-jp); font-size:10.5px; text-decoration:underline;">
+                    ▸ Webお問い合わせフォームを開く
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- ROW 2: BASE / 案D (日本のどこかのはじっこ + 夜間工房演出) -->
+            <div class="dispatch-row">
+              <div class="dispatch-circle-icon" title="Base Location">
+                🏠
+              </div>
+              <div class="dispatch-info">
+                <div class="dispatch-label">
+                  <span>拠点</span>
+                  <span style="font-size:10px; color:#71788f; font-weight:normal;">/ BASE LOCATION</span>
+                </div>
+                <div style="font-family:var(--font-pixel-jp); font-size:13px; color:#ffffff; font-weight:bold; letter-spacing:0.4px;">
+                  日本のどこかのはじっこ
+                </div>
+                <!-- 案D: 情緒的ビジュアル演出 -->
+                <div class="base-atmosphere-badge">
+                  <span class="lamp-glow-dot"></span>
+                  <span>Rainy Night Studio // 深夜の屋根裏工房よりお届け中</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- ROW 3: EXPANDED SNS (note, 𝕏, YouTube) -->
+            <div class="dispatch-row" style="border-bottom:none; padding-bottom:0;">
+              <div class="dispatch-circle-icon" title="Official SNS Channels">
+                🌐
+              </div>
+              <div class="dispatch-info">
+                <div class="dispatch-label">
+                  <span>SNS</span>
+                  <span style="font-size:10px; color:#71788f; font-weight:normal;">/ OFFICIAL CHANNELS</span>
+                </div>
+                
+                <!-- 3 Expanded Rich SNS Cards -->
+                <div class="sns-cards-grid">
+                  <!-- note -->
+                  <a href="https://note.com/hajikkogurashi01" target="_blank" rel="noopener noreferrer" class="sns-card-item sns-card-note">
+                    <div class="sns-card-left">
+                      <div class="sns-micro-icon" style="color:#22c55e;">n</div>
+                      <div class="sns-card-texts">
+                        <div class="sns-card-title">
+                          <span>公式note</span>
+                          <span style="font-size:8px; color:#22c55e; background:#122a1c; padding:1px 5px; border-radius:3px;">開発手記</span>
+                        </div>
+                        <div class="sns-card-desc">泥臭い制作過程・仕様書・振り返りを定期公開中</div>
+                      </div>
+                    </div>
+                    <div class="sns-card-arrow">読む ↗</div>
+                  </a>
+
+                  <!-- 𝕏 Twitter -->
+                  <a href="https://x.com/Corner_neighbor" target="_blank" rel="noopener noreferrer" class="sns-card-item sns-card-x">
+                    <div class="sns-card-left">
+                      <div class="sns-micro-icon" style="color:#000000; font-family:sans-serif;">𝕏</div>
+                      <div class="sns-card-texts">
+                        <div class="sns-card-title">
+                          <span>公式𝕏 (Twitter)</span>
+                          <span style="font-size:8px; color:#e2e8f0; background:#232638; padding:1px 5px; border-radius:3px;">@Corner_neighbor</span>
+                        </div>
+                        <div class="sns-card-desc">日々の開発進捗動画・生存報告・速報アナウンス</div>
+                      </div>
+                    </div>
+                    <div class="sns-card-arrow">見る ↗</div>
+                  </a>
+
+                  <!-- YouTube -->
+                  <a href="https://www.youtube.com/@hajikkogurashi" target="_blank" rel="noopener noreferrer" class="sns-card-item sns-card-yt">
+                    <div class="sns-card-left">
+                      <div class="sns-micro-icon" style="color:#ef4444;">▶</div>
+                      <div class="sns-card-texts">
+                        <div class="sns-card-title">
+                          <span>公式YouTube</span>
+                          <span style="font-size:8px; color:#ef4444; background:#2e1518; padding:1px 5px; border-radius:3px;">@hajikkogurashi</span>
+                        </div>
+                        <div class="sns-card-desc">ゲームトレイラー・プレイ動画・BGMアーカイブ</div>
+                      </div>
+                    </div>
+                    <div class="sns-card-arrow">視聴 ↗</div>
+                  </a>
+                </div>
+
+              </div>
+            </div>
+
           </div>
+
         </section>
 
         <!-- OFFICIAL FOOTER -->
@@ -1618,6 +2261,14 @@
       <!-- Dynamically populated by JS -->
     </div>
   </div>
+
+  <!-- ====================================================================
+       案C: 右下 ドット調 TOPへ戻るボタン (BACK TO TOP BUTTON)
+       ==================================================================== -->
+  <button id="btn-back-to-top" class="btn-pixel-top" aria-label="ページトップへ戻る" title="TOPへ戻る">
+    <div class="btn-pixel-top-arrow"></div>
+    <span class="btn-pixel-top-text">TOP</span>
+  </button>
 
   <script>
     /**
@@ -1721,6 +2372,39 @@
           gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
           osc.start(now);
           osc.stop(now + 0.28);
+        } else if (type === 'jump') {
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(260, now);
+          osc.frequency.exponentialRampToValueAtTime(880, now + 0.18);
+          gain.gain.setValueAtTime(0.09, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+          osc.start(now);
+          osc.stop(now + 0.22);
+        } else if (type === 'cartridge') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(220, now);
+          osc.frequency.setValueAtTime(440, now + 0.04);
+          osc.frequency.setValueAtTime(660, now + 0.08);
+          gain.gain.setValueAtTime(0.08, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+          osc.start(now);
+          osc.stop(now + 0.16);
+        } else if (type === 'sword') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(800, now);
+          osc.frequency.exponentialRampToValueAtTime(140, now + 0.15);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+          osc.start(now);
+          osc.stop(now + 0.18);
+        } else if (type === 'alert') {
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(880, now);
+          osc.frequency.setValueAtTime(1760, now + 0.05);
+          gain.gain.setValueAtTime(0.1, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+          osc.start(now);
+          osc.stop(now + 0.15);
         }
       } catch (e) {
         // Ignore audio errors if blocked
@@ -2395,14 +3079,530 @@
       });
     });
 
-    // Immediate First Frame Draw & Continuous Animation Loop
+    // ====================================================================
+    // ATELIER HUB: EMAIL COPY & TOP BUTTON (案C)
+    // ====================================================================
+    addListenerSafe('btn-copy-mail', 'click', () => {
+      const email = 'hajikkogurashi.official@gmail.com';
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(email).then(() => {
+          play8BitSound('select');
+          showRetroToast('📋 メールアドレスをコピーしました！');
+        }).catch(() => {
+          prompt('メールアドレスをコピーしてください:', email);
+        });
+      } else {
+        prompt('メールアドレスをコピーしてください:', email);
+      }
+    });
+
+    // 案C: 右下 ドット調 TOPへ戻るボタン
+    const btnBackToTop = document.getElementById('btn-back-to-top');
+    if (btnBackToTop) {
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 240) {
+          btnBackToTop.classList.add('visible');
+        } else {
+          btnBackToTop.classList.remove('visible');
+        }
+      }, { passive: true });
+
+      btnBackToTop.addEventListener('click', () => {
+        play8BitSound('jump');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+
+    // ====================================================================
+    // 案A: MINI CRT CONSOLE ENGINE & INTERACTIVE RETRO TV
+    // ====================================================================
+    const miniCrtCanvas = document.getElementById('mini-crt-canvas');
+    let miniCrtCtx = null;
+    if (miniCrtCanvas) {
+      miniCrtCtx = miniCrtCanvas.getContext('2d');
+    }
+
+    let activeCart = 'slicer'; // 'slicer' | 'mirror' | 'mikiri' | 'duel'
+    let crtNoiseTimer = 0;
+    let crtAnimTime = 0;
+
+    // Slicer Mini state
+    const slicerParticles = [
+      { x: 70, y: 30, vx: 0.3, vy: 0.5, char: '木', cut: false },
+      { x: 190, y: 40, vx: -0.4, vy: 0.45, char: '火', cut: false },
+      { x: 130, y: 15, vx: 0.2, vy: 0.6, char: '水', cut: false }
+    ];
+    let sliceSlashAnim = 0;
+
+    // Mirror Mini state
+    let mirrorAngle = 45; // 45 or 135
+
+    // Mikiri Mini state
+    let mikiriPhase = 'waiting'; // 'ready' | 'waiting' | 'trigger' | 'hit' | 'early'
+    let mikiriTriggerTime = 0;
+    let mikiriReactionTime = 0;
+    let mikiriTimer = null;
+
+    function resetMikiriMini() {
+      clearTimeout(mikiriTimer);
+      mikiriPhase = 'waiting';
+      mikiriTriggerTime = 0;
+      mikiriReactionTime = 0;
+      const delay = 1800 + Math.random() * 2200;
+      mikiriTimer = setTimeout(() => {
+        if (activeCart === 'mikiri') {
+          mikiriPhase = 'trigger';
+          mikiriTriggerTime = performance.now();
+          play8BitSound('alert');
+          const osd = document.getElementById('crt-osd-action');
+          if (osd) osd.textContent = '！！ 今だ！斬れ！ ⚔️';
+        }
+      }, delay);
+    }
+
+    const CART_CONFIGS = {
+      slicer: {
+        channel: 'CH.01 [NEON SLICER]',
+        action: 'CLICK TO SLICE ⚔️',
+        desc: 'ネオン漢字をスワイプ＆合体！物理マージパズル',
+        url: 'https://hajikkoroom.xsrv.jp/kanji-slicer/'
+      },
+      mirror: {
+        channel: 'CH.02 [LUMEN MIRROR]',
+        action: 'CLICK TO ROTATE 💎',
+        desc: '鏡の角度を操作して光を導く光学反射パズル',
+        url: 'https://hajikkoroom.xsrv.jp/lumen-mirror/'
+      },
+      mikiri: {
+        channel: 'CH.03 [みきり一閃]',
+        action: 'WAIT FOR [！] THEN CLICK ⚡',
+        desc: '合図の瞬間を見極めろ！0.01秒の超反応居合バトル',
+        url: 'https://hajikkoroom.xsrv.jp/mikiri-issen/'
+      },
+      duel: {
+        channel: 'CH.04 [POCKET DUEL]',
+        action: 'CLICK FOR LIGHTNING ⚡',
+        desc: '雨のサイバー秘密基地で対峙するドット絵剣士たち',
+        url: 'https://hajikkoroom.xsrv.jp/preview/'
+      }
+    };
+
+    function switchCartridge(cartId) {
+      if (activeCart === cartId && crtNoiseTimer <= 0) return;
+      activeCart = cartId;
+      play8BitSound('cartridge');
+      crtNoiseTimer = 14; // Frames of retro TV static
+
+      // Update Active Cartridge UI
+      document.querySelectorAll('.mini-cart-item').forEach(el => {
+        el.classList.toggle('active', el.getAttribute('data-cart') === cartId);
+      });
+
+      const conf = CART_CONFIGS[cartId];
+      if (conf) {
+        const osdCh = document.getElementById('crt-osd-channel');
+        const osdAct = document.getElementById('crt-osd-action');
+        const descEl = document.getElementById('crt-status-desc');
+        const playBtn = document.getElementById('btn-mini-play-full');
+        if (osdCh) osdCh.textContent = conf.channel;
+        if (osdAct) osdAct.textContent = conf.action;
+        if (descEl) descEl.textContent = conf.desc;
+        if (playBtn) playBtn.href = conf.url;
+      }
+
+      if (cartId === 'mikiri') {
+        resetMikiriMini();
+      }
+    }
+
+    // Cartridge buttons event binding
+    document.querySelectorAll('.mini-cart-item').forEach(el => {
+      el.addEventListener('click', () => {
+        const c = el.getAttribute('data-cart');
+        if (c) switchCartridge(c);
+      });
+    });
+
+    // CRT Screen click interaction
+    const crtScreen = document.getElementById('crt-screen-bezel');
+    if (crtScreen) {
+      crtScreen.addEventListener('click', () => {
+        if (activeCart === 'slicer') {
+          sliceSlashAnim = 12;
+          play8BitSound('sword');
+          showRetroToast('⚔️ [NEON SLICER] — 漢字を一刀両断！');
+          slicerParticles.forEach(p => {
+            if (p.y > 40 && p.y < 150) p.cut = true;
+          });
+        } else if (activeCart === 'mirror') {
+          mirrorAngle = mirrorAngle === 45 ? 135 : 45;
+          play8BitSound('select');
+          showRetroToast(`💎 [LUMEN MIRROR] — 鏡を ${mirrorAngle}° に回転！`);
+        } else if (activeCart === 'mikiri') {
+          if (mikiriPhase === 'trigger') {
+            const reaction = ((performance.now() - mikiriTriggerTime) / 1000).toFixed(2);
+            mikiriReactionTime = reaction;
+            mikiriPhase = 'hit';
+            play8BitSound('sword');
+            showRetroToast(`⚡ [一閃成功！] 反応速度: ${reaction}秒！ 見事！`);
+            setTimeout(() => { if (activeCart === 'mikiri') resetMikiriMini(); }, 2400);
+          } else if (mikiriPhase === 'waiting') {
+            mikiriPhase = 'early';
+            play8BitSound('select');
+            showRetroToast('⚠️ [お手つき！] まだ合図が出ていません！');
+            setTimeout(() => { if (activeCart === 'mikiri') resetMikiriMini(); }, 2000);
+          } else {
+            resetMikiriMini();
+          }
+        } else if (activeCart === 'duel') {
+          play8BitSound('alert');
+          showRetroToast('⚡ [POCKET DUEL] — 雷光一閃！');
+          crtNoiseTimer = 6;
+        }
+      });
+    }
+
+    // Mini CRT Canvas Renderer Loop
+    function drawMiniCrtFrame() {
+      if (!miniCrtCtx) return;
+      const ctx = miniCrtCtx;
+      const W = 320;
+      const H = 200;
+      crtAnimTime++;
+
+      // Static noise during cartridge swap
+      if (crtNoiseTimer > 0) {
+        crtNoiseTimer--;
+        ctx.fillStyle = '#06070d';
+        ctx.fillRect(0, 0, W, H);
+        const imgData = ctx.createImageData(W, H);
+        const data = imgData.data;
+        for (let i = 0; i < data.length; i += 4) {
+          const v = Math.random() < 0.25 ? Math.floor(Math.random() * 210) : 10;
+          data[i] = v;
+          data[i+1] = v > 50 ? v + 25 : v;
+          data[i+2] = v > 50 ? v + 45 : v;
+          data[i+3] = 255;
+        }
+        ctx.putImageData(imgData, 0, 0);
+        return;
+      }
+
+      ctx.fillStyle = '#0a0c18';
+      ctx.fillRect(0, 0, W, H);
+
+      // Render Scene by Cartridge
+      if (activeCart === 'slicer') {
+        // Neon Slicer Mode
+        // Cyberpunk city background silhouettes
+        ctx.fillStyle = '#101328';
+        ctx.fillRect(20, 95, 45, 105);
+        ctx.fillRect(80, 75, 55, 125);
+        ctx.fillRect(150, 105, 40, 95);
+        ctx.fillRect(210, 65, 60, 135);
+        ctx.fillRect(280, 85, 40, 115);
+
+        // Neon roof edge highlights
+        ctx.fillStyle = '#00f5ff';
+        ctx.fillRect(80, 75, 55, 2);
+        ctx.fillStyle = '#ff2a9d';
+        ctx.fillRect(210, 65, 60, 2);
+
+        // Lit cyber windows
+        ctx.fillStyle = '#1e284a';
+        for (let wy = 85; wy < 180; wy += 14) {
+          for (let wx = 88; wx < 130; wx += 14) {
+            if ((wx + wy + crtAnimTime) % 7 === 0) {
+              ctx.fillStyle = '#00f5ff';
+            } else if ((wx * 2 + wy) % 5 === 0) {
+              ctx.fillStyle = '#ff2a9d';
+            } else {
+              ctx.fillStyle = '#141a30';
+            }
+            ctx.fillRect(wx, wy, 5, 5);
+          }
+        }
+
+        // Perspective Grid floor
+        ctx.strokeStyle = '#182038';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (let x = 0; x <= W; x += 32) {
+          ctx.moveTo(x, 155);
+          ctx.lineTo(x, H);
+        }
+        for (let y = 155; y <= H; y += 12) {
+          ctx.moveTo(0, y);
+          ctx.lineTo(W, y);
+        }
+        ctx.stroke();
+
+        // Top Game HUD (Score & Combo)
+        ctx.font = '10px "Share Tech Mono", monospace';
+        ctx.fillStyle = '#f59e0b';
+        ctx.textAlign = 'left';
+        ctx.fillText('SCORE: 028400', 12, 34);
+        ctx.fillStyle = '#00f5ff';
+        ctx.textAlign = 'right';
+        ctx.fillText('COMBO x4', W - 12, 34);
+
+        // Floating falling Kanji Blocks
+        ctx.font = 'bold 24px "DotGothic16", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        slicerParticles.forEach((p, idx) => {
+          p.y += p.vy;
+          p.x += Math.sin(crtAnimTime * 0.05 + idx) * 0.35;
+          if (p.y > H - 20) {
+            p.y = 45;
+            p.x = 45 + Math.random() * (W - 90);
+            p.cut = false;
+          }
+
+          if (p.cut) {
+            // Cut Kanji falling apart
+            ctx.fillStyle = 'rgba(255, 42, 157, 0.18)';
+            ctx.strokeStyle = '#ff2a9d';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(p.x - 22, p.y - 15, 18, 30);
+            ctx.strokeRect(p.x + 4, p.y - 12, 18, 30);
+
+            ctx.fillStyle = '#ff2a9d';
+            ctx.fillText(p.char, p.x - 12, p.y);
+            ctx.fillText(p.char, p.x + 14, p.y + 4);
+          } else {
+            // Neon Kanji Block Frame
+            const glow = idx % 2 === 0 ? '#00f5ff' : '#ff4db8';
+            ctx.fillStyle = '#12162a';
+            ctx.fillRect(p.x - 18, p.y - 18, 36, 36);
+            ctx.strokeStyle = glow;
+            ctx.lineWidth = 1.8;
+            ctx.strokeRect(p.x - 18, p.y - 18, 36, 36);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(p.char, p.x, p.y);
+          }
+        });
+
+        // Laser blade beam on bottom
+        ctx.fillStyle = '#ff00a0';
+        ctx.fillRect(0, 188, W, 2);
+        ctx.fillStyle = 'rgba(255, 0, 160, 0.25)';
+        ctx.fillRect(0, 184, W, 10);
+
+        // Slash effect
+        if (sliceSlashAnim > 0) {
+          sliceSlashAnim--;
+          ctx.strokeStyle = '#ff00a0';
+          ctx.lineWidth = 5;
+          ctx.beginPath();
+          ctx.moveTo(20, 175);
+          ctx.lineTo(300, 45);
+          ctx.stroke();
+
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(20, 175);
+          ctx.lineTo(300, 45);
+          ctx.stroke();
+
+          ctx.fillStyle = '#ff2a9d';
+          ctx.font = 'bold 12px "Silkscreen", monospace';
+          ctx.fillText('SLASH!!', 160, 100);
+        }
+
+      } else if (activeCart === 'mirror') {
+        // Lumen Mirror Mode (Rooftop Optical Reflection)
+        // City skyline backdrop
+        ctx.fillStyle = '#0f1322';
+        ctx.fillRect(40, 90, 50, 110);
+        ctx.fillRect(110, 70, 60, 130);
+        ctx.fillRect(200, 100, 70, 100);
+
+        // Windows
+        ctx.fillStyle = '#1e2942';
+        for (let wy = 80; wy < 180; wy += 12) {
+          for (let wx = 118; wx < 160; wx += 12) {
+            if ((wx + wy) % 5 === 0) ctx.fillRect(wx, wy, 4, 4);
+          }
+        }
+
+        // Top Moon
+        ctx.fillStyle = '#e2e8f0';
+        ctx.beginPath();
+        ctx.arc(280, 45, 14, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Laser emitter (Left)
+        ctx.fillStyle = '#1e2238';
+        ctx.fillRect(18, 92, 26, 20);
+        ctx.fillStyle = '#00f5ff';
+        ctx.fillRect(40, 97, 8, 8);
+
+        // Mirror in center
+        ctx.save();
+        ctx.translate(160, 101);
+        ctx.rotate((mirrorAngle * Math.PI) / 180);
+        ctx.fillStyle = '#cbd5e1';
+        ctx.fillRect(-3, -26, 6, 52);
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillRect(-1, -24, 2, 48);
+        ctx.restore();
+
+        // Laser beam path
+        ctx.strokeStyle = '#00f5ff';
+        ctx.shadowColor = '#00f5ff';
+        ctx.shadowBlur = 10;
+        ctx.lineWidth = 3.5;
+        ctx.beginPath();
+        ctx.moveTo(46, 101);
+        ctx.lineTo(160, 101);
+
+        if (mirrorAngle === 45) {
+          ctx.lineTo(160, 32); // Reflected Upwards
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+          // Target Crystal at Top
+          ctx.fillStyle = '#ff2a9d';
+          ctx.beginPath();
+          ctx.arc(160, 32, 10 + Math.sin(crtAnimTime * 0.1) * 2, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          ctx.lineTo(160, 168); // Reflected Downwards
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = '#fbbf24';
+          ctx.beginPath();
+          ctx.arc(160, 168, 10 + Math.sin(crtAnimTime * 0.1) * 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+      } else if (activeCart === 'mikiri') {
+        // Mikiri Issen Mini Arena
+        // Ground & Huge Moon
+        ctx.fillStyle = '#fef08a';
+        ctx.beginPath();
+        ctx.arc(160, 52, 28, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#141728';
+        ctx.fillRect(0, 145, W, 55);
+
+        // Torii gate silhouette in distance
+        ctx.fillStyle = '#221833';
+        ctx.fillRect(142, 90, 36, 4);
+        ctx.fillRect(146, 94, 5, 51);
+        ctx.fillRect(169, 94, 5, 51);
+
+        // Samurai 1 (Player, Left)
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillRect(70, 116, 16, 34); // Body
+        ctx.fillStyle = '#fed7aa';
+        ctx.fillRect(73, 106, 10, 10); // Head
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(70, 102, 16, 6);  // Hat
+        // Blade
+        ctx.strokeStyle = '#e2e8f0';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(86, 126);
+        ctx.lineTo(106, 112);
+        ctx.stroke();
+
+        // Samurai 2 (Rival, Right)
+        ctx.fillStyle = '#f43f5e';
+        ctx.fillRect(234, 116, 16, 34); // Body
+        ctx.fillStyle = '#fed7aa';
+        ctx.fillRect(237, 106, 10, 10); // Head
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(234, 102, 16, 6);  // Hat
+        // Blade
+        ctx.beginPath();
+        ctx.moveTo(234, 126);
+        ctx.lineTo(214, 112);
+        ctx.stroke();
+
+        // Game State Display
+        ctx.textAlign = 'center';
+        if (mikiriPhase === 'waiting') {
+          ctx.font = '14px "DotGothic16", sans-serif';
+          ctx.fillStyle = '#cbd5e1';
+          ctx.fillText('… 構え …', 160, 95);
+        } else if (mikiriPhase === 'trigger') {
+          ctx.font = 'bold 30px "DotGothic16", sans-serif';
+          ctx.fillStyle = '#ff2a85';
+          ctx.shadowColor = '#ff2a85';
+          ctx.shadowBlur = 14;
+          ctx.fillText('！！ 斬 ！！', 160, 95);
+          ctx.shadowBlur = 0;
+        } else if (mikiriPhase === 'hit') {
+          ctx.font = 'bold 18px "DotGothic16", sans-serif';
+          ctx.fillStyle = '#22c55e';
+          ctx.shadowColor = '#22c55e';
+          ctx.shadowBlur = 10;
+          ctx.fillText(`一閃成功！ ${mikiriReactionTime}秒`, 160, 85);
+          ctx.font = '12px "DotGothic16", sans-serif';
+          ctx.fillStyle = '#fde047';
+          ctx.fillText('勝負あり！', 160, 104);
+          ctx.shadowBlur = 0;
+        } else if (mikiriPhase === 'early') {
+          ctx.font = 'bold 16px "DotGothic16", sans-serif';
+          ctx.fillStyle = '#ef4444';
+          ctx.fillText('お手つき！早すぎた！', 160, 95);
+        }
+
+      } else if (activeCart === 'duel') {
+        // Pocket Duel Mode
+        ctx.fillStyle = '#10121d';
+        ctx.fillRect(0, 0, W, H);
+
+        // Distant lightning flash
+        if (Math.random() < 0.04) {
+          ctx.fillStyle = 'rgba(192, 132, 252, 0.28)';
+          ctx.fillRect(0, 0, W, H);
+        }
+
+        // Rain in mini CRT
+        ctx.strokeStyle = 'rgba(125, 211, 252, 0.4)';
+        ctx.lineWidth = 1;
+        for (let r = 0; r < 20; r++) {
+          const rx = (r * 37 + crtAnimTime * 4) % W;
+          const ry = (r * 19 + crtAnimTime * 8) % H;
+          ctx.beginPath();
+          ctx.moveTo(rx, ry);
+          ctx.lineTo(rx - 2, ry + 8);
+          ctx.stroke();
+        }
+
+        // 2 Cyber Ninjas
+        ctx.fillStyle = '#00f5ff';
+        ctx.fillRect(90, 120, 20, 40);
+        ctx.fillStyle = '#ff2a9d';
+        ctx.fillRect(210, 120, 20, 40);
+
+        ctx.font = '13px "DotGothic16", sans-serif';
+        ctx.fillStyle = '#c084fc';
+        ctx.textAlign = 'center';
+        ctx.fillText('世界の端っこで火花散る', 160, 80);
+      }
+    }
+
+    // Initial immediate draw
     if (typeof drawHeroPixelScene === 'function') {
       try { drawHeroPixelScene(0); } catch(err) { console.error('Hero scene initial draw:', err); }
+    }
+    if (typeof drawMiniCrtFrame === 'function') {
+      try { drawMiniCrtFrame(); } catch(err) { console.error('Mini CRT initial draw:', err); }
     }
 
     function animateScene(now) {
       if (typeof drawHeroPixelScene === 'function') {
         drawHeroPixelScene(now || 0);
+      }
+      if (typeof drawMiniCrtFrame === 'function') {
+        drawMiniCrtFrame();
       }
       requestAnimationFrame(animateScene);
     }
