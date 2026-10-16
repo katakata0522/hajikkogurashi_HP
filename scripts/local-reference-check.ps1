@@ -21,7 +21,8 @@ foreach ($file in $htmlFiles) {
             $reference.StartsWith('tel:') -or
             $reference.StartsWith('#') -or
             $reference.StartsWith('data:') -or
-            $reference.StartsWith('<?php')
+            $reference.StartsWith('<?php') -or
+            $reference.StartsWith('${')
         ) {
             continue
         }

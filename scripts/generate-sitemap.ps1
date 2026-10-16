@@ -1,9 +1,9 @@
-﻿$ErrorActionPreference = 'Stop'
+$ErrorActionPreference = 'Stop'
 
 $repoRoot = (Split-Path -Parent $PSScriptRoot)
 $baseUrl = 'https://hajikkoroom.xsrv.jp'
 $today = (Get-Date).ToString('yyyy-MM-dd')
-$excludes = @('404.html')
+$excludes = @('404.html', 'index_legacy.html')
 
 function Get-Priority {
     param(
@@ -43,7 +43,7 @@ function Set-MinigameSeoBlock {
 
     $urlPath = ($RelativePath -replace '/index\.html$', '/')
     $canonical = "$baseUrl/$urlPath"
-    $imageUrl = if ($Image -match '^https?://') { $Image } else { "$baseUrl/$Image" }
+    $imageUrl = if ($Image -match '^https?://') { $Image } else { "$baseUrl/$($Image.TrimStart('/'))" }
 
     $safeTitle = Escape-HtmlAttribute $Title
     $safeDescription = Escape-HtmlAttribute $Description
@@ -111,7 +111,7 @@ foreach ($file in $htmlFiles) {
 
 # 2. ミニゲーム等のサブディレクトリを処理
 # index.html を含み、システム/アセット系以外の非隠しフォルダを自動検出
-$systemDirs = @('assets', 'includes', 'scripts')
+$systemDirs = @('assets', 'includes', 'scripts', 'preview')
 $subDirs = Get-ChildItem -Path $repoRoot -Directory |
     Where-Object { 
         $systemDirs -notcontains $_.Name -and 

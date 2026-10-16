@@ -10,35 +10,39 @@ $indexJsPath = Join-Path $repoRoot 'assets\js\index.js'
 $errors = New-TestErrorList
 
 if (-not (Test-Path $indexCssPath)) {
-    $errors.Add('Missing home-only CSS file.')
+    $errors.Add('Missing legacy home-only CSS file.')
 }
 
 if (-not (Test-Path $indexJsPath)) {
-    $errors.Add('Missing home-only JS file.')
+    $errors.Add('Missing legacy home-only JS file.')
 }
 
 if (Test-ContainsLiquidSyntax -Content $rootIndex) {
     $errors.Add('index.html still contains Liquid syntax.')
 }
 
-if (-not ($rootIndex -match 'assets/css/index\.css\?v=[^"]+' -and $rootIndex -match 'assets/js/index\.js\?v=[^"]+')) {
-    $errors.Add('index.html does not reference the versioned home assets.')
-}
-
 if ($rootIndex -match 'file_get_contents|simplexml_load_string') {
     $errors.Add('index.html still contains runtime RSS PHP that can leak into static previews.')
 }
 
-if (-not ($rootIndex.Contains('class="tiles"') -or $rootIndex.Contains('class="tiles '))) {
-    $errors.Add('index.html is missing the tiles section.')
+if (-not ($rootIndex.Contains('<link rel="canonical" href="https://hajikkoroom.xsrv.jp/" />') -and $rootIndex.Contains('twitter:card'))) {
+    $errors.Add('index.html is missing baseline SEO/OGP tags.')
 }
 
-if (-not ($rootIndex -match 'aria-label="[^"]+"' -and $rootIndex.Contains('>MENU</a>'))) {
-    $errors.Add('index.html is missing the menu trigger.')
+if (-not ($rootIndex.Contains('data-nav="top"') -and $rootIndex.Contains('data-nav="games"'))) {
+    $errors.Add('index.html is missing the main navigation links.')
 }
 
-if (-not ($rootIndex -match 'include\s+[\x27\x22]includes/contact-section\.php[\x27\x22]')) {
-    $errors.Add('index.html is missing the contact section include.')
+if (-not ($rootIndex.Contains('ue5-flagship-card') -or $rootIndex.Contains('id="flagship"'))) {
+    $errors.Add('index.html is missing the flagship games showcase.')
+}
+
+if (-not ($rootIndex.Contains('id="arcade"') -or $rootIndex.Contains('minigame'))) {
+    $errors.Add('index.html is missing the minigames showcase.')
+}
+
+if (-not ($rootIndex.Contains('id="dispatch"') -or $rootIndex.Contains('transmission-panel'))) {
+    $errors.Add('index.html is missing the dispatch/contact section.')
 }
 
 Write-TestResult -Errors $errors -SuccessMessage 'home asset smoke test: ok'
