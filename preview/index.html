@@ -52,8 +52,7 @@
     (function() {
       try {
         var fm = localStorage.getItem('cn_font_mode') || 'pixel';
-        var fs = localStorage.getItem('cn_font_size') || 'md';
-        if (fs === 'sm') fs = 'md';
+        var fs = localStorage.getItem('cn_font_size_v2') || 'lg';
         document.documentElement.setAttribute('data-font-mode', fm);
         document.documentElement.setAttribute('data-font-size', fs);
       } catch (e) {}
@@ -90,10 +89,11 @@
       letter-spacing: 0.02em;
     }
 
-    /* Large Font Size Mode (文字拡大モード: 標準 ⇄ 拡大) */
+    /* Large Font Size Mode (快適・大きめ標準フォント) */
     html[data-font-size="lg"] .ue5-flagship-card p { font-size: 14px !important; line-height: 1.8 !important; }
-    html[data-font-size="lg"] .ue5-flagship-card h2 { font-size: 21px !important; }
+    html[data-font-size="lg"] .ue5-flagship-card h2 { font-size: 19.5px !important; }
     html[data-font-size="lg"] .cart-sub-jp { font-size: 13px !important; }
+    html[data-font-size="lg"] .cart-lead-desc { font-size: 11.5px !important; line-height: 1.5 !important; }
     html[data-font-size="lg"] .transmission-news-list { font-size: 13.5px !important; line-height: 1.75 !important; }
     html[data-font-size="lg"] .subscribe-box div { font-size: 13px !important; line-height: 1.65 !important; }
     html[data-font-size="lg"] .crew-name { font-size: 14.5px !important; }
@@ -1974,15 +1974,15 @@
         <!-- UNREAL ENGINE 5 FLAGSHIP PROJECT CARD -->
         <section class="ue5-flagship-card" aria-label="Flagship Project">
           <div class="ue5-badge-row">
-            <span class="ue5-pill pill-cyan">⚡ 本格制作中 // Unreal Engine 5</span>
+            <span class="ue5-pill pill-cyan">⚡ 鋭意制作中 // Unreal Engine 5</span>
           </div>
           <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
-            <div style="max-width: 680px;">
-              <h2 style="margin:0 0 6px 0; font-family:var(--font-mono); font-size:19px; font-weight:700; color:#ffffff; letter-spacing:0.4px;">
-                Re:青春！はじっこから創る、Unreal Engine 5 本格インディーゲーム
+            <div style="flex:1 1 540px; max-width: 780px;">
+              <h2 style="margin:0 0 6px 0; font-family:var(--font-mono); font-size:18px; font-weight:700; color:#ffffff; letter-spacing:0.4px;">
+                Re:青春！はじっこから創る、Unreal Engine 5 インディーゲーム
               </h2>
               <p style="margin:0; font-family:var(--font-pixel-jp); font-size:11.5px; line-height:1.7; color:#a2a9c2;">
-                Corner Neighbor の大本命プロジェクト。UE5のハイエンドなグラフィックと独自のゲーム性を融合させた本格タイトルを鋭意開発中です。開発メモやイベント参加記録は公式noteで公開中！
+                Corner Neighbor の大本命プロジェクト。UE5のハイエンドなグラフィックと独自のゲーム性を融合させたタイトルを鋭意開発中です。開発メモやイベント参加記録は公式noteで公開中！
               </p>
             </div>
             <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:4px;">
@@ -4047,10 +4047,9 @@
       });
     }
 
-    // Readability & Accessibility Controls: Font Mode (Pixel <-> Standard) & Font Size (md <-> lg)
+    // Readability & Accessibility Controls: Font Mode (Pixel <-> Standard) & Font Size (lg default <-> md)
     let currentFontMode = localStorage.getItem('cn_font_mode') || 'pixel';
-    let currentFontSize = localStorage.getItem('cn_font_size') || 'md';
-    if (currentFontSize === 'sm') currentFontSize = 'md';
+    let currentFontSize = localStorage.getItem('cn_font_size_v2') || 'lg';
 
     function applyReadabilityState(mode, size) {
       document.documentElement.setAttribute('data-font-mode', mode);
@@ -4069,7 +4068,7 @@
         btn.classList.toggle('is-active', isLarge);
         btn.classList.toggle('active', isLarge);
         btn.setAttribute('aria-pressed', isLarge ? 'true' : 'false');
-        btn.setAttribute('title', isLarge ? '現在：文字拡大中（クリックで標準サイズに戻す）' : '現在：標準サイズ（クリックで文字を大きくする）');
+        btn.setAttribute('title', isLarge ? '現在：快適大サイズ（クリックでコンパクト表示）' : '現在：コンパクト表示（クリックで大サイズ表示）');
       });
     }
 
@@ -4087,7 +4086,10 @@
     document.querySelectorAll('.js-font-size-toggle').forEach(btn => {
       btn.addEventListener('click', () => {
         currentFontSize = (currentFontSize === 'lg') ? 'md' : 'lg';
-        try { localStorage.setItem('cn_font_size', currentFontSize); } catch (e) {}
+        try {
+          localStorage.setItem('cn_font_size_v2', currentFontSize);
+          localStorage.setItem('cn_font_size', currentFontSize);
+        } catch (e) {}
         applyReadabilityState(currentFontMode, currentFontSize);
         play8BitSound('select');
       });

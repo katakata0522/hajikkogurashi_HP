@@ -50,8 +50,7 @@
     (function() {
       try {
         var fm = localStorage.getItem('cn_font_mode') || 'pixel';
-        var fs = localStorage.getItem('cn_font_size') || 'md';
-        if (fs === 'sm') fs = 'md';
+        var fs = localStorage.getItem('cn_font_size_v2') || 'lg';
         document.documentElement.setAttribute('data-font-mode', fm);
         document.documentElement.setAttribute('data-font-size', fs);
       } catch (e) {}
@@ -1203,11 +1202,10 @@
   </button>
 
   <script>
-    // 1. Readability Toggles: Font Mode (Pixel <-> Standard) & Font Size (md <-> lg)
+    // 1. Readability Toggles: Font Mode (Pixel <-> Standard) & Font Size (lg default <-> md)
     (function() {
       let currentFontMode = localStorage.getItem('cn_font_mode') || 'pixel';
-      let currentFontSize = localStorage.getItem('cn_font_size') || 'md';
-      if (currentFontSize === 'sm') currentFontSize = 'md';
+      let currentFontSize = localStorage.getItem('cn_font_size_v2') || 'lg';
 
       function applyReadabilityState(mode, size) {
         document.documentElement.setAttribute('data-font-mode', mode);
@@ -1226,7 +1224,7 @@
           btn.classList.toggle('is-active', isLarge);
           btn.classList.toggle('active', isLarge);
           btn.setAttribute('aria-pressed', isLarge ? 'true' : 'false');
-          btn.setAttribute('title', isLarge ? '現在：文字拡大中（クリックで標準サイズに戻す）' : '現在：標準サイズ（クリックで文字を大きくする）');
+          btn.setAttribute('title', isLarge ? '現在：快適大サイズ（クリックでコンパクト表示）' : '現在：コンパクト表示（クリックで大サイズ表示）');
         });
       }
 
@@ -1246,7 +1244,10 @@
         document.querySelectorAll('.js-font-size-toggle').forEach(btn => {
           btn.addEventListener('click', () => {
             currentFontSize = (currentFontSize === 'lg') ? 'md' : 'lg';
-            try { localStorage.setItem('cn_font_size', currentFontSize); } catch (e) {}
+            try {
+              localStorage.setItem('cn_font_size_v2', currentFontSize);
+              localStorage.setItem('cn_font_size', currentFontSize);
+            } catch (e) {}
             applyReadabilityState(currentFontMode, currentFontSize);
           });
         });

@@ -50,8 +50,7 @@
     (function() {
       try {
         var fm = localStorage.getItem('cn_font_mode') || 'pixel';
-        var fs = localStorage.getItem('cn_font_size') || 'md';
-        if (fs === 'sm') fs = 'md';
+        var fs = localStorage.getItem('cn_font_size_v2') || 'lg';
         document.documentElement.setAttribute('data-font-mode', fm);
         document.documentElement.setAttribute('data-font-size', fs);
       } catch (e) {}
@@ -91,6 +90,20 @@
       --font-pixel-jp: 'Noto Sans JP', 'BIZ UDPGothic', 'Hiragino Sans', 'Meiryo', system-ui, -apple-system, sans-serif;
       --font-pixel-en: 'Noto Sans JP', 'BIZ UDPGothic', 'Hiragino Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
     }
+
+    /* Large Font Size Mode (快適・大きめ標準フォント) */
+    html[data-font-size="lg"] .subpage-title { font-size: 30px; }
+    html[data-font-size="lg"] .subpage-lead { font-size: 16.5px; line-height: 1.85; }
+    html[data-font-size="lg"] .filter-tab-btn { font-size: 14px; }
+    html[data-font-size="lg"] .arcade-card-title { font-size: 20px; }
+    html[data-font-size="lg"] .arcade-card-subtitle { font-size: 12.5px; }
+    html[data-font-size="lg"] .arcade-card-desc { font-size: 15px; line-height: 1.75; }
+    html[data-font-size="lg"] .arcade-controls-bar { font-size: 13px; }
+    html[data-font-size="lg"] .btn-arcade-play { font-size: 15px; }
+    html[data-font-size="lg"] .dispatch-info-title { font-size: 14.5px; }
+    html[data-font-size="lg"] .dispatch-info-text { font-size: 15px; line-height: 1.7; }
+    html[data-font-size="lg"] .footer-circle-desc { font-size: 12.5px; }
+    html[data-font-size="lg"] .footer-links a { font-size: 13px; }
 
     * {
       box-sizing: border-box;
@@ -1220,7 +1233,7 @@
     <!-- ATELIER DISPATCH / CTA BOX -->
     <section class="atelier-dispatch-box" aria-label="他ページへの案内">
       <div>
-        <div class="dispatch-info-title">🚀 FLAGSHIP // 次なる挑戦はUE5本格インディーゲーム！</div>
+        <div class="dispatch-info-title">🚀 FLAGSHIP // 次なる挑戦はUE5インディーゲーム！</div>
         <div class="dispatch-info-text">
           Corner Neighborでは現在、Unreal Engine 5を使用した新作ゲームを鋭意制作中！開発日誌や制作舞台裏も公開中。
         </div>
@@ -1308,9 +1321,9 @@
         } catch (e) {}
       }
 
-      // 2. Readability Controls (ABC Font Mode & A Font Size)
+      // 2. Readability Controls (ABC Font Mode & A Font Size: lg default)
       let currentFontMode = document.documentElement.getAttribute('data-font-mode') || 'pixel';
-      let currentFontSize = document.documentElement.getAttribute('data-font-size') || 'md';
+      let currentFontSize = document.documentElement.getAttribute('data-font-size') || 'lg';
 
       function syncReadabilityUI() {
         const isStandard = currentFontMode === 'standard';
@@ -1325,7 +1338,7 @@
         document.querySelectorAll('.js-font-size-toggle').forEach(btn => {
           btn.classList.toggle('is-active', isLg);
           btn.setAttribute('aria-pressed', isLg ? 'true' : 'false');
-          btn.title = isLg ? '文字サイズ切替（現在: 拡大 / クリックで標準）' : '文字サイズ切替（現在: 標準 / クリックで拡大）';
+          btn.title = isLg ? '文字サイズ切替（現在: 快適大サイズ / クリックでコンパクト表示）' : '文字サイズ切替（現在: コンパクト表示 / クリックで大サイズ表示）';
         });
       }
 
@@ -1347,6 +1360,7 @@
             play8BitSound('select');
             currentFontSize = currentFontSize === 'lg' ? 'md' : 'lg';
             document.documentElement.setAttribute('data-font-size', currentFontSize);
+            localStorage.setItem('cn_font_size_v2', currentFontSize);
             localStorage.setItem('cn_font_size', currentFontSize);
             syncReadabilityUI();
           });

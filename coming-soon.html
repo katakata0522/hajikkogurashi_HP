@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>鋭意制作中！ | Corner Neighbor公式ホームページ</title>
-  <meta name="description" content="Corner Neighborの次回作・本格インディーゲームプロジェクトはUnreal Engine 5で鋭意制作中！とうぼうおじさんとの共同制作や東京ゲームダンジョンでの熱狂を胸に、開発進行中。" />
+  <meta name="description" content="Corner Neighborの次回作・インディーゲームプロジェクトはUnreal Engine 5で鋭意制作中！とうぼうおじさんとの共同制作や東京ゲームダンジョンでの熱狂を胸に、開発進行中。" />
   <meta name="robots" content="index,follow" />
   <link rel="canonical" href="https://hajikkoroom.xsrv.jp/coming-soon.html" />
 
@@ -13,13 +13,13 @@
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Corner Neighbor公式ホームページ" />
   <meta property="og:title" content="鋭意制作中！ | Corner Neighbor公式ホームページ" />
-  <meta property="og:description" content="Corner Neighborの次回作・本格インディーゲームプロジェクトはUnreal Engine 5で鋭意制作中！とうぼうおじさんとの共同制作や東京ゲームダンジョンでの熱狂を胸に、開発進行中。" />
+  <meta property="og:description" content="Corner Neighborの次回作・インディーゲームプロジェクトはUnreal Engine 5で鋭意制作中！とうぼうおじさんとの共同制作や東京ゲームダンジョンでの熱狂を胸に、開発進行中。" />
   <meta property="og:url" content="https://hajikkoroom.xsrv.jp/coming-soon.html" />
   <meta property="og:image" content="https://hajikkoroom.xsrv.jp/assets/images/banner.webp" />
   <meta property="og:image:alt" content="鋭意制作中！" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="鋭意制作中！ | Corner Neighbor公式ホームページ" />
-  <meta name="twitter:description" content="Corner Neighborの次回作・本格インディーゲームプロジェクトはUnreal Engine 5で鋭意制作中！とうぼうおじさんとの共同制作や東京ゲームダンジョンでの熱狂を胸に、開発進行中。" />
+  <meta name="twitter:description" content="Corner Neighborの次回作・インディーゲームプロジェクトはUnreal Engine 5で鋭意制作中！とうぼうおじさんとの共同制作や東京ゲームダンジョンでの熱狂を胸に、開発進行中。" />
   <meta name="twitter:image" content="https://hajikkoroom.xsrv.jp/assets/images/banner.webp" />
 
   <!-- Structured Data JSON-LD -->
@@ -50,8 +50,7 @@
     (function() {
       try {
         var fm = localStorage.getItem('cn_font_mode') || 'pixel';
-        var fs = localStorage.getItem('cn_font_size') || 'md';
-        if (fs === 'sm') fs = 'md';
+        var fs = localStorage.getItem('cn_font_size_v2') || 'lg';
         document.documentElement.setAttribute('data-font-mode', fm);
         document.documentElement.setAttribute('data-font-size', fs);
       } catch (e) {}
@@ -91,6 +90,21 @@
       --font-pixel-jp: 'Noto Sans JP', 'BIZ UDPGothic', 'Hiragino Sans', 'Meiryo', system-ui, -apple-system, sans-serif;
       --font-pixel-en: 'Noto Sans JP', 'BIZ UDPGothic', 'Hiragino Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
     }
+
+    /* Large Font Size Mode (快適・大きめ標準フォント) */
+    html[data-font-size="lg"] .subpage-title { font-size: 30px; }
+    html[data-font-size="lg"] .subpage-lead { font-size: 16.5px; line-height: 1.85; }
+    html[data-font-size="lg"] .pillar-card-title { font-size: 19px; }
+    html[data-font-size="lg"] .pillar-card-desc { font-size: 15px; line-height: 1.8; }
+    html[data-font-size="lg"] .honest-box-title { font-size: 15px; }
+    html[data-font-size="lg"] .honest-box-text { font-size: 15px; line-height: 1.8; }
+    html[data-font-size="lg"] .step-title { font-size: 16px; }
+    html[data-font-size="lg"] .step-desc { font-size: 13.5px; line-height: 1.7; }
+    html[data-font-size="lg"] .portal-title { font-size: 18px; }
+    html[data-font-size="lg"] .portal-desc { font-size: 14.5px; line-height: 1.7; }
+    html[data-font-size="lg"] .portal-btn { font-size: 14px; }
+    html[data-font-size="lg"] .footer-circle-desc { font-size: 12.5px; }
+    html[data-font-size="lg"] .footer-links a { font-size: 13px; }
 
     * {
       box-sizing: border-box;
@@ -891,7 +905,7 @@
       </div>
       <h1 class="subpage-title">鋭意制作中！</h1>
       <p class="subpage-lead">
-        Corner Neighborは現在、Unreal Engine 5（UE5）を用いた本格的なインディーゲーム制作に挑戦しています。<br />
+        Corner Neighborは現在、Unreal Engine 5（UE5）を用いたインディーゲーム制作に挑戦しています。<br />
         これまでのブラウザミニゲーム制作で磨いてきた「直感的な手触り感」と「独自のユーモア」を基盤に、より深みのあるゲーム体験をお届けできるよう、一歩一歩丁寧に開発を進めています。
       </p>
     </section>
@@ -1094,9 +1108,9 @@
 
   <script>
     (function() {
-      // Readability Controls (ABC Font Mode & A Font Size)
+      // Readability Controls (ABC Font Mode & A Font Size: lg default)
       let currentFontMode = document.documentElement.getAttribute('data-font-mode') || 'pixel';
-      let currentFontSize = document.documentElement.getAttribute('data-font-size') || 'md';
+      let currentFontSize = document.documentElement.getAttribute('data-font-size') || 'lg';
 
       function syncReadabilityUI() {
         const isStandard = currentFontMode === 'standard';
@@ -1111,7 +1125,7 @@
         document.querySelectorAll('.js-font-size-toggle').forEach(btn => {
           btn.classList.toggle('is-active', isLg);
           btn.setAttribute('aria-pressed', isLg ? 'true' : 'false');
-          btn.title = isLg ? '文字サイズ切替（現在: 拡大 / クリックで標準）' : '文字サイズ切替（現在: 標準 / クリックで拡大）';
+          btn.title = isLg ? '文字サイズ切替（現在: 快適大サイズ / クリックでコンパクト表示）' : '文字サイズ切替（現在: コンパクト表示 / クリックで大サイズ表示）';
         });
       }
 
@@ -1131,6 +1145,7 @@
           btn.addEventListener('click', () => {
             currentFontSize = currentFontSize === 'lg' ? 'md' : 'lg';
             document.documentElement.setAttribute('data-font-size', currentFontSize);
+            localStorage.setItem('cn_font_size_v2', currentFontSize);
             localStorage.setItem('cn_font_size', currentFontSize);
             syncReadabilityUI();
           });
