@@ -1092,17 +1092,18 @@
           <div class="footer-circle-desc">まったりゲームを作るインディーサークル！</div>
           <div class="footer-copyright">© 2024-2026 Corner Neighbor. All rights reserved.</div>
         </div>
-        <div class="footer-links">
-          <a href="/">ホーム</a>
-          <a href="/minigames.html">ミニゲーム広場</a>
-          <a href="/portfolio.html">作品一覧</a>
-          <a href="/members.html">メンバー紹介</a>
-          <a href="/aboutus.html">私たちについて</a>
-          <a href="/news.html">お知らせ</a>
-          <a href="/coming-soon.html">鋭意制作中！</a>
-          <a href="/privacy-policy.html">プライバシーポリシー</a>
-          <a href="/terms-of-service.html">利用規約</a>
-        </div>
+                      <div class="footer-links">
+                <a href="/">ホーム</a>
+                <a href="/minigames.html">ミニゲーム広場</a>
+                <a href="/coming-soon.html">鋭意制作中！</a>
+                <a href="/portfolio.html">作品一覧</a>
+                <a href="/members.html">メンバー紹介</a>
+                <a href="/aboutus.html">私たちについて</a>
+                <a href="/news.html">お知らせ</a>
+                <a href="/privacy-policy.html">プライバシーポリシー</a>
+                <a href="/terms-of-service.html">利用規約</a>
+                <a href="/#dispatch">お問い合わせ</a>
+              </div>
       </div>
     </footer>
 
@@ -1143,7 +1144,7 @@
           btn.addEventListener('click', () => {
             currentFontMode = currentFontMode === 'standard' ? 'pixel' : 'standard';
             document.documentElement.setAttribute('data-font-mode', currentFontMode);
-            localStorage.setItem('cn_font_mode', currentFontMode);
+            try { localStorage.setItem('cn_font_mode', currentFontMode); } catch (e) {}
             syncReadabilityUI();
           });
         });

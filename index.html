@@ -921,12 +921,16 @@
         flex-direction: column;
       }
       #hero-pixel-canvas {
-        height: 210px;
-        object-fit: cover;
+        width: 100%;
+        height: auto;
+        aspect-ratio: 640 / 180;
+        object-fit: contain;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
       }
       .cat-speech-bubble {
         left: 14px;
-        top: 105px;
+        top: 8px;
         bottom: auto;
         max-width: calc(100% - 28px);
         white-space: normal;
@@ -1192,12 +1196,15 @@
       aspect-ratio: 16 / 10;
       box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.95);
       cursor: crosshair;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
     }
     .crt-screen-bezel canvas {
       width: 100%;
       height: 100%;
       display: block;
       image-rendering: auto;
+      touch-action: manipulation;
     }
     .crt-screen-bezel::after {
       content: "";
@@ -2724,16 +2731,17 @@
 
             <!-- Right Column: Navigation Links -->
             <nav class="footer-nav" aria-label="フッターナビゲーション">
-              <div class="footer-links">
+                                          <div class="footer-links">
                 <a href="/">ホーム</a>
-                <a href="/aboutus.html">私たちについて</a>
-                <a href="/members.html">メンバー紹介</a>
-                <a href="/portfolio.html">作品一覧</a>
-                <a href="/news.html">お知らせ</a>
+                <a href="/minigames.html">ミニゲーム広場</a>
                 <a href="/coming-soon.html">鋭意制作中！</a>
+                <a href="/portfolio.html">作品一覧</a>
+                <a href="/members.html">メンバー紹介</a>
+                <a href="/aboutus.html">私たちについて</a>
+                <a href="/news.html">お知らせ</a>
                 <a href="/privacy-policy.html">プライバシーポリシー</a>
                 <a href="/terms-of-service.html">利用規約</a>
-                <a href="#dispatch">お問い合わせ</a>
+                <a href="/#dispatch">お問い合わせ</a>
               </div>
             </nav>
           </div>
@@ -2773,7 +2781,7 @@
         color: '#ff2a9d',
         device: '📱 スマホ最適 / 🖱️ PC対応',
         genre: 'パズル・スイカ系マージアクション',
-        url: 'https://hajikkoroom.xsrv.jp/kanji-slicer/',
+        url: '/kanji-slicer/',
         desc: 'ネオン輝くサイバー空間で漢字パーツをスワイプ切断＆合体！同じ漢字をぶつけて進化させ、ハイスコアを狙う新感覚物理マージパズル。'
       },
       'lumen-mirror': {
@@ -2782,9 +2790,9 @@
         jpTitle: 'LUMEN_MIRROR（ルーメン・ミラー）',
         badge: 'FREE PLAY',
         color: '#00f5ff',
-        device: '📱 スマホ最適 / 🖱️ PC対応',
+        device: '📱 スマホ最適 / 🖱️ PC推奨',
         genre: '光学反射ロジックパズル',
-        url: 'https://hajikkoroom.xsrv.jp/lumen-mirror/',
+        url: '/lumen-mirror/',
         desc: '真夜中のビル群の屋上で鏡の角度を操り、ネオンレーザーをターゲットまで導く静謐で美しい光学リフレクションパズル。'
       },
       'mikiri-issen': {
@@ -2795,32 +2803,21 @@
         color: '#f59e0b',
         device: '📱 スマホ最適 / 🖱️ PC対応',
         genre: '超反応0.01秒居合アクション',
-        url: 'https://hajikkoroom.xsrv.jp/mikiri-issen/',
-        desc: '合図「斬」の瞬間を見極めろ！0.01秒の反射神経でライバルを斬り伏せる緊張感マックスの一撃必殺居合ゲーム。'
-      },
-      'crt-quest': {
-        code: 'CN-ROM-03',
-        enTitle: 'MIKIRI ISSEN',
-        jpTitle: 'みきり一閃（0.01秒の居合斬り）',
-        badge: 'FREE PLAY',
-        color: '#f59e0b',
-        device: '📱 スマホ最適 / 🖱️ PC対応',
-        genre: '超反応0.01秒居合アクション',
-        url: 'https://hajikkoroom.xsrv.jp/mikiri-issen/',
+        url: '/mikiri-issen/',
         desc: '合図「斬」の瞬間を見極めろ！0.01秒の反射神経でライバルを斬り伏せる緊張感マックスの一撃必殺居合ゲーム。'
       }
     };
 
     const ALL_MINI_GAMES = [
-      { jp: '漢字スライサー・マージ', en: 'KANJI SLICER', tag: 'パズル / 物理', device: '📱 スマホ最適', url: 'https://hajikkoroom.xsrv.jp/kanji-slicer/', color: '#ff2a9d' },
-      { jp: 'LUMEN_MIRROR', en: 'LUMEN MIRROR', tag: '光学パズル', device: '📱 スマホ最適 / 🖱️ PC推奨', url: 'https://hajikkoroom.xsrv.jp/lumen-mirror/', color: '#00f5ff' },
-      { jp: 'みきり一閃', en: 'MIKIRI ISSEN', tag: '0.01秒居合', device: '📱 スマホ最適', url: 'https://hajikkoroom.xsrv.jp/mikiri-issen/', color: '#f59e0b' },
-      { jp: 'ブラックホール・スイーパー', en: 'VOID SWEEPER', tag: '一筆書きアクション', device: '📱 スマホ最適', url: 'https://hajikkoroom.xsrv.jp/blackhole-sweeper/', color: '#a855f7' },
-      { jp: 'ギリギリ・ブレーキ！', en: 'EDGE BRAKE!', tag: 'チキンレース', device: '📱 スマホ最適', url: 'https://hajikkoroom.xsrv.jp/girigiri-brake/', color: '#ef4444' },
-      { jp: '超絶！仕分け工場', en: 'CYBER FACTORY', tag: '脳トレ仕分け', device: '📱 スマホ最適', url: 'https://hajikkoroom.xsrv.jp/sorting-factory/', color: '#22c55e' },
-      { jp: '限界！ステルスサボタージュ', en: 'STEALTH SABOTAGE', tag: 'サボりアクション', device: '📱 スマホ最適', url: 'https://hajikkoroom.xsrv.jp/stealth-slacker/', color: '#38bdf8' },
-      { jp: 'ウォールジャンパー', en: 'WALL JUMPER', tag: '激ムズ登攀', device: '🖱️ PC推奨', url: 'https://hajikkoroom.xsrv.jp/wall-jumper/', color: '#eab308' },
-      { jp: '影まね道場', en: 'SHADOW DOJO', tag: '記憶＆型稽古', device: '📱 スマホ対応', url: 'https://hajikkoroom.xsrv.jp/kage-mane-dojo/', color: '#ec4899' }
+      { jp: '漢字スライサー・マージ', en: 'KANJI SLICER', tag: 'パズル / 物理', device: '📱 スマホ最適', url: '/kanji-slicer/', color: '#ff2a9d' },
+      { jp: 'LUMEN_MIRROR', en: 'LUMEN MIRROR', tag: '光学パズル', device: '📱 スマホ最適 / 🖱️ PC推奨', url: '/lumen-mirror/', color: '#00f5ff' },
+      { jp: 'みきり一閃', en: 'MIKIRI ISSEN', tag: '0.01秒居合', device: '📱 スマホ最適', url: '/mikiri-issen/', color: '#f59e0b' },
+      { jp: 'ブラックホール・スイーパー', en: 'VOID SWEEPER', tag: '一筆書きアクション', device: '📱 スマホ最適', url: '/blackhole-sweeper/', color: '#a855f7' },
+      { jp: 'ギリギリ・ブレーキ！', en: 'EDGE BRAKE!', tag: 'チキンレース', device: '📱 スマホ最適', url: '/girigiri-brake/', color: '#ef4444' },
+      { jp: '超絶！仕分け工場', en: 'CYBER FACTORY', tag: '脳トレ仕分け', device: '📱 スマホ最適', url: '/sorting-factory/', color: '#22c55e' },
+      { jp: '限界！ステルスサボタージュ', en: 'STEALTH SABOTAGE', tag: 'サボりアクション', device: '📱 スマホ最適', url: '/stealth-slacker/', color: '#38bdf8' },
+      { jp: 'ウォールジャンパー', en: 'WALL JUMPER', tag: '激ムズ登攀', device: '🖱️ PC推奨', url: '/wall-jumper/', color: '#eab308' },
+      { jp: '影まね道場', en: 'SHADOW DOJO', tag: '記憶＆型稽古', device: '📱 スマホ対応', url: '/kage-mane-dojo/', color: '#ec4899' }
     ];
 
     /**
@@ -4418,6 +4415,12 @@
 
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
+        const modal = document.getElementById('retro-modal-backdrop');
+        if (modal && modal.classList.contains('open')) {
+          closeRetroModal();
+          play8BitSound('select');
+          return;
+        }
         const drawer = document.getElementById('mobile-nav-drawer');
         if (drawer && drawer.classList.contains('open')) {
           drawer.classList.remove('open');
@@ -4678,29 +4681,35 @@
         channel: 'CH.01 [ギリギリ・ブレーキ！]',
         action: 'CLICK TO ACCEL! 🏎️',
         desc: '崖っぷちまで突っ走れ！0.01m極限チキンレース',
-        url: 'https://hajikkoroom.xsrv.jp/girigiri-brake/'
+        url: '/girigiri-brake/'
       },
       mirror: {
         channel: 'CH.02 [LUMEN MIRROR]',
         action: 'CLICK MIRRORS TO REFLECT 💎',
         desc: '鏡の角度を回転させ、光をクリスタルへ導け！',
-        url: 'https://hajikkoroom.xsrv.jp/lumen-mirror/'
+        url: '/lumen-mirror/'
       },
       mikiri: {
         channel: 'CH.03 [みきり一閃]',
         action: '合図「斬」で即クリック ⚡',
         desc: '合図「斬」の瞬間を見極めろ！0.01秒の超反応居合',
-        url: 'https://hajikkoroom.xsrv.jp/mikiri-issen/'
+        url: '/mikiri-issen/'
       },
       duel: {
         channel: 'CH.04 [POCKET DUEL]',
         action: 'CLICK FOR LIGHTNING ⚡',
         desc: '電脳空間の決闘！雨のサイバー秘密基地で対峙',
-        url: 'https://hajikkoroom.xsrv.jp/'
+        url: '/'
       }
     };
 
     function switchCartridge(cartId, triggerEl) {
+      // Clear any pending timers from previous minigame
+      clearTimeout(mikiriTimer);
+      clearTimeout(mikiriRivalTimer);
+      mikiriTimer = null;
+      mikiriRivalTimer = null;
+
       activeCart = cartId;
       play8BitSound('cartridge_clunk');
       crtNoiseTimer = 16; // Frames of retro TV static
@@ -4865,55 +4874,72 @@
       });
     });
 
-    // CRT Screen click & keyboard interaction
+    // CRT Screen click & keyboard interaction (Zero-latency pointerdown for mobile reflection)
     const crtScreen = document.getElementById('crt-screen-bezel');
-    if (crtScreen) {
-      crtScreen.addEventListener('click', (e) => {
-        const rect = crtScreen.getBoundingClientRect();
-        const canvasX = ((e.clientX - rect.left) / rect.width) * 320;
-        const canvasY = ((e.clientY - rect.top) / rect.height) * 200;
+    let lastCrtPointerTime = 0;
 
-        // Click interactions when round completed
-        if (activeCart === 'brake' && brakePhase === 'stopped') {
-          resetBrakeMini();
-          return;
+    function handleCrtInteraction(e) {
+      const now = performance.now();
+      if (now - lastCrtPointerTime < 280) return; // Prevent double-trigger between pointerdown and click
+      lastCrtPointerTime = now;
+
+      const rect = crtScreen.getBoundingClientRect();
+      const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+      const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+      const canvasX = ((clientX - rect.left) / rect.width) * 320;
+      const canvasY = ((clientY - rect.top) / rect.height) * 200;
+
+      // Click interactions when round completed
+      if (activeCart === 'brake' && brakePhase === 'stopped') {
+        resetBrakeMini();
+        return;
+      }
+
+      if (activeCart === 'mikiri' && mikiriPhase === 'hit') {
+        resetMikiriMini();
+        return;
+      }
+
+      // Grand clear CTA check on Mirror
+      if (activeCart === 'mirror' && mirrorSolved && mirrorStage >= 3) {
+        if (canvasY >= 90 && canvasY <= 118 && canvasX >= 50 && canvasX <= 270) {
+          const targetUrl = CART_CONFIGS[activeCart]?.url;
+          if (targetUrl) {
+            window.open(targetUrl, '_blank', 'noopener');
+            showRetroToast(`🚀 [本編起動] ${CART_CONFIGS[activeCart].channel} を全画面で起動中...`);
+            return;
+          }
         }
+      }
 
-        if (activeCart === 'mikiri' && mikiriPhase === 'hit') {
-          resetMikiriMini();
-          return;
-        }
-
-        // Grand clear CTA check on Mirror
-        if (activeCart === 'mirror' && mirrorSolved && mirrorStage >= 3) {
-          if (canvasY >= 90 && canvasY <= 118 && canvasX >= 50 && canvasX <= 270) {
-            const targetUrl = CART_CONFIGS[activeCart]?.url;
-            if (targetUrl) {
-              window.open(targetUrl, '_blank', 'noopener');
-              showRetroToast(`🚀 [本編起動] ${CART_CONFIGS[activeCart].channel} を全画面で起動中...`);
-              return;
+      let opt = 'default';
+      if (activeCart === 'mirror') {
+        if (mirrorSolved) {
+          opt = 'next';
+        } else {
+          let closest = null;
+          let minDist = Infinity;
+          currentMirrors.forEach(m => {
+            const d = Math.hypot(canvasX - m.x, canvasY - m.y);
+            if (d < minDist) {
+              minDist = d;
+              closest = m;
             }
-          }
+          });
+          opt = closest ? closest.id : 'm1';
         }
+      }
+      triggerCrtAction(opt);
+    }
 
-        let opt = 'default';
-        if (activeCart === 'mirror') {
-          if (mirrorSolved) {
-            opt = 'next';
-          } else {
-            let closest = null;
-            let minDist = Infinity;
-            currentMirrors.forEach(m => {
-              const d = Math.hypot(canvasX - m.x, canvasY - m.y);
-              if (d < minDist) {
-                minDist = d;
-                closest = m;
-              }
-            });
-            opt = closest ? closest.id : 'm1';
-          }
-        }
-        triggerCrtAction(opt);
+    if (crtScreen) {
+      crtScreen.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        handleCrtInteraction(e);
+      }, { passive: true });
+
+      crtScreen.addEventListener('click', (e) => {
+        handleCrtInteraction(e);
       });
 
       crtScreen.addEventListener('keydown', (e) => {
@@ -4970,7 +4996,8 @@
       }
 
       ctx.save();
-      ctx.clearRect(0, 0, 640, 400);
+      try {
+        ctx.clearRect(0, 0, 640, 400);
 
       // Apply screen shake if active (e.g. on sword strikes or crashes)
       if (mikiriScreenShake > 0) {
@@ -5946,9 +5973,9 @@
         ctx.fillStyle = '#c084fc';
         ctx.textAlign = 'center';
         ctx.fillText('世界の端っこで火花散る', 160, 80);
+      } finally {
+        ctx.restore();
       }
-
-      ctx.restore();
     }
 
     // IntersectionObserver to pause rendering when off-screen (Battery & Performance Saver)
