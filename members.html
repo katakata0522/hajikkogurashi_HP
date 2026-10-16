@@ -44,6 +44,19 @@
   }
   </script>
 
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="alternate icon" href="/favicon.ico">
+  <script>
+    (function() {
+      try {
+        var fm = localStorage.getItem('cn_font_mode') || 'pixel';
+        var fs = localStorage.getItem('cn_font_size') || 'md';
+        if (fs === 'sm') fs = 'md';
+        document.documentElement.setAttribute('data-font-mode', fm);
+        document.documentElement.setAttribute('data-font-size', fs);
+      } catch (e) {}
+    })();
+  </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -70,6 +83,13 @@
       --font-pixel-jp: 'DotGothic16', monospace;
       --font-pixel-en: 'Silkscreen', 'Share Tech Mono', monospace;
       --font-readable: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Yu Gothic UI", "Noto Sans JP", sans-serif;
+    }
+
+    /* Standard Readable Font Mode (ピクセル解除・くっきり標準文字モード) */
+    html[data-font-mode="standard"] {
+      --font-mono: 'Noto Sans JP', 'BIZ UDPGothic', 'Hiragino Sans', 'Meiryo', system-ui, -apple-system, sans-serif;
+      --font-pixel-jp: 'Noto Sans JP', 'BIZ UDPGothic', 'Hiragino Sans', 'Meiryo', system-ui, -apple-system, sans-serif;
+      --font-pixel-en: 'Noto Sans JP', 'BIZ UDPGothic', 'Hiragino Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
     }
 
     * {
@@ -113,12 +133,13 @@
 
     /* Navigation Links */
     .nav-link {
-      color: #9498a6;
+      color: #a3a8b8;
       text-decoration: none;
       position: relative;
-      padding: 4px 2px 5px 2px;
+      padding: 6px 4px 7px 4px;
       font-family: var(--font-mono);
-      font-size: 14.5px;
+      font-size: 15.5px;
+      font-weight: 700;
       letter-spacing: 0.8px;
       transition: color 0.18s ease, text-shadow 0.18s ease;
       white-space: nowrap;
@@ -134,9 +155,70 @@
       left: 0;
       right: 0;
       bottom: 0;
-      height: 2px;
+      height: 2.5px;
       background: var(--neon-cyan);
       box-shadow: 0 0 8px var(--neon-cyan);
+    }
+
+    /* Header Utility Buttons: ABC Font Toggle & A+ Font Size Toggle */
+    .header-utility-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-header-util {
+      background: #171926;
+      border: 1.5px solid #32374f;
+      color: #cbd5e1;
+      font-family: 'Noto Sans JP', 'BIZ UDPGothic', system-ui, sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      height: 36px;
+      padding: 0 11px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      transition: all 0.16s ease;
+    }
+    .btn-header-util:hover {
+      border-color: var(--neon-cyan);
+      color: #ffffff;
+      background: #1d2133;
+      box-shadow: 0 0 10px rgba(0, 245, 255, 0.25);
+      transform: translateY(-1px);
+    }
+    .btn-header-util.is-active {
+      background: rgba(0, 245, 255, 0.15);
+      border-color: var(--neon-cyan);
+      color: #ffffff;
+      box-shadow: 0 0 12px rgba(0, 245, 255, 0.35), inset 0 0 6px rgba(0, 245, 255, 0.2);
+    }
+    .util-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #25293e;
+      color: var(--neon-cyan);
+      font-family: 'Inter', 'Noto Sans JP', system-ui, sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      padding: 2px 5.5px;
+      border-radius: 4px;
+      border: 1px solid rgba(0, 245, 255, 0.35);
+      line-height: 1.1;
+    }
+    .btn-header-util.is-active .util-badge {
+      background: var(--neon-cyan);
+      color: #08070f;
+      border-color: var(--neon-cyan);
+    }
+    .util-label {
+      font-size: 11.5px;
+      letter-spacing: 0.3px;
     }
 
     /* Social Pills */
@@ -375,18 +457,34 @@
       text-shadow: 0 0 8px rgba(0, 245, 255, 0.6);
     }
 
-    /* Dynamic font size adjustment on HTML root */
-    html[data-font-size="sm"] .readable-body {
-      font-size: 13.5px;
-      line-height: 1.75;
-    }
+    /* Dynamic font size adjustment on HTML root (標準 md ⇄ 拡大 lg) */
     html[data-font-size="md"] .readable-body {
-      font-size: 15px;
+      font-size: 15.5px;
       line-height: 1.85;
     }
     html[data-font-size="lg"] .readable-body {
-      font-size: 17px;
+      font-size: 17.5px;
       line-height: 1.95;
+    }
+    html[data-font-size="lg"] .subpage-lead {
+      font-size: 16.5px;
+      line-height: 1.85;
+    }
+    html[data-font-size="lg"] .subpage-title {
+      font-size: 30px;
+    }
+    html[data-font-size="lg"] .member-name {
+      font-size: 19.5px;
+    }
+    html[data-font-size="lg"] .member-callsign {
+      font-size: 11px;
+    }
+    html[data-font-size="lg"] .member-role-badge,
+    html[data-font-size="lg"] .member-tag {
+      font-size: 11.5px;
+    }
+    html[data-font-size="lg"] .dispatch-info-text {
+      font-size: 15.5px;
     }
 
     /* Member Cards Grid */
@@ -758,12 +856,12 @@
     </svg>
 
     <!-- HEADER / NAVIGATION ("Corner Neighbor") -->
-    <header style="display:flex; align-items:center; justify-content:space-between; min-height: 48px; margin-bottom: 4px; position:relative; z-index:10;">
+    <header style="display:flex; align-items:center; justify-content:space-between; min-height: 60px; padding: 6px 0; margin-bottom: 10px; position:relative; z-index:10;">
       <!-- Left Brand Logo + "Corner Neighbor" -->
-      <a href="/preview/" style="display:flex; align-items:center; gap: 13px; text-decoration:none; color:#ffffff;">
+      <a href="/preview/" style="display:flex; align-items:center; gap: 14px; text-decoration:none; color:#ffffff;">
         <!-- High-Detail Tilted Neon Retro Cassette SVG Icon -->
         <div style="transform: rotate(-13deg); filter: drop-shadow(-2px 0 7px rgba(0,245,255,0.85)) drop-shadow(2px 2px 7px rgba(255,0,160,0.8)); display:flex; align-items:center;">
-          <svg width="44" height="32" viewBox="0 0 44 32" shape-rendering="crispEdges">
+          <svg width="48" height="35" viewBox="0 0 44 32" shape-rendering="crispEdges">
             <rect x="1" y="1" width="42" height="30" rx="3" fill="#131629" stroke="#00f5ff" stroke-width="2"/>
             <rect x="30" y="1" width="13" height="30" fill="none" stroke="#ff2a9d" stroke-width="2"/>
             <rect x="5" y="5" width="13" height="2" fill="#00f5ff"/>
@@ -777,13 +875,13 @@
             <rect x="26" y="22" width="12" height="3" fill="#ff2a9d"/>
           </svg>
         </div>
-        <div class="brand-title" style="font-family: var(--font-mono); font-size: 18px; line-height: 1.06; color: #ffffff; letter-spacing: 0.5px;">
+        <div class="brand-title" style="font-family: var(--font-mono); font-size: 19px; font-weight: 700; line-height: 1.08; color: #ffffff; letter-spacing: 0.6px;">
           <div>Corner</div>
           <div>Neighbor</div>
         </div>
       </a>
 
-      <!-- Right Nav Links + Social Pills (Desktop) -->
+      <!-- Right Nav Links + Readability Toggles (Desktop) -->
       <div class="desktop-nav-group">
         <nav style="display:flex; align-items:center; gap: 20px;" aria-label="メインナビゲーション">
           <a href="/preview/#games" class="nav-link" data-nav="games">GAMES</a>
@@ -791,23 +889,27 @@
           <a href="/members.html" class="nav-link active" data-nav="members">MEMBERS</a>
           <a href="/aboutus.html" class="nav-link" data-nav="about">ABOUT</a>
           <a href="/news.html" class="nav-link" data-nav="news">NEWS</a>
-          <a href="/contact.php" class="nav-link" data-nav="contact">CONTACT</a>
         </nav>
-        <div class="social-pills" style="margin-left: 2px;">
-          <a href="https://x.com/Corner_neighbor" target="_blank" rel="noopener noreferrer" class="social-pill social-pill-x" title="公式 X (Twitter)">
-            <span>𝕏</span>
-          </a>
-          <a href="https://note.com/hajikkogurashi01" target="_blank" rel="noopener noreferrer" class="social-pill social-pill-note" title="開発ノート note">
-            <span>note</span>
-          </a>
-          <a href="https://www.youtube.com/@hajikkogurashi" target="_blank" rel="noopener noreferrer" class="social-pill social-pill-yt" title="公式 YouTube">
-            <span>▶ YT</span>
-          </a>
+        <div class="header-utility-group" role="group" aria-label="文字表示設定">
+          <button type="button" class="btn-header-util js-font-mode-toggle" title="ピクセル文字と読みやすい標準文字を切り替え" aria-pressed="false">
+            <span class="util-badge">ABC</span>
+            <span class="util-label js-font-mode-label">標準文字</span>
+          </button>
+          <button type="button" class="btn-header-util js-font-size-toggle" title="文字サイズを拡大・標準で切り替え" aria-pressed="false">
+            <span class="util-badge">A+</span>
+            <span class="util-label js-font-size-label">文字拡大</span>
+          </button>
         </div>
       </div>
 
-      <!-- Mobile Action Controls (Hamburger) -->
+      <!-- Mobile Action Controls (Font + Size + Hamburger) -->
       <div class="mobile-header-actions">
+        <button type="button" class="btn-header-util js-font-mode-toggle" title="標準文字に切り替え" aria-label="標準文字に切り替え" aria-pressed="false" style="height: 34px; padding: 0 8px;">
+          <span class="util-badge">ABC</span>
+        </button>
+        <button type="button" class="btn-header-util js-font-size-toggle" title="文字サイズ拡大" aria-label="文字サイズ拡大" aria-pressed="false" style="height: 34px; padding: 0 8px;">
+          <span class="util-badge">A+</span>
+        </button>
         <button class="mobile-menu-btn" id="btn-mobile-menu" aria-label="メニューを開く" aria-expanded="false">
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M2 4h14M2 9h14M2 14h14"/>
@@ -818,20 +920,24 @@
 
     <!-- MOBILE DRAWER MENU -->
     <nav class="mobile-nav-drawer" id="mobile-nav-drawer" aria-label="モバイルナビゲーション">
-      <a href="/preview/#games" class="nav-link" style="font-size:14.5px;">GAMES — ミニゲーム一覧</a>
-      <a href="/portfolio.html" class="nav-link" style="font-size:14.5px;">PORTFOLIO — 制作実績・作品集</a>
-      <a href="/members.html" class="nav-link active" style="font-size:14.5px;">MEMBERS — メンバー紹介</a>
-      <a href="/aboutus.html" class="nav-link" style="font-size:14.5px;">ABOUT — サークル紹介</a>
-      <a href="/news.html" class="nav-link" style="font-size:14.5px;">NEWS — お知らせ</a>
-      <a href="/contact.php" class="nav-link" style="font-size:14.5px;">CONTACT — お問い合わせ</a>
-      <div style="display:flex; gap:8px; padding-top:6px; border-top:1px solid #26293a;">
-        <a href="https://x.com/Corner_neighbor" target="_blank" rel="noopener noreferrer" class="social-pill social-pill-x" style="flex:1; justify-content:center;">𝕏 X</a>
-        <a href="https://note.com/hajikkogurashi01" target="_blank" rel="noopener noreferrer" class="social-pill social-pill-note" style="flex:1; justify-content:center;">note</a>
-        <a href="https://www.youtube.com/@hajikkogurashi" target="_blank" rel="noopener noreferrer" class="social-pill social-pill-yt" style="flex:1; justify-content:center;">YouTube</a>
+      <a href="/preview/#games" class="nav-link" style="font-size:15px;">GAMES — ミニゲーム一覧</a>
+      <a href="/portfolio.html" class="nav-link" style="font-size:15px;">PORTFOLIO — 制作実績・作品集</a>
+      <a href="/members.html" class="nav-link active" style="font-size:15px;">MEMBERS — メンバー紹介</a>
+      <a href="/aboutus.html" class="nav-link" style="font-size:15px;">ABOUT — サークル紹介</a>
+      <a href="/news.html" class="nav-link" style="font-size:15px;">NEWS — お知らせ</a>
+      <div style="display:flex; gap:8px; padding-top:8px; border-top:1px solid #26293a;">
+        <button type="button" class="btn-header-util js-font-mode-toggle" style="flex:1; justify-content:center;" aria-pressed="false">
+          <span class="util-badge">ABC</span>
+          <span class="util-label js-font-mode-label">標準文字</span>
+        </button>
+        <button type="button" class="btn-header-util js-font-size-toggle" style="flex:1; justify-content:center;" aria-pressed="false">
+          <span class="util-badge">A+</span>
+          <span class="util-label js-font-size-label">文字拡大</span>
+        </button>
       </div>
     </nav>
 
-    <!-- BREADCRUMBS & READABILITY CONTROLLER -->
+    <!-- BREADCRUMBS BAR -->
     <div class="page-utility-bar">
       <nav class="breadcrumbs" aria-label="パンくずリスト">
         <ol class="breadcrumb-list">
@@ -840,16 +946,6 @@
           <li class="breadcrumb-current" aria-current="page">MEMBERS</li>
         </ol>
       </nav>
-
-      <!-- FONT SIZE / READABILITY CONTROLLER -->
-      <div class="font-size-adjuster" role="group" aria-label="文字サイズ変更">
-        <span class="font-size-label">文字サイズ</span>
-        <div class="font-size-group">
-          <button type="button" class="btn-font-size" data-size="sm" aria-label="文字サイズを小にする">小 A-</button>
-          <button type="button" class="btn-font-size active" data-size="md" aria-label="文字サイズを標準にする" aria-pressed="true">標準</button>
-          <button type="button" class="btn-font-size" data-size="lg" aria-label="文字サイズを大にする">大 A+</button>
-        </div>
-      </div>
     </div>
 
     <!-- SUBPAGE HEADER BANNER -->
@@ -1086,8 +1182,8 @@
         <a href="https://note.com/hajikkogurashi01" target="_blank" rel="noopener noreferrer" class="btn-cyber-action btn-cyan">
           📖 開発手記 note
         </a>
-        <a href="/contact.php" class="btn-cyber-action btn-outline">
-          ✉️ お問い合わせ
+        <a href="/preview/#dispatch" class="btn-cyber-action btn-outline">
+          ✉️ 公式連絡所へ
         </a>
       </div>
     </section>
@@ -1113,7 +1209,7 @@
             <a href="/coming-soon.html">鋭意制作中！</a>
             <a href="/privacy-policy.html">プライバシーポリシー</a>
             <a href="/terms-of-service.html">利用規約</a>
-            <a href="/contact.php">お問い合わせ</a>
+            <a href="/preview/#dispatch">お問い合わせ</a>
           </div>
         </nav>
       </div>
@@ -1128,31 +1224,57 @@
   </button>
 
   <script>
-    // 1. Font Size Adjuster Logic
+    // 1. Readability Toggles: Font Mode (Pixel <-> Standard) & Font Size (md <-> lg)
     (function() {
-      const savedSize = localStorage.getItem('cn_font_size') || 'md';
-      document.documentElement.setAttribute('data-font-size', savedSize);
+      let currentFontMode = localStorage.getItem('cn_font_mode') || 'pixel';
+      let currentFontSize = localStorage.getItem('cn_font_size') || 'md';
+      if (currentFontSize === 'sm') currentFontSize = 'md';
 
-      function updateActiveButtons(size) {
-        document.querySelectorAll('.btn-font-size').forEach(btn => {
-          if (btn.dataset.size === size) {
-            btn.classList.add('active');
-            btn.setAttribute('aria-pressed', 'true');
-          } else {
-            btn.classList.remove('active');
-            btn.setAttribute('aria-pressed', 'false');
-          }
+      function applyReadabilityState(mode, size) {
+        document.documentElement.setAttribute('data-font-mode', mode);
+        document.documentElement.setAttribute('data-font-size', size);
+
+        const isStandard = (mode === 'standard');
+        document.querySelectorAll('.js-font-mode-toggle').forEach(btn => {
+          btn.classList.toggle('is-active', isStandard);
+          btn.classList.toggle('active', isStandard);
+          btn.setAttribute('aria-pressed', isStandard ? 'true' : 'false');
+          btn.setAttribute('title', isStandard ? '現在：くっきり標準文字（クリックでドット文字に戻す）' : '現在：ドット文字（クリックで読みやすい標準文字にする）');
+        });
+        document.querySelectorAll('.js-font-mode-label').forEach(lbl => {
+          lbl.textContent = isStandard ? '標準文字 ON' : '標準文字';
+        });
+
+        const isLarge = (size === 'lg');
+        document.querySelectorAll('.js-font-size-toggle').forEach(btn => {
+          btn.classList.toggle('is-active', isLarge);
+          btn.classList.toggle('active', isLarge);
+          btn.setAttribute('aria-pressed', isLarge ? 'true' : 'false');
+          btn.setAttribute('title', isLarge ? '現在：文字拡大中（クリックで標準サイズに戻す）' : '現在：標準サイズ（クリックで文字を大きくする）');
+        });
+        document.querySelectorAll('.js-font-size-label').forEach(lbl => {
+          lbl.textContent = isLarge ? '文字拡大 ON' : '文字拡大';
         });
       }
 
+      applyReadabilityState(currentFontMode, currentFontSize);
+
       window.addEventListener('DOMContentLoaded', () => {
-        updateActiveButtons(savedSize);
-        document.querySelectorAll('.btn-font-size').forEach(btn => {
+        applyReadabilityState(currentFontMode, currentFontSize);
+
+        document.querySelectorAll('.js-font-mode-toggle').forEach(btn => {
           btn.addEventListener('click', () => {
-            const size = btn.dataset.size;
-            document.documentElement.setAttribute('data-font-size', size);
-            localStorage.setItem('cn_font_size', size);
-            updateActiveButtons(size);
+            currentFontMode = (currentFontMode === 'standard') ? 'pixel' : 'standard';
+            try { localStorage.setItem('cn_font_mode', currentFontMode); } catch (e) {}
+            applyReadabilityState(currentFontMode, currentFontSize);
+          });
+        });
+
+        document.querySelectorAll('.js-font-size-toggle').forEach(btn => {
+          btn.addEventListener('click', () => {
+            currentFontSize = (currentFontSize === 'lg') ? 'md' : 'lg';
+            try { localStorage.setItem('cn_font_size', currentFontSize); } catch (e) {}
+            applyReadabilityState(currentFontMode, currentFontSize);
           });
         });
 
