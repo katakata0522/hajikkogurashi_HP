@@ -2831,6 +2831,17 @@
     let manualLightning = 0;
     let manualCrtMode = null;
     let coffeeSteamPulse = 0;
+    let roomLightMode = 'cozy'; // 'cozy' (normal warm) | 'focus' (midnight focus lamp & ambient dimming)
+    let weatherMode = 1; // 0: drizzle (小雨), 1: steady (夜雨), 2: storm (雷雨・稲光)
+    let cartridgeRackPulse = 0; // Cassette insertion pulse
+
+    const windowTrickles = [
+      { x: 285, y: 30, speed: 0.14, len: 4 },
+      { x: 335, y: 15, speed: 0.20, len: 5 },
+      { x: 410, y: 45, speed: 0.16, len: 4 },
+      { x: 495, y: 20, speed: 0.24, len: 6 },
+      { x: 575, y: 35, speed: 0.12, len: 3 }
+    ];
 
     function px(ctx, x, y, w, h, color) {
       ctx.fillStyle = color;
@@ -2846,6 +2857,7 @@
       if (boostPulse > 0) boostPulse *= 0.95;
       if (manualLightning > 0) manualLightning *= 0.88;
       if (coffeeSteamPulse > 0) coffeeSteamPulse *= 0.96;
+      if (cartridgeRackPulse > 0) cartridgeRackPulse *= 0.94;
       if (fanRunning) fanAngleTime += 16;
 
       // ====================================================================
@@ -2859,16 +2871,29 @@
       ctx.clip();
 
       // --- 1. Lightning Timing & Ambient Sky Flash ---
-      const lightningCycle = 22000;
-      const lightningT = (time + 7500) % lightningCycle;
-      const isLightning = lightningT < 340;
       let lightningFlash = manualLightning;
-      if (isLightning) {
-        if (lightningT < 60) lightningFlash = Math.max(lightningFlash, 0.92);
-        else if (lightningT < 110) lightningFlash = Math.max(lightningFlash, 0.28);
-        else if (lightningT < 210) lightningFlash = Math.max(lightningFlash, 0.85);
-        else lightningFlash = Math.max(lightningFlash, Math.max(0, 0.85 - (lightningT - 210) / 130));
+      if (weatherMode === 2) {
+        // Storm mode: periodic thunderclaps
+        const stormCycle = 8500;
+        const stormT = (time + 4000) % stormCycle;
+        if (stormT < 280) {
+          if (stormT < 50) lightningFlash = Math.max(lightningFlash, 0.95);
+          else if (stormT < 100) lightningFlash = Math.max(lightningFlash, 0.35);
+          else if (stormT < 180) lightningFlash = Math.max(lightningFlash, 0.88);
+          else lightningFlash = Math.max(lightningFlash, 0.88 - (stormT - 180) / 100);
+        }
+      } else if (weatherMode === 1) {
+        // Steady mode: gentle rare distant flash
+        const lightningCycle = 26000;
+        const lightningT = (time + 7500) % lightningCycle;
+        if (lightningT < 300) {
+          if (lightningT < 60) lightningFlash = Math.max(lightningFlash, 0.80);
+          else if (lightningT < 110) lightningFlash = Math.max(lightningFlash, 0.22);
+          else if (lightningT < 190) lightningFlash = Math.max(lightningFlash, 0.70);
+          else lightningFlash = Math.max(lightningFlash, Math.max(0, 0.70 - (lightningT - 190) / 110));
+        }
       }
+      const isLightning = (lightningFlash > 0.45);
 
       const skyGrad = ctx.createLinearGradient(268, 0, 268, 136);
       if (lightningFlash > 0.45) {
@@ -3073,21 +3098,36 @@
       px(ctx, 530, 119, 15, 2, '#090d16');
 
       // --- 6. Animated Diagonal Pixel Rain (STRICTLY CLIPPED AT WINDOW) ---
-      // Rain only renders within window boundary (y <= 135, x >= 268)
-      // and splashes only on the exterior sill ledge at y = 135
+      const rainSpeedMult = (weatherMode === 0) ? 0.42 : ((weatherMode === 2) ? 1.45 : 0.95);
+      const rainSlant = (weatherMode === 2) ? 0.24 : 0.14;
+
       rainDrops.forEach((d, i) => {
-        const ry = (d.y + time * 0.052 * d.speed) % 136;
-        const rx = d.x - (ry * 0.14);
+        // In drizzle mode (mode 0), render fewer drops for a soft, calming atmosphere
+        if (weatherMode === 0 && (i % 2 !== 0)) return;
+
+        const ry = (d.y + time * 0.052 * d.speed * rainSpeedMult) % 136;
+        const rx = d.x - (ry * rainSlant);
         if (rx >= 268 && rx <= W && ry <= 135) {
-          const rainLen = Math.min(d.len, 135 - ry);
+          const rainLen = Math.min(d.len * (weatherMode === 2 ? 1.4 : 1), 135 - ry);
           if (rainLen > 0) {
-            px(ctx, rx, ry, 1, rainLen, lightningFlash > 0.4 ? 'rgba(224, 231, 255, 0.75)' : 'rgba(125, 211, 252, 0.38)');
+            const dropColor = lightningFlash > 0.4 
+              ? 'rgba(224, 231, 255, 0.85)' 
+              : (weatherMode === 0 ? 'rgba(125, 211, 252, 0.22)' : 'rgba(125, 211, 252, 0.38)');
+            px(ctx, rx, ry, 1, rainLen, dropColor);
           }
-          // Splashes ONLY on the exterior windowsill ledge at y = 134-135
-          if (ry >= 132 && i % 3 === 0) {
-            px(ctx, rx - 1, 135, 3, 1, 'rgba(0, 245, 255, 0.55)');
+          // Splashes on the exterior windowsill ledge at y = 134-135
+          if (ry >= 132 && (weatherMode === 2 ? (i % 2 === 0) : (i % 3 === 0))) {
+            px(ctx, rx - 1, 135, weatherMode === 2 ? 4 : 3, 1, 'rgba(0, 245, 255, 0.55)');
           }
         }
+      });
+
+      // Trickling droplets running down the glass pane (触覚的な雨粒の雫)
+      windowTrickles.forEach(t => {
+        const trSpeed = (weatherMode === 0 ? 0.06 : (weatherMode === 1 ? 0.14 : 0.26));
+        t.y = (t.y + trSpeed) % 133;
+        px(ctx, t.x, t.y, 1.5, t.len, 'rgba(255, 255, 255, 0.32)');
+        px(ctx, t.x, t.y + t.len, 1.5, 1.5, 'rgba(0, 245, 255, 0.50)');
       });
 
       // Restore clipping so developer room interior is unaffected
@@ -3155,8 +3195,21 @@
       px(ctx, 339, 123, 6, 2, '#7c7e96');
       px(ctx, 339, 136, 6, 2, '#7c7e96');
       // Soda Can on Drawer
-      px(ctx, 335, 108, 5, 8, '#e11d48');
-      px(ctx, 335, 108, 5, 1.5, '#ffffff');
+      px(ctx, 350, 108, 5, 8, '#e11d48');
+      px(ctx, 350, 108, 5, 1.5, '#ffffff');
+
+      // Retro Mini Cartridge Rack (カセットラック: 赤・シアン・紫のミニゲーム)
+      px(ctx, 326, 114, 21, 2, '#0f172a'); // Rack tray
+      // Cartridge 1: Brake (Red) - lifts slightly on tap
+      const c1Y = (cartridgeRackPulse > 0.4) ? 104 : 107;
+      px(ctx, 327, c1Y, 5, 7, '#ef4444');
+      px(ctx, 328, c1Y + 2, 3, 3, '#fef08a');
+      // Cartridge 2: Mirror (Cyan)
+      px(ctx, 333, 107, 5, 7, '#00f5ff');
+      px(ctx, 334, 109, 3, 3, '#0f172a');
+      // Cartridge 3: Mikiri (Purple)
+      px(ctx, 339, 107, 5, 7, '#a855f7');
+      px(ctx, 340, 109, 3, 3, '#fbcfe8');
 
       // ====================================================================
       // D. CEILING AC UNIT, FAN VENT, CABLES & NEON WALL SIGN
@@ -3548,6 +3601,38 @@
       px(ctx, 111, 124, 3, 3, '#ef4444');
       px(ctx, 116, 124, 3, 3, '#22c55e');
 
+      // Retro Articulated Desk Lamp (電気スタンド)
+      px(ctx, 77, 98, 8, 4, '#1e293b'); // Base
+      px(ctx, 79, 97, 4, 2, '#d97706'); // Brass trim
+      px(ctx, 80, 85, 2, 12, '#475569'); // Vertical stem
+      px(ctx, 77, 85, 5, 2, '#334155'); // Swivel joint
+      px(ctx, 74, 80, 8, 5, '#1e293b'); // Lamp shade hood
+      px(ctx, 74, 84, 8, 2, '#fbbf24'); // Lamp rim
+      // Power LED / switch dot on base
+      const lampSwitchGlow = (roomLightMode === 'focus') ? '#fbbf24' : '#64748b';
+      px(ctx, 80, 99, 2, 2, lampSwitchGlow);
+
+      // Lamp Bulb & Conical Light Pool
+      if (roomLightMode === 'focus') {
+        px(ctx, 76, 85, 4, 3, '#fef08a');
+        ctx.save();
+        const lampCone = ctx.createRadialGradient(78, 86, 2, 85, 106, 36);
+        lampCone.addColorStop(0, 'rgba(254, 240, 138, 0.55)');
+        lampCone.addColorStop(0.5, 'rgba(251, 191, 36, 0.22)');
+        lampCone.addColorStop(1, 'rgba(251, 191, 36, 0)');
+        ctx.fillStyle = lampCone;
+        ctx.beginPath();
+        ctx.moveTo(74, 86);
+        ctx.lineTo(118, 108);
+        ctx.lineTo(60, 108);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      } else {
+        px(ctx, 76, 85, 4, 2, '#fde68a');
+        px(ctx, 72, 88, 16, 14, 'rgba(254, 240, 138, 0.08)');
+      }
+
       // ====================================================================
       // G. SECOND ARCADE CABINET ("NEIGHBOR" / "ADEIE B8ULD")
       // ====================================================================
@@ -3607,6 +3692,20 @@
       const zPhase = Math.floor(time / 550) % 3;
       if (zPhase >= 1) px(ctx, 220, 129, 3, 2, 'rgba(0, 245, 255, 0.65)');
       if (zPhase === 2) px(ctx, 225, 124, 4, 2, 'rgba(255, 42, 157, 0.7)');
+
+      // Ambient Focus Lighting: In focus mode, gently dim the room surroundings for a cozy midnight feel
+      if (roomLightMode === 'focus') {
+        ctx.save();
+        ctx.fillStyle = 'rgba(5, 7, 16, 0.40)';
+        ctx.fillRect(0, 0, 268, 180);
+        // Soft radial spotlight cut out around the desk lamp and keyboard
+        const focusSpot = ctx.createRadialGradient(92, 92, 12, 92, 92, 90);
+        focusSpot.addColorStop(0, 'rgba(0, 0, 0, 0)');
+        focusSpot.addColorStop(1, 'rgba(5, 7, 16, 0.35)');
+        ctx.fillStyle = focusSpot;
+        ctx.fillRect(45, 45, 145, 100);
+        ctx.restore();
+      }
     }
 
     /**
@@ -3800,14 +3899,21 @@
           return;
         }
 
-        // 2. Coffee Mug (デスク上のコーヒーマグ): x: 124~132, y: 95~105
+        // 2. Desk Lamp / Room Light Mode (電気スタンド / 部屋の明かり切替): x: 74~86, y: 78~103
+        if (canvasX >= 72 && canvasX <= 88 && canvasY >= 76 && canvasY <= 104) {
+          roomLightMode = (roomLightMode === 'cozy' ? 'focus' : 'cozy');
+          play8BitSound('select');
+          return;
+        }
+
+        // 3. Coffee Mug (デスク上のコーヒーマグ): x: 124~132, y: 95~105
         if (canvasX >= 122 && canvasX <= 133 && canvasY >= 93 && canvasY <= 106) {
           coffeeSteamPulse = 1.0;
           play8BitSound('select');
           return;
         }
 
-        // 3. Center CRT Monitor (開発画面切り替え): x: 87~128, y: 65~99
+        // 4. Center CRT Monitor (開発画面切り替え): x: 87~128, y: 65~99
         if (canvasX >= 87 && canvasX <= 128 && canvasY >= 65 && canvasY <= 99) {
           const cur = (manualCrtMode !== null) ? manualCrtMode : (Math.floor(performance.now() / 5000) % 5);
           manualCrtMode = (cur + 1) % 5;
@@ -3815,7 +3921,15 @@
           return;
         }
 
-        // 4. Sleeping Cat (寝ている猫): x: 200~235, y: 130~155
+        // 5. Cartridge Rack on Drawer (カセットラックの物理装填): x: 324~354, y: 104~124
+        if (canvasX >= 322 && canvasX <= 356 && canvasY >= 104 && canvasY <= 126) {
+          cartridgeRackPulse = 1.0;
+          manualCrtMode = 4; // Display game test mode on CRT
+          play8BitSound('tape_rewind');
+          return;
+        }
+
+        // 6. Sleeping Cat (寝ている猫): x: 200~235, y: 130~155
         if (canvasX >= 198 && canvasX <= 236 && canvasY >= 130 && canvasY <= 156) {
           play8BitSound('cat');
           const bubble = document.getElementById('cat-bubble');
@@ -3838,9 +3952,12 @@
           return;
         }
 
-        // 5. Rain Window (奥の雨空と窓ガラス): x >= 268, y <= 136
+        // 7. Rain Window & Weather Shift (奥の雨窓・天候切り替え: 小雨→夜雨→雷雨): x >= 268, y <= 136
         if (canvasX >= 268 && canvasY <= 136) {
-          manualLightning = 1.0;
+          weatherMode = (weatherMode + 1) % 3;
+          if (weatherMode === 2) {
+            manualLightning = 1.0;
+          }
           play8BitSound('select');
           return;
         }
@@ -4343,14 +4460,12 @@
           brakeSparks = [];
           brakeSkidMarks = [];
           play8BitSound('select');
-          showRetroToast('🏎️ [アクセル全開！] 上部のプログレスバーと崖を見極めて急制動！');
           announceA11y('アクセル全開！崖の手前で急ブレーキ！');
           const osd = document.getElementById('crt-osd-action');
           if (osd) osd.textContent = '🛑 TAP TO BRAKE!! 🛑';
         } else if (brakePhase === 'accel') {
           brakePhase = 'braking';
           play8BitSound('jump');
-          showRetroToast('🛑 [急ブレーキ作動！] 止まれえぇぇ！');
           announceA11y('急ブレーキ作動！');
           const osd = document.getElementById('crt-osd-action');
           if (osd) osd.textContent = 'BRAKING... 🛑';
@@ -4363,13 +4478,11 @@
           mirrorStage = (mirrorStage % 3) + 1;
           resetMirrorMini();
           play8BitSound('select');
-          showRetroToast(`💎 [LUMEN MIRROR] ステージ 0${mirrorStage} へ進行！`);
           announceA11y(`ステージ 0${mirrorStage} に進みました`);
         } else {
           const target = currentMirrors.find(m => m.id === option) || currentMirrors[0];
           if (target) {
             target.angle = target.angle === 45 ? 135 : 45;
-            showRetroToast(`💎 [ミラー ${target.id.toUpperCase()}] 角度を ${target.angle}° に回転！`);
             announceA11y(`ミラーを${target.angle}度に回転`);
             play8BitSound('select');
           }
@@ -4395,7 +4508,6 @@
           }
 
           play8BitSound('sword');
-          showRetroToast(`⚡ [一閃成功！] ${reaction}秒 ${mikiriRank} (連勝: ${mikiriStreak})`);
           announceA11y(`一閃成功！反応速度${reaction}秒、${mikiriRank}、連勝${mikiriStreak}`);
           const osd = document.getElementById('crt-osd-action');
           if (osd) osd.textContent = '★ 一閃成功！ 本編はこちら (FULL PLAY) ▸';
@@ -4407,7 +4519,6 @@
           mikiriPhase = 'early';
           mikiriStreak = 0;
           play8BitSound('select');
-          showRetroToast('⚠️ [お手つき！] 合図「斬」を見る前に抜刀！連勝リセット');
           announceA11y('早すぎた！お手つき！連勝がリセットされました');
           const osd = document.getElementById('crt-osd-action');
           if (osd) osd.textContent = '早すぎた！【切腹】 CLICK TO RETRY 🔄';
@@ -4417,7 +4528,6 @@
         }
       } else if (activeCart === 'duel') {
         play8BitSound('alert');
-        showRetroToast('⚡ [POCKET DUEL] — 雷光一閃！');
         announceA11y('ポケットデュエル、雷光一閃！');
         crtNoiseTimer = 6;
       }
@@ -4563,27 +4673,94 @@
         const targetCamX = Math.max(0, brakeCarX - 70);
         brakeCameraX += (targetCamX - brakeCameraX) * 0.22;
 
-        // Starry night sky & cyber skyline (parallax scrolling)
-        const bgScroll1 = (brakeCameraX * 0.12) % 180;
-        ctx.fillStyle = '#101426';
-        for (let bx = -bgScroll1; bx < W + 100; bx += 70) {
-          ctx.fillRect(bx, 75, 45, 80);
-          ctx.fillRect(bx + 35, 60, 30, 95);
+        // Deep night sky gradient
+        const skyGrad = ctx.createLinearGradient(0, 0, 0, 155);
+        skyGrad.addColorStop(0, '#04060d');
+        skyGrad.addColorStop(0.65, '#0b1122');
+        skyGrad.addColorStop(1, '#151d38');
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, W, 155);
+
+        // Gentle distant crescent moon (soft silver/warm white)
+        ctx.fillStyle = '#f1f5f9';
+        ctx.beginPath();
+        ctx.arc(272, 38, 9, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#050814'; // crescent cutout
+        ctx.beginPath();
+        ctx.arc(269, 36, 8, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Distant mountain spires (far parallax layer)
+        const bgScrollFar = (brakeCameraX * 0.04) % 160;
+        ctx.fillStyle = '#0c1020';
+        ctx.beginPath();
+        ctx.moveTo(0, 155);
+        for (let mx = -bgScrollFar - 40; mx < W + 80; mx += 80) {
+          ctx.lineTo(mx, 155);
+          ctx.lineTo(mx + 30, 110);
+          ctx.lineTo(mx + 55, 128);
+          ctx.lineTo(mx + 80, 155);
+        }
+        ctx.closePath();
+        ctx.fill();
+
+        // City skyline (mid parallax layer)
+        const bgScroll1 = (brakeCameraX * 0.12) % 210;
+        ctx.fillStyle = '#11172a';
+        for (let bx = -bgScroll1 - 40; bx < W + 80; bx += 70) {
+          ctx.fillRect(bx, 78, 42, 77);
+          ctx.fillRect(bx + 32, 64, 28, 91);
         }
 
-        // Lit Windows
-        ctx.fillStyle = '#1e2c4c';
-        for (let bx = -bgScroll1; bx < W + 100; bx += 70) {
-          for (let wy = 80; wy < 145; wy += 12) {
-            for (let wx = bx + 6; wx < bx + 38; wx += 10) {
-              if ((wx + wy + Math.floor(crtAnimTime / 8)) % 5 === 0) {
-                ctx.fillStyle = '#00f5ff';
-              } else {
-                ctx.fillStyle = '#141d33';
+        // Calm, deterministic lit windows (ZERO strobing! Warm amber & soft cyan)
+        for (let bx = -bgScroll1 - 40; bx < W + 80; bx += 70) {
+          // Building 1 windows
+          for (let wy = 84; wy < 145; wy += 12) {
+            for (let wx = bx + 6; wx < bx + 36; wx += 9) {
+              const hash = Math.abs(Math.sin(Math.floor(wx * 12.9898 + wy * 78.233)) * 43758.5453);
+              const val = hash - Math.floor(hash);
+              if (val > 0.68) {
+                ctx.fillStyle = val > 0.85 ? 'rgba(251, 191, 36, 0.45)' : 'rgba(56, 189, 248, 0.35)';
+                ctx.fillRect(wx, wy, 3, 3);
               }
-              ctx.fillRect(wx, wy, 3.5, 3.5);
             }
           }
+          // Building 2 windows
+          for (let wy = 72; wy < 145; wy += 12) {
+            for (let wx = bx + 36; wx < bx + 56; wx += 8) {
+              const hash = Math.abs(Math.sin(Math.floor(wx * 39.349 + wy * 11.233)) * 23421.631);
+              const val = hash - Math.floor(hash);
+              if (val > 0.72) {
+                ctx.fillStyle = val > 0.88 ? 'rgba(251, 191, 36, 0.40)' : 'rgba(148, 163, 184, 0.35)';
+                ctx.fillRect(wx, wy, 2.5, 3);
+              }
+            }
+          }
+        }
+
+        // Overhead sodium highway street lamps (passing overhead when driving)
+        const lampSpacing = 160;
+        const lampScroll = (brakeCameraX) % lampSpacing;
+        for (let lx = -lampScroll; lx < W + 40; lx += lampSpacing) {
+          // Lamp pole
+          ctx.fillStyle = '#242b42';
+          ctx.fillRect(lx + 8, 118, 2.5, 37);
+          // Lamp head arm
+          ctx.fillRect(lx + 8, 116, 12, 2.5);
+          ctx.fillStyle = '#fef08a';
+          ctx.fillRect(lx + 16, 118.5, 4, 1.5);
+          // Sodium glow cone onto road
+          const lampCone = ctx.createRadialGradient(lx + 18, 120, 2, lx + 18, 165, 35);
+          lampCone.addColorStop(0, 'rgba(254, 240, 138, 0.12)');
+          lampCone.addColorStop(1, 'rgba(254, 240, 138, 0)');
+          ctx.fillStyle = lampCone;
+          ctx.beginPath();
+          ctx.moveTo(lx + 16, 120);
+          ctx.lineTo(lx - 12, 175);
+          ctx.lineTo(lx + 48, 175);
+          ctx.closePath();
+          ctx.fill();
         }
 
         const cliffScreenX = BRAKE_CLIFF_X - brakeCameraX;
@@ -4600,8 +4777,8 @@
           ctx.lineTo(roadEndX, 155);
           ctx.stroke();
 
-          // Speed road dashes
-          const stripeOffset = (brakeCameraX + crtAnimTime * 2) % 32;
+          // Speed road dashes (moves only with camera, static at start!)
+          const stripeOffset = (brakeCameraX) % 32;
           ctx.fillStyle = '#3b4263';
           for (let sx = -stripeOffset; sx < roadEndX; sx += 32) {
             ctx.fillRect(sx, 175, 14, 3);
@@ -4802,12 +4979,12 @@
           // Headlight beam
           ctx.fillStyle = '#fef08a';
           ctx.fillRect(12, 0, 3, 3);
-          if (brakePhase === 'accel' || brakePhase === 'braking') {
-            ctx.fillStyle = 'rgba(254, 240, 138, 0.25)';
+          if (brakePhase === 'ready' || brakePhase === 'accel' || brakePhase === 'braking') {
+            ctx.fillStyle = brakePhase === 'ready' ? 'rgba(254, 240, 138, 0.16)' : 'rgba(254, 240, 138, 0.28)';
             ctx.beginPath();
             ctx.moveTo(15, 1);
-            ctx.lineTo(48, -4);
-            ctx.lineTo(48, 13);
+            ctx.lineTo(52, -5);
+            ctx.lineTo(52, 14);
             ctx.closePath();
             ctx.fill();
           }
@@ -4929,6 +5106,28 @@
             ctx.fillStyle = '#cbd5e1';
             ctx.fillText('画面クリックでリトライ 🔄', 160, 105);
           }
+        }
+
+        // Ready and Acceleration Guidance Prompts (Calm, non-strobing)
+        if (brakePhase === 'ready') {
+          ctx.textAlign = 'center';
+          ctx.font = 'bold 11px "DotGothic16", sans-serif';
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.78)';
+          ctx.fillRect(52, 60, 216, 26);
+          ctx.strokeStyle = 'rgba(0, 245, 255, 0.65)';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(52, 60, 216, 26);
+
+          ctx.fillStyle = '#00f5ff';
+          ctx.fillText('▶ クリック または SPACE でアクセル全開 ◀', 160, 77);
+          ctx.font = '9px "DotGothic16", sans-serif';
+          ctx.fillStyle = '#94a3b8';
+          ctx.fillText('もう一度押して崖の手前ギリギリで急停止！', 160, 102);
+        } else if (brakePhase === 'accel') {
+          ctx.textAlign = 'center';
+          ctx.font = 'bold 11.5px "DotGothic16", sans-serif';
+          ctx.fillStyle = '#ef4444';
+          ctx.fillText('⚡ もう一度クリック / SPACE で急ブレーキ！ ⚡', 160, 77);
         }
       }
 
