@@ -384,7 +384,8 @@
       margin-bottom: 6px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      flex-wrap: wrap;
+      gap: 4px 8px;
     }
     .subpage-title {
       font-family: var(--font-pixel-jp);
@@ -813,8 +814,10 @@
 
       <!-- Right Nav Links + Readability Utilities (Desktop) -->
       <div class="desktop-nav-group">
-        <nav style="display:flex; align-items:center; gap: 22px;" aria-label="メインナビゲーション">
-          <a href="/preview/#games" class="nav-link" data-nav="games">GAMES</a>
+        <nav style="display:flex; align-items:center; gap: 18px;" aria-label="メインナビゲーション">
+          <a href="/preview/" class="nav-link" data-nav="top">TOP</a>
+          <a href="/minigames.html" class="nav-link" data-nav="games">GAMES</a>
+          <a href="/coming-soon.html" class="nav-link" data-nav="flagship">FLAGSHIP</a>
           <a href="/portfolio.html" class="nav-link" data-nav="portfolio">PORTFOLIO</a>
           <a href="/members.html" class="nav-link" data-nav="members">MEMBERS</a>
           <a href="/aboutus.html" class="nav-link" data-nav="about">ABOUT</a>
@@ -850,11 +853,13 @@
 
     <!-- MOBILE DRAWER MENU -->
     <nav class="mobile-nav-drawer" id="mobile-nav-drawer" aria-label="モバイルナビゲーション">
-      <a href="/preview/#games" class="nav-link" style="font-size:15px;">GAMES — ミニゲーム一覧</a>
-      <a href="/portfolio.html" class="nav-link" style="font-size:15px;">PORTFOLIO — 制作実績・作品集</a>
-      <a href="/members.html" class="nav-link" style="font-size:15px;">MEMBERS — メンバー紹介</a>
-      <a href="/aboutus.html" class="nav-link" style="font-size:15px;">ABOUT — サークル紹介</a>
-      <a href="/news.html" class="nav-link active" style="font-size:15px;">NEWS — お知らせ</a>
+      <a href="/preview/" class="nav-link" style="font-size:15px;">TOP</a>
+      <a href="/minigames.html" class="nav-link" style="font-size:15px;">GAMES</a>
+      <a href="/coming-soon.html" class="nav-link" style="font-size:15px;">FLAGSHIP</a>
+      <a href="/portfolio.html" class="nav-link" style="font-size:15px;">PORTFOLIO</a>
+      <a href="/members.html" class="nav-link" style="font-size:15px;">MEMBERS</a>
+      <a href="/aboutus.html" class="nav-link" style="font-size:15px;">ABOUT</a>
+      <a href="/news.html" class="nav-link active" style="font-size:15px;">NEWS</a>
       <div style="display:flex; gap:8px; padding-top:8px; border-top:1px solid #26293a;">
         <button type="button" class="btn-header-util js-font-mode-toggle" style="flex:1; justify-content:center;" aria-pressed="false">
           <span class="util-icon-font">ABC</span>

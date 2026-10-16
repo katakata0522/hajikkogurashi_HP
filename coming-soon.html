@@ -266,7 +266,14 @@
       margin-bottom: 6px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      flex-wrap: wrap;
+      gap: 4px 8px;
+    }
+    .subpage-kicker-sub {
+      font-family: var(--font-pixel-jp);
+      font-size: 10px;
+      color: #94a3b8;
+      letter-spacing: 0.5px;
     }
     .subpage-title {
       font-family: var(--font-pixel-jp);
@@ -834,14 +841,14 @@
 
       <!-- Right Nav Links + Readability Utilities (Desktop) -->
       <div class="desktop-nav-group">
-        <nav style="display:flex; align-items:center; gap: 20px;" aria-label="メインナビゲーション">
-          <a href="/preview/#games" class="nav-link" data-nav="games">TOP/CART</a>
-          <a href="/minigames.html" class="nav-link" data-nav="minigames">MINIGAMES</a>
+        <nav style="display:flex; align-items:center; gap: 18px;" aria-label="メインナビゲーション">
+          <a href="/preview/" class="nav-link" data-nav="top">TOP</a>
+          <a href="/minigames.html" class="nav-link" data-nav="games">GAMES</a>
+          <a href="/coming-soon.html" class="nav-link active" data-nav="flagship">FLAGSHIP</a>
           <a href="/portfolio.html" class="nav-link" data-nav="portfolio">PORTFOLIO</a>
           <a href="/members.html" class="nav-link" data-nav="members">MEMBERS</a>
           <a href="/aboutus.html" class="nav-link" data-nav="about">ABOUT</a>
           <a href="/news.html" class="nav-link" data-nav="news">NEWS</a>
-          <a href="/coming-soon.html" class="nav-link active" data-nav="coming-soon">FLAGSHIP</a>
         </nav>
 
         <!-- Readability Utility Controls -->
@@ -873,13 +880,13 @@
 
     <!-- MOBILE DRAWER MENU -->
     <nav class="mobile-nav-drawer" id="mobile-nav-drawer" aria-label="モバイルナビゲーション">
-      <a href="/preview/#games" class="nav-link" style="font-size:15px;">TOP/CART — カートリッジ</a>
-      <a href="/minigames.html" class="nav-link" style="font-size:15px;">MINIGAMES — ミニゲーム広場</a>
-      <a href="/portfolio.html" class="nav-link" style="font-size:15px;">PORTFOLIO — 作品実績</a>
-      <a href="/members.html" class="nav-link" style="font-size:15px;">MEMBERS — メンバー紹介</a>
-      <a href="/aboutus.html" class="nav-link" style="font-size:15px;">ABOUT — サークル紹介</a>
-      <a href="/news.html" class="nav-link" style="font-size:15px;">NEWS — お知らせ</a>
-      <a href="/coming-soon.html" class="nav-link active" style="font-size:15px;">FLAGSHIP — 鋭意制作中！</a>
+      <a href="/preview/" class="nav-link" style="font-size:15px;">TOP</a>
+      <a href="/minigames.html" class="nav-link" style="font-size:15px;">GAMES</a>
+      <a href="/coming-soon.html" class="nav-link active" style="font-size:15px;">FLAGSHIP</a>
+      <a href="/portfolio.html" class="nav-link" style="font-size:15px;">PORTFOLIO</a>
+      <a href="/members.html" class="nav-link" style="font-size:15px;">MEMBERS</a>
+      <a href="/aboutus.html" class="nav-link" style="font-size:15px;">ABOUT</a>
+      <a href="/news.html" class="nav-link" style="font-size:15px;">NEWS</a>
     </nav>
 
     <!-- BREADCRUMBS BAR -->
@@ -901,7 +908,7 @@
       <div class="subpage-kicker">
         <span>⚡ FLAGSHIP PROJECT</span>
         <span>//</span>
-        <span>UNREAL ENGINE 5 次世代インディー制作</span>
+        <span class="subpage-kicker-sub">UNREAL ENGINE 5 次世代インディー制作</span>
       </div>
       <h1 class="subpage-title">鋭意制作中！</h1>
       <p class="subpage-lead">

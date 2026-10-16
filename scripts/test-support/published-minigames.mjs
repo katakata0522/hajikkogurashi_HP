@@ -15,6 +15,6 @@ export function extractPublishedSlugs(markup) {
 }
 
 export function countGameCards(markup) {
-  const divs = markup.match(/<div\b[^>]*>/g) || [];
-  return divs.filter((tag) => tagHasClass(tag, 'game-card')).length;
+  const cards = markup.match(/<(?:div|article)\b[^>]*>/g) || [];
+  return cards.filter((tag) => tagHasClass(tag, 'game-card')).length;
 }

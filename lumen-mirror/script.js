@@ -330,28 +330,34 @@ class GameController {
 
         const muteToggle = document.getElementById('sound-mute-toggle');
         const muteLabel = document.getElementById('sound-mute-label');
-        if (muteToggle) {
-            muteToggle.checked = audio.isMuted;
+        const hudSoundBtn = document.getElementById('hud-sound-btn');
+
+        const syncLumenMuteUI = (isMuted) => {
+            if (muteToggle) muteToggle.checked = isMuted;
             if (muteLabel) {
-                muteLabel.textContent = audio.isMuted ? 'SOUND: OFF 🔇' : 'SOUND: ON 🔊';
-                if (audio.isMuted) {
+                muteLabel.textContent = isMuted ? 'SOUND: OFF 🔇' : 'SOUND: ON 🔊';
+                if (isMuted) {
                     muteLabel.style.borderColor = 'rgba(255, 0, 127, 0.6)';
                     muteLabel.style.color = '#ff007f';
+                } else {
+                    muteLabel.style.borderColor = 'rgba(0, 243, 255, 0.4)';
+                    muteLabel.style.color = '#00f3ff';
                 }
             }
+            if (hudSoundBtn) {
+                hudSoundBtn.textContent = isMuted ? '🔇' : '🔊';
+                hudSoundBtn.classList.toggle('is-muted', isMuted);
+                hudSoundBtn.title = isMuted ? 'SOUND: ON (音声有効)' : 'SOUND: OFF (消音)';
+            }
+        };
+
+        syncLumenMuteUI(audio.isMuted);
+
+        if (muteToggle) {
             muteToggle.addEventListener('change', (e) => {
                 const isMuted = e.target.checked;
                 audio.setMuted(isMuted);
-                if (muteLabel) {
-                    muteLabel.textContent = isMuted ? 'SOUND: OFF 🔇' : 'SOUND: ON 🔊';
-                    if (isMuted) {
-                        muteLabel.style.borderColor = 'rgba(255, 0, 127, 0.6)';
-                        muteLabel.style.color = '#ff007f';
-                    } else {
-                        muteLabel.style.borderColor = 'rgba(0, 243, 255, 0.4)';
-                        muteLabel.style.color = '#00f3ff';
-                    }
-                }
+                syncLumenMuteUI(isMuted);
             });
             if (muteLabel) {
                 muteLabel.addEventListener('click', (e) => {
@@ -359,16 +365,19 @@ class GameController {
                     muteToggle.checked = !muteToggle.checked;
                     const isMuted = muteToggle.checked;
                     audio.setMuted(isMuted);
-                    muteLabel.textContent = isMuted ? 'SOUND: OFF 🔇' : 'SOUND: ON 🔊';
-                    if (isMuted) {
-                        muteLabel.style.borderColor = 'rgba(255, 0, 127, 0.6)';
-                        muteLabel.style.color = '#ff007f';
-                    } else {
-                        muteLabel.style.borderColor = 'rgba(0, 243, 255, 0.4)';
-                        muteLabel.style.color = '#00f3ff';
-                    }
+                    syncLumenMuteUI(isMuted);
                 });
             }
+        }
+
+        if (hudSoundBtn) {
+            hudSoundBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                const isMuted = !audio.isMuted;
+                audio.setMuted(isMuted);
+                syncLumenMuteUI(isMuted);
+            });
         }
         document.getElementById('emit-btn').addEventListener('click', () => {
             this._unlock(); this.emitPhoton();

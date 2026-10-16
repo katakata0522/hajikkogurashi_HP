@@ -6,13 +6,13 @@
       const RESULT_DELAY_MS = 940;
 
       const enemies = [
-        { name: '町の剣士', title: '一人目', rank: '★☆☆☆☆', reactionMs: 480, cssClass: 'enemy-town', minWaitMs: 1600, maxWaitMs: 3800, flavor: 'まずは落ち着いて合図を見る相手です。' },
-        { name: '道場破り', title: '二人目', rank: '★★☆☆☆', reactionMs: 385, cssClass: 'enemy-dojo', minWaitMs: 1900, maxWaitMs: 5200, flavor: '油断すると斬られます。合図だけを見ましょう。' },
-        { name: '早耳の忍び', title: '三人目', rank: '★★★☆☆', reactionMs: 340, cssClass: 'enemy-ninja', minWaitMs: 2000, maxWaitMs: 6200, flavor: '速い相手です。長い待ちに飲まれないように。' },
-        { name: '無口な達人', title: '四人目', rank: '★★★★☆', reactionMs: 315, cssClass: 'enemy-master', minWaitMs: 2200, maxWaitMs: 7200, flavor: '一瞬の迷いが負けにつながります。' },
-        { name: '影の剣豪', title: '五人目', rank: '★★★★★', reactionMs: 295, cssClass: 'enemy-shadow', minWaitMs: 2400, maxWaitMs: 8500, flavor: 'ここからは本気の領域。かなり厳しい勝負です。' },
-        { name: '刹那の鬼', title: '六人目', rank: '★★★★★', reactionMs: 285, cssClass: 'enemy-demon', minWaitMs: 2600, maxWaitMs: 9200, flavor: '人間離れした速さ。ここを越えれば達人です。' },
-        { name: '刹那の鬼・真', title: '隠しボス', rank: '★★★★★★', reactionMs: 260, cssClass: 'enemy-demon', minWaitMs: 2800, maxWaitMs: 9800, flavor: '限界突破の一戦。勝てなくても当然の相手です。', hidden: true },
+        { name: '町の剣士', title: '一人目', rank: '★☆☆☆☆', reactionMs: 560, cssClass: 'enemy-town', minWaitMs: 1600, maxWaitMs: 3800, flavor: 'まずは落ち着いて合図を見る相手です。' },
+        { name: '道場破り', title: '二人目', rank: '★★☆☆☆', reactionMs: 460, cssClass: 'enemy-dojo', minWaitMs: 1900, maxWaitMs: 5200, flavor: '油断すると斬られます。合図だけを見ましょう。' },
+        { name: '早耳の忍び', title: '三人目', rank: '★★★☆☆', reactionMs: 400, cssClass: 'enemy-ninja', minWaitMs: 2000, maxWaitMs: 6200, flavor: '速い相手です。長い待ちに飲まれないように。' },
+        { name: '無口な達人', title: '四人目', rank: '★★★★☆', reactionMs: 360, cssClass: 'enemy-master', minWaitMs: 2200, maxWaitMs: 7200, flavor: '一瞬の迷いが負けにつながります。' },
+        { name: '影の剣豪', title: '五人目', rank: '★★★★★', reactionMs: 330, cssClass: 'enemy-shadow', minWaitMs: 2400, maxWaitMs: 8500, flavor: 'ここからは本気の領域。かなり厳しい勝負です。' },
+        { name: '刹那の鬼', title: '六人目', rank: '★★★★★', reactionMs: 300, cssClass: 'enemy-demon', minWaitMs: 2600, maxWaitMs: 9200, flavor: '人間離れした速さ。ここを越えれば達人です。' },
+        { name: '刹那の鬼・真', title: '隠しボス', rank: '★★★★★★', reactionMs: 275, cssClass: 'enemy-demon', minWaitMs: 2800, maxWaitMs: 9800, flavor: '限界突破の一戦。勝てなくても当然の相手です。', hidden: true },
       ];
 
       const enemyClassNames = enemies.map((enemy) => enemy.cssClass);

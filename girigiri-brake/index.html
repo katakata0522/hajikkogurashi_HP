@@ -60,9 +60,12 @@
 
             <div id="hud" class="screen">
                 <div class="hud-top">
-                    <div class="weather-box">
-                        <span class="weather-label">CONDITION</span>
-                        <span id="weather-value" class="weather-value">☀️ NORMAL</span>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <div class="weather-box">
+                            <span class="weather-label">CONDITION</span>
+                            <span id="weather-value" class="weather-value">☀️ NORMAL</span>
+                        </div>
+                        <button id="hud-sound-btn" class="hud-sound-btn" title="音声ミュート切替" aria-label="音声ミュート切替">🔊</button>
                     </div>
                     <div class="speedometer">
                         <span class="speed-label">SPEED</span>

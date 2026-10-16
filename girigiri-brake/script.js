@@ -491,27 +491,43 @@ class GameController {
         }
 
         // ミュート状態の初期反映とバインド
-        if (muteToggle) {
-            muteToggle.checked = this.audio.isMuted;
-            if (muteLabel) {
-                muteLabel.textContent = this.audio.isMuted ? '音 OFF 🔇' : '音 ON 🔊';
+        const hudSoundBtn = document.getElementById('hud-sound-btn');
+        const syncMuteUI = (isMuted) => {
+            if (muteToggle) muteToggle.checked = isMuted;
+            if (muteLabel) muteLabel.textContent = isMuted ? '音 OFF 🔇' : '音 ON 🔊';
+            if (hudSoundBtn) {
+                hudSoundBtn.textContent = isMuted ? '🔇' : '🔊';
+                hudSoundBtn.classList.toggle('is-muted', isMuted);
+                hudSoundBtn.title = isMuted ? '音声をONにする' : '音声をミュートする';
             }
+        };
+
+        syncMuteUI(this.audio.isMuted);
+
+        if (muteToggle) {
             muteToggle.addEventListener('change', (e) => {
                 const isMuted = e.target.checked;
                 this.audio.setMuted(isMuted);
-                if (muteLabel) {
-                    muteLabel.textContent = isMuted ? '音 OFF 🔇' : '音 ON 🔊';
-                }
+                syncMuteUI(isMuted);
             });
             if (muteLabel) {
                 muteLabel.addEventListener('click', (e) => {
                     e.preventDefault();
-                    muteToggle.checked = !muteToggle.checked;
-                    const isMuted = muteToggle.checked;
+                    const isMuted = !muteToggle.checked;
                     this.audio.setMuted(isMuted);
-                    muteLabel.textContent = isMuted ? '音 OFF 🔇' : '音 ON 🔊';
+                    syncMuteUI(isMuted);
                 });
             }
+        }
+
+        if (hudSoundBtn) {
+            hudSoundBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                const isMuted = !this.audio.isMuted;
+                this.audio.setMuted(isMuted);
+                syncMuteUI(isMuted);
+            });
         }
     }
 

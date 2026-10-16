@@ -1887,8 +1887,10 @@
 
           <!-- Right Nav Links + Readability Toggles + SFX Toggle + PLAY NOW CTA (Desktop) -->
           <div class="desktop-nav-group">
-            <nav class="desktop-nav-links" style="gap: 20px;" aria-label="Main Navigation">
-              <a href="#games" class="nav-link active" data-nav="games">GAMES</a>
+            <nav class="desktop-nav-links" style="gap: 16px;" aria-label="Main Navigation">
+              <a href="/preview/" class="nav-link active" data-nav="top">TOP</a>
+              <a href="/minigames.html" class="nav-link" data-nav="games">GAMES</a>
+              <a href="/coming-soon.html" class="nav-link" data-nav="flagship">FLAGSHIP</a>
               <a href="/portfolio.html" class="nav-link" data-nav="portfolio">PORTFOLIO</a>
               <a href="/members.html" class="nav-link" data-nav="members">MEMBERS</a>
               <a href="/aboutus.html" class="nav-link" data-nav="about">ABOUT</a>
@@ -1929,12 +1931,14 @@
 
         <!-- MOBILE DRAWER MENU -->
         <nav class="mobile-nav-drawer" id="mobile-nav-drawer" aria-label="Mobile Navigation">
-          <a href="#games" class="nav-link active" style="font-size:15px;">GAMES — ミニゲーム一覧</a>
-          <a href="/portfolio.html" class="nav-link" style="font-size:15px;">PORTFOLIO — 制作実績・作品集</a>
-          <a href="/members.html" class="nav-link" style="font-size:15px;">MEMBERS — メンバー紹介</a>
-          <a href="/aboutus.html" class="nav-link" style="font-size:15px;">ABOUT — サークル紹介</a>
-          <a href="/news.html" class="nav-link" style="font-size:15px;">NEWS — お知らせ</a>
-          <button class="btn-neon-play" id="btn-play-now-drawer" style="width:100%; margin:10px 0 6px 0; padding:9px 14px; font-size:13.5px; text-align:center;">▶ PLAY NOW — 全ゲームをプレイ</button>
+          <a href="/preview/" class="nav-link active" style="font-size:15px;">TOP</a>
+          <a href="/minigames.html" class="nav-link" style="font-size:15px;">GAMES</a>
+          <a href="/coming-soon.html" class="nav-link" style="font-size:15px;">FLAGSHIP</a>
+          <a href="/portfolio.html" class="nav-link" style="font-size:15px;">PORTFOLIO</a>
+          <a href="/members.html" class="nav-link" style="font-size:15px;">MEMBERS</a>
+          <a href="/aboutus.html" class="nav-link" style="font-size:15px;">ABOUT</a>
+          <a href="/news.html" class="nav-link" style="font-size:15px;">NEWS</a>
+          <button class="btn-neon-play" id="btn-play-now-drawer" style="width:100%; margin:10px 0 6px 0; padding:9px 14px; font-size:13.5px; text-align:center;">▶ PLAY NOW</button>
           <div style="display:flex; gap:8px; padding:8px 0; border-top:1px solid #26293a;">
             <button type="button" class="btn-header-util js-font-mode-toggle" style="flex:1; justify-content:center; gap:6px;" aria-pressed="false">
               <span class="util-icon-font">ABC</span>
@@ -1978,8 +1982,8 @@
           </div>
           <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
             <div style="flex:1 1 540px; max-width: 780px;">
-              <h2 style="margin:0 0 6px 0; font-family:var(--font-mono); font-size:18px; font-weight:700; color:#ffffff; letter-spacing:0.4px;">
-                Re:青春！はじっこから創る、Unreal Engine 5 インディーゲーム
+              <h2 style="margin:0 0 6px 0; font-family:var(--font-mono); font-size:18px; font-weight:700; color:#ffffff; letter-spacing:0.4px; word-break:keep-all; overflow-wrap:break-word; text-wrap:balance;">
+                Re:青春！はじっこから創る、<span style="display:inline-block; white-space:nowrap;">Unreal Engine 5</span> <span style="display:inline-block; white-space:nowrap;">インディーゲーム</span>
               </h2>
               <p style="margin:0; font-family:var(--font-pixel-jp); font-size:11.5px; line-height:1.7; color:#a2a9c2;">
                 Corner Neighbor の大本命プロジェクト。UE5のハイエンドなグラフィックと独自のゲーム性を融合させたタイトルを鋭意開発中です。開発メモやイベント参加記録は公式noteで公開中！
@@ -2060,23 +2064,56 @@
                     <rect x="28" y="17" width="138" height="58" fill="#1a1033" stroke="#3c1b5c" stroke-width="2"/>
                     <rect x="33" y="22" width="12" height="2" fill="#00f5ff"/>
                     <rect x="33" y="26" width="8" height="2" fill="#ff4db8"/>
-                    <text x="51" y="30" fill="#ffffff" font-family="'Share Tech Mono', monospace" font-weight="bold" font-size="13.5" letter-spacing="0.5">NEON SLICER</text>
-                    <!-- Label Pixel Artwork: Cyber Ninjas Dueling -->
-                    <rect x="48" y="34" width="96" height="38" fill="#140c29"/>
-                    <rect x="52" y="36" width="10" height="34" fill="#3b165e"/>
-                    <rect x="74" y="35" width="14" height="35" fill="#59156e"/>
-                    <rect x="116" y="38" width="12" height="32" fill="#381954"/>
-                    <polygon points="50,62 94,35 100,35 56,65" fill="#ff00a0"/>
-                    <rect x="64" y="45" width="7" height="7" fill="#090d16"/>
-                    <rect x="65" y="47" width="5" height="2" fill="#00f5ff"/>
-                    <polygon points="58,52 74,52 78,72 54,72" fill="#121829"/>
-                    <polygon points="60,55 72,55 68,70 58,70" fill="#253459"/>
-                    <rect x="92" y="43" width="7" height="7" fill="#090d16"/>
-                    <rect x="93" y="45" width="4" height="2" fill="#ff00a0"/>
-                    <polygon points="86,50 104,50 112,72 82,72" fill="#111827"/>
-                    <polygon points="90,53 102,53 106,70 88,70" fill="#1e3a5f"/>
-                    <polygon points="98,54 142,38 144,41 100,57" fill="#ffffff"/>
-                    <polygon points="96,53 143,37 145,42 98,58" fill="#00f5ff" opacity="0.75"/>
+                    <text x="50" y="30" fill="#ffffff" font-family="'Share Tech Mono', monospace" font-weight="bold" font-size="13" letter-spacing="0.5">KANJI SLICER</text>
+                    <!-- Label Pixel Artwork: Cyber Ninja Slicing Kanji Block -->
+                    <rect x="48" y="34" width="96" height="38" fill="#120a28"/>
+                    <!-- Subtle Cyber Dojo Grid & Pillars -->
+                    <rect x="48" y="66" width="96" height="6" fill="#1e113d"/>
+                    <rect x="48" y="66" width="96" height="1" fill="#4c1d95"/>
+                    <rect x="53" y="35" width="8" height="31" fill="#231247"/>
+                    <rect x="131" y="35" width="8" height="31" fill="#231247"/>
+                    <!-- Left: Slicable Kanji Stone Tile (Split in Two Halves by Slash!) -->
+                    <!-- Top-Left Half of Kanji Tile (shifted slightly up-left) -->
+                    <rect x="61" y="39" width="22" height="11" fill="#2e1a5e" stroke="#00f5ff" stroke-width="1"/>
+                    <!-- Pixel Kanji strokes top half -->
+                    <rect x="65" y="42" width="14" height="2" fill="#e0f2fe"/>
+                    <rect x="71" y="40" width="2" height="8" fill="#00f5ff"/>
+                    <rect x="66" y="46" width="5" height="2" fill="#67e8f9"/>
+                    <rect x="73" y="46" width="5" height="2" fill="#67e8f9"/>
+                    <!-- Bottom-Right Half of Kanji Tile (shifted slightly down-right) -->
+                    <rect x="64" y="53" width="22" height="11" fill="#2e1a5e" stroke="#ff4db8" stroke-width="1"/>
+                    <!-- Pixel Kanji strokes bottom half -->
+                    <rect x="68" y="55" width="14" height="2" fill="#fbcfe8"/>
+                    <rect x="74" y="54" width="2" height="8" fill="#ff4db8"/>
+                    <rect x="69" y="59" width="4" height="3" fill="#f472b6"/>
+                    <rect x="77" y="59" width="4" height="3" fill="#f472b6"/>
+                    <!-- Right: Cyber Ninja in Dynamic Slash Pose -->
+                    <!-- Flowing Magenta Scarf (Ninjato trail) -->
+                    <rect x="114" y="43" width="10" height="3" fill="#ff00a0"/>
+                    <rect x="121" y="40" width="9" height="3" fill="#ff4db8"/>
+                    <rect x="127" y="38" width="6" height="2" fill="#f472b6"/>
+                    <!-- Ninja Head & Hood -->
+                    <rect x="103" y="41" width="10" height="9" fill="#090d16"/>
+                    <rect x="104" y="40" width="8" height="2" fill="#1e293b"/>
+                    <!-- Glowing Cyan Visor Eye -->
+                    <rect x="104" y="44" width="6" height="2" fill="#00f5ff"/>
+                    <rect x="105" y="44" width="2" height="2" fill="#ffffff"/>
+                    <!-- Ninja Torso & Armor -->
+                    <polygon points="99,50 116,50 119,64 96,64" fill="#111827"/>
+                    <polygon points="102,52 113,52 115,62 100,62" fill="#1e3a5f"/>
+                    <rect x="105" y="52" width="4" height="10" fill="#00f5ff" opacity="0.35"/>
+                    <!-- Ninja Legs (Wide Stance) -->
+                    <rect x="97" y="63" width="5" height="7" fill="#090d16"/>
+                    <rect x="112" y="63" width="5" height="7" fill="#090d16"/>
+                    <!-- Diagonal Katana Laser Slash Cutting Through the Kanji Tile! -->
+                    <polygon points="52,61 128,36 131,40 55,65" fill="#00f5ff" opacity="0.45"/>
+                    <polygon points="54,60 126,37 128,39 56,62" fill="#ffffff"/>
+                    <!-- Impact Sparks along the cut -->
+                    <rect x="59" y="52" width="2" height="2" fill="#ff00a0"/>
+                    <rect x="74" y="49" width="3" height="3" fill="#ffffff"/>
+                    <rect x="86" y="43" width="2" height="2" fill="#00f5ff"/>
+                    <rect x="91" y="52" width="2" height="2" fill="#ff4db8"/>
+                    <!-- Left Label Mini Chip Pattern -->
                     <rect x="33" y="55" width="13" height="15" fill="#2a1847"/>
                     <rect x="35" y="57" width="3" height="3" fill="#ff4db8"/>
                     <rect x="40" y="57" width="4" height="3" fill="#00f5ff"/>
@@ -2104,12 +2141,12 @@
                 </div>
               </article>
 
-              <!-- CARD 2: ROOFTOP CHILL (LUMEN_MIRROR) -->
+              <!-- CARD 2: LUMEN MIRROR (LUMEN_MIRROR) -->
               <article class="game-card">
                 <div class="cartridge-well" data-game-id="lumen-mirror" data-action="details">
                   <div class="cart-badge badge-cyan">
-                    <span style="font-size: 7px;">WISHLIST</span>
-                    <span>NOW</span>
+                    <span style="font-size: 7.5px;">FREE</span>
+                    <span>PLAY</span>
                   </div>
                   <!-- Cyan Famicom Cartridge SVG -->
                   <svg class="cartridge-svg" width="194" height="104" viewBox="0 0 194 104" shape-rendering="crispEdges" style="filter: drop-shadow(0 0 10px rgba(0, 245, 255, 0.45));">
@@ -2129,19 +2166,47 @@
                     <rect x="28" y="17" width="138" height="58" fill="#102136" stroke="#1e3a5f" stroke-width="2"/>
                     <rect x="33" y="22" width="12" height="2" fill="#00f5ff"/>
                     <rect x="33" y="26" width="8" height="2" fill="#67e8f9"/>
-                    <text x="51" y="29" fill="#ffffff" font-family="'Share Tech Mono', monospace" font-weight="bold" font-size="12" letter-spacing="0.4">ROOFTOP CHILL</text>
-                    <rect x="48" y="34" width="96" height="38" fill="#162c46"/>
-                    <circle cx="99" cy="43" r="5.5" fill="#ffffff"/>
-                    <rect x="52" y="36" width="16" height="36" fill="#0d1829"/>
-                    <rect x="70" y="42" width="18" height="30" fill="#112036"/>
-                    <rect x="108" y="45" width="14" height="27" fill="#0f1d30"/>
-                    <rect x="124" y="39" width="16" height="33" fill="#0b1524"/>
-                    <rect x="48" y="55" width="60" height="17" fill="#23293d"/>
-                    <rect x="52" y="59" width="52" height="10" fill="#181c2b"/>
-                    <rect x="55" y="40" width="8" height="2" fill="#38bdf8"/>
-                    <rect x="74" y="46" width="10" height="2" fill="#f472b6"/>
-                    <rect x="128" y="44" width="8" height="2" fill="#38bdf8"/>
-                    <rect x="112" y="52" width="6" height="2" fill="#facc15"/>
+                    <text x="50" y="29" fill="#ffffff" font-family="'Share Tech Mono', monospace" font-weight="bold" font-size="12.5" letter-spacing="0.4">LUMEN MIRROR</text>
+                    <!-- Label Pixel Artwork: Optical Laser Reflection & Crystal Prism -->
+                    <rect x="48" y="34" width="96" height="38" fill="#091526"/>
+                    <!-- Optical Chamber Grid Nodes -->
+                    <rect x="64" y="42" width="2" height="2" fill="#1e3a5f"/>
+                    <rect x="96" y="42" width="2" height="2" fill="#1e3a5f"/>
+                    <rect x="64" y="60" width="2" height="2" fill="#1e3a5f"/>
+                    <rect x="112" y="60" width="2" height="2" fill="#1e3a5f"/>
+                    <!-- Dark Obstacle Block in Center -->
+                    <rect x="88" y="51" width="14" height="14" fill="#162a45" stroke="#294870" stroke-width="1"/>
+                    <!-- Laser Emitter Turret (Bottom-Left) -->
+                    <rect x="50" y="55" width="10" height="10" fill="#334155"/>
+                    <rect x="52" y="57" width="6" height="6" fill="#1e293b"/>
+                    <rect x="58" y="58" width="4" height="4" fill="#00f5ff"/>
+                    <!-- Laser Beam Glow (3 bounced segments: Right -> Up -> Right -> Down-Right) -->
+                    <rect x="60" y="58" width="20" height="4" fill="#00f5ff" opacity="0.35"/>
+                    <rect x="76" y="41" width="4" height="20" fill="#00f5ff" opacity="0.35"/>
+                    <rect x="76" y="40" width="34" height="4" fill="#00f5ff" opacity="0.35"/>
+                    <polygon points="108,41 128,53 126,56 106,44" fill="#00f5ff" opacity="0.35"/>
+                    <!-- Laser Beam Crisp Core -->
+                    <rect x="60" y="59" width="19" height="2" fill="#ffffff"/>
+                    <rect x="77" y="42" width="2" height="19" fill="#ffffff"/>
+                    <rect x="77" y="41" width="32" height="2" fill="#ffffff"/>
+                    <polygon points="108,41 127,53 126,55 107,43" fill="#ffffff"/>
+                    <!-- Mirror 1 (Bottom-Left at 78,60, angled /) -->
+                    <polygon points="73,64 82,55 84,57 75,66" fill="#e2e8f0"/>
+                    <polygon points="74,63 81,56 82,57 75,64" fill="#67e8f9"/>
+                    <!-- Mirror 2 (Top-Left at 78,42, angled /) -->
+                    <polygon points="73,46 82,37 84,39 75,48" fill="#e2e8f0"/>
+                    <polygon points="74,45 81,38 82,39 75,46" fill="#67e8f9"/>
+                    <!-- Mirror 3 (Top-Right at 108,42, angled \) -->
+                    <polygon points="104,37 113,46 111,48 102,39" fill="#e2e8f0"/>
+                    <polygon points="105,38 112,45 111,46 104,39" fill="#67e8f9"/>
+                    <!-- Target Lumen Crystal Prism (Right at 128,55) -->
+                    <polygon points="128,45 137,55 128,65 119,55" fill="#ff4db8" opacity="0.4"/>
+                    <polygon points="128,47 135,55 128,63 121,55" fill="#00f5ff"/>
+                    <polygon points="128,50 132,55 128,60 124,55" fill="#ffffff"/>
+                    <!-- Sparkle Rays around Crystal -->
+                    <rect x="127" y="42" width="2" height="2" fill="#ffffff"/>
+                    <rect x="138" y="54" width="2" height="2" fill="#67e8f9"/>
+                    <rect x="127" y="66" width="2" height="2" fill="#ff4db8"/>
                     <rect x="33" y="55" width="13" height="15" fill="#17334f"/>
                     <rect x="35" y="57" width="3" height="3" fill="#67e8f9"/>
                     <rect x="40" y="57" width="4" height="3" fill="#38bdf8"/>
@@ -2168,11 +2233,11 @@
                 </div>
               </article>
 
-              <!-- CARD 3: CRT QUEST (みきり一閃) -->
+              <!-- CARD 3: MIKIRI ISSEN (みきり一閃) -->
               <article class="game-card">
-                <div class="cartridge-well" data-game-id="crt-quest" data-action="details">
+                <div class="cartridge-well" data-game-id="mikiri-issen" data-action="details">
                   <div class="cart-badge badge-amber">
-                    <span>DEMA</span>
+                    <span style="font-size: 7.5px;">FREE</span>
                     <span>PLAY</span>
                   </div>
                   <!-- Golden Orange Famicom Cartridge SVG -->
@@ -2193,21 +2258,38 @@
                     <rect x="28" y="17" width="138" height="58" fill="#261c14" stroke="#523718" stroke-width="2"/>
                     <rect x="33" y="22" width="12" height="2" fill="#fbbf24"/>
                     <rect x="33" y="26" width="8" height="2" fill="#f59e0b"/>
-                    <text x="58" y="30" fill="#ffffff" font-family="'Share Tech Mono', monospace" font-weight="bold" font-size="13.5" letter-spacing="0.6">CRT QUEST</text>
-                    <rect x="48" y="34" width="96" height="38" fill="#1e2229"/>
-                    <rect x="50" y="36" width="92" height="28" fill="#2b2623"/>
-                    <rect x="55" y="40" width="22" height="22" fill="#d6d3c4"/>
-                    <rect x="58" y="43" width="16" height="12" fill="#143326"/>
-                    <rect x="60" y="45" width="8" height="2" fill="#4ade80"/>
-                    <rect x="60" y="49" width="11" height="2" fill="#4ade80"/>
-                    <rect x="103" y="39" width="12" height="7" fill="#ea580c"/>
-                    <rect x="105" y="45" width="9" height="6" fill="#fed7aa"/>
-                    <rect x="102" y="51" width="14" height="11" fill="#16a34a"/>
-                    <rect x="92" y="54" width="10" height="3" fill="#cbd5e1"/>
-                    <rect x="104" y="62" width="4" height="5" fill="#78350f"/>
-                    <rect x="111" y="62" width="4" height="5" fill="#78350f"/>
-                    <rect x="48" y="66" width="96" height="6" fill="#22c55e"/>
-                    <rect x="48" y="69" width="96" height="3" fill="#15803d"/>
+                    <text x="50" y="30" fill="#ffffff" font-family="'Share Tech Mono', monospace" font-weight="bold" font-size="13" letter-spacing="0.5">MIKIRI ISSEN</text>
+                    <!-- Label Pixel Artwork: Crimson Twilight Iai Samurai Duel -->
+                    <rect x="48" y="34" width="96" height="38" fill="#1c0d18"/>
+                    <!-- Crimson & Amber Horizon Gradient Bands -->
+                    <rect x="48" y="44" width="96" height="10" fill="#3b1224"/>
+                    <rect x="48" y="54" width="96" height="11" fill="#6b1d2f"/>
+                    <rect x="48" y="61" width="96" height="4" fill="#9a3412"/>
+                    <!-- Giant Full Moon in Center -->
+                    <circle cx="96" cy="52" r="13" fill="#fde68a" opacity="0.35"/>
+                    <circle cx="96" cy="52" r="10.5" fill="#fef3c7"/>
+                    <!-- Alert [ ! ] Signal Flash at Top Center -->
+                    <rect x="91" y="36" width="10" height="9" fill="#dc2626" stroke="#fef08a" stroke-width="1"/>
+                    <rect x="95" y="38" width="2" height="3" fill="#ffffff"/>
+                    <rect x="95" y="42" width="2" height="1.5" fill="#ffffff"/>
+                    <!-- Left Samurai Silhouette (Low Iai Crouch with Kasa Hat) -->
+                    <polygon points="56,50 73,47 69,51 58,52" fill="#090508"/>
+                    <rect x="62" y="50" width="6" height="5" fill="#090508"/>
+                    <polygon points="58,55 70,55 73,65 55,65" fill="#090508"/>
+                    <rect x="65" y="51" width="3" height="1.5" fill="#38bdf8"/>
+                    <!-- Right Rival Samurai Silhouette (Topknot & Hakama) -->
+                    <rect x="122" y="46" width="4" height="3" fill="#090508"/>
+                    <rect x="119" y="49" width="7" height="5" fill="#090508"/>
+                    <rect x="120" y="51" width="3" height="1.5" fill="#ef4444"/>
+                    <polygon points="116,54 128,54 131,65 113,65" fill="#090508"/>
+                    <!-- Lightning Iai Slash Flash Across the Moon! -->
+                    <polygon points="51,61 141,44 142,48 52,64" fill="#fbbf24" opacity="0.65"/>
+                    <polygon points="52,61 140,45 141,47 53,63" fill="#ffffff"/>
+                    <!-- Pitch-Black Ground & Pampas Grass Blades -->
+                    <rect x="48" y="65" width="96" height="7" fill="#090508"/>
+                    <rect x="52" y="62" width="1.5" height="3" fill="#090508"/>
+                    <rect x="136" y="61" width="1.5" height="4" fill="#090508"/>
+                    <rect x="139" y="62" width="1.5" height="3" fill="#090508"/>
                     <rect x="33" y="55" width="13" height="15" fill="#422c13"/>
                     <rect x="35" y="57" width="4" height="3" fill="#fbbf24"/>
                     <rect x="40" y="57" width="4" height="3" fill="#f59e0b"/>
@@ -2229,8 +2311,8 @@
                 </div>
                 <div class="card-divider"></div>
                 <div class="card-actions">
-                  <button class="btn-card-action btn-card-play" data-game-id="crt-quest" data-action="play">▶ 今すぐ遊ぶ</button>
-                  <button class="btn-card-action" data-game-id="crt-quest" data-action="details">詳細</button>
+                  <button class="btn-card-action btn-card-play" data-game-id="mikiri-issen" data-action="play">▶ 今すぐ遊ぶ</button>
+                  <button class="btn-card-action" data-game-id="mikiri-issen" data-action="details">詳細</button>
                 </div>
               </article>
 
@@ -2339,12 +2421,12 @@
 
         <!-- CREW ROSTER: 7 MEMBERS -->
         <section class="crew-section" aria-label="Development Crew">
-          <div style="display:flex; align-items:center; gap: 12px; margin-bottom: 12px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap: 8px 12px; margin-bottom: 12px;">
             <h2 style="margin:0; font-size: 19px; font-weight: 700; color: #e2e8f0; letter-spacing: 0.4px;">
-              SECRET BASE CREW <span style="font-size:12px; color:#00f5ff; font-weight:normal;">— 7人のゲーム職人たち</span>
+              SECRET BASE CREW <span style="font-size:12px; color:#00f5ff; font-weight:normal; display:inline-block; white-space:nowrap;">— 7人のゲーム職人たち</span>
             </h2>
-            <div style="flex:1; height: 1px; background: #262836; margin-top: 4px;"></div>
-            <a href="/members.html" style="color:#00f5ff; font-family:var(--font-pixel-jp); font-size:10px; text-decoration:none;">全員を見る ▸</a>
+            <div style="flex:1; min-width:20px; height: 1px; background: #262836; margin-top: 4px;"></div>
+            <a href="/members.html" style="color:#00f5ff; font-family:var(--font-pixel-jp); font-size:10px; text-decoration:none; white-space:nowrap;">全員を見る ▸</a>
           </div>
 
           <div class="crew-grid">
@@ -2669,7 +2751,7 @@
     const FEATURED_CARTRIDGES = {
       'kanji-slicer': {
         code: 'CN-ROM-01',
-        enTitle: 'NEON SLICER',
+        enTitle: 'KANJI SLICER',
         jpTitle: '漢字スライサー・マージ',
         badge: 'OUT NOW',
         color: '#ff2a9d',
@@ -2680,32 +2762,43 @@
       },
       'lumen-mirror': {
         code: 'CN-ROM-02',
-        enTitle: 'ROOFTOP CHILL',
+        enTitle: 'LUMEN MIRROR',
         jpTitle: 'LUMEN_MIRROR（ルーメン・ミラー）',
-        badge: 'PLAY NOW',
+        badge: 'FREE PLAY',
         color: '#00f5ff',
         device: '📱 スマホ最適 / 🖱️ PC対応',
         genre: '光学反射ロジックパズル',
         url: 'https://hajikkoroom.xsrv.jp/lumen-mirror/',
         desc: '真夜中のビル群の屋上で鏡の角度を操り、ネオンレーザーをターゲットまで導く静謐で美しい光学リフレクションパズル。'
       },
-      'crt-quest': {
+      'mikiri-issen': {
         code: 'CN-ROM-03',
-        enTitle: 'CRT QUEST',
+        enTitle: 'MIKIRI ISSEN',
         jpTitle: 'みきり一閃（0.01秒の居合斬り）',
-        badge: 'DEMO PLAY',
+        badge: 'FREE PLAY',
         color: '#f59e0b',
         device: '📱 スマホ最適 / 🖱️ PC対応',
         genre: '超反応0.01秒居合アクション',
         url: 'https://hajikkoroom.xsrv.jp/mikiri-issen/',
-        desc: 'ブラウン管モニターが閃く刹那の合図を見極めろ！0.01秒の反射神経でライバルを斬り伏せる緊張感マックスの一撃必殺居合ゲーム。'
+        desc: '合図「斬」の瞬間を見極めろ！0.01秒の反射神経でライバルを斬り伏せる緊張感マックスの一撃必殺居合ゲーム。'
+      },
+      'crt-quest': {
+        code: 'CN-ROM-03',
+        enTitle: 'MIKIRI ISSEN',
+        jpTitle: 'みきり一閃（0.01秒の居合斬り）',
+        badge: 'FREE PLAY',
+        color: '#f59e0b',
+        device: '📱 スマホ最適 / 🖱️ PC対応',
+        genre: '超反応0.01秒居合アクション',
+        url: 'https://hajikkoroom.xsrv.jp/mikiri-issen/',
+        desc: '合図「斬」の瞬間を見極めろ！0.01秒の反射神経でライバルを斬り伏せる緊張感マックスの一撃必殺居合ゲーム。'
       }
     };
 
     const ALL_MINI_GAMES = [
-      { jp: '漢字スライサー・マージ', en: 'NEON SLICER', tag: 'パズル / 物理', device: '📱 スマホ最適', url: 'https://hajikkoroom.xsrv.jp/kanji-slicer/', color: '#ff2a9d' },
-      { jp: 'LUMEN_MIRROR', en: 'ROOFTOP CHILL', tag: '光学パズル', device: '📱 スマホ最適 / 🖱️ PC推奨', url: 'https://hajikkoroom.xsrv.jp/lumen-mirror/', color: '#00f5ff' },
-      { jp: 'みきり一閃', en: 'CRT QUEST', tag: '0.01秒居合', device: '📱 スマホ最適', url: 'https://hajikkoroom.xsrv.jp/mikiri-issen/', color: '#f59e0b' },
+      { jp: '漢字スライサー・マージ', en: 'KANJI SLICER', tag: 'パズル / 物理', device: '📱 スマホ最適', url: 'https://hajikkoroom.xsrv.jp/kanji-slicer/', color: '#ff2a9d' },
+      { jp: 'LUMEN_MIRROR', en: 'LUMEN MIRROR', tag: '光学パズル', device: '📱 スマホ最適 / 🖱️ PC推奨', url: 'https://hajikkoroom.xsrv.jp/lumen-mirror/', color: '#00f5ff' },
+      { jp: 'みきり一閃', en: 'MIKIRI ISSEN', tag: '0.01秒居合', device: '📱 スマホ最適', url: 'https://hajikkoroom.xsrv.jp/mikiri-issen/', color: '#f59e0b' },
       { jp: 'ブラックホール・スイーパー', en: 'VOID SWEEPER', tag: '一筆書きアクション', device: '📱 スマホ最適', url: 'https://hajikkoroom.xsrv.jp/blackhole-sweeper/', color: '#a855f7' },
       { jp: 'ギリギリ・ブレーキ！', en: 'EDGE BRAKE!', tag: 'チキンレース', device: '📱 スマホ最適', url: 'https://hajikkoroom.xsrv.jp/girigiri-brake/', color: '#ef4444' },
       { jp: '超絶！仕分け工場', en: 'CYBER FACTORY', tag: '脳トレ仕分け', device: '📱 スマホ最適', url: 'https://hajikkoroom.xsrv.jp/sorting-factory/', color: '#22c55e' },
@@ -2762,6 +2855,76 @@
           gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
           osc.start(now);
           osc.stop(now + 0.28);
+        } else if (type === 'rain_ambient') {
+          // Gentle soothing rainfall surge (bandpass filtered noise)
+          const bufferSize = Math.floor(audioCtx.sampleRate * 0.9);
+          const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+          const output = noiseBuffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) {
+            output[i] = (Math.random() * 2 - 1) * 0.28;
+          }
+          const whiteNoise = audioCtx.createBufferSource();
+          whiteNoise.buffer = noiseBuffer;
+          const filter = audioCtx.createBiquadFilter();
+          filter.type = 'bandpass';
+          filter.frequency.setValueAtTime(700, now);
+          filter.frequency.linearRampToValueAtTime(480, now + 0.9);
+          filter.Q.value = 1.2;
+          gain.gain.setValueAtTime(0.06, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
+          whiteNoise.connect(filter);
+          filter.connect(gain);
+          whiteNoise.start(now);
+          whiteNoise.stop(now + 0.9);
+          return;
+        } else if (type === 'thunder') {
+          // Distant atmospheric rolling thunder
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(80, now);
+          osc.frequency.exponentialRampToValueAtTime(28, now + 1.2);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+          osc.start(now);
+          osc.stop(now + 1.2);
+
+          const bufferSize = Math.floor(audioCtx.sampleRate * 1.0);
+          const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+          const output = noiseBuffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) {
+            output[i] = (Math.random() * 2 - 1) * 0.22;
+          }
+          const whiteNoise = audioCtx.createBufferSource();
+          whiteNoise.buffer = noiseBuffer;
+          const filter = audioCtx.createBiquadFilter();
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(500, now);
+          const noiseGain = audioCtx.createGain();
+          noiseGain.gain.setValueAtTime(0.08, now);
+          noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 1.0);
+          whiteNoise.connect(filter);
+          filter.connect(noiseGain);
+          noiseGain.connect(audioCtx.destination);
+          whiteNoise.start(now);
+          whiteNoise.stop(now + 1.0);
+          return;
+        } else if (type === 'switch_click') {
+          // Mechanical tactile switch ("カチッ")
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(1400, now);
+          osc.frequency.exponentialRampToValueAtTime(220, now + 0.04);
+          gain.gain.setValueAtTime(0.08, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+          osc.start(now);
+          osc.stop(now + 0.05);
+        } else if (type === 'cup_tap') {
+          // Warm ceramic contact on desk ("コトッ")
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(640, now);
+          osc.frequency.exponentialRampToValueAtTime(300, now + 0.08);
+          gain.gain.setValueAtTime(0.06, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+          osc.start(now);
+          osc.stop(now + 0.09);
         } else if (type === 'jump') {
           osc.type = 'square';
           osc.frequency.setValueAtTime(260, now);
@@ -3591,34 +3754,56 @@
         px(ctx, 105, 73, 10, 1.5, '#e0f2fe');
       }
 
-      // RIGHT DESK CODE MONITOR
-      px(ctx, 129, 68, 25, 28, '#3f395e');
-      px(ctx, 132, 71, 19, 22, '#0f172a');
-      px(ctx, 135, 74, 11, 1.5, '#22d3ee');
-      px(ctx, 135, 78, 14, 1.5, '#4ade80');
-      px(ctx, 135, 82, 8, 1.5, '#22d3ee');
-      px(ctx, 135, 86, 12, 1.5, '#f472b6');
+      // RIGHT DESK CODE MONITOR (Sized to leave clean dark negative space in front of developer's face profile)
+      px(ctx, 129, 68, 19, 28, '#3f395e');
+      px(ctx, 131, 71, 15, 22, '#0f172a');
+      px(ctx, 133, 74, 9, 1.5, '#22d3ee');
+      px(ctx, 133, 78, 11, 1.5, '#4ade80');
+      px(ctx, 133, 82, 7, 1.5, '#22d3ee');
+      px(ctx, 133, 86, 10, 1.5, '#f472b6');
 
-      // Steaming Coffee Mug on Desk (Smooth Sine-Wave Steam)
-      px(ctx, 125, 98, 5, 5, '#f43f5e');
-      px(ctx, 126, 97, 3, 1, '#451a03'); // Dark coffee
+      // Steaming Coffee Mug on Desk (With ceramic handle, rim highlight & Sine-Wave Steam)
+      px(ctx, 126, 97, 5, 6, '#e11d48'); // Mug body
+      px(ctx, 126, 97, 1.5, 6, '#fb7185'); // Left ceramic highlight
+      px(ctx, 130, 97, 1, 6, '#9f1239'); // Right shade
+      px(ctx, 131, 98, 2, 1, '#f43f5e'); // Handle top
+      px(ctx, 132, 99, 1, 2, '#f43f5e'); // Handle outer loop
+      px(ctx, 131, 101, 2, 1, '#be123c'); // Handle bottom
+      px(ctx, 127, 97, 3, 1, '#451a03'); // Dark coffee surface
       const steamHeightScale = 1 + coffeeSteamPulse * 1.5;
       for (let s = 0; s < 3; s++) {
         const steamT = (time * 0.0022 + s * 0.75) % 2.4;
-        const steamY = 96 - steamT * 4.2 * steamHeightScale;
-        const steamX = 127 + Math.sin(steamT * 4 + s) * (1.6 * (1 + coffeeSteamPulse * 0.8));
+        const steamY = 95 - steamT * 4.2 * steamHeightScale;
+        const steamX = 127.5 + Math.sin(steamT * 4 + s) * (1.6 * (1 + coffeeSteamPulse * 0.8));
         const steamAlpha = Math.max(0, (0.65 - steamT * 0.25) * (1 + coffeeSteamPulse * 0.5));
         px(ctx, steamX, steamY, 1.5, 2, `rgba(255, 255, 255, ${steamAlpha})`);
       }
 
-      // Desk Surface & Keyboard with CRT Monitor Glow
-      px(ctx, 84, 103, 76, 5, '#2e294e');
-      px(ctx, 84, 103, 76, 1.5, '#67e8f9');
-      px(ctx, 95, 100, 24, 3, '#94a3b8');
-      px(ctx, 87, 108, 5, 44, '#18142b');
-      px(ctx, 98, 111, 32, 36, '#141124');
-      px(ctx, 111, 124, 3, 3, '#ef4444');
-      px(ctx, 116, 124, 3, 3, '#22c55e');
+      // Desk Surface, Mechanical Keyboard, Mouse & Under-Desk PC Tower
+      px(ctx, 82, 103, 78, 4, '#2e294e'); // Desk tabletop
+      px(ctx, 82, 103, 78, 1.2, '#67e8f9'); // Cyan monitor reflection on desk edge
+      px(ctx, 82, 107, 78, 1, '#19152c'); // Desk underside bevel
+      // Mechanical Keyboard with sculpted keycaps & subtle RGB underglow
+      px(ctx, 96, 100, 22, 3, '#475569'); // Keyboard frame
+      px(ctx, 97, 99, 20, 1.5, '#cbd5e1'); // Keycap row
+      px(ctx, 100, 99, 1, 1.5, '#334155'); // Key separation gaps
+      px(ctx, 104, 99, 1, 1.5, '#334155');
+      px(ctx, 109, 99, 1, 1.5, '#334155');
+      px(ctx, 113, 99, 1, 1.5, '#334155');
+      px(ctx, 96, 102.2, 22, 0.8, '#00f5ff'); // Cyan underglow strip
+      // Mouse & Mousepad
+      px(ctx, 119, 102, 6, 1, '#0f172a'); // Mousepad
+      px(ctx, 120, 100, 4, 2, '#94a3b8'); // Mouse body
+      px(ctx, 120.5, 100, 1, 1, '#00f5ff'); // Scroll wheel LED
+      // Desk Left Leg & Compact Under-Desk PC Subwoofer (leaves clean negative space for human legs!)
+      px(ctx, 85, 108, 5, 40, '#18142b');
+      px(ctx, 90, 108, 1, 40, '#251f42');
+      px(ctx, 93, 111, 21, 35, '#141124'); // Compact PC case
+      px(ctx, 95, 113, 17, 31, '#1b1730');
+      px(ctx, 97, 116, 13, 2, '#0d0b18'); // Drive bay 1
+      px(ctx, 97, 120, 13, 2, '#0d0b18'); // Drive bay 2
+      px(ctx, 98, 125, 2, 2, '#ef4444'); // HDD LED
+      px(ctx, 102, 125, 2, 2, '#22c55e'); // Power LED
 
       // Retro Articulated Desk Lamp (電気スタンド)
       px(ctx, 77, 98, 8, 4, '#1e293b'); // Base
@@ -3653,59 +3838,130 @@
       }
 
       // ====================================================================
-      // G. SECOND ARCADE CABINET ("NEIGHBOR" / "ADEIE B8ULD")
+      // G. BACKGROUND SERVER RACK / CABINET (Positioned cleanly behind chair)
       // ====================================================================
-      px(ctx, 154, 49, 37, 92, '#28304d');
-      px(ctx, 157, 52, 31, 87, '#1b2238');
-      px(ctx, 157, 52, 31, 8, '#ff2a9d');
-      px(ctx, 160, 55, 25, 3, '#fbcfe8');
-      px(ctx, 160, 64, 25, 24, '#0f2922');
-      px(ctx, 162, 66, 21, 19, '#14532d');
-      px(ctx, 165, 69, 11, 2.5, '#4ade80');
-      px(ctx, 165, 74, 15, 2.5, '#facc15');
-      px(ctx, 165, 79, 12, 2.5, '#4ade80');
+      px(ctx, 162, 43, 33, 98, '#212740');
+      px(ctx, 165, 46, 27, 92, '#161b2e');
+      // Top Marquee positioned at y=46 (well above developer's head so it never looks like a hat)
+      px(ctx, 165, 46, 27, 6, '#be185d');
+      px(ctx, 168, 48, 21, 2, '#fbcfe8');
+      // Recessed Dark Glass & Status Bay
+      px(ctx, 168, 56, 21, 24, '#0c1322');
+      px(ctx, 174, 59, 12, 2, '#22c55e');
+      px(ctx, 174, 64, 10, 2, '#38bdf8');
+      px(ctx, 174, 69, 13, 2, '#eab308');
 
       // ====================================================================
       // H. DEVELOPER CHARACTER IN GAMING CHAIR + SLEEPING PIXEL CAT
+      // Developer restored to the nostalgic retro 8-bit base (anonymous silhouette
+      // with charming mottari feel), paired with clear recognizable 2 human legs
+      // with knee articulation & detailed sneakers. Cat retains tabby design without white chin.
       // ====================================================================
-      // Developer Legs & White Sneakers
-      px(ctx, 136, 117, 30, 9, '#1d3b66');
-      px(ctx, 128, 124, 19, 16, '#254c80');
-      px(ctx, 120, 137, 12, 5, '#f8fafc');
-      px(ctx, 139, 140, 12, 5, '#cbd5e1');
 
-      // Developer Torso & Typing Arm
+      // --- 1. Ergonomic Gaming Chair (Backrest & Seat Base) ---
+      px(ctx, 173, 68, 19, 52, '#1a162b'); // Outer backrest
+      px(ctx, 176, 71, 13, 46, '#2b2442'); // Inner cushion
+      px(ctx, 155, 114, 33, 8, '#1a162b'); // Seat cushion
+      px(ctx, 158, 100, 16, 4, '#383054'); // Padded armrest
+
+      // --- 2. Developer Back Leg (Left / Farther leg in deeper denim shade) ---
+      px(ctx, 133, 115, 22, 6, '#172e52'); // Back thigh
+      px(ctx, 128, 116, 6, 6, '#172e52');  // Back knee bend
+      px(ctx, 127, 122, 6, 12, '#142847'); // Back shin/calf
+      px(ctx, 126, 134, 6.5, 2, '#234270'); // Back rolled denim cuff
+      px(ctx, 127, 136, 4, 2, '#cbd5e1'); // Back sock
+      px(ctx, 122, 138, 9, 3, '#cbd5e1');  // Back shoe upper
+      px(ctx, 119, 139, 3, 2, '#e2e8f0');  // Back toe box
+      px(ctx, 124, 139, 4, 1, '#38bdf8');  // Cyan accent
+      px(ctx, 119, 141, 12, 1.5, '#475569'); // Back sole
+
+      // --- 3. Developer Torso, Red Hoodie Sleeve & Typing Arm (Nostalgic retro style) ---
       const typeBob = Math.floor(time / 180) % 2;
-      px(ctx, 156, 84, 22, 33, '#271f3d');
-      px(ctx, 146, 90 + typeBob, 16, 8, '#eab396');
-      px(ctx, 155, 86, 9, 14, '#f43f5e');
+      px(ctx, 156, 84, 22, 33, '#271f3d'); // Retro dark torso / hoodie
+      px(ctx, 146, 90 + typeBob, 16, 8, '#eab396'); // Blocky typing arm
+      px(ctx, 155, 86, 9, 14, '#f43f5e'); // Red hoodie sleeve
 
-      // Developer Head & Glowing Pink Headphones
-      px(ctx, 158, 65, 16, 16, '#eab396');
-      px(ctx, 159, 62, 16, 8, '#3b251e');
-      px(ctx, 165, 64, 5, 12, '#1e1b2e');
-      px(ctx, 163, 70, 7, 7, '#ff2a9d');
+      // --- 4. Developer Front Leg (Right / Closer leg with clear knee & cuff articulation) ---
+      px(ctx, 141, 115, 22, 7, '#254c80'); // Front thigh
+      px(ctx, 141, 115, 18, 1.5, '#3b6fa8'); // Thigh monitor highlight
+      px(ctx, 138, 116, 6, 6, '#254c80');  // Front knee cap
+      px(ctx, 138, 116, 4, 2, '#3b6fa8');  // Knee highlight
+      px(ctx, 139, 122, 6.5, 13, '#254c80'); // Front shin (clean 6px gap from back leg)
+      px(ctx, 139, 122, 1.5, 13, '#3b6fa8'); // Shin highlight edge
+      px(ctx, 140, 129, 5.5, 7, '#1f416e'); // Lower calf tapering to ankle
+      px(ctx, 139, 136, 6.5, 2, '#3b6fa8'); // Rolled denim cuff
+      px(ctx, 140.5, 138, 4, 2, '#f1f5f9'); // White sock
+      // Front detailed street sneaker
+      px(ctx, 139, 140, 7, 3, '#f8fafc');  // Heel
+      px(ctx, 136, 141, 4, 2, '#ffffff');  // Midfoot
+      px(ctx, 133, 141.5, 3, 2, '#e2e8f0'); // Rounded toe cap
+      px(ctx, 137, 140, 2, 1, '#94a3b8');  // Laces
+      px(ctx, 139, 141.5, 4, 1.2, '#f43f5e'); // Crimson accent
+      px(ctx, 133, 143.5, 13, 1.5, '#cbd5e1'); // Midsole
+      px(ctx, 133, 144.8, 13, 1, '#334155'); // Dark tread
 
-      // High-Back Ergonomic Gaming Chair
-      px(ctx, 173, 68, 19, 52, '#1a162b');
-      px(ctx, 176, 71, 13, 46, '#2b2442');
-      px(ctx, 155, 114, 33, 8, '#1a162b');
-      px(ctx, 158, 100, 16, 4, '#383054');
-      px(ctx, 170, 122, 5, 20, '#12101f');
-      px(ctx, 156, 142, 33, 4, '#1f1b33');
-      px(ctx, 156, 146, 4, 4, '#090812');
-      px(ctx, 171, 146, 4, 4, '#090812');
-      px(ctx, 185, 146, 4, 4, '#090812');
+      // --- 5. Developer Head & Glowing Pink Headphones (Original retro 8-bit blocky head) ---
+      px(ctx, 158, 65, 16, 16, '#eab396'); // Clean retro head (anonymous developer silhouette)
+      px(ctx, 159, 62, 16, 8, '#3b251e');  // Retro hair volume
+      px(ctx, 165, 64, 5, 12, '#1e1b2e');  // Headphone arch
+      px(ctx, 163, 70, 7, 7, '#ff2a9d');   // Glowing pink square ear cup
 
-      // Sleeping Pixel Cat on Floor (x: 206, y: 138) with gentle breathing & tail wag
+      // --- 6. Chair Stand, Center Cylinder & Casters ---
+      px(ctx, 170, 122, 5, 20, '#12101f'); // Center post
+      px(ctx, 156, 142, 33, 4, '#1f1b33'); // 5-star base
+      px(ctx, 156, 146, 4, 4, '#090812');  // Caster 1
+      px(ctx, 171, 146, 4, 4, '#090812');  // Caster 2
+      px(ctx, 185, 146, 4, 4, '#090812');  // Caster 3
+
+      // --- 7. Sleeping Tabby Cat on Cozy Woven Mat (Without white chin patch) ---
       const catBreath = Math.floor(time / 700) % 2;
-      px(ctx, 205, 140, 24, 12, '#57463b');
-      px(ctx, 208, 137 + catBreath, 19, 12 - catBreath, '#786252');
-      px(ctx, 207, 134 + catBreath, 4, 4, '#57463b'); // Left ear
-      px(ctx, 215, 134 + catBreath, 4, 4, '#57463b'); // Right ear
-      px(ctx, 209, 141, 3, 1.5, '#1e1b24'); // Closed left eye
-      px(ctx, 215, 141, 3, 1.5, '#1e1b24'); // Closed right eye
-      px(ctx, 224, 144 - catBreath, 8, 5, '#45372e'); // Curled tail
+      // Cozy woven floor mat underneath cat
+      px(ctx, 198, 148, 39, 5, '#101424'); // Mat floor shadow
+      px(ctx, 199, 147, 37, 5, '#3b2d54'); // Mat outer border
+      px(ctx, 201, 148, 33, 3, '#4c3a6e'); // Mat inner weave
+      px(ctx, 204, 149, 27, 1, '#624d8a'); // Woven stitch texture
+      // Curled sleeping body dome
+      px(ctx, 210, 142, 21, 7, '#6e5240'); // Lower body base
+      px(ctx, 211, 138 + catBreath, 19, 6, '#856550'); // Mid body arch
+      px(ctx, 214, 136 + catBreath, 13, 3, '#9c7860'); // Rounded upper back dome
+      px(ctx, 216, 136 + catBreath, 9, 1, '#b89278');  // Fur top sheen
+      // Tabby stripes on back
+      px(ctx, 217, 137 + catBreath, 2, 4, '#4f392c');
+      px(ctx, 221, 137 + catBreath, 2, 5, '#4f392c');
+      px(ctx, 225, 138 + catBreath, 2, 4, '#4f392c');
+      px(ctx, 212, 147, 18, 2, '#4a3528'); // Belly shadow
+      // Cat Head (Natural tabby brown cheeks & chin, NO white chin patch!)
+      px(ctx, 205, 138, 10, 2, '#9c7860'); // Head crown
+      px(ctx, 203, 140, 13, 8, '#856550'); // Full rounded head & chin (warm fur color)
+      px(ctx, 209, 138, 2, 2, '#4f392c');  // Forehead tabby mark
+      // Pointed Triangular Left Ear & Pink Inner Ear
+      px(ctx, 203, 137, 4, 2, '#6e5240');
+      px(ctx, 203, 135, 3, 2, '#6e5240');
+      px(ctx, 203, 134, 1.5, 1, '#4f392c'); // Pointed ear tip
+      px(ctx, 204, 136, 2, 2, '#fda4af');   // Pink inner ear
+      // Pointed Triangular Right Ear & Pink Inner Ear
+      px(ctx, 212, 137, 4, 2, '#6e5240');
+      px(ctx, 213, 135, 3, 2, '#6e5240');
+      px(ctx, 214.5, 134, 1.5, 1, '#4f392c'); // Pointed ear tip
+      px(ctx, 213, 136, 2, 2, '#fda4af');     // Pink inner ear
+      // Sleeping Eyes, Pink Nose & Whiskers
+      px(ctx, 205, 142, 3, 1, '#271c18');   // Closed left eye
+      px(ctx, 204, 141.5, 1, 1, '#271c18'); // Left eyelash curve
+      px(ctx, 211, 142, 3, 1, '#271c18');   // Closed right eye
+      px(ctx, 214, 141.5, 1, 1, '#271c18'); // Right eyelash curve
+      px(ctx, 208.5, 143.5, 2, 1.5, '#fb7185'); // Tiny pink nose
+      px(ctx, 201, 143, 2, 0.8, '#cbd5e1'); // Left whiskers
+      px(ctx, 201, 144.8, 2, 0.8, '#cbd5e1');
+      px(ctx, 216, 143, 2, 0.8, '#cbd5e1'); // Right whisker
+      // Front Paws (Soft natural fur tone)
+      px(ctx, 203, 147, 4, 2, '#786252'); // Left paw
+      px(ctx, 204.5, 147.5, 1, 1.5, '#57463b'); // Paw toe line
+      px(ctx, 209, 147, 4, 2, '#786252'); // Right paw
+      px(ctx, 210.5, 147.5, 1, 1.5, '#57463b'); // Paw toe line
+      // Curled Tail wrapping around back
+      px(ctx, 229, 145, 5, 3, '#5c4333');
+      px(ctx, 232, 142 - catBreath * 0.5, 3, 4, '#6e5240');
+      px(ctx, 233, 140 - catBreath * 0.5, 2.5, 2, '#6e5240');
 
       // Tiny floating pixel "Zzz" above sleeping cat
       const zPhase = Math.floor(time / 550) % 3;
@@ -3927,21 +4183,21 @@
         // 1. Industrial Wall Fan (換気扇): x: 139~163, y: 7~31
         if (canvasX >= 135 && canvasX <= 167 && canvasY >= 5 && canvasY <= 33) {
           fanRunning = !fanRunning;
-          play8BitSound('select');
+          play8BitSound('switch_click');
           return;
         }
 
         // 2. Desk Lamp / Room Light Mode (電気スタンド / 部屋の明かり切替): x: 74~86, y: 78~103
         if (canvasX >= 72 && canvasX <= 88 && canvasY >= 76 && canvasY <= 104) {
           roomLightMode = (roomLightMode === 'cozy' ? 'focus' : 'cozy');
-          play8BitSound('select');
+          play8BitSound('switch_click');
           return;
         }
 
         // 3. Coffee Mug (デスク上のコーヒーマグ): x: 124~132, y: 95~105
         if (canvasX >= 122 && canvasX <= 133 && canvasY >= 93 && canvasY <= 106) {
           coffeeSteamPulse = 1.0;
-          play8BitSound('select');
+          play8BitSound('cup_tap');
           return;
         }
 
@@ -3963,7 +4219,9 @@
 
         // 6. Sleeping Cat (寝ている猫): x: 200~235, y: 130~155
         if (canvasX >= 198 && canvasX <= 236 && canvasY >= 130 && canvasY <= 156) {
-          play8BitSound('cat');
+          if (!catBubbleTimer) {
+            play8BitSound('cat');
+          }
           const bubble = document.getElementById('cat-bubble');
           if (bubble) {
             const phrases = [
@@ -3979,7 +4237,10 @@
             bubble.textContent = phrases[Math.floor(Math.random() * phrases.length)];
             bubble.classList.add('visible');
             clearTimeout(catBubbleTimer);
-            catBubbleTimer = setTimeout(() => bubble.classList.remove('visible'), 2800);
+            catBubbleTimer = setTimeout(() => {
+              bubble.classList.remove('visible');
+              catBubbleTimer = null;
+            }, 2800);
           }
           return;
         }
@@ -3989,14 +4250,15 @@
           weatherMode = (weatherMode + 1) % 3;
           if (weatherMode === 2) {
             manualLightning = 1.0;
+            play8BitSound('thunder');
+          } else {
+            play8BitSound('rain_ambient');
           }
-          play8BitSound('select');
           return;
         }
 
-        // Default click elsewhere in room: soft CRT boost pulse (no toast)
+        // Default click elsewhere in room: soft CRT boost pulse (silent, no electronic beep)
         boostPulse = 0.8;
-        play8BitSound('select');
       });
     }
 
@@ -4375,8 +4637,8 @@
           const osdAct = document.getElementById('crt-osd-action');
           if (osdAct) osdAct.textContent = '【 斬 】 今だ！撃て！ ⚔️';
 
-          // Rival Reaction Timeout: Rival attacks if player doesn't react in time!
-          const rivalReactionSec = Math.max(0.24, 0.40 - (mikiriStreak * 0.02));
+          // Rival Reaction Timeout: Rival attacks if player doesn't react in time (balanced for human reaction)
+          const rivalReactionSec = Math.max(0.38, 0.58 - (mikiriStreak * 0.025));
           mikiriRivalTimer = setTimeout(() => {
             if (activeCart === 'mikiri' && mikiriPhase === 'trigger') {
               clearTimeout(mikiriRivalTimer);
@@ -4544,7 +4806,7 @@
           play8BitSound('sword');
           announceA11y(`一閃成功！反応速度${reaction}秒、${mikiriRank}、連勝${mikiriStreak}`);
           const osd = document.getElementById('crt-osd-action');
-          if (osd) osd.textContent = '★ 一閃成功！ 本編はこちら (FULL PLAY) ▸';
+          if (osd) osd.textContent = `★ 一閃成功！ 連勝: ${mikiriStreak} 人斬り [画面クリックで次へ]`;
           const playBtn = document.getElementById('btn-mini-play-full');
           if (playBtn) playBtn.classList.add('pulse-glow');
         } else if (mikiriPhase === 'waiting') {
@@ -4596,17 +4858,26 @@
         const canvasX = ((e.clientX - rect.left) / rect.width) * 320;
         const canvasY = ((e.clientY - rect.top) / rect.height) * 200;
 
-        // "本編はこちら" CTA banner button click check
-        const isBrakeCleared = (activeCart === 'brake' && brakePhase === 'stopped' && brakeDistance > 0);
-        const isMirrorCleared = (activeCart === 'mirror' && mirrorSolved);
-        const isMikiriCleared = (activeCart === 'mikiri' && mikiriPhase === 'hit');
+        // Click interactions when round completed
+        if (activeCart === 'brake' && brakePhase === 'stopped') {
+          resetBrakeMini();
+          return;
+        }
 
-        if ((isBrakeCleared || isMirrorCleared || isMikiriCleared) && canvasY >= 90 && canvasY <= 118 && canvasX >= 50 && canvasX <= 270) {
-          const targetUrl = CART_CONFIGS[activeCart]?.url;
-          if (targetUrl) {
-            window.open(targetUrl, '_blank', 'noopener');
-            showRetroToast(`🚀 [本編起動] ${CART_CONFIGS[activeCart].channel} を全画面で起動中...`);
-            return;
+        if (activeCart === 'mikiri' && mikiriPhase === 'hit') {
+          resetMikiriMini();
+          return;
+        }
+
+        // Grand clear CTA check on Mirror
+        if (activeCart === 'mirror' && mirrorSolved && mirrorStage >= 3) {
+          if (canvasY >= 90 && canvasY <= 118 && canvasX >= 50 && canvasX <= 270) {
+            const targetUrl = CART_CONFIGS[activeCart]?.url;
+            if (targetUrl) {
+              window.open(targetUrl, '_blank', 'noopener');
+              showRetroToast(`🚀 [本編起動] ${CART_CONFIGS[activeCart].channel} を全画面で起動中...`);
+              return;
+            }
           }
         }
 
@@ -4936,7 +5207,7 @@
                 brakeVerdict = `🐔 チキンストップ！ 残り ${brakeDistance}m (RANK C)`;
               }
               const osd = document.getElementById('crt-osd-action');
-              if (osd) osd.textContent = '★ 成功！ 本編はこちら (FULL PLAY) ▸';
+              if (osd) osd.textContent = `★ 停止成功！ 記録: ${brakeDistance.toFixed(2)}m [画面クリックで再挑戦]`;
               const playBtn = document.getElementById('btn-mini-play-full');
               if (playBtn) playBtn.classList.add('pulse-glow');
             }
@@ -5117,19 +5388,10 @@
             ctx.fillStyle = brakeDistance <= 0.30 ? '#fde047' : (brakeDistance <= 0.80 ? '#38bdf8' : '#e2e8f0');
             ctx.fillText(brakeVerdict, 160, 78);
 
-            // "本編はこちら" CTA banner on canvas
-            ctx.fillStyle = '#0b0f19';
-            ctx.fillRect(50, 93, 220, 22);
-            ctx.strokeStyle = '#00f5ff';
-            ctx.lineWidth = 1.5;
-            ctx.strokeRect(50, 93, 220, 22);
-            ctx.font = 'bold 11px "DotGothic16", sans-serif';
+            // Clean retry prompt (full play is permanently available at bottom right)
+            ctx.font = 'bold 10.5px "DotGothic16", sans-serif';
             ctx.fillStyle = '#00f5ff';
-            ctx.fillText('▶ 本編はこちら (雨・突風モード搭載) ◀', 160, 108);
-
-            ctx.font = '9px "DotGothic16", sans-serif';
-            ctx.fillStyle = '#cbd5e1';
-            ctx.fillText('枠外クリックで再挑戦 🔄 / ここを押すと本編起動', 160, 127);
+            ctx.fillText('画面クリックで再挑戦 🔄', 160, 106);
           } else if (brakePhase === 'fell') {
             ctx.shadowBlur = 0;
             ctx.fillStyle = '#050713';
@@ -5387,30 +5649,20 @@
           ctx.shadowBlur = 0;
           if (mirrorStage < 3) {
             ctx.fillStyle = '#050713';
-            ctx.fillText(`★ STAGE 0${mirrorStage} CLEAR! ★`, 160.5, 78.5);
+            ctx.fillText(`★ STAGE 0${mirrorStage} CLEAR! ★`, 160.5, 88.5);
             ctx.fillStyle = '#fde047';
-            ctx.fillText(`★ STAGE 0${mirrorStage} CLEAR! ★`, 160, 78);
+            ctx.fillText(`★ STAGE 0${mirrorStage} CLEAR! ★`, 160, 88);
 
-            // "本編はこちら" CTA banner on canvas
-            ctx.fillStyle = '#0b0f19';
-            ctx.fillRect(50, 93, 220, 22);
-            ctx.strokeStyle = '#00f5ff';
-            ctx.lineWidth = 1.5;
-            ctx.strokeRect(50, 93, 220, 22);
-            ctx.font = 'bold 11px "DotGothic16", sans-serif';
-            ctx.fillStyle = '#00f5ff';
-            ctx.fillText('▶ 本編はこちら (全30ステージ収録) ◀', 160, 108);
-
-            ctx.font = '9px "DotGothic16", sans-serif';
+            ctx.font = '10.5px "DotGothic16", sans-serif';
             ctx.fillStyle = '#38bdf8';
-            ctx.fillText(`画面クリックで STAGE 0${mirrorStage + 1} へ ➔`, 160, 126);
+            ctx.fillText(`画面クリックで STAGE 0${mirrorStage + 1} へ ➔`, 160, 114);
           } else {
             ctx.fillStyle = '#050713';
             ctx.fillText('👑 ALL STAGES CLEARED!! 👑', 160.5, 78.5);
             ctx.fillStyle = '#fde047';
             ctx.fillText('👑 ALL STAGES CLEARED!! 👑', 160, 78);
 
-            // "本編はこちら" CTA banner on canvas
+            // "本編はこちら" CTA banner on canvas (only on final all clear!)
             ctx.fillStyle = '#0b0f19';
             ctx.fillRect(50, 93, 220, 22);
             ctx.strokeStyle = '#fde047';
@@ -5418,7 +5670,7 @@
             ctx.strokeRect(50, 93, 220, 22);
             ctx.font = 'bold 11px "DotGothic16", sans-serif';
             ctx.fillStyle = '#fde047';
-            ctx.fillText('▶ 本編はこちら (全30ステージ完全版) ◀', 160, 108);
+            ctx.fillText('▶ 本編はこちら (全ステージ完全版) ◀', 160, 108);
 
             ctx.font = '9px "DotGothic16", sans-serif';
             ctx.fillStyle = '#38bdf8';
@@ -5619,19 +5871,14 @@
           ctx.fillStyle = '#22c55e';
           ctx.fillText(`★ 一閃成功！ ${mikiriReactionTime}秒 ${mikiriRank}`, 160, 74);
 
-          // "本編はこちら" CTA banner on canvas
-          ctx.fillStyle = '#0b0f19';
-          ctx.fillRect(50, 93, 220, 22);
-          ctx.strokeStyle = '#00f5ff';
-          ctx.lineWidth = 1.5;
-          ctx.strokeRect(50, 93, 220, 22);
+          // Clean streak summary & next challenger prompt
           ctx.font = 'bold 11px "DotGothic16", sans-serif';
           ctx.fillStyle = '#00f5ff';
-          ctx.fillText('▶ 本編はこちら (真剣勝負モード搭載) ◀', 160, 108);
+          ctx.fillText(`連勝記録: ${mikiriStreak} 人斬り！`, 160, 102);
 
-          ctx.font = '9px "DotGothic16", sans-serif';
+          ctx.font = '9.5px "DotGothic16", sans-serif';
           ctx.fillStyle = '#cbd5e1';
-          ctx.fillText(`連勝記録: ${mikiriStreak} 人斬り！ / クリックで次へ ➔`, 160, 126);
+          ctx.fillText('画面クリックで次の刺客へ ➔', 160, 122);
         } else if (mikiriPhase === 'rival_hit') {
           ctx.shadowBlur = 0;
           ctx.font = 'bold 16px "DotGothic16", sans-serif';

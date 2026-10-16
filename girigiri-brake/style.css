@@ -477,3 +477,31 @@ canvas {
     background: rgba(255, 65, 108, 0.1);
     box-shadow: 0 0 15px rgba(255, 65, 108, 0.4);
 }
+
+.hud-sound-btn {
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(0, 242, 254, 0.4);
+    color: var(--accent-color);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    box-shadow: 0 0 8px rgba(0, 242, 254, 0.15);
+}
+
+.hud-sound-btn:hover {
+    border-color: var(--accent-color);
+    background: rgba(0, 242, 254, 0.15);
+    box-shadow: 0 0 12px rgba(0, 242, 254, 0.35);
+}
+
+.hud-sound-btn.is-muted {
+    border-color: rgba(255, 65, 108, 0.6);
+    color: var(--primary-color);
+    box-shadow: 0 0 8px rgba(255, 65, 108, 0.2);
+}

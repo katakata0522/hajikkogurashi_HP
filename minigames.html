@@ -266,7 +266,14 @@
       margin-bottom: 6px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      flex-wrap: wrap;
+      gap: 4px 8px;
+    }
+    .subpage-kicker-sub {
+      font-family: var(--font-pixel-jp);
+      font-size: 10px;
+      color: #94a3b8;
+      letter-spacing: 0.5px;
     }
     .subpage-title {
       font-family: var(--font-pixel-jp);
@@ -852,14 +859,14 @@
 
       <!-- Right Nav Links + Readability Utilities (Desktop) -->
       <div class="desktop-nav-group">
-        <nav style="display:flex; align-items:center; gap: 20px;" aria-label="メインナビゲーション">
-          <a href="/preview/#games" class="nav-link" data-nav="games">TOP/CART</a>
-          <a href="/minigames.html" class="nav-link active" data-nav="minigames">MINIGAMES</a>
+        <nav style="display:flex; align-items:center; gap: 18px;" aria-label="メインナビゲーション">
+          <a href="/preview/" class="nav-link" data-nav="top">TOP</a>
+          <a href="/minigames.html" class="nav-link active" data-nav="games">GAMES</a>
+          <a href="/coming-soon.html" class="nav-link" data-nav="flagship">FLAGSHIP</a>
           <a href="/portfolio.html" class="nav-link" data-nav="portfolio">PORTFOLIO</a>
           <a href="/members.html" class="nav-link" data-nav="members">MEMBERS</a>
           <a href="/aboutus.html" class="nav-link" data-nav="about">ABOUT</a>
           <a href="/news.html" class="nav-link" data-nav="news">NEWS</a>
-          <a href="/coming-soon.html" class="nav-link" data-nav="coming-soon">FLAGSHIP</a>
         </nav>
 
         <!-- Readability Utility Controls (Font Mode ABC + Font Size A) -->
@@ -891,13 +898,13 @@
 
     <!-- MOBILE DRAWER MENU -->
     <nav class="mobile-nav-drawer" id="mobile-nav-drawer" aria-label="モバイルナビゲーション">
-      <a href="/preview/#games" class="nav-link" style="font-size:15px;">TOP/CART — カートリッジ</a>
-      <a href="/minigames.html" class="nav-link active" style="font-size:15px;">MINIGAMES — ミニゲーム広場</a>
-      <a href="/portfolio.html" class="nav-link" style="font-size:15px;">PORTFOLIO — 作品実績</a>
-      <a href="/members.html" class="nav-link" style="font-size:15px;">MEMBERS — メンバー紹介</a>
-      <a href="/aboutus.html" class="nav-link" style="font-size:15px;">ABOUT — サークル紹介</a>
-      <a href="/news.html" class="nav-link" style="font-size:15px;">NEWS — お知らせ</a>
-      <a href="/coming-soon.html" class="nav-link" style="font-size:15px;">FLAGSHIP — 鋭意制作中！</a>
+      <a href="/preview/" class="nav-link" style="font-size:15px;">TOP</a>
+      <a href="/minigames.html" class="nav-link active" style="font-size:15px;">GAMES</a>
+      <a href="/coming-soon.html" class="nav-link" style="font-size:15px;">FLAGSHIP</a>
+      <a href="/portfolio.html" class="nav-link" style="font-size:15px;">PORTFOLIO</a>
+      <a href="/members.html" class="nav-link" style="font-size:15px;">MEMBERS</a>
+      <a href="/aboutus.html" class="nav-link" style="font-size:15px;">ABOUT</a>
+      <a href="/news.html" class="nav-link" style="font-size:15px;">NEWS</a>
     </nav>
 
     <!-- BREADCRUMBS BAR -->
@@ -919,7 +926,7 @@
       <div class="subpage-kicker">
         <span>🎮 ARCADE ARCHIVE</span>
         <span>//</span>
-        <span>ブラウザで即座に遊べる9つの小品</span>
+        <span class="subpage-kicker-sub">ブラウザで即座に遊べる9つの小品</span>
       </div>
       <h1 class="subpage-title">ミニゲーム広場</h1>
       <p class="subpage-lead">
@@ -950,8 +957,8 @@
     <main class="minigames-grid" id="minigames-grid" aria-label="ミニゲーム一覧">
 
       <!-- 1. 漢字スライサー・マージ -->
-      <article class="arcade-card" data-category="mobile" style="--card-accent: #eb5e28;">
-        <a href="/kanji-slicer/" class="arcade-thumb-link" aria-label="漢字スライサー・マージを遊ぶ">
+      <article class="arcade-card game-card" data-category="mobile" style="--card-accent: #eb5e28;">
+        <a href="/kanji-slicer/" class="arcade-thumb-link image-link" aria-label="漢字スライサー・マージを遊ぶ">
           <img src="/assets/images/kanji_slicer_thumbnail.png" alt="漢字スライサー・マージ サムネイル" width="1024" height="1024" class="arcade-thumb-img" loading="eager" />
           <div class="arcade-thumb-overlay"></div>
           <span class="arcade-thumb-rom">CN-ROM-01</span>
@@ -981,8 +988,8 @@
       </article>
 
       <!-- 2. LUMEN_MIRROR -->
-      <article class="arcade-card" data-category="pc" style="--card-accent: #00f3ff;">
-        <a href="/lumen-mirror/" class="arcade-thumb-link" aria-label="LUMEN_MIRRORを遊ぶ">
+      <article class="arcade-card game-card" data-category="pc" style="--card-accent: #00f3ff;">
+        <a href="/lumen-mirror/" class="arcade-thumb-link image-link" aria-label="LUMEN_MIRRORを遊ぶ">
           <img src="/assets/images/lumen_mirror_thumbnail.png" alt="LUMEN_MIRROR サムネイル" width="1024" height="1024" class="arcade-thumb-img" loading="eager" />
           <div class="arcade-thumb-overlay"></div>
           <span class="arcade-thumb-rom">CN-ROM-02</span>
@@ -1012,8 +1019,8 @@
       </article>
 
       <!-- 3. みきり一閃 -->
-      <article class="arcade-card" data-category="mobile" style="--card-accent: #ffd36a;">
-        <a href="/mikiri-issen/" class="arcade-thumb-link" aria-label="みきり一閃を遊ぶ">
+      <article class="arcade-card game-card" data-category="mobile" style="--card-accent: #ffd36a;">
+        <a href="/mikiri-issen/" class="arcade-thumb-link image-link" aria-label="みきり一閃を遊ぶ">
           <img src="/assets/images/mikiri_issen_thumbnail_1779165128314.png" alt="みきり一閃 サムネイル" width="1024" height="1024" class="arcade-thumb-img" loading="eager" />
           <div class="arcade-thumb-overlay"></div>
           <span class="arcade-thumb-rom">CN-ROM-03</span>
@@ -1043,8 +1050,8 @@
       </article>
 
       <!-- 4. ギリギリ・ブレーキ！ -->
-      <article class="arcade-card" data-category="mobile" style="--card-accent: #00f2fe;">
-        <a href="/girigiri-brake/" class="arcade-thumb-link" aria-label="ギリギリ・ブレーキ！を遊ぶ">
+      <article class="arcade-card game-card" data-category="mobile" style="--card-accent: #00f2fe;">
+        <a href="/girigiri-brake/" class="arcade-thumb-link image-link" aria-label="ギリギリ・ブレーキ！を遊ぶ">
           <img src="/assets/images/girigiri_brake_thumbnail_1779165077904.png" alt="ギリギリ・ブレーキ！ サムネイル" width="1024" height="1024" class="arcade-thumb-img" loading="eager" />
           <div class="arcade-thumb-overlay"></div>
           <span class="arcade-thumb-rom">CN-ROM-04</span>
@@ -1074,8 +1081,8 @@
       </article>
 
       <!-- 5. ブラックホール・スイーパー -->
-      <article class="arcade-card" data-category="mobile" style="--card-accent: #00e5ff;">
-        <a href="/blackhole-sweeper/" class="arcade-thumb-link" aria-label="ブラックホール・スイーパーを遊ぶ">
+      <article class="arcade-card game-card" data-category="mobile" style="--card-accent: #00e5ff;">
+        <a href="/blackhole-sweeper/" class="arcade-thumb-link image-link" aria-label="ブラックホール・スイーパーを遊ぶ">
           <img src="/assets/images/blackhole_sweeper_thumbnail_1779194532152.png" alt="ブラックホール・スイーパー サムネイル" width="1024" height="1024" class="arcade-thumb-img" loading="lazy" />
           <div class="arcade-thumb-overlay"></div>
           <span class="arcade-thumb-rom">CN-ROM-05</span>
@@ -1105,8 +1112,8 @@
       </article>
 
       <!-- 6. 超絶！仕分け工場 -->
-      <article class="arcade-card" data-category="mobile" style="--card-accent: #ffd700;">
-        <a href="/sorting-factory/" class="arcade-thumb-link" aria-label="超絶！仕分け工場を遊ぶ">
+      <article class="arcade-card game-card" data-category="mobile" style="--card-accent: #ffd700;">
+        <a href="/sorting-factory/" class="arcade-thumb-link image-link" aria-label="超絶！仕分け工場を遊ぶ">
           <img src="/assets/images/sorting_factory_thumbnail_1779165097756.png" alt="超絶！仕分け工場 サムネイル" width="1024" height="1024" class="arcade-thumb-img" loading="lazy" />
           <div class="arcade-thumb-overlay"></div>
           <span class="arcade-thumb-rom">CN-ROM-06</span>
@@ -1136,8 +1143,8 @@
       </article>
 
       <!-- 7. 限界！ステルスサボタージュ -->
-      <article class="arcade-card" data-category="mobile" style="--card-accent: #ff3366;">
-        <a href="/stealth-slacker/" class="arcade-thumb-link" aria-label="限界！ステルスサボタージュを遊ぶ">
+      <article class="arcade-card game-card" data-category="mobile" style="--card-accent: #ff3366;">
+        <a href="/stealth-slacker/" class="arcade-thumb-link image-link" aria-label="限界！ステルスサボタージュを遊ぶ">
           <img src="/assets/images/stealth_slacker_thumbnail_1779165112569.png" alt="限界！ステルスサボタージュ サムネイル" width="1024" height="1024" class="arcade-thumb-img" loading="lazy" />
           <div class="arcade-thumb-overlay"></div>
           <span class="arcade-thumb-rom">CN-ROM-07</span>
@@ -1167,8 +1174,8 @@
       </article>
 
       <!-- 8. ウォールジャンパー -->
-      <article class="arcade-card" data-category="pc" style="--card-accent: #ff6666;">
-        <a href="/wall-jumper/" class="arcade-thumb-link" aria-label="ウォールジャンパーを遊ぶ">
+      <article class="arcade-card game-card" data-category="pc" style="--card-accent: #ff6666;">
+        <a href="/wall-jumper/" class="arcade-thumb-link image-link" aria-label="ウォールジャンパーを遊ぶ">
           <img src="/assets/images/wall_jumper_thumbnail_1779165143429.png" alt="ウォールジャンパー サムネイル" width="1024" height="1024" class="arcade-thumb-img" loading="lazy" />
           <div class="arcade-thumb-overlay"></div>
           <span class="arcade-thumb-rom">CN-ROM-08</span>
@@ -1198,8 +1205,8 @@
       </article>
 
       <!-- 9. 影まね道場 -->
-      <article class="arcade-card" data-category="mobile" style="--card-accent: #e0b756;">
-        <a href="/kage-mane-dojo/" class="arcade-thumb-link" aria-label="影まね道場を遊ぶ">
+      <article class="arcade-card game-card" data-category="mobile" style="--card-accent: #e0b756;">
+        <a href="/kage-mane-dojo/" class="arcade-thumb-link image-link" aria-label="影まね道場を遊ぶ">
           <img src="/assets/images/kage_mane_dojo_thumbnail.svg" alt="影まね道場 サムネイル" width="1024" height="1024" class="arcade-thumb-img" loading="lazy" />
           <div class="arcade-thumb-overlay"></div>
           <span class="arcade-thumb-rom">CN-ROM-09</span>
