@@ -690,6 +690,16 @@
         -2px 0 11px rgba(0, 245, 255, 0.6),
         2px 0 11px rgba(255, 0, 160, 0.6);
     }
+    .btn-card-play {
+      background: #0f1c2b;
+      color: #00f5ff;
+      font-weight: bold;
+    }
+    .btn-card-play:hover {
+      background: #00f5ff;
+      color: #090b14;
+      box-shadow: 0 0 14px rgba(0, 245, 255, 0.7);
+    }
 
     /* Circular Stamp Badges on Cartridges */
     .cart-badge {
@@ -2084,10 +2094,13 @@
                     <span class="led-pink"></span>
                   </div>
                 </div>
+                <div class="cart-lead-desc" style="font-family: var(--font-pixel-jp); font-size: 10.5px; color: #a2abbf; padding: 2px 4px 6px 4px; line-height: 1.45;">
+                  スワイプで漢字を一刀両断＆部首合体！爽快物理パズル
+                </div>
                 <div class="card-divider"></div>
                 <div class="card-actions">
-                  <button class="btn-card-action" data-game-id="kanji-slicer" data-action="coin">INSERT COIN</button>
-                  <button class="btn-card-action" data-game-id="kanji-slicer" data-action="details">DETAILS</button>
+                  <button class="btn-card-action btn-card-play" data-game-id="kanji-slicer" data-action="play">▶ 今すぐ遊ぶ</button>
+                  <button class="btn-card-action" data-game-id="kanji-slicer" data-action="details">詳細</button>
                 </div>
               </article>
 
@@ -2139,16 +2152,19 @@
                   </svg>
                 </div>
                 <div class="well-leds">
-                  <span class="cart-sub-jp">LUMEN_MIRROR</span>
+                  <span class="cart-sub-jp">LUMEN_MIRROR（ルーメン・ミラー）</span>
                   <div class="led-group">
                     <span class="led-green"></span>
                     <span class="led-pink"></span>
                   </div>
                 </div>
+                <div class="cart-lead-desc" style="font-family: var(--font-pixel-jp); font-size: 10.5px; color: #a2abbf; padding: 2px 4px 6px 4px; line-height: 1.45;">
+                  鏡の角度を操り、光を水晶へ導く静謐な光学反射パズル
+                </div>
                 <div class="card-divider"></div>
                 <div class="card-actions">
-                  <button class="btn-card-action" data-game-id="lumen-mirror" data-action="coin">INSERT COIN</button>
-                  <button class="btn-card-action" data-game-id="lumen-mirror" data-action="details">DETAILS</button>
+                  <button class="btn-card-action btn-card-play" data-game-id="lumen-mirror" data-action="play">▶ 今すぐ遊ぶ</button>
+                  <button class="btn-card-action" data-game-id="lumen-mirror" data-action="details">詳細</button>
                 </div>
               </article>
 
@@ -2202,16 +2218,19 @@
                   </svg>
                 </div>
                 <div class="well-leds">
-                  <span class="cart-sub-jp">みきり一閃 / 0.01秒居合</span>
+                  <span class="cart-sub-jp">みきり一閃（0.01秒居合）</span>
                   <div class="led-group">
                     <span class="led-green"></span>
                     <span class="led-pink"></span>
                   </div>
                 </div>
+                <div class="cart-lead-desc" style="font-family: var(--font-pixel-jp); font-size: 10.5px; color: #a2abbf; padding: 2px 4px 6px 4px; line-height: 1.45;">
+                  合図「斬」の瞬間に斬り伏せろ！超反射神経の一撃勝負
+                </div>
                 <div class="card-divider"></div>
                 <div class="card-actions">
-                  <button class="btn-card-action" data-game-id="crt-quest" data-action="coin">INSERT COIN</button>
-                  <button class="btn-card-action" data-game-id="crt-quest" data-action="details">DETAILS</button>
+                  <button class="btn-card-action btn-card-play" data-game-id="crt-quest" data-action="play">▶ 今すぐ遊ぶ</button>
+                  <button class="btn-card-action" data-game-id="crt-quest" data-action="details">詳細</button>
                 </div>
               </article>
 
@@ -3861,12 +3880,12 @@
         const g = FEATURED_CARTRIDGES[gameId];
         if (!g) return;
 
-        if (action === 'coin') {
+        if (action === 'play') {
           play8BitSound('coin');
-          showRetroToast(`🪙 [1 CREDIT INSERTED] — 『${g.jpTitle}』を起動します...`);
+          showRetroToast(`🪙 [起動] 『${g.jpTitle}』を起動中...`);
           setTimeout(() => {
-            openCartridgeModal(gameId);
-          }, 350);
+            window.open(g.url, '_blank', 'noopener');
+          }, 240);
         } else {
           openCartridgeModal(gameId);
         }
@@ -3879,10 +3898,23 @@
       if (el) el.addEventListener(evt, handler);
     }
 
-    // Header & Hero CTA Buttons
-    ['btn-play-now', 'btn-play-now-mobile', 'btn-play-now-drawer', 'btn-enter-base', 'btn-open-archive', 'btn-new-tab'].forEach(id => {
+    // Header & Quick Archive CTA Buttons (Opens All Games Modal)
+    ['btn-play-now', 'btn-play-now-mobile', 'btn-play-now-drawer', 'btn-open-archive', 'btn-new-tab'].forEach(id => {
       addListenerSafe(id, 'click', openAllGamesModal);
     });
+
+    // Hero Banner "ゲームを遊ぶ ▼" Dedicated Smooth Scroll to Cartridges Section
+    const btnEnterBase = document.getElementById('btn-enter-base');
+    if (btnEnterBase) {
+      btnEnterBase.addEventListener('click', (e) => {
+        e.preventDefault();
+        play8BitSound('select');
+        const gamesSec = document.getElementById('games');
+        if (gamesSec) {
+          gamesSec.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    }
 
     // Interactive Physical Environment Objects inside Hero Canvas (Tap to interact)
     let catBubbleTimer = null;

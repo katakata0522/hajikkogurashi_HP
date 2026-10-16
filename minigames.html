@@ -1,286 +1,1415 @@
 <!DOCTYPE html>
-<!--
-	Forty by HTML5 UP
-	html5up.net | @ajlkn
-	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
--->
 <html lang="ja">
-
 <head>
-	<title>ミニゲーム広場 | Corner Neighbor公式ホームページ</title>
-	<link rel="preconnect" href="https://fonts.googleapis.com" />
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-	<link rel="canonical" href="https://hajikkoroom.xsrv.jp/minigames.html" />
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<meta name="description" content="Corner Neighborのミニゲームで遊ぼう！ブラウザで気軽に遊べるミニゲームを公開中。" />
-	<meta name="robots" content="index,follow" />
-	<meta property="og:locale" content="ja_JP" />
-	<meta property="og:type" content="website" />
-	<meta property="og:site_name" content="Corner Neighbor公式ホームページ" />
-	<meta property="og:title" content="ミニゲーム広場 | Corner Neighbor公式ホームページ" />
-	<meta property="og:description" content="Corner Neighborのミニゲームで遊ぼう！ブラウザで気軽に遊べるミニゲームを公開中。" />
-	<meta property="og:url" content="https://hajikkoroom.xsrv.jp/minigames.html" />
-	<meta property="og:image" content="https://hajikkoroom.xsrv.jp/assets/images/banner.webp" />
-	<meta property="og:image:alt" content="ミニゲーム広場" />
-	<meta name="twitter:card" content="summary_large_image" />
-	<meta name="twitter:title" content="ミニゲーム広場 | Corner Neighbor公式ホームページ" />
-	<meta name="twitter:description" content="Corner Neighborのミニゲームで遊ぼう！ブラウザで気軽に遊べるミニゲームを公開中。" />
-	<meta name="twitter:image" content="https://hajikkoroom.xsrv.jp/assets/images/banner.webp" />
-	<link rel="stylesheet" href="/assets/css/main.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/css/main.css'); ?>" />
-	<link rel="stylesheet" href="/assets/css/custom.css?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/css/custom.css'); ?>" />
-	<script type="application/ld+json">
-	{
-		"@context": "https://schema.org",
-		"@type": "BreadcrumbList",
-		"itemListElement": [
-			{
-				"@type": "ListItem",
-				"position": 1,
-				"name": "ホーム",
-				"item": "https://hajikkoroom.xsrv.jp/"
-			},
-			{
-				"@type": "ListItem",
-				"position": 2,
-				"name": "ミニゲーム広場",
-				"item": "https://hajikkoroom.xsrv.jp/minigames.html"
-			}
-		]
-	}
-	</script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ミニゲーム広場 | Corner Neighbor公式ホームページ</title>
+  <meta name="description" content="Corner Neighborのブラウザミニゲーム広場！スマホやPCで気軽に遊べる9つのインディーゲームを公開中。物理パズルから反射アクションまで今すぐプレイ！" />
+  <meta name="robots" content="index,follow" />
+  <link rel="canonical" href="https://hajikkoroom.xsrv.jp/minigames.html" />
+
+  <!-- Open Graph / OGP & Twitter Cards -->
+  <meta property="og:locale" content="ja_JP" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Corner Neighbor公式ホームページ" />
+  <meta property="og:title" content="ミニゲーム広場 | Corner Neighbor公式ホームページ" />
+  <meta property="og:description" content="Corner Neighborのブラウザミニゲーム広場！スマホやPCで気軽に遊べる9つのインディーゲームを公開中。物理パズルから反射アクションまで今すぐプレイ！" />
+  <meta property="og:url" content="https://hajikkoroom.xsrv.jp/minigames.html" />
+  <meta property="og:image" content="https://hajikkoroom.xsrv.jp/assets/images/banner.webp" />
+  <meta property="og:image:alt" content="ミニゲーム広場" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="ミニゲーム広場 | Corner Neighbor公式ホームページ" />
+  <meta name="twitter:description" content="Corner Neighborのブラウザミニゲーム広場！スマホやPCで気軽に遊べる9つのインディーゲームを公開中。物理パズルから反射アクションまで今すぐプレイ！" />
+  <meta name="twitter:image" content="https://hajikkoroom.xsrv.jp/assets/images/banner.webp" />
+
+  <!-- Structured Data JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "ホーム",
+        "item": "https://hajikkoroom.xsrv.jp/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "ミニゲーム広場",
+        "item": "https://hajikkoroom.xsrv.jp/minigames.html"
+      }
+    ]
+  }
+  </script>
+
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="alternate icon" href="/favicon.ico">
+  <script>
+    (function() {
+      try {
+        var fm = localStorage.getItem('cn_font_mode') || 'pixel';
+        var fs = localStorage.getItem('cn_font_size') || 'md';
+        if (fs === 'sm') fs = 'md';
+        document.documentElement.setAttribute('data-font-mode', fm);
+        document.documentElement.setAttribute('data-font-size', fs);
+      } catch (e) {}
+    })();
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Press+Start+2P&family=Share+Tech+Mono&family=Silkscreen:wght@400;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-void: #08070f;
+      --bg-viewport: #0e0e13;
+      --bg-panel: #141624;
+      --bg-card: #171928;
+      --bg-card-hover: #1c2033;
+      --border-muted: #282c3f;
+      --border-glow: #383e58;
+      --neon-cyan: #00f5ff;
+      --neon-pink: #ff2a9d;
+      --neon-magenta: #eb1899;
+      --neon-amber: #f59e0b;
+      --neon-green: #22c55e;
+      --text-main: #e2e8f0;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --font-mono: 'Share Tech Mono', 'DotGothic16', monospace;
+      --font-pixel-jp: 'DotGothic16', monospace;
+      --font-pixel-en: 'Silkscreen', 'Share Tech Mono', monospace;
+      --font-readable: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Yu Gothic UI", "Noto Sans JP", sans-serif;
+    }
+
+    /* Standard Readable Font Mode (ピクセル解除・くっきり標準文字モード) */
+    html[data-font-mode="standard"] {
+      --font-mono: 'Noto Sans JP', 'BIZ UDPGothic', 'Hiragino Sans', 'Meiryo', system-ui, -apple-system, sans-serif;
+      --font-pixel-jp: 'Noto Sans JP', 'BIZ UDPGothic', 'Hiragino Sans', 'Meiryo', system-ui, -apple-system, sans-serif;
+      --font-pixel-en: 'Noto Sans JP', 'BIZ UDPGothic', 'Hiragino Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-void);
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(0, 245, 255, 0.08) 0%, transparent 65%),
+        radial-gradient(circle at 10% 30%, rgba(255, 42, 157, 0.04) 0%, transparent 50%),
+        radial-gradient(circle at 90% 70%, rgba(0, 245, 255, 0.04) 0%, transparent 50%);
+      font-family: var(--font-readable);
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Main Container */
+    .site-container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 18px 24px 60px 24px;
+      position: relative;
+      z-index: 10;
+    }
+    @media (max-width: 768px) {
+      .site-container {
+        padding: 12px 14px 44px 14px;
+      }
+    }
+
+    /* Navigation Links */
+    .nav-link {
+      color: #a3a8b8;
+      text-decoration: none;
+      position: relative;
+      padding: 6px 4px 7px 4px;
+      font-family: var(--font-mono);
+      font-size: 15.5px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      transition: color 0.18s ease, text-shadow 0.18s ease;
+      white-space: nowrap;
+    }
+    .nav-link:hover,
+    .nav-link.active {
+      color: var(--neon-cyan);
+      text-shadow: 0 0 8px rgba(0, 245, 255, 0.5);
+    }
+    .nav-link.active::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 2.5px;
+      background: var(--neon-cyan);
+      box-shadow: 0 0 8px var(--neon-cyan);
+    }
+
+    /* Header Utility Buttons: ABC Font Toggle & A+ Font Size Toggle */
+    .header-utility-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-header-util {
+      background: #171926;
+      border: 1.5px solid #363c54;
+      color: #cbd5e1;
+      height: 36px;
+      width: 38px;
+      min-width: 38px;
+      padding: 0;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+      transition: all 0.16s ease;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1;
+      user-select: none;
+    }
+    .btn-header-util:hover {
+      border-color: var(--neon-cyan);
+      color: #ffffff;
+      background: #1d2133;
+      box-shadow: 0 0 10px rgba(0, 245, 255, 0.25);
+      transform: translateY(-1px);
+    }
+    .btn-header-util.is-active,
+    .btn-header-util.active {
+      background: rgba(0, 245, 255, 0.16);
+      border-color: var(--neon-cyan);
+      color: var(--neon-cyan);
+      box-shadow: 0 0 12px rgba(0, 245, 255, 0.35), inset 0 0 6px rgba(0, 245, 255, 0.15);
+    }
+    .btn-header-util .util-icon-font {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: inherit;
+      transition: transform 0.15s ease;
+    }
+    .btn-header-util.is-active .util-icon-font,
+    .btn-header-util.active .util-icon-font {
+      color: var(--neon-cyan);
+      text-shadow: 0 0 8px rgba(0, 245, 255, 0.7);
+    }
+    .btn-header-util .util-icon-a {
+      font-size: 13px;
+      font-weight: 700;
+      color: inherit;
+      transition: transform 0.15s ease, font-size 0.15s ease;
+    }
+    .btn-header-util.is-active .util-icon-a,
+    .btn-header-util.active .util-icon-a {
+      font-size: 17.5px;
+      font-weight: 900;
+      color: var(--neon-cyan);
+      text-shadow: 0 0 8px rgba(0, 245, 255, 0.75);
+    }
+
+    /* Subpage Header Banner */
+    .subpage-banner {
+      background: linear-gradient(135deg, rgba(22, 25, 42, 0.95) 0%, rgba(14, 16, 28, 0.98) 100%);
+      border: 1px solid var(--border-muted);
+      border-radius: 8px;
+      padding: 24px 28px;
+      margin-bottom: 26px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    }
+    .subpage-banner::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink), var(--neon-amber));
+    }
+    .subpage-kicker {
+      font-family: var(--font-pixel-en);
+      font-size: 11px;
+      color: var(--neon-cyan);
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .subpage-title {
+      font-family: var(--font-pixel-jp);
+      font-size: 26px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 0.8px;
+      margin: 0 0 10px 0;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+    }
+    .subpage-lead {
+      font-family: var(--font-readable);
+      font-size: 14.5px;
+      line-height: 1.75;
+      color: var(--text-muted);
+      max-width: 820px;
+      margin: 0;
+    }
+
+    /* Filter Tabs Bar */
+    .filter-tabs-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      background: #111422;
+      border: 1px solid #23283c;
+      border-radius: 6px;
+      padding: 8px 12px;
+      margin-bottom: 24px;
+    }
+    .filter-tabs {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .filter-tab-btn {
+      background: #171a2a;
+      border: 1px solid #2a3148;
+      color: #94a3b8;
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      padding: 6px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.16s ease;
+    }
+    .filter-tab-btn:hover {
+      color: #ffffff;
+      border-color: #404968;
+      background: #1e2236;
+    }
+    .filter-tab-btn.active {
+      background: rgba(0, 245, 255, 0.12);
+      border-color: var(--neon-cyan);
+      color: var(--neon-cyan);
+      font-weight: bold;
+      box-shadow: 0 0 10px rgba(0, 245, 255, 0.25);
+    }
+    .filter-count-badge {
+      background: #0d101a;
+      border-radius: 10px;
+      padding: 1px 6px;
+      font-size: 11px;
+      color: inherit;
+    }
+    .filter-meta-hint {
+      font-family: var(--font-pixel-jp);
+      font-size: 11px;
+      color: #7d859b;
+    }
+
+    /* Minigames Grid */
+    .minigames-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 22px;
+      margin-bottom: 40px;
+    }
+    @media (max-width: 640px) {
+      .minigames-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+    }
+
+    /* Minigame Card */
+    .arcade-card {
+      background: linear-gradient(180deg, #161828 0%, #121422 100%);
+      border: 1.5px solid #282e44;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: transform 0.2s cubic-bezier(0.2, 0, 0.2, 1), border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .arcade-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--card-accent, var(--neon-cyan));
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 245, 255, 0.15);
+    }
+    .arcade-card.is-hidden {
+      display: none !important;
+    }
+
+    /* Thumbnail Box */
+    .arcade-thumb-link {
+      position: relative;
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #090a12;
+      overflow: hidden;
+      border-bottom: 1px solid #23273a;
+    }
+    .arcade-thumb-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      transition: transform 0.35s ease, filter 0.25s ease;
+    }
+    .arcade-card:hover .arcade-thumb-img {
+      transform: scale(1.05);
+      filter: brightness(1.08);
+    }
+    .arcade-thumb-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 40%, rgba(9, 10, 18, 0.85) 100%);
+      pointer-events: none;
+    }
+    .arcade-thumb-rom {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(14, 16, 26, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+      padding: 2px 7px;
+      font-family: var(--font-pixel-en);
+      font-size: 9.5px;
+      color: #94a3b8;
+      letter-spacing: 0.5px;
+      backdrop-filter: blur(4px);
+    }
+    .arcade-thumb-badge {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      background: rgba(16, 20, 36, 0.9);
+      border: 1px solid rgba(0, 245, 255, 0.4);
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-family: var(--font-pixel-jp);
+      font-size: 11px;
+      color: var(--neon-cyan);
+      backdrop-filter: blur(4px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+    }
+    .arcade-thumb-badge.badge-pc {
+      border-color: rgba(245, 158, 11, 0.6);
+      color: #f59e0b;
+    }
+
+    /* Card Body */
+    .arcade-card-body {
+      padding: 16px 18px 18px 18px;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+      justify-content: space-between;
+    }
+    .arcade-card-header {
+      margin-bottom: 8px;
+    }
+    .arcade-card-subtitle {
+      font-family: var(--font-pixel-jp);
+      font-size: 11px;
+      color: #8c95ac;
+      margin-bottom: 4px;
+      letter-spacing: 0.5px;
+    }
+    .arcade-card-title {
+      font-family: var(--font-pixel-jp);
+      font-size: 18px;
+      font-weight: 700;
+      color: #ffffff;
+      margin: 0;
+      line-height: 1.35;
+      letter-spacing: 0.5px;
+    }
+    .arcade-card-title a {
+      color: inherit;
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+    .arcade-card-title a:hover {
+      color: var(--neon-cyan);
+    }
+    .arcade-card-desc {
+      font-family: var(--font-readable);
+      font-size: 13.5px;
+      line-height: 1.65;
+      color: var(--text-muted);
+      margin: 8px 0 14px 0;
+    }
+
+    /* Controls Bar */
+    .arcade-controls-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      background: #0f111c;
+      border: 1px solid #212638;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: #8f98af;
+      margin-bottom: 14px;
+    }
+    .arcade-controls-bar span {
+      color: #cbd5e1;
+    }
+
+    /* Actions */
+    .arcade-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-arcade-play {
+      flex: 1;
+      background: #0f1d2b;
+      border: 1.5px solid rgba(0, 245, 255, 0.6);
+      color: var(--neon-cyan);
+      font-family: var(--font-pixel-jp);
+      font-size: 13.5px;
+      font-weight: bold;
+      padding: 10px 14px;
+      border-radius: 5px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.18s ease;
+      box-shadow: 0 0 10px rgba(0, 245, 255, 0.15);
+      cursor: pointer;
+    }
+    .btn-arcade-play:hover {
+      background: var(--neon-cyan);
+      color: #08070f;
+      box-shadow: 0 0 16px rgba(0, 245, 255, 0.6);
+      transform: translateY(-1px);
+    }
+
+    /* Breadcrumbs */
+    .page-utility-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #1a1e2f;
+    }
+    .breadcrumb-list {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-pixel-jp);
+      font-size: 12px;
+      color: #8c93ab;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .breadcrumb-list a {
+      color: #a3a8b8;
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+    .breadcrumb-list a:hover {
+      color: var(--neon-cyan);
+    }
+    .breadcrumb-sep {
+      color: #4b526d;
+    }
+    .breadcrumb-current {
+      color: var(--neon-cyan);
+    }
+
+    /* Atelier Dispatch Box */
+    .atelier-dispatch-box {
+      background: #121422;
+      border: 1.5px solid #282c3f;
+      border-radius: 8px;
+      padding: 22px 24px;
+      margin-top: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+    .dispatch-info-title {
+      font-family: var(--font-pixel-en);
+      font-size: 13px;
+      color: var(--neon-cyan);
+      letter-spacing: 0.8px;
+      margin-bottom: 4px;
+    }
+    .dispatch-info-text {
+      font-family: var(--font-readable);
+      font-size: 13.5px;
+      color: #94a3b8;
+      line-height: 1.6;
+    }
+    .dispatch-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .btn-cyber-action {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      padding: 8px 16px;
+      border-radius: 5px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.18s ease;
+    }
+    .btn-cyan {
+      background: #0f1c29;
+      color: #00f5ff;
+      border: 1px solid rgba(0, 245, 255, 0.45);
+    }
+    .btn-cyan:hover {
+      background: #00f5ff;
+      color: #08070f;
+      box-shadow: 0 0 14px rgba(0, 245, 255, 0.5);
+    }
+    .btn-outline {
+      background: #141726;
+      color: #cbd5e1;
+      border: 1px solid #30354e;
+    }
+    .btn-outline:hover {
+      border-color: #cbd5e1;
+      color: #ffffff;
+    }
+
+    /* Site Footer */
+    .site-footer {
+      margin-top: 48px;
+      padding: 24px 0 20px 0;
+      border-top: 1px solid #212435;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #7b8196;
+    }
+    .footer-layout {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .footer-brand-col {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-width: 440px;
+    }
+    .footer-brand-name {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #f1f5f9;
+      letter-spacing: 0.5px;
+    }
+    .footer-circle-desc {
+      font-family: var(--font-pixel-jp);
+      font-size: 10.5px;
+      color: #8c93ab;
+      line-height: 1.5;
+    }
+    .footer-copyright {
+      font-size: 10px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+    .footer-links {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px 18px;
+      flex-wrap: wrap;
+      max-width: 520px;
+    }
+    .footer-links a {
+      color: #9aa1b8;
+      text-decoration: none;
+      font-size: 11px;
+      transition: color 0.15s ease;
+    }
+    .footer-links a:hover {
+      color: var(--neon-cyan);
+      text-decoration: underline;
+    }
+    @media (max-width: 768px) {
+      .footer-layout {
+        flex-direction: column;
+        gap: 16px;
+      }
+      .footer-links {
+        justify-content: flex-start;
+      }
+    }
+
+    /* Floating Back to Top Button */
+    .btn-pixel-top {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #141522;
+      border: 2px solid #f59e0b;
+      box-shadow: 0 0 14px rgba(245, 158, 11, 0.4), inset 0 0 6px rgba(245, 158, 11, 0.2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 95;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(12px);
+      transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .btn-pixel-top.visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+    .btn-pixel-top:hover {
+      transform: translateY(-4px) scale(1.06);
+      border-color: #fde047;
+      box-shadow: 0 0 22px rgba(253, 224, 71, 0.7), inset 0 0 8px rgba(253, 224, 71, 0.3);
+    }
+    .btn-pixel-top-arrow {
+      width: 0;
+      height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-bottom: 9px solid #f59e0b;
+      transition: border-bottom-color 0.15s ease, transform 0.15s ease;
+    }
+    .btn-pixel-top:hover .btn-pixel-top-arrow {
+      border-bottom-color: #fde047;
+      transform: translateY(-1.5px);
+    }
+    .btn-pixel-top-text {
+      font-family: var(--font-pixel-en);
+      font-size: 7.5px;
+      font-weight: 700;
+      color: #f59e0b;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+      transition: color 0.15s ease;
+    }
+    .btn-pixel-top:hover .btn-pixel-top-text {
+      color: #fde047;
+    }
+
+    /* Mobile Header Layout */
+    .desktop-nav-group {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+    .mobile-header-actions {
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+    .mobile-menu-btn {
+      background: #171a2a;
+      border: 1px solid #30354e;
+      color: #cbd5e1;
+      border-radius: 5px;
+      padding: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .mobile-nav-drawer {
+      display: none;
+      background: #111422;
+      border-top: 1px solid #23283e;
+      border-bottom: 1px solid #23283e;
+      padding: 14px 18px;
+      margin-bottom: 16px;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .mobile-nav-drawer.open {
+      display: flex;
+    }
+    @media (max-width: 900px) {
+      .desktop-nav-group {
+        display: none;
+      }
+      .mobile-header-actions {
+        display: flex;
+      }
+    }
+  </style>
 </head>
 
-
 <body>
-    <div id="wrapper">
-        <!-- Header -->
-<header id="header">
-  <a href="/" class="logo">
-    <strong>Corner Neighbor</strong>
-    <span>まったりゲームを作るサークル！</span>
-  </a>
-  <nav>
-    <a href="#menu" aria-label="メニューを開く">MENU</a>
-  </nav>
-</header>
+  <!-- Pixel Sparkle Accents -->
+  <svg style="position:absolute; top: 8px; left: 8px; width: 48px; height: 95px; pointer-events:none; z-index:2;" viewBox="0 0 48 95" shape-rendering="crispEdges">
+    <rect x="6" y="2" width="2" height="10" fill="#ff66d9"/>
+    <rect x="2" y="6" width="10" height="2" fill="#ff66d9"/>
+    <rect x="5" y="5" width="4" height="4" fill="#ffffff"/>
+    <rect x="17" y="6" width="2" height="2" fill="#ffd700"/>
+    <rect x="23" y="7" width="3" height="2" fill="#7b2cbf"/>
+    <rect x="33" y="7" width="3" height="2" fill="#ffffff"/>
+    <rect x="8" y="16" width="3" height="2" fill="#00f5ff"/>
+  </svg>
 
-<!-- Menu -->
-<nav id="menu">
-  <ul class="links">
-    <li><a href="/">ホーム</a></li>
-    <li><a href="/aboutus.html">私たちについて</a></li>
-    <li><a href="/members.html">メンバー紹介</a></li>
-    <li><a href="/news.html">お知らせ</a></li>
-    <li><a href="/portfolio.html">作品一覧</a></li>
-    <li><a href="/minigames.html">ミニゲーム広場</a></li>
-    <li><a href="/coming-soon.html">鋭意制作中！</a></li>
-  </ul>
-</nav>
+  <svg style="position:absolute; top: 8px; right: 8px; width: 56px; height: 90px; pointer-events:none; z-index:2;" viewBox="0 0 56 90" shape-rendering="crispEdges">
+    <rect x="6" y="7" width="4" height="2" fill="#7b2cbf"/>
+    <rect x="13" y="7" width="4" height="2" fill="#00f5ff"/>
+    <rect x="26" y="7" width="2" height="2" fill="#ffd700"/>
+    <rect x="35" y="7" width="2" height="2" fill="#ff00a0"/>
+    <rect x="44" y="2" width="3" height="11" fill="#ffb703"/>
+    <rect x="40" y="6" width="11" height="3" fill="#ff4d94"/>
+    <rect x="43" y="5" width="5" height="5" fill="#fff3b0"/>
+  </svg>
 
+  <div class="site-container">
+    <!-- HEADER / NAVIGATION -->
+    <header style="display:flex; align-items:center; justify-content:space-between; min-height: 60px; padding: 6px 0; margin-bottom: 6px; position:relative; z-index:10;">
+      <!-- Left Brand Logo -->
+      <a href="/preview/" style="display:flex; align-items:center; gap: 14px; text-decoration:none; color:#ffffff;">
+        <div style="transform: rotate(-13deg); filter: drop-shadow(-2px 0 7px rgba(0,245,255,0.85)) drop-shadow(2px 2px 7px rgba(255,0,160,0.8)); display:flex; align-items:center;">
+          <svg width="48" height="35" viewBox="0 0 44 32" shape-rendering="crispEdges">
+            <rect x="1" y="1" width="42" height="30" rx="3" fill="#131629" stroke="#00f5ff" stroke-width="2"/>
+            <rect x="30" y="1" width="13" height="30" fill="none" stroke="#ff2a9d" stroke-width="2"/>
+            <rect x="5" y="5" width="13" height="2" fill="#00f5ff"/>
+            <rect x="5" y="9" width="13" height="2" fill="#00f5ff"/>
+            <rect x="5" y="13" width="13" height="2" fill="#00f5ff"/>
+            <rect x="5" y="17" width="13" height="2" fill="#00f5ff"/>
+            <rect x="5" y="21" width="17" height="3.5" fill="#00f5ff"/>
+            <rect x="21" y="6" width="17" height="13" fill="#1f1b38" stroke="#ff66c4" stroke-width="1.5"/>
+            <rect x="24" y="10" width="4" height="4" fill="#00f5ff"/>
+            <rect x="31" y="10" width="4" height="4" fill="#ffb703"/>
+            <rect x="26" y="22" width="12" height="3" fill="#ff2a9d"/>
+          </svg>
+        </div>
+        <div class="brand-title" style="font-family: var(--font-mono); font-size: 19px; line-height: 1.08; color: #ffffff; letter-spacing: 0.6px;">
+          <div>Corner</div>
+          <div>Neighbor</div>
+        </div>
+      </a>
 
-        <!-- Main -->
-        <main id="main" class="alt">
-            <!-- One -->
-            <section id="one">
-                <div class="inner">
-                    <nav class="breadcrumbs" aria-label="パンくずリスト">
-                        <ol>
-                            <li><a href="/">ホーム</a></li>
-                            <li aria-current="page">ミニゲーム広場</li>
-                        </ol>
-                    </nav>
+      <!-- Right Nav Links + Readability Utilities (Desktop) -->
+      <div class="desktop-nav-group">
+        <nav style="display:flex; align-items:center; gap: 20px;" aria-label="メインナビゲーション">
+          <a href="/preview/#games" class="nav-link" data-nav="games">TOP/CART</a>
+          <a href="/minigames.html" class="nav-link active" data-nav="minigames">MINIGAMES</a>
+          <a href="/portfolio.html" class="nav-link" data-nav="portfolio">PORTFOLIO</a>
+          <a href="/members.html" class="nav-link" data-nav="members">MEMBERS</a>
+          <a href="/aboutus.html" class="nav-link" data-nav="about">ABOUT</a>
+          <a href="/news.html" class="nav-link" data-nav="news">NEWS</a>
+          <a href="/coming-soon.html" class="nav-link" data-nav="coming-soon">FLAGSHIP</a>
+        </nav>
 
-                    <div class="page-header-container">
-                        <header class="major page-header-title">
-                            <h1>ミニゲーム広場</h1>
-                        </header>
-                    </div>
+        <!-- Readability Utility Controls (Font Mode ABC + Font Size A) -->
+        <div class="header-utility-group" role="group" aria-label="表示・読みやすさ設定">
+          <button type="button" class="btn-header-util js-font-mode-toggle" aria-pressed="false" title="フォント切替（ドット文字 / 標準文字）" aria-label="フォント切替">
+            <span class="util-icon-font">ABC</span>
+          </button>
+          <button type="button" class="btn-header-util js-font-size-toggle" aria-pressed="false" title="文字サイズ切替（標準 / 拡大）" aria-label="文字サイズ切替">
+            <span class="util-icon-a">A</span>
+          </button>
+        </div>
+      </div>
 
-                    <div style="margin-bottom: 3em;">
-                        <p style="font-size: 1.2em; line-height: 1.75; letter-spacing: 0.05em;">
-                            ここは、Corner Neighborのメンバーが作った<strong>ブラウザで遊べるミニゲーム</strong>を公開する場所です。<br />
-                            スマホでもパソコンでも、気軽に遊んでいってくださいね！
-                        </p>
+      <!-- Mobile Action Controls (Readability + Hamburger) -->
+      <div class="mobile-header-actions">
+        <button type="button" class="btn-header-util js-font-mode-toggle" aria-pressed="false" title="フォント切替" aria-label="フォント切替">
+          <span class="util-icon-font">ABC</span>
+        </button>
+        <button type="button" class="btn-header-util js-font-size-toggle" aria-pressed="false" title="文字サイズ切替" aria-label="文字サイズ切替">
+          <span class="util-icon-a">A</span>
+        </button>
+        <button class="mobile-menu-btn" id="btn-mobile-menu" aria-label="メニューを開く" aria-expanded="false">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M2 4h14M2 9h14M2 14h14"/>
+          </svg>
+        </button>
+      </div>
+    </header>
 
-                        <div class="notice">
-                            <p style="margin: 0;">
-                                <strong style="color: #60a5fa;"><i class="icon solid fa-info-circle"></i> プレイ環境のご案内</strong><br />
-                                各ゲームのカードに<strong>「スマホ対応」</strong>や<strong>「PC推奨」</strong>の目安タグを表記しています。お使いの端末に合わせて、ぜひベストな環境で遊んでみてくださいね！
-                            </p>
-                        </div>
-                    </div>
+    <!-- MOBILE DRAWER MENU -->
+    <nav class="mobile-nav-drawer" id="mobile-nav-drawer" aria-label="モバイルナビゲーション">
+      <a href="/preview/#games" class="nav-link" style="font-size:15px;">TOP/CART — カートリッジ</a>
+      <a href="/minigames.html" class="nav-link active" style="font-size:15px;">MINIGAMES — ミニゲーム広場</a>
+      <a href="/portfolio.html" class="nav-link" style="font-size:15px;">PORTFOLIO — 作品実績</a>
+      <a href="/members.html" class="nav-link" style="font-size:15px;">MEMBERS — メンバー紹介</a>
+      <a href="/aboutus.html" class="nav-link" style="font-size:15px;">ABOUT — サークル紹介</a>
+      <a href="/news.html" class="nav-link" style="font-size:15px;">NEWS — お知らせ</a>
+      <a href="/coming-soon.html" class="nav-link" style="font-size:15px;">FLAGSHIP — 鋭意制作中！</a>
+    </nav>
 
-                    <hr class="major" />
-
-                    <div class="minigames-grid">
-                        <!-- 漢字スライサー・マージ -->
-                        <div class="game-card" style="--game-theme: #eb5e28; --game-theme-alpha: rgba(235, 94, 40, 0.3);">
-                            <a href="/kanji-slicer/" class="image-link">
-                                <img src="/assets/images/kanji_slicer_thumbnail.png" alt="漢字スライサー・マージ" width="1024" height="1024" loading="eager" />
-                            </a>
-                            <div class="game-card-content">
-                                <header class="major game-card-title">
-                                    <h3><a href="/kanji-slicer/">漢字スライサー・マージ</a></h3>
-                                </header>
-                                <p class="game-card-desc"><strong class="game-badge">物理スライス / スマホ最適 (PC対応)</strong><br>落ちてくる漢字を合体させて、お題をクリアせよ。スワイプで一刀両断すれば、漢字が部首に分裂！爽快パズル。</p>
-                                <ul class="actions">
-                                    <li><a href="/kanji-slicer/" class="button next">遊ぶ</a></li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <!-- LUMEN_MIRROR -->
-                        <div class="game-card" style="--game-theme: #00f3ff; --game-theme-alpha: rgba(0, 243, 255, 0.3);">
-                            <a href="/lumen-mirror/" class="image-link">
-                                <img src="/assets/images/lumen_mirror_thumbnail.png" alt="LUMEN_MIRROR - ルーメン・ミラー" width="1024" height="1024" loading="eager" />
-                            </a>
-                            <div class="game-card-content">
-                                <header class="major game-card-title">
-                                    <h3><a href="/lumen-mirror/">LUMEN_MIRROR</a></h3>
-                                </header>
-                                <p class="game-card-desc"><strong class="game-badge">物理反射パズル / PC推奨 (マウス操作最適)</strong><br>漆黒の虚空に［鏡のライン］を紡ぎ、光をターゲットへと導け。硬派で洗練された幾何学の美学。</p>
-                                <ul class="actions">
-                                    <li><a href="/lumen-mirror/" class="button next">遊ぶ</a></li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <!-- ブラックホール・スイーパー -->
-                        <div class="game-card" style="--game-theme: #00e5ff; --game-theme-alpha: rgba(0, 229, 255, 0.3);">
-                            <a href="/blackhole-sweeper/" class="image-link">
-                                <img src="/assets/images/blackhole_sweeper_thumbnail_1779194532152.png" alt="ブラックホール・スイーパー" width="1024" height="1024" loading="eager" />
-                            </a>
-                            <div class="game-card-content">
-                                <header class="major game-card-title">
-                                    <h3><a href="/blackhole-sweeper/">ブラックホール・スイーパー</a></h3>
-                                </header>
-                                <p class="game-card-desc"><strong class="game-badge">一筆書きアクション / スマホ最適 (PC対応)</strong><br>画面をなぞって「線」を引き、湧き出るバグをぐるっと囲んで一網打尽！欲張りすぎにはご用心。</p>
-                                <ul class="actions">
-                                    <li><a href="/blackhole-sweeper/" class="button next">遊ぶ</a></li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <!-- ギリギリ・ブレーキ！ -->
-                        <div class="game-card" style="--game-theme: #00f2fe; --game-theme-alpha: rgba(0, 242, 254, 0.3);">
-                            <a href="/girigiri-brake/" class="image-link">
-                                <img src="/assets/images/girigiri_brake_thumbnail_1779165077904.png" alt="ギリギリ・ブレーキ！" width="1024" height="1024" loading="eager" />
-                            </a>
-                            <div class="game-card-content">
-                                <header class="major game-card-title">
-                                    <h3><a href="/girigiri-brake/">ギリギリ・ブレーキ！</a></h3>
-                                </header>
-                                <p class="game-card-desc"><strong class="game-badge">チキンレース / スマホ最適 (PC対応)</strong><br>猛スピードからの急ブレーキ！崖ギリギリで止まる快感とスリルを味わおう。</p>
-                                <ul class="actions">
-                                    <li><a href="/girigiri-brake/" class="button next">遊ぶ</a></li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <!-- 超絶！仕分け工場 -->
-                        <div class="game-card" style="--game-theme: #ffd700; --game-theme-alpha: rgba(255, 215, 0, 0.3);">
-                            <a href="/sorting-factory/" class="image-link">
-                                <img src="/assets/images/sorting_factory_thumbnail_1779165097756.png" alt="超絶！仕分け工場" width="1024" height="1024" loading="eager" />
-                            </a>
-                            <div class="game-card-content">
-                                <header class="major game-card-title">
-                                    <h3><a href="/sorting-factory/">超絶！仕分け工場</a></h3>
-                                </header>
-                                <p class="game-card-desc"><strong class="game-badge">脳トレパニック / スマホ最適 (PC対応)</strong><br>迫り来るアイテムを左右に仕分けろ！途中で変わるルールに君の脳はついてこれるか？</p>
-                                <ul class="actions">
-                                    <li><a href="/sorting-factory/" class="button next">遊ぶ</a></li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <!-- 限界！ステルスサボタージュ -->
-                        <div class="game-card" style="--game-theme: #ff3366; --game-theme-alpha: rgba(255, 51, 102, 0.3);">
-                            <a href="/stealth-slacker/" class="image-link">
-                                <img src="/assets/images/stealth_slacker_thumbnail_1779165112569.png" alt="限界！ステルスサボタージュ" width="1024" height="1024" loading="eager" />
-                            </a>
-                            <div class="game-card-content">
-                                <header class="major game-card-title">
-                                    <h3><a href="/stealth-slacker/">限界！ステルスサボタージュ</a></h3>
-                                </header>
-                                <p class="game-card-desc"><strong class="game-badge">バカゲー / スマホ最適 (PC対応)</strong><br>画面長押しで全力サボり！上司が振り返る瞬間に指を離して仕事してるフリをしろ！</p>
-                                <ul class="actions">
-                                    <li><a href="/stealth-slacker/" class="button next">遊ぶ</a></li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <!-- みきり一閃 -->
-                        <div class="game-card" style="--game-theme: #ffd36a; --game-theme-alpha: rgba(255, 211, 106, 0.3);">
-                            <a href="/mikiri-issen/" class="image-link">
-                                <img src="/assets/images/mikiri_issen_thumbnail_1779165128314.png" alt="みきり一閃" width="1024" height="1024" loading="eager" />
-                            </a>
-                            <div class="game-card-content">
-                                <header class="major game-card-title">
-                                    <h3><a href="/mikiri-issen/">みきり一閃</a></h3>
-                                </header>
-                                <p class="game-card-desc"><strong class="game-badge">反射神経 / スマホ最適 (PC対応)</strong><br>合図の瞬間だけを斬る、純粋な一瞬勝負。襲い来る剣客たちを打ち倒し、限界突破を目指せ！</p>
-                                <ul class="actions">
-                                    <li><a href="/mikiri-issen/" class="button next">遊ぶ</a></li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <!-- ウォールジャンパー -->
-                        <div class="game-card" style="--game-theme: #ff6666; --game-theme-alpha: rgba(255, 102, 102, 0.3);">
-                            <a href="/wall-jumper/" class="image-link">
-                                <img src="/assets/images/wall_jumper_thumbnail_1779165143429.png" alt="ウォールジャンパー" width="1024" height="1024" loading="eager" />
-                            </a>
-                            <div class="game-card-content">
-                                <header class="major game-card-title">
-                                    <h3><a href="/wall-jumper/">ウォールジャンパー</a></h3>
-                                </header>
-                                <p class="game-card-desc"><strong class="game-badge">激ムズアクション / PC推奨 (キーボード最適)</strong><br>壁を蹴ってひたすら上に登り続ける即死系アクション。赤いアイツを操って自己ベストに挑もう！</p>
-                                <ul class="actions">
-                                    <li><a href="/wall-jumper/" class="button next">遊ぶ</a></li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <!-- 影まね道場 -->
-                        <div class="game-card" style="--game-theme: #e0b756; --game-theme-alpha: rgba(224, 183, 86, 0.3);">
-                            <a href="/kage-mane-dojo/" class="image-link">
-                                <img src="/assets/images/kage_mane_dojo_thumbnail.svg" alt="影まね道場" width="1024" height="1024" loading="eager" />
-                            </a>
-                            <div class="game-card-content">
-                                <header class="major game-card-title">
-                                    <h3><a href="/kage-mane-dojo/">影まね道場</a></h3>
-                                </header>
-                                <p class="game-card-desc"><strong class="game-badge">記憶アクション / スマホ対応</strong><br>師範が見せる型を覚え、弟子として同じ順番で打ち返せ。集中力と記憶力で段位を伸ばす道場稽古。</p>
-                                <ul class="actions">
-                                    <li><a href="/kage-mane-dojo/" class="button next">遊ぶ</a></li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </section>
-        </main>
-
-<!-- Footer -->
-	<footer id="footer">
-		<div class="inner">
-			
-			<ul class="copyright footer-meta">
-				<li>© 2024-2026 Corner Neighbor公式ホームページ</li>
-				<li>デザイン: <a href="https://html5up.net" target="_blank" rel="noopener noreferrer">HTML5 UP</a></li>
-				<li><a href="/privacy-policy.html">プライバシーポリシー</a></li>
-				<li><a href="/terms-of-service.html">利用規約</a></li>
-			</ul>
-		</div>
-	</footer>
-
-<a href="#" id="scrollToTopBtn" title="ページトップへ戻る">▲</a>
-<!-- Scripts -->
-	<script src="/assets/js/main.js?v=<?php echo filemtime($_SERVER['DOCUMENT_ROOT'] . '/assets/js/main.js'); ?>"></script>
-
+    <!-- BREADCRUMBS BAR -->
+    <div class="page-utility-bar">
+      <nav class="breadcrumbs" aria-label="パンくずリスト">
+        <ol class="breadcrumb-list">
+          <li><a href="/preview/">ホーム</a></li>
+          <li class="breadcrumb-sep">&gt;</li>
+          <li class="breadcrumb-current" aria-current="page">ミニゲーム広場</li>
+        </ol>
+      </nav>
+      <div style="font-family: var(--font-pixel-en); font-size: 11px; color: var(--neon-cyan);">
+        ALL 9 GAMES // PLAY FREE IN BROWSER
+      </div>
     </div>
-</body>
 
+    <!-- SUBPAGE HERO BANNER -->
+    <section class="subpage-banner" aria-label="ミニゲーム広場 ヘッダー">
+      <div class="subpage-kicker">
+        <span>🎮 ARCADE ARCHIVE</span>
+        <span>//</span>
+        <span>ブラウザで即座に遊べる9つの小品</span>
+      </div>
+      <h1 class="subpage-title">ミニゲーム広場</h1>
+      <p class="subpage-lead">
+        Corner Neighborのメンバーが制作した、ブラウザですぐに遊べるインディーミニゲーム集です。<br />
+        スマホで直感的に遊べるカジュアルパズルから、PCでの精密な操作が求められる硬派アクションまで、インストール不要で自由にお楽しみいただけます！
+      </p>
+    </section>
+
+    <!-- FILTER TABS BAR -->
+    <div class="filter-tabs-container" role="toolbar" aria-label="ゲーム絞り込み">
+      <div class="filter-tabs">
+        <button type="button" class="filter-tab-btn active" data-filter="all">
+          すべて <span class="filter-count-badge">9</span>
+        </button>
+        <button type="button" class="filter-tab-btn" data-filter="mobile">
+          📱 スマホ最適 <span class="filter-count-badge">7</span>
+        </button>
+        <button type="button" class="filter-tab-btn" data-filter="pc">
+          🖱️ PC推奨 <span class="filter-count-badge">2</span>
+        </button>
+      </div>
+      <div class="filter-meta-hint">
+        ※ 全ゲームPC・スマホの各ブラウザに対応しています
+      </div>
+    </div>
+
+    <!-- 9 MINIGAMES GRID -->
+    <main class="minigames-grid" id="minigames-grid" aria-label="ミニゲーム一覧">
+
+      <!-- 1. 漢字スライサー・マージ -->
+      <article class="arcade-card" data-category="mobile" style="--card-accent: #eb5e28;">
+        <a href="/kanji-slicer/" class="arcade-thumb-link" aria-label="漢字スライサー・マージを遊ぶ">
+          <img src="/assets/images/kanji_slicer_thumbnail.png" alt="漢字スライサー・マージ サムネイル" width="1024" height="1024" class="arcade-thumb-img" loading="eager" />
+          <div class="arcade-thumb-overlay"></div>
+          <span class="arcade-thumb-rom">CN-ROM-01</span>
+          <span class="arcade-thumb-badge">📱 スマホ最適 (PC対応)</span>
+        </a>
+        <div class="arcade-card-body">
+          <div class="arcade-card-header">
+            <div class="arcade-card-subtitle">物理スライス・部首合体パズル</div>
+            <h2 class="arcade-card-title">
+              <a href="/kanji-slicer/">漢字スライサー・マージ</a>
+            </h2>
+            <p class="arcade-card-desc">
+              落ちてくる漢字をスワイプで一刀両断！分裂した部首を合体させてお題をクリアする、手触り爽快な新感覚物理パズル。
+            </p>
+          </div>
+          <div>
+            <div class="arcade-controls-bar">
+              <span>🕹️ 操作:</span> スワイプ / マウスドラッグ
+            </div>
+            <div class="arcade-actions">
+              <a href="/kanji-slicer/" class="btn-arcade-play js-play-sfx">
+                ▶ 今すぐ遊ぶ
+              </a>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- 2. LUMEN_MIRROR -->
+      <article class="arcade-card" data-category="pc" style="--card-accent: #00f3ff;">
+        <a href="/lumen-mirror/" class="arcade-thumb-link" aria-label="LUMEN_MIRRORを遊ぶ">
+          <img src="/assets/images/lumen_mirror_thumbnail.png" alt="LUMEN_MIRROR サムネイル" width="1024" height="1024" class="arcade-thumb-img" loading="eager" />
+          <div class="arcade-thumb-overlay"></div>
+          <span class="arcade-thumb-rom">CN-ROM-02</span>
+          <span class="arcade-thumb-badge badge-pc">🖱️ PC推奨 (マウス最適)</span>
+        </a>
+        <div class="arcade-card-body">
+          <div class="arcade-card-header">
+            <div class="arcade-card-subtitle">幾何学光線反射パズル</div>
+            <h2 class="arcade-card-title">
+              <a href="/lumen-mirror/">LUMEN_MIRROR</a>
+            </h2>
+            <p class="arcade-card-desc">
+              漆黒の虚空に鏡のラインを紡ぎ、光を水晶ターゲットへ導け。静謐で研ぎ澄まされた幾何学の美学が光るパズルゲーム。
+            </p>
+          </div>
+          <div>
+            <div class="arcade-controls-bar">
+              <span>🕹️ 操作:</span> マウスドラッグ (鏡の配置)
+            </div>
+            <div class="arcade-actions">
+              <a href="/lumen-mirror/" class="btn-arcade-play js-play-sfx">
+                ▶ 今すぐ遊ぶ
+              </a>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- 3. みきり一閃 -->
+      <article class="arcade-card" data-category="mobile" style="--card-accent: #ffd36a;">
+        <a href="/mikiri-issen/" class="arcade-thumb-link" aria-label="みきり一閃を遊ぶ">
+          <img src="/assets/images/mikiri_issen_thumbnail_1779165128314.png" alt="みきり一閃 サムネイル" width="1024" height="1024" class="arcade-thumb-img" loading="eager" />
+          <div class="arcade-thumb-overlay"></div>
+          <span class="arcade-thumb-rom">CN-ROM-03</span>
+          <span class="arcade-thumb-badge">📱 スマホ最適 (PC対応)</span>
+        </a>
+        <div class="arcade-card-body">
+          <div class="arcade-card-header">
+            <div class="arcade-card-subtitle">0.01秒の居合反射神経バトル</div>
+            <h2 class="arcade-card-title">
+              <a href="/mikiri-issen/">みきり一閃</a>
+            </h2>
+            <p class="arcade-card-desc">
+              合図「斬」の瞬間に斬り伏せろ！襲い来る剣客たちを打ち倒し、極限の反射神経でハイスコア・限界突破を目指せ。
+            </p>
+          </div>
+          <div>
+            <div class="arcade-controls-bar">
+              <span>🕹️ 操作:</span> 画面タップ / スペースキー
+            </div>
+            <div class="arcade-actions">
+              <a href="/mikiri-issen/" class="btn-arcade-play js-play-sfx">
+                ▶ 今すぐ遊ぶ
+              </a>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- 4. ギリギリ・ブレーキ！ -->
+      <article class="arcade-card" data-category="mobile" style="--card-accent: #00f2fe;">
+        <a href="/girigiri-brake/" class="arcade-thumb-link" aria-label="ギリギリ・ブレーキ！を遊ぶ">
+          <img src="/assets/images/girigiri_brake_thumbnail_1779165077904.png" alt="ギリギリ・ブレーキ！ サムネイル" width="1024" height="1024" class="arcade-thumb-img" loading="eager" />
+          <div class="arcade-thumb-overlay"></div>
+          <span class="arcade-thumb-rom">CN-ROM-04</span>
+          <span class="arcade-thumb-badge">📱 スマホ最適 (PC対応)</span>
+        </a>
+        <div class="arcade-card-body">
+          <div class="arcade-card-header">
+            <div class="arcade-card-subtitle">極限チキンレース・アクション</div>
+            <h2 class="arcade-card-title">
+              <a href="/girigiri-brake/">ギリギリ・ブレーキ！</a>
+            </h2>
+            <p class="arcade-card-desc">
+              猛スピードからの急ブレーキ！断崖絶壁のギリギリで踏みとどまる快感とスリルを味わう、度胸試しのチキンレース。
+            </p>
+          </div>
+          <div>
+            <div class="arcade-controls-bar">
+              <span>🕹️ 操作:</span> タップ長押し / キー長押し
+            </div>
+            <div class="arcade-actions">
+              <a href="/girigiri-brake/" class="btn-arcade-play js-play-sfx">
+                ▶ 今すぐ遊ぶ
+              </a>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- 5. ブラックホール・スイーパー -->
+      <article class="arcade-card" data-category="mobile" style="--card-accent: #00e5ff;">
+        <a href="/blackhole-sweeper/" class="arcade-thumb-link" aria-label="ブラックホール・スイーパーを遊ぶ">
+          <img src="/assets/images/blackhole_sweeper_thumbnail_1779194532152.png" alt="ブラックホール・スイーパー サムネイル" width="1024" height="1024" class="arcade-thumb-img" loading="lazy" />
+          <div class="arcade-thumb-overlay"></div>
+          <span class="arcade-thumb-rom">CN-ROM-05</span>
+          <span class="arcade-thumb-badge">📱 スマホ最適 (PC対応)</span>
+        </a>
+        <div class="arcade-card-body">
+          <div class="arcade-card-header">
+            <div class="arcade-card-subtitle">一筆囲み消去アクション</div>
+            <h2 class="arcade-card-title">
+              <a href="/blackhole-sweeper/">ブラックホール・スイーパー</a>
+            </h2>
+            <p class="arcade-card-desc">
+              画面をなぞって「線」を引き、湧き出るバグをぐるっと囲んで一網打尽！囲みすぎの崩壊に気を配りながら消去せよ。
+            </p>
+          </div>
+          <div>
+            <div class="arcade-controls-bar">
+              <span>🕹️ 操作:</span> スワイプ描画 / マウスドラッグ
+            </div>
+            <div class="arcade-actions">
+              <a href="/blackhole-sweeper/" class="btn-arcade-play js-play-sfx">
+                ▶ 今すぐ遊ぶ
+              </a>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- 6. 超絶！仕分け工場 -->
+      <article class="arcade-card" data-category="mobile" style="--card-accent: #ffd700;">
+        <a href="/sorting-factory/" class="arcade-thumb-link" aria-label="超絶！仕分け工場を遊ぶ">
+          <img src="/assets/images/sorting_factory_thumbnail_1779165097756.png" alt="超絶！仕分け工場 サムネイル" width="1024" height="1024" class="arcade-thumb-img" loading="lazy" />
+          <div class="arcade-thumb-overlay"></div>
+          <span class="arcade-thumb-rom">CN-ROM-06</span>
+          <span class="arcade-thumb-badge">📱 スマホ最適 (PC対応)</span>
+        </a>
+        <div class="arcade-card-body">
+          <div class="arcade-card-header">
+            <div class="arcade-card-subtitle">脳トレ瞬発パニック</div>
+            <h2 class="arcade-card-title">
+              <a href="/sorting-factory/">超絶！仕分け工場</a>
+            </h2>
+            <p class="arcade-card-desc">
+              迫り来るアイテムを左右に瞬速仕分け！途中で逆転するルールに君の脳は追いつけるか？クセになるスピード感。
+            </p>
+          </div>
+          <div>
+            <div class="arcade-controls-bar">
+              <span>🕹️ 操作:</span> 左右フリック / 左右矢印キー
+            </div>
+            <div class="arcade-actions">
+              <a href="/sorting-factory/" class="btn-arcade-play js-play-sfx">
+                ▶ 今すぐ遊ぶ
+              </a>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- 7. 限界！ステルスサボタージュ -->
+      <article class="arcade-card" data-category="mobile" style="--card-accent: #ff3366;">
+        <a href="/stealth-slacker/" class="arcade-thumb-link" aria-label="限界！ステルスサボタージュを遊ぶ">
+          <img src="/assets/images/stealth_slacker_thumbnail_1779165112569.png" alt="限界！ステルスサボタージュ サムネイル" width="1024" height="1024" class="arcade-thumb-img" loading="lazy" />
+          <div class="arcade-thumb-overlay"></div>
+          <span class="arcade-thumb-rom">CN-ROM-07</span>
+          <span class="arcade-thumb-badge">📱 スマホ最適 (PC対応)</span>
+        </a>
+        <div class="arcade-card-body">
+          <div class="arcade-card-header">
+            <div class="arcade-card-subtitle">コミカルステルス・オフィス</div>
+            <h2 class="arcade-card-title">
+              <a href="/stealth-slacker/">限界！ステルスサボタージュ</a>
+            </h2>
+            <p class="arcade-card-desc">
+              画面長押しで全力サボり！上司が振り返る寸前に指を離して仕事してるフリを決めろ！バレたら即ゲームオーバーの脱力作。
+            </p>
+          </div>
+          <div>
+            <div class="arcade-controls-bar">
+              <span>🕹️ 操作:</span> 長押し＆離す / キー操作
+            </div>
+            <div class="arcade-actions">
+              <a href="/stealth-slacker/" class="btn-arcade-play js-play-sfx">
+                ▶ 今すぐ遊ぶ
+              </a>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- 8. ウォールジャンパー -->
+      <article class="arcade-card" data-category="pc" style="--card-accent: #ff6666;">
+        <a href="/wall-jumper/" class="arcade-thumb-link" aria-label="ウォールジャンパーを遊ぶ">
+          <img src="/assets/images/wall_jumper_thumbnail_1779165143429.png" alt="ウォールジャンパー サムネイル" width="1024" height="1024" class="arcade-thumb-img" loading="lazy" />
+          <div class="arcade-thumb-overlay"></div>
+          <span class="arcade-thumb-rom">CN-ROM-08</span>
+          <span class="arcade-thumb-badge badge-pc">🖱️ PC推奨 (キーボード最適)</span>
+        </a>
+        <div class="arcade-card-body">
+          <div class="arcade-card-header">
+            <div class="arcade-card-subtitle">激ムズ三角飛びアクション</div>
+            <h2 class="arcade-card-title">
+              <a href="/wall-jumper/">ウォールジャンパー</a>
+            </h2>
+            <p class="arcade-card-desc">
+              壁を蹴ってひたすら上に登り続ける即死系アクション。赤いアイツを操って罠を避け、自己ベストの登頂を目指せ！
+            </p>
+          </div>
+          <div>
+            <div class="arcade-controls-bar">
+              <span>🕹️ 操作:</span> 矢印キー / スペース壁キック
+            </div>
+            <div class="arcade-actions">
+              <a href="/wall-jumper/" class="btn-arcade-play js-play-sfx">
+                ▶ 今すぐ遊ぶ
+              </a>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- 9. 影まね道場 -->
+      <article class="arcade-card" data-category="mobile" style="--card-accent: #e0b756;">
+        <a href="/kage-mane-dojo/" class="arcade-thumb-link" aria-label="影まね道場を遊ぶ">
+          <img src="/assets/images/kage_mane_dojo_thumbnail.svg" alt="影まね道場 サムネイル" width="1024" height="1024" class="arcade-thumb-img" loading="lazy" />
+          <div class="arcade-thumb-overlay"></div>
+          <span class="arcade-thumb-rom">CN-ROM-09</span>
+          <span class="arcade-thumb-badge">📱 スマホ対応 (PC対応)</span>
+        </a>
+        <div class="arcade-card-body">
+          <div class="arcade-card-header">
+            <div class="arcade-card-subtitle">記憶＆型稽古アクション</div>
+            <h2 class="arcade-card-title">
+              <a href="/kage-mane-dojo/">影まね道場</a>
+            </h2>
+            <p class="arcade-card-desc">
+              師範が見せる型を覚え、弟子として同じ順番で打ち返せ。集中力と短期記憶で段位を伸ばす、和風道場稽古ゲーム。
+            </p>
+          </div>
+          <div>
+            <div class="arcade-controls-bar">
+              <span>🕹️ 操作:</span> ボタンタップ / 数字キー
+            </div>
+            <div class="arcade-actions">
+              <a href="/kage-mane-dojo/" class="btn-arcade-play js-play-sfx">
+                ▶ 今すぐ遊ぶ
+              </a>
+            </div>
+          </div>
+        </div>
+      </article>
+
+    </main>
+
+    <!-- ATELIER DISPATCH / CTA BOX -->
+    <section class="atelier-dispatch-box" aria-label="他ページへの案内">
+      <div>
+        <div class="dispatch-info-title">🚀 FLAGSHIP // 次なる挑戦はUE5本格インディーゲーム！</div>
+        <div class="dispatch-info-text">
+          Corner Neighborでは現在、Unreal Engine 5を使用した新作ゲームを鋭意制作中！開発日誌や制作舞台裏も公開中。
+        </div>
+      </div>
+      <div class="dispatch-actions">
+        <a href="/coming-soon.html" class="btn-cyber-action btn-cyan">
+          ⚡ 制作中プロジェクトを見る
+        </a>
+        <a href="/portfolio.html" class="btn-cyber-action btn-outline">
+          📦 作品実績一覧
+        </a>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+      <div class="footer-layout">
+        <div class="footer-brand-col">
+          <div class="footer-brand-name">CORNER NEIGHBOR</div>
+          <div class="footer-circle-desc">まったりゲームを作るインディーサークル！</div>
+          <div class="footer-copyright">© 2024-2026 Corner Neighbor. All rights reserved.</div>
+        </div>
+        <div class="footer-links">
+          <a href="/preview/">ホーム</a>
+          <a href="/minigames.html">ミニゲーム広場</a>
+          <a href="/portfolio.html">作品一覧</a>
+          <a href="/members.html">メンバー紹介</a>
+          <a href="/aboutus.html">私たちについて</a>
+          <a href="/news.html">お知らせ</a>
+          <a href="/coming-soon.html">鋭意制作中！</a>
+          <a href="/privacy-policy.html">プライバシーポリシー</a>
+          <a href="/terms-of-service.html">利用規約</a>
+        </div>
+      </div>
+    </footer>
+
+    <!-- BACK TO TOP BUTTON -->
+    <button type="button" class="btn-pixel-top" id="btn-back-to-top" aria-label="ページトップへ戻る">
+      <span class="btn-pixel-top-arrow"></span>
+      <span class="btn-pixel-top-text">TOP</span>
+    </button>
+  </div>
+
+  <script>
+    (function() {
+      // 1. Retro Synth Audio Utility
+      let audioCtx = null;
+      function getAudioContext() {
+        if (!audioCtx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass) audioCtx = new AudioContextClass();
+        }
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        return audioCtx;
+      }
+
+      function play8BitSound(type) {
+        try {
+          const ctx = getAudioContext();
+          if (!ctx) return;
+          const now = ctx.currentTime;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+
+          if (type === 'select') {
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(440, now);
+            osc.frequency.setValueAtTime(880, now + 0.05);
+            gain.gain.setValueAtTime(0.08, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+            osc.start(now);
+            osc.stop(now + 0.12);
+          } else if (type === 'tab') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(587.33, now);
+            gain.gain.setValueAtTime(0.06, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+            osc.start(now);
+            osc.stop(now + 0.08);
+          }
+        } catch (e) {}
+      }
+
+      // 2. Readability Controls (ABC Font Mode & A Font Size)
+      let currentFontMode = document.documentElement.getAttribute('data-font-mode') || 'pixel';
+      let currentFontSize = document.documentElement.getAttribute('data-font-size') || 'md';
+
+      function syncReadabilityUI() {
+        const isStandard = currentFontMode === 'standard';
+        const isLg = currentFontSize === 'lg';
+
+        document.querySelectorAll('.js-font-mode-toggle').forEach(btn => {
+          btn.classList.toggle('is-active', isStandard);
+          btn.setAttribute('aria-pressed', isStandard ? 'true' : 'false');
+          btn.title = isStandard ? 'フォント切替（現在: 標準文字 / クリックでドット文字）' : 'フォント切替（現在: ドット文字 / クリックで標準文字）';
+        });
+
+        document.querySelectorAll('.js-font-size-toggle').forEach(btn => {
+          btn.classList.toggle('is-active', isLg);
+          btn.setAttribute('aria-pressed', isLg ? 'true' : 'false');
+          btn.title = isLg ? '文字サイズ切替（現在: 拡大 / クリックで標準）' : '文字サイズ切替（現在: 標準 / クリックで拡大）';
+        });
+      }
+
+      window.addEventListener('DOMContentLoaded', () => {
+        syncReadabilityUI();
+
+        document.querySelectorAll('.js-font-mode-toggle').forEach(btn => {
+          btn.addEventListener('click', () => {
+            play8BitSound('select');
+            currentFontMode = currentFontMode === 'standard' ? 'pixel' : 'standard';
+            document.documentElement.setAttribute('data-font-mode', currentFontMode);
+            localStorage.setItem('cn_font_mode', currentFontMode);
+            syncReadabilityUI();
+          });
+        });
+
+        document.querySelectorAll('.js-font-size-toggle').forEach(btn => {
+          btn.addEventListener('click', () => {
+            play8BitSound('select');
+            currentFontSize = currentFontSize === 'lg' ? 'md' : 'lg';
+            document.documentElement.setAttribute('data-font-size', currentFontSize);
+            localStorage.setItem('cn_font_size', currentFontSize);
+            syncReadabilityUI();
+          });
+        });
+
+        // 3. Filter Tabs (All / Mobile / PC)
+        const filterBtns = document.querySelectorAll('.filter-tab-btn');
+        const cards = document.querySelectorAll('.arcade-card');
+
+        filterBtns.forEach(btn => {
+          btn.addEventListener('click', () => {
+            play8BitSound('tab');
+            const target = btn.getAttribute('data-filter');
+
+            filterBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            cards.forEach(card => {
+              const cat = card.getAttribute('data-category');
+              if (target === 'all' || cat === target) {
+                card.classList.remove('is-hidden');
+              } else {
+                card.classList.add('is-hidden');
+              }
+            });
+          });
+        });
+
+        // 4. Play Button Retro SFX
+        document.querySelectorAll('.js-play-sfx').forEach(btn => {
+          btn.addEventListener('click', () => {
+            play8BitSound('select');
+          });
+        });
+
+        // 5. Mobile Drawer Toggle
+        const menuBtn = document.getElementById('btn-mobile-menu');
+        const drawer = document.getElementById('mobile-nav-drawer');
+        if (menuBtn && drawer) {
+          menuBtn.addEventListener('click', () => {
+            play8BitSound('select');
+            const isOpen = drawer.classList.toggle('open');
+            menuBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+          });
+        }
+
+        // 6. Back to Top Button
+        const btnTop = document.getElementById('btn-back-to-top');
+        if (btnTop) {
+          window.addEventListener('scroll', () => {
+            if (window.scrollY > 280) {
+              btnTop.classList.add('visible');
+            } else {
+              btnTop.classList.remove('visible');
+            }
+          }, { passive: true });
+          btnTop.addEventListener('click', () => {
+            play8BitSound('select');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          });
+        }
+      });
+    })();
+  </script>
+</body>
 </html>
