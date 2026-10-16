@@ -198,7 +198,7 @@
       box-shadow: 0 0 8px var(--neon-cyan);
     }
 
-    /* Header Utility Buttons: ABC Font Toggle & A+ Font Size Toggle */
+    /* Header Utility Buttons: Minimalist Icon-Only [ABC] & Expanding [A] Toggles */
     .header-utility-group {
       display: inline-flex;
       align-items: center;
@@ -206,20 +206,22 @@
     }
     .btn-header-util {
       background: #171926;
-      border: 1.5px solid #32374f;
+      border: 1.5px solid #363c54;
       color: #cbd5e1;
-      font-family: 'Noto Sans JP', 'BIZ UDPGothic', system-ui, sans-serif;
-      font-size: 12px;
-      font-weight: 700;
       height: 36px;
-      padding: 0 11px;
+      width: 38px;
+      min-width: 38px;
+      padding: 0;
       border-radius: 6px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      justify-content: center;
       white-space: nowrap;
       transition: all 0.16s ease;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1;
+      user-select: none;
     }
     .btn-header-util:hover {
       border-color: var(--neon-cyan);
@@ -228,35 +230,37 @@
       box-shadow: 0 0 10px rgba(0, 245, 255, 0.25);
       transform: translateY(-1px);
     }
-    .btn-header-util.is-active {
-      background: rgba(0, 245, 255, 0.15);
+    .btn-header-util.is-active,
+    .btn-header-util.active {
+      background: rgba(0, 245, 255, 0.16);
       border-color: var(--neon-cyan);
-      color: #ffffff;
-      box-shadow: 0 0 12px rgba(0, 245, 255, 0.35), inset 0 0 6px rgba(0, 245, 255, 0.2);
-    }
-    .util-badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: #25293e;
       color: var(--neon-cyan);
-      font-family: 'Inter', 'Noto Sans JP', system-ui, sans-serif;
+      box-shadow: 0 0 12px rgba(0, 245, 255, 0.35), inset 0 0 6px rgba(0, 245, 255, 0.15);
+    }
+    .btn-header-util .util-icon-font {
       font-size: 11px;
       font-weight: 800;
-      letter-spacing: 0.3px;
-      padding: 2px 5.5px;
-      border-radius: 4px;
-      border: 1px solid rgba(0, 245, 255, 0.35);
-      line-height: 1.1;
+      letter-spacing: 0.5px;
+      color: inherit;
+      transition: transform 0.15s ease;
     }
-    .btn-header-util.is-active .util-badge {
-      background: var(--neon-cyan);
-      color: #08070f;
-      border-color: var(--neon-cyan);
+    .btn-header-util.is-active .util-icon-font,
+    .btn-header-util.active .util-icon-font {
+      color: var(--neon-cyan);
+      text-shadow: 0 0 8px rgba(0, 245, 255, 0.7);
     }
-    .util-label {
-      font-size: 11.5px;
-      letter-spacing: 0.3px;
+    .btn-header-util .util-icon-a {
+      font-size: 13px;
+      font-weight: 700;
+      color: inherit;
+      transition: transform 0.15s ease, font-size 0.15s ease;
+    }
+    .btn-header-util.is-active .util-icon-a,
+    .btn-header-util.active .util-icon-a {
+      font-size: 17.5px;
+      font-weight: 900;
+      color: var(--neon-cyan);
+      text-shadow: 0 0 8px rgba(0, 245, 255, 0.75);
     }
 
     /* Neon Gradient Button (PLAY NOW) */
@@ -1880,14 +1884,12 @@
               <a href="/aboutus.html" class="nav-link" data-nav="about">ABOUT</a>
               <a href="/news.html" class="nav-link" data-nav="news">NEWS</a>
             </nav>
-            <div class="header-utility-group" role="group" aria-label="文字表示・音声設定">
-              <button type="button" class="btn-header-util js-font-mode-toggle" id="btn-font-mode" title="ピクセル文字と読みやすい標準文字を切り替え" aria-pressed="false">
-                <span class="util-badge">ABC</span>
-                <span class="util-label js-font-mode-label">標準文字</span>
+            <div class="header-utility-group" role="group" aria-label="表示設定">
+              <button type="button" class="btn-header-util js-font-mode-toggle" id="btn-font-mode" title="フォント切替（ドット文字 / 標準文字）" aria-label="フォント切替" aria-pressed="false">
+                <span class="util-icon-font">ABC</span>
               </button>
-              <button type="button" class="btn-header-util js-font-size-toggle" id="btn-font-size" title="文字サイズを拡大・標準で切り替え" aria-pressed="false">
-                <span class="util-badge">A+</span>
-                <span class="util-label js-font-size-label">文字拡大</span>
+              <button type="button" class="btn-header-util js-font-size-toggle" id="btn-font-size" title="文字サイズ切替（標準 / 拡大）" aria-label="文字サイズ切替" aria-pressed="false">
+                <span class="util-icon-a">A</span>
               </button>
               <button type="button" class="btn-sfx-toggle" id="btn-sfx" title="8-bit Sound Effects On/Off">
                 <span id="sfx-icon">🔇</span> SFX
@@ -1898,13 +1900,13 @@
 
           <!-- Mobile Action Controls (Font + Size + SFX + Hamburger) -->
           <div class="mobile-header-actions">
-            <button type="button" class="btn-header-util js-font-mode-toggle" title="標準文字に切り替え" aria-label="標準文字に切り替え" aria-pressed="false" style="height: 34px; padding: 0 8px;">
-              <span class="util-badge">ABC</span>
+            <button type="button" class="btn-header-util js-font-mode-toggle" title="フォント切替" aria-label="フォント切替" aria-pressed="false">
+              <span class="util-icon-font">ABC</span>
             </button>
-            <button type="button" class="btn-header-util js-font-size-toggle" title="文字サイズ拡大" aria-label="文字サイズ拡大" aria-pressed="false" style="height: 34px; padding: 0 8px;">
-              <span class="util-badge">A+</span>
+            <button type="button" class="btn-header-util js-font-size-toggle" title="文字サイズ切替" aria-label="文字サイズ切替" aria-pressed="false">
+              <span class="util-icon-a">A</span>
             </button>
-            <button class="btn-sfx-toggle" id="btn-sfx-mobile" title="SFX On/Off" style="height: 34px; padding: 0 8px; font-size: 11px;">
+            <button class="btn-sfx-toggle" id="btn-sfx-mobile" title="SFX On/Off" style="height: 36px; padding: 0 8px; font-size: 11px;">
               <span id="sfx-icon-mobile">🔇</span> SFX
             </button>
             <button class="mobile-menu-btn" id="btn-mobile-menu" aria-label="Toggle Menu">
@@ -1924,13 +1926,11 @@
           <a href="/news.html" class="nav-link" style="font-size:15px;">NEWS — お知らせ</a>
           <button class="btn-neon-play" id="btn-play-now-drawer" style="width:100%; margin:10px 0 6px 0; padding:9px 14px; font-size:13.5px; text-align:center;">▶ PLAY NOW — 全ゲームをプレイ</button>
           <div style="display:flex; gap:8px; padding:8px 0; border-top:1px solid #26293a;">
-            <button type="button" class="btn-header-util js-font-mode-toggle" style="flex:1; justify-content:center;" aria-pressed="false">
-              <span class="util-badge">ABC</span>
-              <span class="util-label js-font-mode-label">標準文字</span>
+            <button type="button" class="btn-header-util js-font-mode-toggle" style="flex:1; justify-content:center; gap:6px;" aria-pressed="false">
+              <span class="util-icon-font">ABC</span>
             </button>
-            <button type="button" class="btn-header-util js-font-size-toggle" style="flex:1; justify-content:center;" aria-pressed="false">
-              <span class="util-badge">A+</span>
-              <span class="util-label js-font-size-label">文字拡大</span>
+            <button type="button" class="btn-header-util js-font-size-toggle" style="flex:1; justify-content:center; gap:6px;" aria-pressed="false">
+              <span class="util-icon-a">A</span>
             </button>
           </div>
           <div style="display:flex; justify-content:space-between; align-items:center; padding-top:6px; border-top:1px solid #26293a;">
@@ -2826,6 +2826,11 @@
     }
 
     let boostPulse = 0;
+    let fanRunning = true;
+    let fanAngleTime = 0;
+    let manualLightning = 0;
+    let manualCrtMode = null;
+    let coffeeSteamPulse = 0;
 
     function px(ctx, x, y, w, h, color) {
       ctx.fillStyle = color;
@@ -2839,6 +2844,9 @@
       ctx.clearRect(0, 0, W, H);
 
       if (boostPulse > 0) boostPulse *= 0.95;
+      if (manualLightning > 0) manualLightning *= 0.88;
+      if (coffeeSteamPulse > 0) coffeeSteamPulse *= 0.96;
+      if (fanRunning) fanAngleTime += 16;
 
       // ====================================================================
       // A. RIGHT HALF: RAINY CYBERPUNK NIGHT SKYLINE, LIGHTNING, UFO & MOON
@@ -2854,12 +2862,12 @@
       const lightningCycle = 22000;
       const lightningT = (time + 7500) % lightningCycle;
       const isLightning = lightningT < 340;
-      let lightningFlash = 0;
+      let lightningFlash = manualLightning;
       if (isLightning) {
-        if (lightningT < 60) lightningFlash = 0.92;
-        else if (lightningT < 110) lightningFlash = 0.28;
-        else if (lightningT < 210) lightningFlash = 0.85;
-        else lightningFlash = Math.max(0, 0.85 - (lightningT - 210) / 130);
+        if (lightningT < 60) lightningFlash = Math.max(lightningFlash, 0.92);
+        else if (lightningT < 110) lightningFlash = Math.max(lightningFlash, 0.28);
+        else if (lightningT < 210) lightningFlash = Math.max(lightningFlash, 0.85);
+        else lightningFlash = Math.max(lightningFlash, Math.max(0, 0.85 - (lightningT - 210) / 130));
       }
 
       const skyGrad = ctx.createLinearGradient(268, 0, 268, 136);
@@ -3171,10 +3179,10 @@
       // Recessed circular exhaust cavity
       px(ctx, 143, 11, 16, 16, '#0d091a');
       px(ctx, 144, 12, 14, 14, '#080512');
-      // Smooth 4-Phase Rotating Propeller Blades (ゆったり穏やかに回る速度に調整)
-      const fanStep = Math.floor(time / 260) % 4;
-      const bladeColor = '#7c719e';
-      const bladeShade = '#554a73';
+      // Smooth 4-Phase Rotating Propeller Blades (fanRunning時のみ回転)
+      const fanStep = Math.floor(fanAngleTime / 260) % 4;
+      const bladeColor = fanRunning ? '#7c719e' : '#554a73';
+      const bladeShade = fanRunning ? '#554a73' : '#39314f';
       if (fanStep === 0) {
         px(ctx, 150, 12, 2, 6, bladeColor);
         px(ctx, 150, 20, 2, 6, bladeColor);
@@ -3199,14 +3207,11 @@
       // Central brass rotor cap
       px(ctx, 149, 17, 4, 4, '#fbbf24');
       px(ctx, 150, 18, 2, 2, '#d97706');
-      // Power LED (Green, gentle soft glow)
-      const fanLedGlow = Math.sin(time * 0.003) > 0 ? '#22c55e' : '#16a34a';
+      // Power LED (稼働中: 緑発光 / 停止時: 控えめな消灯レッド)
+      const fanLedGlow = fanRunning 
+        ? (Math.sin(time * 0.003) > 0 ? '#22c55e' : '#16a34a')
+        : '#471822';
       px(ctx, 158, 9, 2, 2, fanLedGlow);
-      // Swaying Pull-String Cord with round tassel (ゆったり微風に揺れる)
-      const cordSway = Math.sin(time * 0.0018) * 0.9;
-      px(ctx, 160 + cordSway * 0.3, 29, 1, 6, '#cbd5e1');
-      px(ctx, 160 + cordSway * 0.7, 35, 1, 6, '#cbd5e1');
-      px(ctx, 159 + cordSway, 41, 3, 3, '#fbbf24'); // Golden pull tassel
 
       // Hanging Ceiling Cables
       ctx.strokeStyle = '#0d0a1a';
@@ -3305,7 +3310,7 @@
       px(ctx, 91, 69, 33, 26, '#0f172a');
       px(ctx, 93, 71, 29, 22, '#090e1a');
 
-      const pcMode = Math.floor(time / 5000) % 5;
+      const pcMode = (manualCrtMode !== null) ? manualCrtMode : (Math.floor(time / 5000) % 5);
 
       if (pcMode === 0) {
         // --- MODE 0: VS Code / IDE Code Editor (Realistic Typing & Scrolling) ---
@@ -3525,11 +3530,12 @@
       // Steaming Coffee Mug on Desk (Smooth Sine-Wave Steam)
       px(ctx, 125, 98, 5, 5, '#f43f5e');
       px(ctx, 126, 97, 3, 1, '#451a03'); // Dark coffee
+      const steamHeightScale = 1 + coffeeSteamPulse * 1.5;
       for (let s = 0; s < 3; s++) {
         const steamT = (time * 0.0022 + s * 0.75) % 2.4;
-        const steamY = 96 - steamT * 4.2;
-        const steamX = 127 + Math.sin(steamT * 4 + s) * 1.6;
-        const steamAlpha = Math.max(0, 0.65 - steamT * 0.25);
+        const steamY = 96 - steamT * 4.2 * steamHeightScale;
+        const steamX = 127 + Math.sin(steamT * 4 + s) * (1.6 * (1 + coffeeSteamPulse * 0.8));
+        const steamAlpha = Math.max(0, (0.65 - steamT * 0.25) * (1 + coffeeSteamPulse * 0.5));
         px(ctx, steamX, steamY, 1.5, 2, `rgba(255, 255, 255, ${steamAlpha})`);
       }
 
@@ -3779,15 +3785,38 @@
       addListenerSafe(id, 'click', openAllGamesModal);
     });
 
-    // Interactive Sleeping Cat & Arcade Click inside Hero Canvas
+    // Interactive Physical Environment Objects inside Hero Canvas (Tap to interact)
     let catBubbleTimer = null;
     if (heroCanvas) {
       heroCanvas.addEventListener('click', (e) => {
         const rect = heroCanvas.getBoundingClientRect();
-        const relX = (e.clientX - rect.left) / rect.width;
-        const relY = (e.clientY - rect.top) / rect.height;
+        const canvasX = (e.clientX - rect.left) / rect.width * 640;
+        const canvasY = (e.clientY - rect.top) / rect.height * 180;
 
-        if (relX > 0.28 && relX < 0.40 && relY > 0.62) {
+        // 1. Industrial Wall Fan (換気扇): x: 139~163, y: 7~31
+        if (canvasX >= 135 && canvasX <= 167 && canvasY >= 5 && canvasY <= 33) {
+          fanRunning = !fanRunning;
+          play8BitSound('select');
+          return;
+        }
+
+        // 2. Coffee Mug (デスク上のコーヒーマグ): x: 124~132, y: 95~105
+        if (canvasX >= 122 && canvasX <= 133 && canvasY >= 93 && canvasY <= 106) {
+          coffeeSteamPulse = 1.0;
+          play8BitSound('select');
+          return;
+        }
+
+        // 3. Center CRT Monitor (開発画面切り替え): x: 87~128, y: 65~99
+        if (canvasX >= 87 && canvasX <= 128 && canvasY >= 65 && canvasY <= 99) {
+          const cur = (manualCrtMode !== null) ? manualCrtMode : (Math.floor(performance.now() / 5000) % 5);
+          manualCrtMode = (cur + 1) % 5;
+          play8BitSound('select');
+          return;
+        }
+
+        // 4. Sleeping Cat (寝ている猫): x: 200~235, y: 130~155
+        if (canvasX >= 198 && canvasX <= 236 && canvasY >= 130 && canvasY <= 156) {
           play8BitSound('cat');
           const bubble = document.getElementById('cat-bubble');
           if (bubble) {
@@ -3806,11 +3835,19 @@
             clearTimeout(catBubbleTimer);
             catBubbleTimer = setTimeout(() => bubble.classList.remove('visible'), 2800);
           }
-        } else {
-          boostPulse = 1.0;
-          play8BitSound('select');
-          showRetroToast('⚡ [MIDNIGHT HIDEAWAY] — CRTモニター出力ブースト！');
+          return;
         }
+
+        // 5. Rain Window (奥の雨空と窓ガラス): x >= 268, y <= 136
+        if (canvasX >= 268 && canvasY <= 136) {
+          manualLightning = 1.0;
+          play8BitSound('select');
+          return;
+        }
+
+        // Default click elsewhere in room: soft CRT boost pulse (no toast)
+        boostPulse = 0.8;
+        play8BitSound('select');
       });
     }
 
@@ -3877,9 +3914,6 @@
         btn.setAttribute('aria-pressed', isStandard ? 'true' : 'false');
         btn.setAttribute('title', isStandard ? '現在：くっきり標準文字（クリックでドット文字に戻す）' : '現在：ドット文字（クリックで読みやすい標準文字にする）');
       });
-      document.querySelectorAll('.js-font-mode-label').forEach(lbl => {
-        lbl.textContent = isStandard ? '標準文字 ON' : '標準文字';
-      });
 
       const isLarge = (size === 'lg');
       document.querySelectorAll('.js-font-size-toggle').forEach(btn => {
@@ -3887,9 +3921,6 @@
         btn.classList.toggle('active', isLarge);
         btn.setAttribute('aria-pressed', isLarge ? 'true' : 'false');
         btn.setAttribute('title', isLarge ? '現在：文字拡大中（クリックで標準サイズに戻す）' : '現在：標準サイズ（クリックで文字を大きくする）');
-      });
-      document.querySelectorAll('.js-font-size-label').forEach(lbl => {
-        lbl.textContent = isLarge ? '文字拡大 ON' : '文字拡大';
       });
     }
 
@@ -3901,11 +3932,6 @@
         try { localStorage.setItem('cn_font_mode', currentFontMode); } catch (e) {}
         applyReadabilityState(currentFontMode, currentFontSize);
         play8BitSound('select');
-        if (currentFontMode === 'standard') {
-          showRetroToast('🔤 [ABC 標準文字 ON] — 読みやすい標準フォントに切り替えました');
-        } else {
-          showRetroToast('👾 [PIXEL MODE] — レトロなドット文字に戻しました');
-        }
       });
     });
 
@@ -3915,11 +3941,6 @@
         try { localStorage.setItem('cn_font_size', currentFontSize); } catch (e) {}
         applyReadabilityState(currentFontMode, currentFontSize);
         play8BitSound('select');
-        if (currentFontSize === 'lg') {
-          showRetroToast('🔍 [A+ 文字拡大 ON] — 文字サイズを大きくしました');
-        } else {
-          showRetroToast('🗚 [A 標準サイズ] — 文字サイズを標準に戻しました');
-        }
       });
     });
 
@@ -3943,9 +3964,6 @@
       }
       if (sfxEnabled) {
         play8BitSound('coin');
-        showRetroToast('🔊 8-BIT サウンドエフェクトを有効化しました');
-      } else {
-        showRetroToast('🔇 サウンドエフェクトをミュートしました');
       }
     }
     addListenerSafe('btn-sfx', 'click', toggleSfx);
@@ -3984,7 +4002,6 @@
     addListenerSafe('btn-reload-scene', 'click', () => {
       boostPulse = 1.2;
       play8BitSound('select');
-      showRetroToast('🌧️ [RAIN & NEON SYNCED] — 深夜の秘密基地を再同期しました');
     });
 
     // Latest Transmission JP / RAW Cipher Toggle
@@ -4003,12 +4020,11 @@
     addListenerSafe('intel-form', 'submit', (e) => {
       e.preventDefault();
       play8BitSound('coin');
-      showRetroToast('📡 [INTEL CONNECTED] — 公式note & 𝕏 で最新の開発手記を公開中！');
       setTimeout(() => {
         if (confirm('📡 [CORNER NEIGHBOR INTEL]\n公式noteの開発記録ページへ移動しますか？')) {
           window.open('https://note.com/hajikkogurashi01', '_blank');
         }
-      }, 400);
+      }, 200);
     });
 
     // Bottom 3 Hardware Controller Tiles
@@ -4019,11 +4035,9 @@
         if (hw === 'dpad') {
           openAllGamesModal();
         } else if (hw === 'axis') {
-          showRetroToast('👾 [MEMBERS] — メンバー紹介ページ (members.html) へ移動します');
-          setTimeout(() => { window.location.href = '/members.html'; }, 700);
+          window.location.href = '/members.html';
         } else if (hw === 'gamepad') {
-          showRetroToast('🏠 [ABOUT / NEWS] — サークル紹介 (aboutus.html) へ移動します');
-          setTimeout(() => { window.location.href = '/aboutus.html'; }, 700);
+          window.location.href = '/aboutus.html';
         }
       });
     });
