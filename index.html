@@ -57,7 +57,10 @@
         var fs = localStorage.getItem('cn_font_size_v2') || 'lg';
         document.documentElement.setAttribute('data-font-mode', fm);
         document.documentElement.setAttribute('data-font-size', fs);
-      } catch (e) {}
+      } catch (e) {
+        document.documentElement.setAttribute('data-font-mode', 'pixel');
+        document.documentElement.setAttribute('data-font-size', 'lg');
+      }
     })();
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -921,16 +924,14 @@
         flex-direction: column;
       }
       #hero-pixel-canvas {
-        width: 100%;
-        height: auto;
-        aspect-ratio: 640 / 180;
-        object-fit: contain;
+        height: 210px;
+        object-fit: cover;
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
       }
       .cat-speech-bubble {
         left: 14px;
-        top: 8px;
+        top: 105px;
         bottom: auto;
         max-width: calc(100% - 28px);
         white-space: normal;
@@ -1939,10 +1940,10 @@
             <button type="button" class="btn-header-util js-font-size-toggle" title="文字サイズ切替" aria-label="文字サイズ切替" aria-pressed="false">
               <span class="util-icon-a">A</span>
             </button>
-            <button class="btn-sfx-toggle" id="btn-sfx-mobile" title="SFX On/Off" style="height: 36px; padding: 0 8px; font-size: 11px;">
+            <button type="button" class="btn-sfx-toggle" id="btn-sfx-mobile" title="SFX On/Off" style="height: 36px; padding: 0 8px; font-size: 11px;">
               <span id="sfx-icon-mobile">🔇</span> SFX
             </button>
-            <button class="mobile-menu-btn" id="btn-mobile-menu" aria-label="Toggle Menu">
+            <button type="button" class="mobile-menu-btn" id="btn-mobile-menu" aria-label="メニューを開く" aria-expanded="false" aria-controls="mobile-nav-drawer">
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M2 4h14M2 9h14M2 14h14"/>
               </svg>
@@ -1969,7 +1970,7 @@
           </div>
           <div style="display:flex; justify-content:space-between; align-items:center; padding-top:6px; border-top:1px solid #26293a;">
             <span style="font-size:11px; color:#7c8299;">8-BIT SOUND ENGINE</span>
-            <button class="btn-sfx-toggle" id="btn-sfx-drawer">🔇 SFX</button>
+            <button type="button" class="btn-sfx-toggle" id="btn-sfx-drawer">🔇 SFX</button>
           </div>
         </nav>
 
@@ -2752,7 +2753,7 @@
   <!-- ====================================================================
        MODAL: ROM CARTRIDGE DETAILS & ALL 9 CORNER NEIGHBOR MINI-GAMES
        ==================================================================== -->
-  <div class="retro-modal-backdrop" id="retro-modal-backdrop" role="dialog" aria-modal="true">
+  <div class="retro-modal-backdrop" id="retro-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="retro-modal-title">
     <div class="retro-modal" id="retro-modal-content">
       <!-- Dynamically populated by JS -->
     </div>
@@ -2761,7 +2762,7 @@
   <!-- ====================================================================
        案C: 右下 ドット調 TOPへ戻るボタン (BACK TO TOP BUTTON)
        ==================================================================== -->
-  <button id="btn-back-to-top" class="btn-pixel-top" aria-label="ページトップへ戻る" title="TOPへ戻る">
+  <button type="button" id="btn-back-to-top" class="btn-pixel-top" aria-label="ページトップへ戻る" title="TOPへ戻る">
     <div class="btn-pixel-top-arrow"></div>
     <span class="btn-pixel-top-text">TOP</span>
   </button>
@@ -4040,9 +4041,21 @@
 
     const modalBackdrop = document.getElementById('retro-modal-backdrop');
     const modalContent = document.getElementById('retro-modal-content');
+    let lastModalTrigger = null;
+
+    function focusModalFirstElement() {
+      const focusable = modalContent.querySelectorAll('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])');
+      if (focusable.length > 0) {
+        focusable[0].focus();
+      }
+    }
 
     function closeRetroModal() {
       modalBackdrop.classList.remove('open');
+      if (lastModalTrigger && typeof lastModalTrigger.focus === 'function') {
+        lastModalTrigger.focus();
+        lastModalTrigger = null;
+      }
     }
 
     modalBackdrop.addEventListener('click', (e) => {
@@ -4053,15 +4066,16 @@
     function openCartridgeModal(gameId) {
       const g = FEATURED_CARTRIDGES[gameId];
       if (!g) return;
+      lastModalTrigger = document.activeElement;
       play8BitSound('select');
       modalContent.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:1px solid #282c3e; padding-bottom:12px; margin-bottom:16px;">
           <div>
             <div style="font-size:11px; color:${g.color}; letter-spacing:1px;">${g.code} // ${g.badge}</div>
-            <h3 style="margin:4px 0 2px 0; font-size:22px; color:#ffffff; letter-spacing:0.6px;">${g.enTitle}</h3>
+            <h3 id="retro-modal-title" style="margin:4px 0 2px 0; font-size:22px; color:#ffffff; letter-spacing:0.6px;">${g.enTitle}</h3>
             <div style="font-family:var(--font-pixel-jp); font-size:14px; color:#00f5ff;">${g.jpTitle}</div>
           </div>
-          <button onclick="closeRetroModal()" style="background:#1c1e2b; border:1px solid #35394f; color:#fff; width:30px; height:30px; border-radius:4px; cursor:pointer; font-size:15px;">×</button>
+          <button type="button" aria-label="モーダルを閉じる" onclick="closeRetroModal()" style="background:#1c1e2b; border:1px solid #35394f; color:#fff; width:30px; height:30px; border-radius:4px; cursor:pointer; font-size:15px;">×</button>
         </div>
         <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px; font-family:var(--font-pixel-jp); font-size:11.5px;">
           <span style="background:#1a1d2b; border:1px solid #2e334d; padding:4px 10px; border-radius:4px; color:#e2e8f0;">ジャンル: ${g.genre}</span>
@@ -4071,17 +4085,19 @@
           ${g.desc}
         </p>
         <div style="display:flex; flex-wrap:wrap; gap:12px; justify-content:flex-end;">
-          <button onclick="closeRetroModal()" style="background:#1b1d29; border:1px solid #34384c; color:#94a3b8; font-family:var(--font-pixel-jp); padding:8px 16px; border-radius:5px; cursor:pointer;">閉じる</button>
+          <button type="button" onclick="closeRetroModal()" style="background:#1b1d29; border:1px solid #34384c; color:#94a3b8; font-family:var(--font-pixel-jp); padding:8px 16px; border-radius:5px; cursor:pointer;">閉じる</button>
           <a href="${g.url}" target="_blank" rel="noopener" class="btn-neon-play" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px; font-family:var(--font-pixel-jp);">
             🕹️ INSERT COIN — 今すぐ遊ぶ ▸
           </a>
         </div>
       `;
       modalBackdrop.classList.add('open');
+      setTimeout(focusModalFirstElement, 20);
     }
 
     // Open All 9 Corner Neighbor Mini-Games Archive Modal
     function openAllGamesModal() {
+      lastModalTrigger = document.activeElement;
       play8BitSound('select');
       const cardsHtml = ALL_MINI_GAMES.map((item, idx) => `
         <a href="${item.url}" target="_blank" rel="noopener" style="text-decoration:none; background:#181a26; border:1.5px solid #2b2f44; border-radius:6px; padding:11px 12px; display:flex; flex-direction:column; justify-content:space-between; gap:8px; transition:all 0.15s;" onmouseover="this.style.borderColor='${item.color}'" onmouseout="this.style.borderColor='#2b2f44'">
@@ -4103,9 +4119,9 @@
         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #282c3e; padding-bottom:12px; margin-bottom:14px;">
           <div>
             <div style="font-size:11px; color:#ff2a9d; letter-spacing:1px;">CORNER NEIGHBOR ARCADE DECK</div>
-            <h3 style="margin:2px 0 0 0; font-family:var(--font-pixel-jp); font-size:18px; color:#ffffff;">世界の端っこで作ったミニゲーム全9作品</h3>
+            <h3 id="retro-modal-title" style="margin:2px 0 0 0; font-family:var(--font-pixel-jp); font-size:18px; color:#ffffff;">世界の端っこで作ったミニゲーム全9作品</h3>
           </div>
-          <button onclick="closeRetroModal()" style="background:#1c1e2b; border:1px solid #35394f; color:#fff; width:30px; height:30px; border-radius:4px; cursor:pointer; font-size:15px;">×</button>
+          <button type="button" aria-label="モーダルを閉じる" onclick="closeRetroModal()" style="background:#1c1e2b; border:1px solid #35394f; color:#fff; width:30px; height:30px; border-radius:4px; cursor:pointer; font-size:15px;">×</button>
         </div>
         <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); gap:11px; margin-bottom:16px;">
           ${cardsHtml}
@@ -4116,10 +4132,11 @@
             <a href="/members.html" style="color:#ff2a9d; text-decoration:none;">▸ メンバー紹介 (MEMBERS)</a>
             <a href="/aboutus.html" style="color:#fbbf24; text-decoration:none;">▸ サークル紹介 (ABOUT)</a>
           </div>
-          <button onclick="closeRetroModal()" style="background:#1b1d29; border:1px solid #34384c; color:#cbd5e1; font-family:var(--font-pixel-jp); padding:6px 14px; border-radius:4px; cursor:pointer;">閉じる</button>
+          <button type="button" onclick="closeRetroModal()" style="background:#1b1d29; border:1px solid #34384c; color:#cbd5e1; font-family:var(--font-pixel-jp); padding:6px 14px; border-radius:4px; cursor:pointer;">閉じる</button>
         </div>
       `;
       modalBackdrop.classList.add('open');
+      setTimeout(focusModalFirstElement, 20);
     }
 
     // Cartridge Buttons Event Listeners
@@ -4322,8 +4339,12 @@
     }
 
     // Readability & Accessibility Controls: Font Mode (Pixel <-> Standard) & Font Size (lg default <-> md)
-    let currentFontMode = localStorage.getItem('cn_font_mode') || 'pixel';
-    let currentFontSize = localStorage.getItem('cn_font_size_v2') || 'lg';
+    let currentFontMode = document.documentElement.getAttribute('data-font-mode') || 'pixel';
+    let currentFontSize = document.documentElement.getAttribute('data-font-size') || 'lg';
+    try {
+      currentFontMode = localStorage.getItem('cn_font_mode') || currentFontMode;
+      currentFontSize = localStorage.getItem('cn_font_size_v2') || currentFontSize;
+    } catch (e) {}
 
     function applyReadabilityState(mode, size) {
       document.documentElement.setAttribute('data-font-mode', mode);
@@ -4398,8 +4419,10 @@
     // Mobile Menu Drawer Toggle & Accessible Dismiss
     addListenerSafe('btn-mobile-menu', 'click', () => {
       const drawer = document.getElementById('mobile-nav-drawer');
+      const menuBtn = document.getElementById('btn-mobile-menu');
       if (drawer) {
-        drawer.classList.toggle('open');
+        const isOpen = drawer.classList.toggle('open');
+        if (menuBtn) menuBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
         play8BitSound('select');
       }
     });
@@ -4407,23 +4430,47 @@
     document.querySelectorAll('#mobile-nav-drawer a, #mobile-nav-drawer button').forEach(el => {
       el.addEventListener('click', () => {
         const drawer = document.getElementById('mobile-nav-drawer');
+        const menuBtn = document.getElementById('btn-mobile-menu');
         if (drawer && !el.classList.contains('btn-sfx-toggle') && !el.classList.contains('btn-header-util')) {
           drawer.classList.remove('open');
+          if (menuBtn) menuBtn.setAttribute('aria-expanded', 'false');
         }
       });
     });
 
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        const modal = document.getElementById('retro-modal-backdrop');
-        if (modal && modal.classList.contains('open')) {
+      const modal = document.getElementById('retro-modal-backdrop');
+      if (modal && modal.classList.contains('open')) {
+        if (e.key === 'Escape') {
           closeRetroModal();
           play8BitSound('select');
           return;
         }
+        if (e.key === 'Tab') {
+          const focusable = modalContent.querySelectorAll('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])');
+          if (focusable.length > 0) {
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (e.shiftKey && document.activeElement === first) {
+              e.preventDefault();
+              last.focus();
+            } else if (!e.shiftKey && document.activeElement === last) {
+              e.preventDefault();
+              first.focus();
+            }
+          }
+          return;
+        }
+      }
+      if (e.key === 'Escape') {
         const drawer = document.getElementById('mobile-nav-drawer');
+        const menuBtn = document.getElementById('btn-mobile-menu');
         if (drawer && drawer.classList.contains('open')) {
           drawer.classList.remove('open');
+          if (menuBtn) {
+            menuBtn.setAttribute('aria-expanded', 'false');
+            menuBtn.focus();
+          }
           play8BitSound('select');
         }
       }
@@ -5973,6 +6020,7 @@
         ctx.fillStyle = '#c084fc';
         ctx.textAlign = 'center';
         ctx.fillText('世界の端っこで火花散る', 160, 80);
+      }
       } finally {
         ctx.restore();
       }
@@ -6005,14 +6053,23 @@
       try { drawMiniCrtFrame(); } catch(err) { console.error('Mini CRT initial draw:', err); }
     }
 
+    let lastCrtFrameTime = 0;
+    let lastHeroFrameTime = 0;
     function animateScene(now) {
+      const t = now || performance.now();
       const renderHero = window.isHeroVisible !== undefined ? window.isHeroVisible : isHeroVisible;
       if (renderHero && typeof drawHeroPixelScene === 'function') {
-        const timeToUse = window.__heroCustomTime !== undefined ? window.__heroCustomTime : (now || 0);
-        drawHeroPixelScene(timeToUse);
+        if (window.__heroCustomTime !== undefined || (t - lastHeroFrameTime >= 15.5)) {
+          lastHeroFrameTime = t;
+          const timeToUse = window.__heroCustomTime !== undefined ? window.__heroCustomTime : t;
+          drawHeroPixelScene(timeToUse);
+        }
       }
       if (isCrtVisible && typeof drawMiniCrtFrame === 'function') {
-        drawMiniCrtFrame();
+        if (t - lastCrtFrameTime >= 15.5) {
+          lastCrtFrameTime = t;
+          drawMiniCrtFrame();
+        }
       }
       requestAnimationFrame(animateScene);
     }

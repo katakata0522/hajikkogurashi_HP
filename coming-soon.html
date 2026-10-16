@@ -44,8 +44,10 @@
   }
   </script>
 
+  <meta name="theme-color" content="#08070f" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="alternate icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/favicon.svg">
   <script>
     (function() {
       try {
@@ -53,7 +55,10 @@
         var fs = localStorage.getItem('cn_font_size_v2') || 'lg';
         document.documentElement.setAttribute('data-font-mode', fm);
         document.documentElement.setAttribute('data-font-size', fs);
-      } catch (e) {}
+      } catch (e) {
+        document.documentElement.setAttribute('data-font-mode', 'pixel');
+        document.documentElement.setAttribute('data-font-size', 'lg');
+      }
     })();
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -1153,8 +1158,10 @@
           btn.addEventListener('click', () => {
             currentFontSize = currentFontSize === 'lg' ? 'md' : 'lg';
             document.documentElement.setAttribute('data-font-size', currentFontSize);
-            localStorage.setItem('cn_font_size_v2', currentFontSize);
-            localStorage.setItem('cn_font_size', currentFontSize);
+            try {
+              localStorage.setItem('cn_font_size_v2', currentFontSize);
+              localStorage.setItem('cn_font_size', currentFontSize);
+            } catch (e) {}
             syncReadabilityUI();
           });
         });
@@ -1166,6 +1173,19 @@
           menuBtn.addEventListener('click', () => {
             const isOpen = drawer.classList.toggle('open');
             menuBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+          });
+          drawer.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+              drawer.classList.remove('open');
+              menuBtn.setAttribute('aria-expanded', 'false');
+            });
+          });
+          document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && drawer.classList.contains('open')) {
+              drawer.classList.remove('open');
+              menuBtn.setAttribute('aria-expanded', 'false');
+              menuBtn.focus();
+            }
           });
         }
 

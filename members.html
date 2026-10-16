@@ -44,8 +44,10 @@
   }
   </script>
 
+  <meta name="theme-color" content="#08070f" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="alternate icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/favicon.svg">
   <script>
     (function() {
       try {
@@ -53,7 +55,10 @@
         var fs = localStorage.getItem('cn_font_size_v2') || 'lg';
         document.documentElement.setAttribute('data-font-mode', fm);
         document.documentElement.setAttribute('data-font-size', fs);
-      } catch (e) {}
+      } catch (e) {
+        document.documentElement.setAttribute('data-font-mode', 'pixel');
+        document.documentElement.setAttribute('data-font-size', 'lg');
+      }
     })();
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -1202,7 +1207,7 @@
   </main>
 
   <!-- FLOATING BACK TO TOP BUTTON -->
-  <button id="btn-back-to-top" class="btn-pixel-top" aria-label="ページトップへ戻る" title="TOPへ戻る">
+  <button type="button" id="btn-back-to-top" class="btn-pixel-top" aria-label="ページトップへ戻る" title="TOPへ戻る">
     <div class="btn-pixel-top-arrow"></div>
     <span class="btn-pixel-top-text">TOP</span>
   </button>
@@ -1210,8 +1215,12 @@
   <script>
     // 1. Readability Toggles: Font Mode (Pixel <-> Standard) & Font Size (lg default <-> md)
     (function() {
-      let currentFontMode = localStorage.getItem('cn_font_mode') || 'pixel';
-      let currentFontSize = localStorage.getItem('cn_font_size_v2') || 'lg';
+      let currentFontMode = document.documentElement.getAttribute('data-font-mode') || 'pixel';
+      let currentFontSize = document.documentElement.getAttribute('data-font-size') || 'lg';
+      try {
+        currentFontMode = localStorage.getItem('cn_font_mode') || currentFontMode;
+        currentFontSize = localStorage.getItem('cn_font_size_v2') || currentFontSize;
+      } catch (e) {}
 
       function applyReadabilityState(mode, size) {
         document.documentElement.setAttribute('data-font-mode', mode);
@@ -1265,6 +1274,19 @@
           menuBtn.addEventListener('click', () => {
             const isOpen = drawer.classList.toggle('open');
             menuBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+          });
+          drawer.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+              drawer.classList.remove('open');
+              menuBtn.setAttribute('aria-expanded', 'false');
+            });
+          });
+          document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && drawer.classList.contains('open')) {
+              drawer.classList.remove('open');
+              menuBtn.setAttribute('aria-expanded', 'false');
+              menuBtn.focus();
+            }
           });
         }
 
