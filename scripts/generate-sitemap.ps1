@@ -13,6 +13,7 @@ function Get-Priority {
 
     switch ($FileName) {
         'index.html'       { return '1.0' }
+        'minigames.html'   { return '0.9' }
         'portfolio.html'   { return '0.8' }
         'aboutus.html'     { return '0.8' }
         'news.html'        { return '0.7' }
@@ -111,7 +112,7 @@ foreach ($file in $htmlFiles) {
 
 # 2. ミニゲーム等のサブディレクトリを処理
 # index.html を含み、システム/アセット系以外の非隠しフォルダを自動検出
-$systemDirs = @('assets', 'includes', 'scripts', 'preview')
+$systemDirs = @('assets', 'includes', 'scripts', 'preview', 'concept')
 $subDirs = Get-ChildItem -Path $repoRoot -Directory |
     Where-Object { 
         $systemDirs -notcontains $_.Name -and 
