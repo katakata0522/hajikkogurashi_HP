@@ -1,0 +1,32 @@
+{
+  "name": "Corner Neighbor - レトロインディーゲームスタジオ",
+  "short_name": "CornerNeighbor",
+  "description": "Unreal Engine 5やWEBでゲームを制作するインディーゲームサークル「Corner Neighbor」の公式サイトです。レトロゲームやブラウザミニゲームを配信中！",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#08070f",
+  "background_color": "#08070f",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/assets/images/banner.webp",
+      "sizes": "1200x630",
+      "type": "image/webp",
+      "purpose": "any"
+    }
+  ]
+}

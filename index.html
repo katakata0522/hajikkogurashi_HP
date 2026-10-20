@@ -47,9 +47,11 @@
   </script>
 
   <meta name="theme-color" content="#08070f" />
+  <link rel="manifest" href="/manifest.webmanifest">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="alternate icon" href="/favicon.ico">
   <link rel="apple-touch-icon" href="/favicon.svg">
+  <script src="/assets/js/view-transitions.js" defer></script>
   <script>
     (function() {
       try {
@@ -1343,14 +1345,43 @@
     }
     .crt-kb-hint-pill {
       font-family: var(--font-mono);
-      font-size: 10.5px;
+      font-size: 10px;
       color: #94a3b8;
-      background: #181c2b;
-      padding: 2px 8px;
-      border-radius: 3px;
+      background: #141726;
+      padding: 3px 8px;
+      border-radius: 4px;
       border: 1px solid #2d3550;
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
       width: fit-content;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
+    }
+    .crt-kbd {
+      display: inline-block;
+      padding: 1px 5px;
+      font-family: var(--font-mono, monospace);
+      font-size: 9.5px;
+      font-weight: 700;
+      color: #38bdf8;
+      background: #080912;
+      border: 1px solid #334155;
+      border-bottom: 2px solid #1e293b;
+      border-radius: 3px;
+      line-height: 1.35;
+      letter-spacing: 0.4px;
+    }
+    .crt-kb-sep {
+      color: #475569;
+      font-size: 9px;
+      margin: 0 1px;
+    }
+    .mini-cart-kb {
+      opacity: 0.78;
+      font-family: var(--font-mono, monospace);
+      font-size: 8.5px;
+      margin-left: 2px;
+      font-weight: bold;
     }
     .btn-mini-play-prominent {
       padding: 9px 18px;
@@ -2534,25 +2565,25 @@
 
             <!-- 4 Mini Cartridge Slots -->
             <div class="mini-cart-rack" id="mini-cart-rack" role="toolbar" aria-label="ミニゲームカセット選択ラック">
-              <div class="mini-cart-item active" data-cart="brake" tabindex="0" role="button" aria-pressed="true" aria-label="ROM 01 ギリギリ・ブレーキ カセット" title="ギリギリ・ブレーキ！">
+              <div class="mini-cart-item active" data-cart="brake" tabindex="0" role="button" aria-pressed="true" aria-label="ROM 01 ギリギリ・ブレーキ カセット (キー1)" title="ギリギリ・ブレーキ！ [キー1で切替]">
                 <span class="mini-cart-icon">🏎️</span>
                 <span class="mini-cart-label">ギリギリ・ブレーキ</span>
-                <span class="mini-cart-tag" style="background:#3b1318; color:#f87171; border:1px solid #ef4444;">ROM 01</span>
+                <span class="mini-cart-tag" style="background:#3b1318; color:#f87171; border:1px solid #ef4444;">ROM 01 <span class="mini-cart-kb">[1]</span></span>
               </div>
-              <div class="mini-cart-item" data-cart="mirror" tabindex="0" role="button" aria-pressed="false" aria-label="ROM 02 LUMEN MIRROR カセット" title="LUMEN_MIRROR（光学反射）">
+              <div class="mini-cart-item" data-cart="mirror" tabindex="0" role="button" aria-pressed="false" aria-label="ROM 02 LUMEN MIRROR カセット (キー2)" title="LUMEN_MIRROR（光学反射） [キー2で切替]">
                 <span class="mini-cart-icon">💎</span>
                 <span class="mini-cart-label">LUMEN MIRROR</span>
-                <span class="mini-cart-tag" style="background:#103542; color:#67e8f9; border:1px solid #67e8f9;">ROM 02</span>
+                <span class="mini-cart-tag" style="background:#103542; color:#67e8f9; border:1px solid #67e8f9;">ROM 02 <span class="mini-cart-kb">[2]</span></span>
               </div>
-              <div class="mini-cart-item" data-cart="mikiri" tabindex="0" role="button" aria-pressed="false" aria-label="ROM 03 みきり一閃 カセット" title="みきり一閃（0.01秒居合）">
+              <div class="mini-cart-item" data-cart="mikiri" tabindex="0" role="button" aria-pressed="false" aria-label="ROM 03 みきり一閃 カセット (キー3)" title="みきり一閃（0.01秒居合） [キー3で切替]">
                 <span class="mini-cart-icon">⚔️</span>
                 <span class="mini-cart-label">みきり一閃</span>
-                <span class="mini-cart-tag" style="background:#3b240b; color:#fcd34d; border:1px solid #fcd34d;">ROM 03</span>
+                <span class="mini-cart-tag" style="background:#3b240b; color:#fcd34d; border:1px solid #fcd34d;">ROM 03 <span class="mini-cart-kb">[3]</span></span>
               </div>
-              <div class="mini-cart-item" data-cart="duel" tabindex="0" role="button" aria-pressed="false" aria-label="ROM 04 POCKET DUEL カセット" title="POCKET DUEL（サイバー対決）">
+              <div class="mini-cart-item" data-cart="duel" tabindex="0" role="button" aria-pressed="false" aria-label="ROM 04 POCKET DUEL カセット (キー4)" title="POCKET DUEL（サイバー対決） [キー4で切替]">
                 <span class="mini-cart-icon">⚡</span>
                 <span class="mini-cart-label">POCKET DUEL</span>
-                <span class="mini-cart-tag" style="background:#28183d; color:#c084fc; border:1px solid #c084fc;">ROM 04</span>
+                <span class="mini-cart-tag" style="background:#28183d; color:#c084fc; border:1px solid #c084fc;">ROM 04 <span class="mini-cart-kb">[4]</span></span>
               </div>
             </div>
 
@@ -2560,7 +2591,13 @@
             <div class="mini-console-footer">
               <div class="mini-console-desc-wrap">
                 <span id="crt-status-desc" class="crt-status-desc-text">崖っぷちまで突っ走れ！0.01m極限チキンレース</span>
-                <span class="crt-kb-hint-pill">Space / Enterキー対応</span>
+                <div class="crt-kb-hint-pill" aria-label="キーボード操作ガイド">
+                  <kbd class="crt-kbd">SPACE</kbd> 操作
+                  <span class="crt-kb-sep">/</span>
+                  <kbd class="crt-kbd">1-4</kbd> ROM切替
+                  <span class="crt-kb-sep">/</span>
+                  <kbd class="crt-kbd">R</kbd> リトライ
+                </div>
               </div>
               <div class="mini-console-cta-wrap">
                 <a id="btn-mini-play-full" href="https://hajikkoroom.xsrv.jp/girigiri-brake/" target="_blank" rel="noopener" class="btn-mini-play-prominent" aria-label="本編を全画面で遊ぶ">
@@ -4567,6 +4604,41 @@
     let crtNoiseTimer = 0;
     let crtAnimTime = 0;
 
+    // Helper to safely load and save CRT scores to localStorage
+    function loadCrtScore(key, defaultVal) {
+      try {
+        const v = localStorage.getItem(key);
+        if (v !== null) {
+          const num = parseFloat(v);
+          if (!isNaN(num)) return num;
+        }
+      } catch (_) {}
+      return defaultVal;
+    }
+
+    function saveCrtScore(key, val) {
+      try {
+        localStorage.setItem(key, String(val));
+      } catch (_) {}
+    }
+
+    let crtNewRecordAnim = {
+      active: false,
+      timer: 0,
+      cart: '',
+      text: '★ NEW RECORD! ★'
+    };
+
+    function triggerCrtNewRecord(cart, customText) {
+      crtNewRecordAnim.active = true;
+      crtNewRecordAnim.timer = 150;
+      crtNewRecordAnim.cart = cart;
+      crtNewRecordAnim.text = customText || '★ NEW RECORD! ★';
+      play8BitSound('coin');
+      announceA11y(`自己ベスト更新！新記録達成！`);
+      showRetroToast(`🏆 [NEW RECORD!] 自己ベスト更新！`);
+    }
+
     // ==========================================
     // 1. BRAKE MINI STATE (スクロール＆プログレスバー搭載チキンレース)
     // ==========================================
@@ -4577,7 +4649,7 @@
     const BRAKE_CLIFF_X = 2600; // Total world distance (approx 130m)
     let brakeCameraX = 0;
     let brakeDistance = 0;
-    let brakeBest = 0.48; // In meters
+    let brakeBest = loadCrtScore('cn_crt_best_brake', 0.48); // In meters
     let brakeSparks = [];
     let brakeSkidMarks = []; // World coordinates { x, y, len }
     let brakeVerdict = '';
@@ -4612,6 +4684,7 @@
     // 2. LUMEN MIRROR MINI STATE (多段ステージ＆高質感光学パズル)
     // ==========================================
     let mirrorStage = 1; // 1 | 2 | 3
+    let mirrorBestStage = Math.floor(loadCrtScore('cn_crt_best_mirror', 1));
     let mirrorSolved = false;
     let mirrorSolvedAnim = 0;
     let mirrorGlowParticles = [];
@@ -4676,6 +4749,7 @@
     let mikiriTimer = null;
     let mikiriRivalTimer = null;
     let mikiriStreak = 0;
+    let mikiriBest = Math.floor(loadCrtScore('cn_crt_best_mikiri', 3));
     let mikiriSlashAnim = 0;
     let mikiriFlash = 0;
     let mikiriRank = '';
@@ -4722,6 +4796,14 @@
         }
       }, delay);
     }
+
+    // ==========================================
+    // 4. POCKET DUEL MINI STATE (サイバー対決)
+    // ==========================================
+    let duelStreak = 0;
+    let duelBest = Math.floor(loadCrtScore('cn_crt_best_duel', 3));
+    let duelClashAnim = 0;
+    let duelVerdict = '';
 
     const CART_CONFIGS = {
       brake: {
@@ -4785,7 +4867,9 @@
 
       // Update Active Cartridge UI
       document.querySelectorAll('.mini-cart-item').forEach(el => {
-        el.classList.toggle('active', el.getAttribute('data-cart') === cartId);
+        const isActive = el.getAttribute('data-cart') === cartId;
+        el.classList.toggle('active', isActive);
+        el.setAttribute('aria-pressed', isActive ? 'true' : 'false');
       });
 
       const conf = CART_CONFIGS[cartId];
@@ -4807,6 +4891,10 @@
         resetMirrorMini();
       } else if (cartId === 'mikiri') {
         resetMikiriMini();
+      } else if (cartId === 'duel') {
+        duelStreak = 0;
+        duelClashAnim = 0;
+        duelVerdict = '';
       }
     }
 
@@ -4874,7 +4962,14 @@
             mikiriRank = '【紙一重…】 (RANK C)';
           }
 
-          play8BitSound('sword');
+          if (mikiriStreak > mikiriBest) {
+            mikiriBest = mikiriStreak;
+            saveCrtScore('cn_crt_best_mikiri', mikiriBest);
+            triggerCrtNewRecord('mikiri', `★ NEW RECORD! ${mikiriBest} 人斬り ★`);
+          } else {
+            play8BitSound('sword');
+          }
+
           announceA11y(`一閃成功！反応速度${reaction}秒、${mikiriRank}、連勝${mikiriStreak}`);
           const osd = document.getElementById('crt-osd-action');
           if (osd) osd.textContent = `★ 一閃成功！ 連勝: ${mikiriStreak} 人斬り [画面クリックで次へ]`;
@@ -4894,8 +4989,32 @@
           resetMikiriMini();
         }
       } else if (activeCart === 'duel') {
-        play8BitSound('alert');
-        announceA11y('ポケットデュエル、雷光一閃！');
+        duelClashAnim = 22;
+        const pRoll = Math.floor(Math.random() * 6) + 1;
+        const cRoll = Math.floor(Math.random() * 6) + 1;
+        if (pRoll >= cRoll) {
+          duelStreak++;
+          duelVerdict = `⚡ 決闘勝利！(${pRoll} vs ${cRoll})`;
+          if (duelStreak > duelBest) {
+            duelBest = duelStreak;
+            saveCrtScore('cn_crt_best_duel', duelBest);
+            triggerCrtNewRecord('duel', `★ NEW RECORD! ${duelBest} WINS ★`);
+          } else {
+            play8BitSound('sword');
+            showRetroToast(`⚡ [DUEL WIN] 決闘勝利！(${pRoll} vs ${cRoll}) 連勝: ${duelStreak}`);
+          }
+          announceA11y(`ポケットデュエル勝利！出目 ${pRoll} 対 ${cRoll}、連勝 ${duelStreak}`);
+          const osd = document.getElementById('crt-osd-action');
+          if (osd) osd.textContent = `★ 激突勝利！ 連勝: ${duelStreak} [クリックで連戦]`;
+        } else {
+          duelStreak = 0;
+          play8BitSound('alert');
+          duelVerdict = `💥 決闘惜敗…(${pRoll} vs ${cRoll})`;
+          announceA11y(`ポケットデュエル惜敗…出目 ${pRoll} 対 ${cRoll}、連勝リセット`);
+          showRetroToast(`💥 [DUEL LOSE] 惜敗… (${pRoll} vs ${cRoll}) 連勝リセット`);
+          const osd = document.getElementById('crt-osd-action');
+          if (osd) osd.textContent = '惜敗… CLICK TO RETRY 🔄';
+        }
         crtNoiseTimer = 6;
       }
     }
@@ -5002,18 +5121,57 @@
           } else {
             triggerCrtAction('default');
           }
-        } else if (e.key === 'ArrowUp' || e.key === '1') {
-          e.preventDefault();
-          triggerCrtAction('m1');
-        } else if (e.key === 'ArrowDown' || e.key === '2') {
-          e.preventDefault();
-          triggerCrtAction('m2');
-        } else if (e.key === '3') {
-          e.preventDefault();
-          triggerCrtAction('m3');
         }
       });
     }
+
+    // Mini CRT Global Keyboard Shortcuts: [1-4] ROM Select, [R] Retry
+    window.addEventListener('keydown', (e) => {
+      const targetTag = (e.target && e.target.tagName) || '';
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(targetTag) || e.target?.isContentEditable) {
+        return;
+      }
+      const modal = document.getElementById('retro-modal-backdrop');
+      if (modal && modal.classList.contains('open')) {
+        return;
+      }
+      if (e.ctrlKey || e.altKey || e.metaKey) {
+        return;
+      }
+
+      const key = e.key;
+      // [1-4] ROM Select
+      if (key === '1' || key === '2' || key === '3' || key === '4') {
+        const romMap = { '1': 'brake', '2': 'mirror', '3': 'mikiri', '4': 'duel' };
+        const cartId = romMap[key];
+        if (cartId) {
+          e.preventDefault();
+          switchCartridge(cartId);
+        }
+        return;
+      }
+
+      // [R] Retry / Reset
+      if (key === 'r' || key === 'R') {
+        e.preventDefault();
+        if (activeCart === 'brake') {
+          resetBrakeMini();
+        } else if (activeCart === 'mirror') {
+          resetMirrorMini();
+        } else if (activeCart === 'mikiri') {
+          resetMikiriMini();
+        } else if (activeCart === 'duel') {
+          duelStreak = 0;
+          duelVerdict = '';
+          const osd = document.getElementById('crt-osd-action');
+          if (osd) osd.textContent = 'CLICK FOR LIGHTNING ⚡';
+        }
+        play8BitSound('select');
+        announceA11y('ゲームをリトライしました');
+        showRetroToast(`🔄 [RETRY] ゲームをリセットしました`);
+        return;
+      }
+    });
 
     // Mini CRT Canvas Renderer Loop
     function drawMiniCrtFrame() {
@@ -5282,6 +5440,8 @@
               brakeDistance = parseFloat(dist);
               if (brakeDistance < brakeBest && brakeDistance > 0) {
                 brakeBest = brakeDistance;
+                saveCrtScore('cn_crt_best_brake', brakeBest);
+                triggerCrtNewRecord('brake', `★ NEW RECORD! ${brakeBest.toFixed(2)}m ★`);
               }
               if (brakeDistance <= 0.30) {
                 brakeVerdict = `👑 神技！ 残り ${brakeDistance}m (RANK S+)`;
@@ -5542,7 +5702,7 @@
         ctx.fillText(curStg.title, 10, 18);
         ctx.fillStyle = '#64748b';
         ctx.textAlign = 'right';
-        ctx.fillText(`STAGE ${mirrorStage}/3`, W - 10, 18);
+        ctx.fillText(`STAGE ${mirrorStage}/3 (BEST: 0${mirrorBestStage})`, W - 10, 18);
 
         // Obstacle barrier blocks
         curStg.blocks.forEach(b => {
@@ -5646,8 +5806,14 @@
         if (isAligned && !mirrorSolved) {
           mirrorSolved = true;
           mirrorSolvedAnim = 30;
-          play8BitSound('coin');
-          showRetroToast('🌟 [LUMEN MIRROR] — 光学回路開通！結晶覚醒！');
+          if (mirrorStage > mirrorBestStage) {
+            mirrorBestStage = mirrorStage;
+            saveCrtScore('cn_crt_best_mirror', mirrorBestStage);
+            triggerCrtNewRecord('mirror', `★ NEW RECORD! STG.0${mirrorBestStage} CLEAR ★`);
+          } else {
+            play8BitSound('coin');
+            showRetroToast('🌟 [LUMEN MIRROR] — 光学回路開通！結晶覚醒！');
+          }
           const osd = document.getElementById('crt-osd-action');
           if (osd) {
             osd.textContent = mirrorStage < 3 ? '★ CLEAR! CLICK FOR NEXT STAGE ➔' : '★ 全面制覇！ 本編はこちら (FULL PLAY) ▸';
@@ -5818,6 +5984,9 @@
         ctx.fillStyle = '#f59e0b';
         ctx.textAlign = 'left';
         ctx.fillText(`STREAK: ${mikiriStreak} WINS`, 12, 34);
+        ctx.fillStyle = '#38bdf8';
+        ctx.textAlign = 'right';
+        ctx.fillText(`BEST: ${mikiriBest} WINS`, W - 12, 34);
 
         const pBreath = Math.floor(crtAnimTime / 20) % 2;
 
@@ -5995,7 +6164,7 @@
         ctx.fillStyle = '#10121d';
         ctx.fillRect(0, 0, W, H);
 
-        if (Math.random() < 0.04) {
+        if (Math.random() < 0.04 || duelClashAnim > 0) {
           ctx.fillStyle = 'rgba(192, 132, 252, 0.28)';
           ctx.fillRect(0, 0, W, H);
         }
@@ -6011,15 +6180,73 @@
           ctx.stroke();
         }
 
+        // Top Streak & Best HUD
+        ctx.font = '10px "Share Tech Mono", monospace';
+        ctx.fillStyle = '#f59e0b';
+        ctx.textAlign = 'left';
+        ctx.fillText(`STREAK: ${duelStreak} WINS`, 12, 34);
+        ctx.fillStyle = '#38bdf8';
+        ctx.textAlign = 'right';
+        ctx.fillText(`BEST: ${duelBest} WINS`, W - 12, 34);
+
+        // Cyber duelists
         ctx.fillStyle = '#00f5ff';
         ctx.fillRect(90, 120, 20, 40);
         ctx.fillStyle = '#ff2a9d';
         ctx.fillRect(210, 120, 20, 40);
 
-        ctx.font = '13px "DotGothic16", sans-serif';
-        ctx.fillStyle = '#c084fc';
+        if (duelClashAnim > 0) {
+          duelClashAnim--;
+          // Lightning bolt clash between duelists
+          ctx.strokeStyle = '#fde047';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.moveTo(110, 140);
+          ctx.lineTo(145, 128);
+          ctx.lineTo(170, 148);
+          ctx.lineTo(210, 136);
+          ctx.stroke();
+        }
+
+        ctx.font = '12px "DotGothic16", sans-serif';
+        ctx.fillStyle = duelVerdict ? '#fde047' : '#c084fc';
         ctx.textAlign = 'center';
-        ctx.fillText('世界の端っこで火花散る', 160, 80);
+        ctx.fillText(duelVerdict || '世界の端っこで火花散る [CLICK/SPACEで対決]', 160, 80);
+      }
+
+      // ====================================================
+      // NEW RECORD! RETRO CELEBRATION OVERLAY
+      // ====================================================
+      if (crtNewRecordAnim.timer > 0 && crtNewRecordAnim.cart === activeCart) {
+        crtNewRecordAnim.timer--;
+        if (Math.floor(crtAnimTime / 5) % 2 === 0) {
+          ctx.save();
+          const bw = 240;
+          const bh = 24;
+          const bx = 160 - bw / 2;
+          const by = 48;
+          ctx.fillStyle = 'rgba(15, 20, 35, 0.94)';
+          ctx.fillRect(bx, by, bw, bh);
+          ctx.strokeStyle = '#fde047';
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(bx, by, bw, bh);
+
+          // Golden pixel corners
+          ctx.fillStyle = '#fde047';
+          ctx.fillRect(bx - 2, by - 2, 4, 4);
+          ctx.fillRect(bx + bw - 2, by - 2, 4, 4);
+          ctx.fillRect(bx - 2, by + bh - 2, 4, 4);
+          ctx.fillRect(bx + bw - 2, by + bh - 2, 4, 4);
+
+          // Banner text
+          ctx.textAlign = 'center';
+          ctx.font = 'bold 11px "DotGothic16", sans-serif';
+          ctx.fillStyle = '#050713';
+          ctx.fillText(crtNewRecordAnim.text, 160.5, by + 16.5);
+          ctx.fillStyle = '#fde047';
+          ctx.fillText(crtNewRecordAnim.text, 160, by + 16);
+          ctx.restore();
+        }
       }
       } finally {
         ctx.restore();

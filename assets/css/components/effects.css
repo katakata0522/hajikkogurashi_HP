@@ -114,3 +114,56 @@ input[type="submit"]:hover::before {
   left: 200%;
   transition: left 0.7s cubic-bezier(0.25, 1, 0.5, 1);
 }
+
+/* ============================================================
+   View Transitions API — Retro CRT Cross-Document Screen Switch
+   ============================================================ */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root) {
+  animation: 180ms cubic-bezier(0.4, 0, 1, 1) both retro-crt-snap-out;
+}
+
+::view-transition-new(root) {
+  animation: 220ms cubic-bezier(0, 0, 0.2, 1) both retro-crt-snap-in;
+}
+
+@keyframes retro-crt-snap-out {
+  0% {
+    opacity: 1;
+    filter: brightness(1);
+    transform: scale(1);
+  }
+  45% {
+    opacity: 0.9;
+    filter: brightness(1.35) contrast(1.1);
+    transform: scale(1.002, 0.98);
+  }
+  100% {
+    opacity: 0;
+    filter: brightness(1.8);
+    transform: scale(0.985);
+  }
+}
+
+@keyframes retro-crt-snap-in {
+  0% {
+    opacity: 0;
+    filter: brightness(0.65);
+    transform: scale(1.01);
+  }
+  100% {
+    opacity: 1;
+    filter: brightness(1);
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
+}

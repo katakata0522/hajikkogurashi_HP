@@ -1,2 +1,3 @@
 # HTMLファイル内でPHPを動作させる設定（エックスサーバー FastCGI環境用）
 AddHandler fcgid-script .html .htm
+AddType application/manifest+json .webmanifest

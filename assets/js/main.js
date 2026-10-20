@@ -381,6 +381,39 @@
 	}
 
 	/* ============================
+	   View Transitions API
+	   ============================ */
+	function initViewTransitions() {
+		if (!('startViewTransition' in document)) return;
+		if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+		document.addEventListener('click', function (e) {
+			if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+			var link = e.target.closest('a');
+			if (!link) return;
+			if (link.target && link.target !== '_self') return;
+			if (link.hasAttribute('download')) return;
+
+			var rawHref = link.getAttribute('href');
+			if (!rawHref || rawHref.startsWith('#') || rawHref.startsWith('javascript:') || rawHref.startsWith('mailto:') || rawHref.startsWith('tel:')) return;
+
+			var destination;
+			try {
+				destination = new URL(link.href, window.location.href);
+			} catch (_) {
+				return;
+			}
+			if (destination.origin !== window.location.origin) return;
+			if (destination.pathname === window.location.pathname && destination.search === window.location.search) return;
+
+			e.preventDefault();
+			document.startViewTransition(function () {
+				window.location.href = destination.href;
+			});
+		});
+	}
+
+	/* ============================
 	   Init
 	   ============================ */
 	document.addEventListener('DOMContentLoaded', function () {
@@ -392,6 +425,7 @@
 		initScrolly();
 		initContactFormGlow();
 		initContactEmailLinks();
+		initViewTransitions();
 	});
 
 })();
