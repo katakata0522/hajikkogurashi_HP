@@ -714,17 +714,18 @@
       }
     }
 
-    /* Floating Back to Top Button */
+    /* Floating Back to Top Button (8-BIT ARCADE TACTILE KEY-SWITCH) */
     .btn-pixel-top {
       position: fixed;
       bottom: 24px;
       right: 24px;
-      width: 48px;
+      width: 46px;
       height: 48px;
-      border-radius: 50%;
-      background: #141522;
-      border: 2px solid #f59e0b;
-      box-shadow: 0 0 14px rgba(245, 158, 11, 0.4), inset 0 0 6px rgba(245, 158, 11, 0.2);
+      border-radius: 8px;
+      background: linear-gradient(180deg, #1e2338 0%, #111322 100%);
+      border: 1.5px solid #384265;
+      border-bottom: 3.5px solid #f59e0b;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6), 0 0 12px rgba(245, 158, 11, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -734,7 +735,7 @@
       opacity: 0;
       pointer-events: none;
       transform: translateY(12px);
-      transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+      transition: opacity 0.25s ease, transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
     }
     .btn-pixel-top.visible {
       opacity: 1;
@@ -742,33 +743,69 @@
       transform: translateY(0);
     }
     .btn-pixel-top:hover {
-      transform: translateY(-4px) scale(1.06);
-      border-color: #fde047;
-      box-shadow: 0 0 22px rgba(253, 224, 71, 0.7), inset 0 0 8px rgba(253, 224, 71, 0.3);
+      transform: translateY(-2px);
+      border-color: #4b5884;
+      border-bottom-color: #fbbf24;
+      background: linear-gradient(180deg, #262c47 0%, #16182c 100%);
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.7), 0 0 18px rgba(251, 191, 36, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+    .btn-pixel-top:active {
+      transform: translateY(2px);
+      border-bottom-width: 1.5px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.8), 0 0 8px rgba(245, 158, 11, 0.3);
     }
     .btn-pixel-top-arrow {
-      width: 0;
-      height: 0;
-      border-left: 6px solid transparent;
-      border-right: 6px solid transparent;
-      border-bottom: 9px solid #f59e0b;
-      transition: border-bottom-color 0.15s ease, transform 0.15s ease;
+      width: 14px;
+      height: 10px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 2px;
     }
-    .btn-pixel-top:hover .btn-pixel-top-arrow {
-      border-bottom-color: #fde047;
-      transform: translateY(-1.5px);
+    .btn-pixel-top-arrow::before {
+      content: '';
+      display: block;
+      width: 7px;
+      height: 7px;
+      border-top: 2.5px solid #fbbf24;
+      border-left: 2.5px solid #fbbf24;
+      transform: rotate(45deg);
+      box-shadow: -1px -1px 3px rgba(251, 191, 36, 0.5);
+      transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .btn-pixel-top:hover .btn-pixel-top-arrow::before {
+      border-color: #ffffff;
+      box-shadow: -1px -1px 6px rgba(255, 255, 255, 0.8);
+      transform: rotate(45deg) translate(-1px, -1px);
     }
     .btn-pixel-top-text {
-      font-family: var(--font-pixel-en);
-      font-size: 7.5px;
+      font-family: var(--font-pixel-en, 'Silkscreen', monospace);
+      font-size: 8px;
+      line-height: 1;
+      color: #fbbf24;
+      letter-spacing: 0.8px;
       font-weight: 700;
-      color: #f59e0b;
-      letter-spacing: 0.5px;
-      margin-top: 2px;
-      transition: color 0.15s ease;
+      text-shadow: 0 0 4px rgba(251, 191, 36, 0.4);
+      transition: color 0.15s ease, text-shadow 0.15s ease;
     }
     .btn-pixel-top:hover .btn-pixel-top-text {
-      color: #fde047;
+      color: #ffffff;
+      text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+    }
+    @media (max-width: 640px) {
+      .btn-pixel-top {
+        bottom: 16px;
+        right: 16px;
+        width: 40px;
+        height: 42px;
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6), 0 0 10px rgba(245, 158, 11, 0.3);
+      }
+      .btn-pixel-top-text {
+        font-size: 7px;
+        letter-spacing: 0.5px;
+      }
     }
 
     /* Mobile Header Layout */
