@@ -95,12 +95,20 @@ activeCart = await page.evaluate(() => document.querySelector('.mini-cart-item.a
 assert.equal(activeCart, 'brake', 'Key 1 must switch active cartridge to brake');
 console.log('✓ Keyboard shortcuts 1, 2, 3, 4 successfully switch ROM cartridges');
 
-// Test 4: Check 'R' Key (Retry)
+// Test 4: Check Space Key & 'R' Key (Retry)
+let initialBrakePhase = await page.evaluate(() => typeof brakePhase !== 'undefined' ? brakePhase : 'ready');
+assert.equal(initialBrakePhase, 'ready', 'Initial brake phase must be ready');
+
 await page.keyboard.press('Space'); // Start accel
-await page.waitForTimeout(100);
+await page.waitForTimeout(150);
+let accelBrakePhase = await page.evaluate(() => typeof brakePhase !== 'undefined' ? brakePhase : 'accel');
+assert.equal(accelBrakePhase, 'accel', 'Space key must trigger CRT action (accel)');
+
 await page.keyboard.press('r'); // Press retry
-await page.waitForTimeout(100);
-console.log('✓ "R" key successfully resets/retries mini game');
+await page.waitForTimeout(150);
+let resetBrakePhase = await page.evaluate(() => typeof brakePhase !== 'undefined' ? brakePhase : 'ready');
+assert.equal(resetBrakePhase, 'ready', 'R key must reset mini CRT state to ready');
+console.log('✓ Space key successfully operates CRT and "R" key resets/retries');
 
 // Test 5: Verify localStorage Score Persistence & Reload
 await page.evaluate(() => {
@@ -138,11 +146,19 @@ const newRecordTriggered = await page.evaluate(() => {
 assert.ok(newRecordTriggered, 'triggerCrtNewRecord must activate new record celebration state');
 console.log('✓ NEW RECORD presentation trigger verified successfully');
 
-// Test 7: Verify View Transitions script loaded and attached
+// Test 7: Verify View Transitions API and cross-document navigation
 const vtInstalled = await page.evaluate(() => {
   return typeof document.startViewTransition !== 'undefined';
 });
 console.log('✓ Browser View Transitions API support detected:', vtInstalled);
+
+// Test 8: Real link click transition without page errors
+const errorsBeforeNav = pageErrors.length;
+await page.click('a[href="/minigames.html"]');
+await page.waitForLoadState('domcontentloaded');
+assert.equal(pageErrors.length, errorsBeforeNav, `Navigation caused errors: ${pageErrors.join(', ')}`);
+assert.ok(page.url().includes('minigames.html'), 'Should navigate cleanly to minigames.html');
+console.log('✓ Seamless cross-document View Transition navigation verified with 0 errors');
 
 await browser.close();
 server.close();

@@ -51,6 +51,7 @@
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="alternate icon" href="/favicon.ico">
   <link rel="apple-touch-icon" href="/favicon.svg">
+  <style>@view-transition { navigation: auto; }</style>
   <script src="/assets/js/view-transitions.js" defer></script>
   <script>
     (function() {
@@ -4684,7 +4685,7 @@
     // 2. LUMEN MIRROR MINI STATE (多段ステージ＆高質感光学パズル)
     // ==========================================
     let mirrorStage = 1; // 1 | 2 | 3
-    let mirrorBestStage = Math.floor(loadCrtScore('cn_crt_best_mirror', 1));
+    let mirrorBestStage = Math.floor(loadCrtScore('cn_crt_best_mirror', 0));
     let mirrorSolved = false;
     let mirrorSolvedAnim = 0;
     let mirrorGlowParticles = [];
@@ -4749,7 +4750,7 @@
     let mikiriTimer = null;
     let mikiriRivalTimer = null;
     let mikiriStreak = 0;
-    let mikiriBest = Math.floor(loadCrtScore('cn_crt_best_mikiri', 3));
+    let mikiriBest = Math.floor(loadCrtScore('cn_crt_best_mikiri', 0));
     let mikiriSlashAnim = 0;
     let mikiriFlash = 0;
     let mikiriRank = '';
@@ -4801,7 +4802,7 @@
     // 4. POCKET DUEL MINI STATE (サイバー対決)
     // ==========================================
     let duelStreak = 0;
-    let duelBest = Math.floor(loadCrtScore('cn_crt_best_duel', 3));
+    let duelBest = Math.floor(loadCrtScore('cn_crt_best_duel', 0));
     let duelClashAnim = 0;
     let duelVerdict = '';
 
@@ -5111,12 +5112,13 @@
       crtScreen.addEventListener('keydown', (e) => {
         if (e.key === ' ' || e.key === 'Enter') {
           e.preventDefault();
+          e.stopPropagation();
           if (activeCart === 'mirror') {
             if (mirrorSolved) {
               triggerCrtAction('next');
             } else {
               const unsolved = currentMirrors.find(m => m.angle !== m.target) || currentMirrors[0];
-              triggerCrtAction(unsolved.id);
+              triggerCrtAction(unsolved ? unsolved.id : 'm1');
             }
           } else {
             triggerCrtAction('default');
@@ -5125,7 +5127,7 @@
       });
     }
 
-    // Mini CRT Global Keyboard Shortcuts: [1-4] ROM Select, [R] Retry
+    // Mini CRT Global Keyboard Shortcuts: [Space] Action, [1-4] ROM Select, [R] Retry
     window.addEventListener('keydown', (e) => {
       const targetTag = (e.target && e.target.tagName) || '';
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes(targetTag) || e.target?.isContentEditable) {
@@ -5140,6 +5142,24 @@
       }
 
       const key = e.key;
+      // Space: CRT Mini Game Action
+      if (e.code === 'Space' || key === ' ') {
+        if (!['BUTTON', 'A'].includes(targetTag)) {
+          e.preventDefault();
+          if (activeCart === 'mirror') {
+            if (mirrorSolved) {
+              triggerCrtAction('next');
+            } else {
+              const unsolved = currentMirrors.find(m => m.angle !== m.target) || currentMirrors[0];
+              triggerCrtAction(unsolved ? unsolved.id : 'm1');
+            }
+          } else {
+            triggerCrtAction('default');
+          }
+          return;
+        }
+      }
+
       // [1-4] ROM Select
       if (key === '1' || key === '2' || key === '3' || key === '4') {
         const romMap = { '1': 'brake', '2': 'mirror', '3': 'mikiri', '4': 'duel' };
@@ -5438,7 +5458,7 @@
               brakeTilt = 0;
               const dist = ((BRAKE_CLIFF_X - 14 - brakeCarX) / 20).toFixed(2);
               brakeDistance = parseFloat(dist);
-              if (brakeDistance < brakeBest && brakeDistance > 0) {
+              if (brakeDistance >= 0 && brakeDistance < brakeBest) {
                 brakeBest = brakeDistance;
                 saveCrtScore('cn_crt_best_brake', brakeBest);
                 triggerCrtNewRecord('brake', `★ NEW RECORD! ${brakeBest.toFixed(2)}m ★`);
@@ -5702,7 +5722,7 @@
         ctx.fillText(curStg.title, 10, 18);
         ctx.fillStyle = '#64748b';
         ctx.textAlign = 'right';
-        ctx.fillText(`STAGE ${mirrorStage}/3 (BEST: 0${mirrorBestStage})`, W - 10, 18);
+        ctx.fillText(`STAGE ${mirrorStage}/3 (BEST: ${mirrorBestStage > 0 ? '0' + mirrorBestStage : '--'})`, W - 10, 18);
 
         // Obstacle barrier blocks
         curStg.blocks.forEach(b => {

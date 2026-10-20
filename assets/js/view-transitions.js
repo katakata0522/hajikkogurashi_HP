@@ -7,16 +7,34 @@
 
   if (typeof document === 'undefined') return;
 
-  // Gracefully degrade if View Transitions API is unsupported
-  if (!('startViewTransition' in document)) return;
-
   // Respect user preference for reduced motion
   if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     return;
   }
 
+  // Feature detection: Check for native MPA Cross-Document View Transitions (Chrome 126+, Safari 18.2+)
+  // When supported, CSS `@view-transition { navigation: auto; }` handles page-to-page transitions
+  // natively without interrupting standard navigation.
+  var supportsNativeCrossDoc = ('onpageswap' in window) || ('onpagereveal' in window);
+
+  if (supportsNativeCrossDoc) {
+    window.addEventListener('pageswap', function (e) {
+      if (e.viewTransition && e.viewTransition.finished) {
+        e.viewTransition.finished.catch(function () {});
+      }
+    });
+    window.addEventListener('pagereveal', function (e) {
+      if (e.viewTransition && e.viewTransition.finished) {
+        e.viewTransition.finished.catch(function () {});
+      }
+    });
+    return;
+  }
+
+  // Fallback for same-document View Transitions API
+  if (!('startViewTransition' in document)) return;
+
   document.addEventListener('click', function (e) {
-    // Only intercept primary clicks without modifier keys
     if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
       return;
     }
@@ -24,7 +42,6 @@
     var link = e.target.closest('a');
     if (!link) return;
 
-    // Skip new tabs or download links
     if (link.target && link.target !== '_self') return;
     if (link.hasAttribute('download')) return;
 
@@ -40,18 +57,21 @@
       return;
     }
 
-    // Must be same origin
     if (destination.origin !== window.location.origin) return;
-
-    // Skip in-page anchor jumps
     if (destination.pathname === window.location.pathname && destination.search === window.location.search) {
       return;
     }
 
-    // Perform smooth View Transition
-    e.preventDefault();
-    document.startViewTransition(function () {
+    // Smooth transition fallback
+    try {
+      var vt = document.startViewTransition(function () {
+        window.location.href = destination.href;
+      });
+      if (vt && vt.finished) {
+        vt.finished.catch(function () {});
+      }
+    } catch (_) {
       window.location.href = destination.href;
-    });
+    }
   });
 })();
