@@ -2,7 +2,7 @@
  * Corner Neighbor - Secret Easter Egg & Midnight Mode
  * 1. コナミコマンド (↑ ↑ ↓ ↓ ← → ← → B A) で隠し開発室 (/secret.html) へワープ
  * 2. スマホ用隠しトリガー (フッターのCorner Neighborロゴを5回連続タップ)
- * 3. 深夜モード (0:00 - 4:59) でフッターに「🌙 MIDNIGHT // 深夜開発中…( ˘ω˘ )zzZ」が点灯
+ * 3. 深夜モード (0:00 - 4:59) でフッターに「🌙 MIDNIGHT // 深夜開発中」が点灯
  */
 (function() {
   'use strict';
