@@ -51,6 +51,7 @@
   <link rel="apple-touch-icon" href="/favicon.svg" />
   <style>@view-transition { navigation: auto; }</style>
   <script src="/assets/js/view-transitions.js" defer></script>
+  <script src="/assets/js/secret-easter-egg.js" defer></script>
   <script>
     (function() {
       try {
@@ -802,18 +803,18 @@
       color: #ffffff;
     }
 
-    /* Site Footer */
+    /* FOOTER (SIMPLIFIED & HIGH-VISIBILITY BUTTONS) */
     .site-footer {
       margin-top: 48px;
-      padding: 24px 0 20px 0;
-      border-top: 1px solid #212435;
-      font-family: var(--font-mono);
-      font-size: 11px;
-      color: #7b8196;
+      padding: 28px 0 24px 0;
+      border-top: 1px solid #23273c;
+      font-family: var(--font-pixel-jp);
+      color: #94a3b8;
+      position: relative;
     }
     .footer-layout {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
       gap: 20px;
@@ -821,51 +822,128 @@
     .footer-brand-col {
       display: flex;
       flex-direction: column;
-      gap: 4px;
-      max-width: 440px;
+      gap: 5px;
+      max-width: 460px;
+    }
+    .footer-brand-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: #ffffff;
+      width: fit-content;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.15s ease;
+    }
+    .footer-brand-link:hover {
+      transform: translateX(2px);
     }
     .footer-brand-name {
-      font-size: 13.5px;
+      font-family: var(--font-pixel-en, 'Silkscreen', monospace);
+      font-size: 16px;
       font-weight: 700;
-      color: #f1f5f9;
-      letter-spacing: 0.5px;
+      color: #f8fafc;
+      letter-spacing: 0.6px;
+      transition: color 0.15s ease, text-shadow 0.15s ease;
+    }
+    .footer-brand-link:hover .footer-brand-name {
+      color: var(--neon-cyan);
+      text-shadow: 0 0 8px rgba(0, 245, 255, 0.5);
     }
     .footer-circle-desc {
-      font-family: var(--font-pixel-jp);
-      font-size: 10.5px;
-      color: #8c93ab;
+      font-size: 12px;
+      color: #8c95af;
       line-height: 1.5;
     }
     .footer-copyright {
-      font-size: 10px;
+      font-family: var(--font-mono, monospace);
+      font-size: 11px;
       color: #64748b;
-      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .footer-midnight-badge {
+      font-size: 10.5px;
+      color: #fbbf24;
+      background: rgba(251, 191, 36, 0.12);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+      padding: 1px 7px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+      animation: pulse-midnight 2s infinite ease-in-out;
+    }
+    @keyframes pulse-midnight {
+      0%, 100% { opacity: 0.8; }
+      50% { opacity: 1; border-color: rgba(251, 191, 36, 0.6); }
     }
     .footer-links {
       display: flex;
       align-items: center;
-      justify-content: flex-end;
-      gap: 12px 18px;
+      gap: 12px;
       flex-wrap: wrap;
-      max-width: 520px;
     }
-    .footer-links a {
-      color: #9aa1b8;
+    .footer-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: #151829;
+      border: 1.5px solid #2d3450;
+      color: #cbd5e1;
+      padding: 7px 14px;
+      border-radius: 6px;
       text-decoration: none;
-      font-size: 11px;
-      transition: color 0.15s ease;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      transition: all 0.15s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     }
-    .footer-links a:hover {
-      color: var(--neon-cyan);
-      text-decoration: underline;
+    .footer-btn-icon {
+      font-size: 13px;
+      line-height: 1;
     }
-    @media (max-width: 768px) {
+    .footer-btn:hover {
+      background: #1c223a;
+      border-color: var(--neon-cyan);
+      color: #ffffff;
+      transform: translateY(-1.5px);
+      box-shadow: 0 4px 12px rgba(0, 245, 255, 0.2);
+    }
+    .footer-btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
+    .footer-btn-contact {
+      background: #181d33;
+      border-color: #3b466d;
+      color: #38bdf8;
+    }
+    .footer-btn-contact:hover {
+      background: #202747;
+      border-color: #38bdf8;
+      box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);
+    }
+    @media (max-width: 640px) {
       .footer-layout {
         flex-direction: column;
+        align-items: flex-start;
         gap: 16px;
       }
       .footer-links {
-        justify-content: flex-start;
+        width: 100%;
+        gap: 8px;
+      }
+      .footer-btn {
+        flex: 1 1 auto;
+        justify-content: center;
+        padding: 8px 10px;
+        font-size: 12px;
+      }
+      .site-footer {
+        padding-bottom: 64px;
       }
     }
 
@@ -1353,30 +1431,50 @@
       </div>
     </section>
 
-    <!-- FOOTER -->
+    <!-- FOOTER (SIMPLIFIED & HIGH-VISIBILITY BUTTONS) -->
     <footer class="site-footer">
       <div class="footer-layout">
         <!-- Left Column: Brand & Circle Info & Copyright -->
         <div class="footer-brand-col">
-          <div class="footer-brand-name">Corner Neighbor</div>
+          <a href="/" class="footer-brand-link" id="footer-secret-trigger" title="Corner Neighbor (屋根裏工房)">
+            <!-- Mini Cassette Icon -->
+            <svg width="22" height="16" viewBox="0 0 44 32" shape-rendering="crispEdges" style="flex-shrink:0;">
+              <rect x="1" y="1" width="42" height="30" rx="3" fill="#131629" stroke="#00f5ff" stroke-width="2"/>
+              <rect x="30" y="1" width="13" height="30" fill="none" stroke="#ff2a9d" stroke-width="2"/>
+              <rect x="5" y="5" width="13" height="2" fill="#00f5ff"/>
+              <rect x="5" y="9" width="13" height="2" fill="#00f5ff"/>
+              <rect x="5" y="13" width="13" height="2" fill="#00f5ff"/>
+              <rect x="5" y="17" width="13" height="2" fill="#00f5ff"/>
+              <rect x="21" y="6" width="17" height="13" fill="#1f1b38" stroke="#ff66c4" stroke-width="1.5"/>
+              <rect x="24" y="10" width="4" height="4" fill="#00f5ff"/>
+              <rect x="31" y="10" width="4" height="4" fill="#ffb703"/>
+              <rect x="26" y="22" width="12" height="3" fill="#ff2a9d"/>
+            </svg>
+            <span class="footer-brand-name">Corner Neighbor</span>
+          </a>
           <div class="footer-circle-desc">Unreal Engine 5 & WEB インディーゲーム制作サークル</div>
-          <div class="footer-copyright">© 2024-2026 Corner Neighbor公式ホームページ. All Rights Reserved.</div>
+          <div class="footer-copyright">
+            <span>© 2024-2026 Corner Neighbor. All Rights Reserved.</span>
+            <span class="footer-midnight-badge" id="footer-midnight-badge" style="display:none;">🌙 MIDNIGHT // 深夜開発中…( ˘ω˘ )zzZ</span>
+          </div>
         </div>
 
-        <!-- Right Column: Navigation Links -->
+        <!-- Right Column: 3 Refined Action Buttons (Terms, Privacy, Contact) -->
         <nav class="footer-nav" aria-label="フッターナビゲーション">
-                        <div class="footer-links">
-                <a href="/">ホーム</a>
-                <a href="/minigames.html">ミニゲーム広場</a>
-                <a href="/coming-soon.html">鋭意制作中！</a>
-                <a href="/portfolio.html">作品一覧</a>
-                <a href="/members.html">メンバー紹介</a>
-                <a href="/aboutus.html">私たちについて</a>
-                <a href="/news.html">お知らせ</a>
-                <a href="/privacy-policy.html">プライバシーポリシー</a>
-                <a href="/terms-of-service.html">利用規約</a>
-                <a href="/#dispatch">お問い合わせ</a>
-              </div>
+          <div class="footer-links">
+            <a href="/terms-of-service.html" class="footer-btn">
+              <span class="footer-btn-icon">📜</span>
+              <span>利用規約</span>
+            </a>
+            <a href="/privacy-policy.html" class="footer-btn">
+              <span class="footer-btn-icon">🔒</span>
+              <span>プライバシーポリシー</span>
+            </a>
+            <a href="/#dispatch" class="footer-btn footer-btn-contact">
+              <span class="footer-btn-icon">✉️</span>
+              <span>お問い合わせ</span>
+            </a>
+          </div>
         </nav>
       </div>
     </footer>
