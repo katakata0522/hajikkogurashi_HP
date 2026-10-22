@@ -126,6 +126,10 @@ jobs:
         if: steps.changes.outputs.deploy_needed == 'true'
         run: npm run test:minigames:browser
 
+      - name: Check mail contact before deploy
+        if: steps.changes.outputs.deploy_needed == 'true'
+        run: node scripts/mail-contact-browser-test.mjs
+
       - name: Generate sitemap.xml
         if: steps.changes.outputs.deploy_needed == 'true'
         run: pwsh -File ./scripts/generate-sitemap.ps1

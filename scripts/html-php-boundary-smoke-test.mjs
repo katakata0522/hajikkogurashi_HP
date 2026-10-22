@@ -1,4 +1,4 @@
-// HTMLの静的配信と、旧ページから通常PHPへのフォーム送信を守る。
+// 公開サイトにPHPを置かず、旧URLからもメール連絡へ進める契約を守る。
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -10,14 +10,20 @@ function visit(directory) {
     if (entry.name.startsWith('.') || entry.name === 'node_modules') continue;
     const file = path.join(directory, entry.name);
     if (entry.isDirectory()) visit(file);
-    else if (/\.html?$/i.test(entry.name)) {
-      assert.doesNotMatch(fs.readFileSync(file, 'utf8'), /<\?(?:php\b|=|\s)/i,
-        `${path.relative(root, file)} requires server-side PHP in HTML`);
+    else {
+      assert.doesNotMatch(entry.name, /\.(?:php[0-9]*|phtml|phar)$/i,
+        `${path.relative(root, file)} must not be published as executable PHP`);
+      if (/\.html?$/i.test(entry.name)) {
+        const html = fs.readFileSync(file, 'utf8');
+        assert.doesNotMatch(html, /<\?(?!xml\b)/i,
+          `${path.relative(root, file)} contains a PHP opening tag`);
+        assert.doesNotMatch(html, /(?:href|action)\s*=\s*["'][^"']*\.php(?:[?#"']|$)/i,
+          `${path.relative(root, file)} still sends visitors to retired PHP`);
+      }
     }
   }
 }
 visit(root);
-
 const config = fs.readFileSync(path.join(root, '.htaccess'), 'utf8');
 for (const line of config.split(/\r?\n/)) {
   if (/^\s*AddHandler\b/i.test(line)) {
@@ -28,21 +34,23 @@ for (const line of config.split(/\r?\n/)) {
 assert.match(config, /^AddType application\/manifest\+json \.webmanifest$/m);
 
 const html = fs.readFileSync(path.join(root, 'index_legacy.html'), 'utf8');
-const attrs = tag => Object.fromEntries([...tag.matchAll(/([\w-]+)(?:\s*=\s*"([^"]*)")?/g)]
-  .map(m => [m[1], m[2] || '']));
-const forms = [...html.matchAll(/<form\b([^>]*)>([\s\S]*?)<\/form>/gi)];
-assert.equal(forms.length, 1, 'The old contact form must remain available');
-assert.equal(attrs(forms[0][1]).action, '/contact.php');
-assert.equal(attrs(forms[0][1]).method.toLowerCase(), 'post');
-const fields = [...forms[0][2].matchAll(/<(?:input|textarea)\b([^>]*)>/gi)].map(m => attrs(m[1]));
-for (const name of ['name', '_replyto', 'message', 'company', 'return_to']) {
-  assert.equal(fields.filter(f => f.name === name).length, 1, `Missing or duplicate ${name}`);
+assert.doesNotMatch(html, /<form\b/i, 'The retired form must not collect unsendable messages');
+assert.match(html, /href="mailto:hajikkogurashi\.official@gmail\.com"[^>]*>メールアプリを開く<\/a>/);
+assert.match(html, /id="contact"/);
+const concept = fs.readFileSync(path.join(root, 'concept/index.html'), 'utf8');
+assert.match(concept, /href="\/#dispatch">お問い合わせ<\/a>/);
+const redirects = [...config.matchAll(/^RedirectMatch\s+303\s+"([^"\n]+)"\s+"([^"\n]+)"$/gm)]
+  .map(m => ({ pattern: new RegExp(m[1]), target: m[2] }));
+for (const [url, target] of [
+  ['/contact.php', 'https://hajikkoroom.xsrv.jp/#dispatch'],
+  ['/includes/contact-section.php', 'https://hajikkoroom.xsrv.jp/index_legacy.html#contact'],
+  ['/includes/news-data.php', 'https://hajikkoroom.xsrv.jp/news.html'],
+]) {
+  const matching = redirects.filter(r => r.pattern.test(url));
+  assert.equal(matching.length, 1, `Expected one static redirect for ${url}`);
+  assert.equal(matching[0].target, target);
 }
-assert.equal(fields.find(f => f.name === 'return_to').value, '/');
-for (const name of ['name', '_replyto', 'message']) {
-  assert.ok('required' in fields.find(f => f.name === name));
+for (const url of ['/other.php', '/contact.php.extra', '/other/contact.php']) {
+  assert.equal(redirects.some(r => r.pattern.test(url)), false, `Redirect scope too broad: ${url}`);
 }
-for (const file of ['contact.php', 'includes/contact-section.php', 'includes/news-data.php']) {
-  assert.match(fs.readFileSync(path.join(root, file), 'utf8'), /^<\?php\b/);
-}
-console.log('HTML/PHP boundary: static HTML, legacy form and normal PHP entrypoints OK');
+console.log('HTML/PHP boundary: zero PHP files, email contact and scoped legacy redirects OK');

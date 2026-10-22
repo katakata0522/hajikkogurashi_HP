@@ -90,11 +90,11 @@ Xserver に置くのは、基本的にこのリポジトリ直下の静的ファ
 
 ## HTMLとPHPの境界
 
-`index_legacy.html` は旧トップの表示済み問い合わせHTMLを含む静的ページです。
-現行トップはメールへの連絡導線、旧トップのフォームは通常の `/contact.php` へPOSTします。
+現行トップ・旧トップともにメールアプリから連絡できます。公開サイトにはPHPを配置しません。
+旧PHPのURLは`.htaccess`の303転送で静的な連絡先・お知らせへ案内します。
 `.html` / `.htm` をPHPへ渡すAddHandlerは不要です。
-`contact.php` と `includes/` のPHPは通常のPHPとして維持します。
 
-`node scripts/html-php-boundary-smoke-test.mjs` で、HTML内へのPHP再混入と旧フォームの欠落を検査します。
-旧版の動的構成へ戻す必要がある場合は、静的化PR全体を作業ブランチでrevertし、
-CI合格後に通常のデプロイを使います。旧HTMLだけ、または旧ハンドラーだけを単独で復元しないでください。
+`node scripts/html-php-boundary-smoke-test.mjs` でPHPファイル・HTML内PHP・旧送信先の再混入とメール導線を検査します。
+`node scripts/mail-contact-browser-test.mjs` は320/390/1365pxとJavaScript無効時の連絡導線を確認します。
+旧PHPの原本は公開対象外の `docs/retired-php-20261022.md` とGit履歴に保持しています。
+復元が必要ならPHP廃止PR全体を作業ブランチでrevertし、CI合格後に通常のXserverデプロイで反映します。
