@@ -122,6 +122,10 @@ jobs:
           "$chrome_path" --version
           echo "CHROME_PATH=$chrome_path" >> "$GITHUB_ENV"
 
+      - name: Check mail contact before deploy
+        if: steps.changes.outputs.deploy_needed == 'true'
+        run: node scripts/mail-contact-browser-test.mjs
+
       - name: Validate minigame browser behavior before deploy
         if: steps.changes.outputs.deploy_needed == 'true'
         run: npm run test:minigames:browser

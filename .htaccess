@@ -1,1 +1,6 @@
 AddType application/manifest+json .webmanifest
+
+# 廃止したPHPのURLも、PHPを実行せず静的な案内へ転送する。
+RedirectMatch 303 "^/contact\.php$" "https://hajikkoroom.xsrv.jp/#dispatch"
+RedirectMatch 303 "^/includes/contact-section\.php$" "https://hajikkoroom.xsrv.jp/index_legacy.html#contact"
+RedirectMatch 303 "^/includes/news-data\.php$" "https://hajikkoroom.xsrv.jp/news.html"

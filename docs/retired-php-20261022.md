@@ -1,3 +1,14 @@
+# PHP廃止前の原本（2026年10月22日）
+
+公開サイトをメール連絡へ統一する前の保存記録。PHPは実行せず、文言・処理内容を履歴として保持する。
+元コミット: `e4b345bcbfd1f2c7f7e37549579f2532252fa8bb`
+このMarkdownは既存の公開成果物から除外される。
+
+## contact.php
+
+SHA-256: `1786fe8daa031490648810322e0c750973c76642a3f207b6adf09877b46c58bc`
+
+```php
 <?php
 declare(strict_types=1);
 
@@ -229,3 +240,146 @@ if (!$sent) {
 }
 
 renderPage('送信を受け付けました', 'お問い合わせありがとうございます。内容を確認のうえ、必要に応じてご連絡します。', $returnTo, 200);
+
+```
+
+## includes/contact-section.php
+
+SHA-256: `198cf1033b3bcaad8b3f26356a244e1d966cc30c3920aaf9920d7c6bf1f21e01`
+
+```php
+<?php
+// 現在のファイルパスから動的に戻り先URLを判定（安全対策込み）
+$current_script = $_SERVER['SCRIPT_NAME'] ?? '/';
+$allowed_redirect_paths = array(
+    '/',
+    '/index.html',
+    '/aboutus.html',
+    '/portfolio.html'
+);
+
+$safe_return_to = '/';
+foreach ($allowed_redirect_paths as $path) {
+    if (strpos($current_script, $path) !== false) {
+        // 例: /index.html や /aboutus.html に部分一致、または完全一致した場合
+        // Xserver等でディレクトリトップの場合は / になるため / も許可
+        $safe_return_to = $path;
+        break;
+    }
+}
+// index.htmlはルートパス / にマッピング
+if ($safe_return_to === '/index.html') {
+    $safe_return_to = '/';
+}
+?>
+		<!-- Contact -->
+		<section id="contact">
+			<div class="inner">
+				<section class="contact-panel contact-panel--form">
+					<header class="major">
+						<h2>お問い合わせ</h2>
+					</header>
+					<form action="/contact.php" method="POST" class="contact-form">
+						<div class="field half first">
+							<label for="name">お名前</label>
+							<input type="text" name="name" id="name" autocomplete="name" required />
+						</div>
+						<div class="field half">
+							<label for="email"><span class="required-mark">※</span>メールアドレス</label>
+							<input type="email" name="_replyto" id="email" autocomplete="email" inputmode="email" placeholder="例：example@mail.com" required />
+						</div>
+						<div class="field">
+							<label for="message">お問い合わせ内容</label>
+							<textarea name="message" id="message" rows="6" required></textarea>
+						</div>
+						<input type="hidden" name="return_to" value="<?php echo htmlspecialchars($safe_return_to, ENT_QUOTES, 'UTF-8'); ?>" />
+						<div style="display:none;">
+							<label for="company">会社名</label>
+							<input type="text" name="company" id="company" tabindex="-1" autocomplete="off" />
+						</div>
+						<ul class="actions">
+							<li><input type="submit" value="送信する" class="special" /></li>
+							<li><input type="reset" value="入力をリセット" /></li>
+						</ul>
+					</form>
+					<p>フォームが送信できない場合は、<a href="#" class="js-contact-email" data-user="hajikkogurashi.official" data-domain="gmail.com">メール</a>でもご連絡いただけます。</p>
+				</section>
+
+				<section class="split contact-panel contact-panel--info">
+					<section>
+						<div class="contact-method">
+							<span class="icon alt fa-envelope"></span>
+							<h3>メール</h3>
+							<a href="#" class="js-contact-email" data-user="hajikkogurashi.official" data-domain="gmail.com" data-display="email">フォームをご利用ください</a>
+						</div>
+					</section>
+
+					<section>
+						<div class="contact-method">
+							<span class="icon alt fa-home"></span>
+							<h3>拠点</h3>
+							<span>日本のどこかのはじっこ</span>
+						</div>
+					</section>
+
+					<section>
+						<div class="contact-method contact-method--social">
+							<span class="icon alt fa-share-alt"></span>
+							<h3>SNS</h3>
+							<ul class="icons social-links">
+								<li class="social-links__item">
+									<a href="https://note.com/hajikkogurashi01" class="icon alt fa-sticky-note-o" target="_blank" rel="noopener noreferrer" aria-label="note" title="note">
+										<span class="label">note</span>
+									</a>
+								</li>
+								<li class="social-links__item">
+									<a href="https://x.com/Corner_neighbor" class="icon alt fa-twitter" target="_blank" rel="noopener noreferrer" aria-label="X" title="X">
+										<span class="label">X</span>
+									</a>
+								</li>
+								<li class="social-links__item">
+									<a href="https://www.youtube.com/@hajikkogurashi" class="icon alt fa-youtube-play" target="_blank" rel="noopener noreferrer" aria-label="YouTube" title="YouTube">
+										<span class="label">YouTube</span>
+									</a>
+								</li>
+							</ul>
+						</div>
+					</section>
+				</section>
+			</div>
+		</section>
+
+```
+
+## includes/news-data.php
+
+SHA-256: `74d813adb28b5db4ddf51339e8c23992f5e5f7d8f8ae04a84e664623bc365882`
+
+```php
+<?php
+/**
+ * Corner Neighbor公式ホームページ
+ * お知らせデータファイル (news-data.php)
+ * 
+ * お知らせを追加する場合は、以下の $news_items 配列の先頭に要素を追加してください。
+ */
+
+$news_items = [
+    [
+        'date' => '2026年03月31日',
+        'title' => '【ホームページ更新！】',
+        'content' => '作品一覧ページの整理、公開中ページの仮文言の見直し、サイト情報の整備を進めました。<br />公開内容は今後も順次更新していきます。'
+    ],
+    [
+        'date' => '2025年05月09日',
+        'title' => '【note 更新！】',
+        'content' => '「東京ゲームダンジョンに行ってきた」を公開しました！まだ見ぬインディーズゲームを求めて潜入します👀<br /><a href="https://note.com/hajikkogurashi01/n/n5c3d29c281e1">note記事へGO!</a>'
+    ],
+    [
+        'date' => '2024年08月16日',
+        'title' => 'サークル活動開始！',
+        'content' => '2024年8月16日より、ゲーム制作サークル「Corner Neighbor」の活動を開始しました！応援よろしくお願いします！<br /><a href="https://note.com/hajikkogurashi01">Corner Neighborのnoteページ</a><br /><a href="https://x.com/Corner_neighbor">Corner Neighbor のXアカウント</a><br /><a href="https://www.youtube.com/@hajikkogurashi">Corner NeighborのYouTubeアカウント</a>'
+    ]
+];
+
+```

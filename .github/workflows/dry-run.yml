@@ -62,6 +62,8 @@ jobs:
           fi
           "$chrome_path" --version
           echo "CHROME_PATH=$chrome_path" >> "$GITHUB_ENV"
+      - name: Check mail contact across viewport and script settings
+        run: node scripts/mail-contact-browser-test.mjs
       - name: Run minigame browser tests
         id: minigame-browser
         env:
