@@ -5,6 +5,12 @@ $ErrorActionPreference = "Stop"
 $repoRoot = Get-RepoRoot
 $errors = New-TestErrorList
 
+# 静的HTMLにPHP処理が再導入されると、本番で生コードや欠落が発生する。
+node (Join-Path $repoRoot 'scripts/html-php-boundary-smoke-test.mjs')
+if ($LASTEXITCODE -ne 0) {
+    throw 'HTML/PHP boundary smoke test failed.'
+}
+
 foreach ($relativePath in (Get-StaticPages)) {
     $fullPath = Join-Path $repoRoot $relativePath
 

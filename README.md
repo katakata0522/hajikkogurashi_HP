@@ -87,3 +87,14 @@ Xserver に置くのは、基本的にこのリポジトリ直下の静的ファ
 
 旧 Jekyll ソース一式は、このリポジトリの外へ退避済みです。  
 必要になった場合は、ローカルバックアップか Git 履歴から戻せます。
+
+## HTMLとPHPの境界
+
+`index_legacy.html` は旧トップの表示済み問い合わせHTMLを含む静的ページです。
+現行トップはメールへの連絡導線、旧トップのフォームは通常の `/contact.php` へPOSTします。
+`.html` / `.htm` をPHPへ渡すAddHandlerは不要です。
+`contact.php` と `includes/` のPHPは通常のPHPとして維持します。
+
+`node scripts/html-php-boundary-smoke-test.mjs` で、HTML内へのPHP再混入と旧フォームの欠落を検査します。
+旧版の動的構成へ戻す必要がある場合は、静的化PR全体を作業ブランチでrevertし、
+CI合格後に通常のデプロイを使います。旧HTMLだけ、または旧ハンドラーだけを単独で復元しないでください。
