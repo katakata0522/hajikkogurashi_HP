@@ -32,7 +32,10 @@ try {
         const hit = document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2);
         return hit === el || el.contains(hit);
       }), 'Another element covers the mail action');
-      assert.ok(await page.locator('#contact').evaluate(el => el.scrollWidth <= el.clientWidth + 1), 'Contact content overflows');
+      // テンプレートの装飾罫線は横へ延長されるため、実際の連絡リンクを測る。
+      const addressBox = await address.boundingBox();
+      assert.ok(addressBox && addressBox.x >= 0 && addressBox.x + addressBox.width <= width + 1,
+        `Mail address clipped at width=${width}, JavaScript=${javaScriptEnabled}: ${JSON.stringify(addressBox)}`);
       assert.deepEqual(errors, []);
       await context.close();
       cases++;
