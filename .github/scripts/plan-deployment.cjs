@@ -8,8 +8,10 @@ const SHA = /^[0-9a-f]{40}$/;
 const SITE_MARKER = 'https://hajikkoroom.xsrv.jp/deploy-version.txt';
 const WORKFLOW = '.github/workflows/deploy.yml';
 
-function gh(route) {
-  return JSON.parse(execFileSync('gh', ['api', route], { encoding: 'utf8', timeout: 20000 }));
+function gh(route, filter) {
+  const args = ['api', route];
+  if (filter) args.push('--jq', filter);
+  return JSON.parse(execFileSync('gh', args, { encoding: 'utf8', timeout: 20000 }));
 }
 
 async function liveRevision() {
@@ -33,8 +35,14 @@ function publicChanges(base, head, cwd) {
 
 function previousProof(env, api) {
   const prefix = `repos/${env.GITHUB_REPOSITORY}/actions`;
-  const runs = api(`${prefix}/workflows/deploy.yml/runs?branch=main&per_page=100`).workflow_runs;
-  const previous = runs.find(run => run.run_number === Number(env.GITHUB_RUN_NUMBER) - 1);
+  const number = Number(env.GITHUB_RUN_NUMBER) - 1;
+  if (!Number.isSafeInteger(number) || number < 1) return null;
+  // A page of full Actions records can exceed the child process stdout limit.
+  // Emit only the single trusted candidate and the fields checked below.
+  const filter = `[.workflow_runs[] | select(.run_number == ${number}) |
+    {id,run_number,run_attempt,status,conclusion,event,path,head_branch,head_repository:{full_name:.head_repository.full_name}}]`;
+  const runs = api(`${prefix}/workflows/deploy.yml/runs?branch=main&per_page=100`, filter);
+  const previous = runs.length === 1 && runs[0].run_number === number && runs[0];
   if (!previous || previous.status !== 'completed' || previous.conclusion !== 'success' ||
       !['push', 'workflow_dispatch'].includes(previous.event) || previous.path !== WORKFLOW ||
       previous.head_branch !== 'main' || previous.head_repository?.full_name !== env.GITHUB_REPOSITORY) return null;
@@ -62,7 +70,7 @@ async function plan(env, { api = gh, readLive = liveRevision, changed = publicCh
     if (changed(verified, head)) return deploy('最後に本番確認した版から公開対象に変更があります。');
     return { mode: 'unchanged', verified, reason: '本番の検証記録・版表示が一致し、公開対象に累積差分はありません。' };
   } catch (error) {
-    return deploy(`配信省略の根拠を確認できません (${error.name})。全体を配信します。`);
+    return deploy(`配信省略の根拠を確認できません (${error.code || error.name})。全体を配信します。`);
   }
 }
 
