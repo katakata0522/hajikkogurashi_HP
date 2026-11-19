@@ -17,19 +17,34 @@ const success = { id: 82, run_number: 8, run_attempt: 2, path: '.github/workflow
   head_repository: { full_name: repo }, head_branch: 'main', event: 'push',
   status: 'completed', conclusion: 'success' };
 const receipt = { name: 'hp-verified-v1-2-' + prior, expired: false, size_in_bytes: 180 };
+const candidateRun = { id: 93, run_attempt: 2, path: '.github/workflows/dry-run.yml', head_sha: head,
+  head_repository: { full_name: repo }, head_branch: 'verified/release', event: 'push',
+  status: 'completed', conclusion: 'success' };
+const staticRuntime = '1'.repeat(64);
+const browserRuntime = '2'.repeat(64);
+const passingChecks = { name: `hp-regressions-v1-2-${head}-${staticRuntime}-${browserRuntime}`,
+  expired: false, size_in_bytes: 210 };
 
 function fixture({ runs = [success], artifacts = [receipt], total = artifacts.length,
+                   candidates = [], checks = [], checkTotal = checks.length,
                    main = head, live = prior, changed = () => false } = {}) {
+  const requests = [];
   const api = (route, filter) => {
+    requests.push(route);
     if (route.endsWith('/git/ref/heads/main')) return { object: { sha: main } };
     if (route.includes('/workflows/deploy.yml/runs?')) {
       assert.match(filter, /select\(\.run_number == 8\)/);
       return runs;
     }
+    if (route.includes('/workflows/dry-run.yml/runs?')) {
+      assert.ok(route.includes('event=push') && route.includes('head_sha=' + head));
+      return candidates;
+    }
+    if (route.includes('/runs/93/artifacts?')) return { artifacts: checks, total_count: checkTotal };
     assert.match(route, /\/runs\/82\/artifacts\?/);
     return { artifacts, total_count: total };
   };
-  return { api, readLive: async () => live, changed };
+  return { api, readLive: async () => live, changed, requests };
 }
 
 test('確認済みの公開版を引き継ぎ、手順書だけのmainを公開済みとは記録しない', async () => {
@@ -74,6 +89,62 @@ test('手動・再実行は最新mainのみ配信し、古い実行は証跡も�
   for (const overrides of [{ GITHUB_EVENT_NAME: 'workflow_dispatch' }, { GITHUB_RUN_ATTEMPT: '2' }]) {
     assert.equal((await plan({ ...env, ...overrides }, fixture())).mode, 'deploy');
   }
+});
+
+test('通常配信では同じSHAの検証済みpushの実行回と両環境を引き継ぐ', async () => {
+  const deps = fixture({ changed: () => true, candidates: [candidateRun], checks: [passingChecks] });
+  const result = await plan(env, deps);
+  assert.equal(result.mode, 'deploy');
+  assert.deepEqual(result.candidate, { staticRuntime, browserRuntime,
+    url: 'https://github.com/example/site/actions/runs/93/attempts/2' });
+});
+
+test('fork・PR・別SHA・別ワークフロー・新しい失敗・未完了は再利用しない', async () => {
+  for (const fields of [{ head_repository: { full_name: 'other/site' } }, { event: 'pull_request' },
+    { event: 'workflow_dispatch' }, { head_branch: 'feature' }, { head_sha: prior }, { path: 'other.yml' },
+    { status: 'in_progress' }, { conclusion: 'failure' }, { run_attempt: 0 }]) {
+    const result = await plan(env, fixture({ changed: () => true,
+      candidates: [{ ...candidateRun, ...fields }], checks: [passingChecks] }));
+    assert.equal(result.mode, 'deploy');
+    assert.ok(!result.candidate);
+  }
+  const result = await plan(env, fixture({ changed: () => true, checks: [passingChecks],
+    candidates: [candidateRun, { ...candidateRun, id: 94, conclusion: 'failure' }] }));
+  assert.ok(!result.candidate);
+});
+
+test('スキップ・別実行回・期限切れ・不完全な検査の記録では本番前にテストする', async () => {
+  for (const fields of [{ checks: [] }, { checks: [{ ...passingChecks, name: 'minigame-screenshots-93-2' }] },
+    { checks: [{ ...passingChecks, expired: true }] }, { checks: [{ ...passingChecks, size_in_bytes: 0 }] },
+    { checks: [{ ...passingChecks, name: passingChecks.name.replace('-2-', '-1-') }] },
+    { checks: [{ ...passingChecks, name: passingChecks.name.replace(head, prior) }] },
+    { checks: [{ ...passingChecks, name: passingChecks.name.slice(0, -1) }] },
+    { checks: [passingChecks, passingChecks] }, { checks: [passingChecks], checkTotal: 101 }]) {
+    const result = await plan(env, fixture({ changed: () => true, candidates: [candidateRun], ...fields }));
+    assert.equal(result.mode, 'deploy');
+    assert.ok(!result.candidate);
+  }
+});
+
+test('手動・復旧・変更なしの配信は候補を検索せず、照会障害でも全検証へ戻る', async () => {
+  for (const [overrides, fields, expected] of [
+    [{ GITHUB_EVENT_NAME: 'workflow_dispatch' }, {}, 'deploy'], [{ GITHUB_RUN_ATTEMPT: '2' }, {}, 'deploy'],
+    [{}, { live: head }, 'deploy'], [{}, { artifacts: [] }, 'deploy'],
+    [{}, { changed: () => false }, 'unchanged'], [{}, { main: prior }, 'superseded'],
+  ]) {
+    const deps = fixture({ changed: () => true, candidates: [candidateRun], checks: [passingChecks], ...fields });
+    const result = await plan({ ...env, ...overrides }, deps);
+    assert.equal(result.mode, expected);
+    assert.ok(!result.candidate);
+    assert.ok(!deps.requests.some(route => route.includes('dry-run.yml')));
+  }
+  const deps = fixture({ changed: () => true });
+  const result = await plan(env, { ...deps, api(route, filter) {
+    if (route.includes('dry-run.yml')) throw new Error('GitHub unavailable');
+    return deps.api(route, filter);
+  } });
+  assert.equal(result.mode, 'deploy');
+  assert.ok(!result.candidate);
 });
 
 test('実際のGit履歴で公開差分、後続文書、削除、拡張子の大文字を区別する', t => {

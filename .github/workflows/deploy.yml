@@ -39,20 +39,20 @@ jobs:
         if: steps.changes.outputs.mode == 'unchanged'
         run: echo "No public artifact or deploy-time build input changed; Xserver deployment is skipped."
 
+      - name: Identify static check environment
+        if: steps.changes.outputs.deploy_needed == 'true'
+        id: static
+        env:
+          VERIFIED_FINGERPRINT: ${{ steps.changes.outputs.static_runtime }}
+          VERIFIED_RUN_URL: ${{ steps.changes.outputs.candidate_run }}
+        run: bash .github/scripts/regression-runtime.sh static
       - name: Validate static site
+        if: steps.changes.outputs.deploy_needed == 'true' && steps.static.outputs.reuse != 'true'
+        run: bash .github/scripts/check-static-site.sh
+      - name: Validate deployment-only scripts
         if: steps.changes.outputs.deploy_needed == 'true'
         run: |
-          pwsh -File ./scripts/static-site-smoke-test.ps1
-          pwsh -File ./scripts/home-asset-smoke-test.ps1
-          pwsh -File ./scripts/structure-smoke-test.ps1
-          pwsh -File ./scripts/local-reference-check.ps1
-          pwsh -File ./scripts/deploy-public-artifact-smoke-test.ps1
-          pwsh -File ./scripts/viewport-accessibility-smoke-test.ps1
-          pwsh -File ./scripts/deploy-security-smoke-test.ps1
-          pwsh -File ./scripts/deploy-impact-smoke-test.ps1
           bash -n ./scripts/verify-deployment-marker.sh
-          bash -n ./.github/scripts/rsync-transient-retry.sh
-          node --check ./.github/scripts/detect-deploy-impact.cjs
           node --check ./scripts/verify-live-minigame-routes.mjs
 
       - name: Setup Node.js for minigame regression tests
@@ -65,30 +65,17 @@ jobs:
         if: steps.changes.outputs.deploy_needed == 'true'
         run: npm ci --ignore-scripts --no-audit --no-fund
 
-      - name: Validate minigame logic before deploy
-        if: steps.changes.outputs.deploy_needed == 'true'
-        run: npm run test:minigames:smoke
-
       - name: Resolve runner Chrome for predeploy regression
+        id: browser
         if: steps.changes.outputs.deploy_needed == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          chrome_path="$(command -v google-chrome || command -v google-chrome-stable || true)"
-          if [ -z "$chrome_path" ]; then
-            echo "::error::Google Chrome is not available on this GitHub-hosted runner image"
-            exit 1
-          fi
-          "$chrome_path" --version
-          echo "CHROME_PATH=$chrome_path" >> "$GITHUB_ENV"
+        env:
+          VERIFIED_FINGERPRINT: ${{ steps.changes.outputs.browser_runtime }}
+          VERIFIED_RUN_URL: ${{ steps.changes.outputs.candidate_run }}
+        run: bash .github/scripts/regression-runtime.sh browser
 
-      - name: Check mail contact before deploy
-        if: steps.changes.outputs.deploy_needed == 'true'
-        run: node scripts/mail-contact-browser-test.mjs
-
-      - name: Validate minigame browser behavior before deploy
-        if: steps.changes.outputs.deploy_needed == 'true'
-        run: npm run test:minigames:browser
+      - name: Validate minigames and mail before deploy
+        if: steps.changes.outputs.deploy_needed == 'true' && steps.browser.outputs.reuse != 'true'
+        uses: ./.github/actions/check-minigames
 
       - name: Generate sitemap.xml
         if: steps.changes.outputs.deploy_needed == 'true'

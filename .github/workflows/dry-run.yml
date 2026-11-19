@@ -21,6 +21,7 @@ jobs:
     timeout-minutes: 5
     outputs:
       browser: ${{ steps.scope.outputs.browser }}
+      runtime: ${{ steps.runtime.outputs.fingerprint }}
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
@@ -42,19 +43,16 @@ jobs:
             echo 'browser=true' >> "$GITHUB_OUTPUT"
           fi
       - name: Run site smoke tests
+        id: site
+        run: bash .github/scripts/check-static-site.sh
+      - name: Identify passing static check environment
+        id: runtime
+        if: steps.site.outcome == 'success'
+        run: bash .github/scripts/regression-runtime.sh static
+      - name: Check workflow configuration and deployment decisions
         run: |
-          pwsh -File ./scripts/static-site-smoke-test.ps1
-          pwsh -File ./scripts/home-asset-smoke-test.ps1
-          pwsh -File ./scripts/structure-smoke-test.ps1
-          pwsh -File ./scripts/local-reference-check.ps1
           pwsh -File ./scripts/workflow-action-pin-smoke-test.ps1
-          pwsh -File ./scripts/deploy-public-artifact-smoke-test.ps1
-          pwsh -File ./scripts/viewport-accessibility-smoke-test.ps1
-          pwsh -File ./scripts/deploy-security-smoke-test.ps1
-          pwsh -File ./scripts/deploy-impact-smoke-test.ps1
           node --test .github/scripts/plan-deployment.test.cjs
-          bash -n ./.github/scripts/rsync-transient-retry.sh
-          node --check ./.github/scripts/detect-deploy-impact.cjs
 
   minigame-check:
     needs: static-check
@@ -69,28 +67,16 @@ jobs:
           node-version: '22'
       - name: Install locked test dependencies
         run: npm ci --ignore-scripts --no-audit --no-fund
-      - name: Run minigame smoke tests
-        run: |
-          node scripts/minigame-screenshots-test.mjs
-          npm run test:minigames:smoke
+      - name: Test minigame screenshot collection
+        run: node scripts/minigame-screenshots-test.mjs
       - name: Resolve runner Chrome
-        shell: bash
-        run: |
-          set -euo pipefail
-          chrome_path="$(command -v google-chrome || command -v google-chrome-stable || true)"
-          if [ -z "$chrome_path" ]; then
-            echo "::error::Google Chrome is not available on this GitHub-hosted runner image"
-            exit 1
-          fi
-          "$chrome_path" --version
-          echo "CHROME_PATH=$chrome_path" >> "$GITHUB_ENV"
-      - name: Check mail contact across viewport and script settings
-        run: node scripts/mail-contact-browser-test.mjs
-      - name: Run minigame browser tests
+        id: runtime
+        run: bash .github/scripts/regression-runtime.sh browser
+      - name: Run minigame and mail regressions
         id: minigame-browser
-        env:
-          MINIGAME_SCREENSHOT_DIR: test-results/minigame-screenshots
-        run: npm run test:minigames:browser
+        uses: ./.github/actions/check-minigames
+        with:
+          screenshot-directory: test-results/minigame-screenshots
       - name: Upload minigame screenshots
         if: ${{ !cancelled() && steps.minigame-browser.outcome != 'skipped' }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -101,6 +87,25 @@ jobs:
           retention-days: 7
           compression-level: 0
           include-hidden-files: false
+      - name: Record passing checks for this checkout
+        id: receipt
+        if: >-
+          success() && github.event_name == 'push' && startsWith(github.ref, 'refs/heads/verified/') &&
+          steps.minigame-browser.outcome == 'success' &&
+          needs.static-check.outputs.runtime != '' && steps.runtime.outputs.fingerprint != ''
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git diff --exit-code HEAD --
+          printf '%s\n' "$GITHUB_SHA" > "$RUNNER_TEMP/hp-regressions.txt"
+      - name: Make passing checks available to deployment
+        if: steps.receipt.outcome == 'success'
+        continue-on-error: true
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: hp-regressions-v1-${{ github.run_attempt }}-${{ github.sha }}-${{ needs.static-check.outputs.runtime }}-${{ steps.runtime.outputs.fingerprint }}
+          path: ${{ runner.temp }}/hp-regressions.txt
+          if-no-files-found: error
+          retention-days: 7
 
   release-checks:
     name: hp-release-checks

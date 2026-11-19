@@ -1,0 +1,21 @@
+name: Check minigames and mail contact
+description: Run the same predeployment checks on a candidate or on main.
+inputs:
+  screenshot-directory:
+    description: Optional directory for browser screenshots
+    required: false
+    default: ''
+runs:
+  using: composite
+  steps:
+    - name: Run minigame smoke tests
+      shell: bash
+      run: npm run test:minigames:smoke
+    - name: Check mail contact across viewport and script settings
+      shell: bash
+      run: node scripts/mail-contact-browser-test.mjs
+    - name: Run minigame browser tests
+      shell: bash
+      env:
+        MINIGAME_SCREENSHOT_DIR: ${{ inputs.screenshot-directory }}
+      run: npm run test:minigames:browser
