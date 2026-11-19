@@ -98,3 +98,8 @@ Xserver に置くのは、基本的にこのリポジトリ直下の静的ファ
 `node scripts/mail-contact-browser-test.mjs` は320/390/1365pxとJavaScript無効時の連絡導線を確認します。
 旧PHPの原本は公開対象外の `docs/retired-php-20261022.md` とGit履歴に保持しています。
 復元が必要ならPHP廃止PR全体を作業ブランチでrevertし、CI合格後に通常のXserverデプロイで反映します。
+## 自動テスト後のmain反映
+
+通常は作業ブランチのPRで `hp-release-checks` を確認します。直接反映を選ぶ場合は、最新の `origin/main` を含む作業ブランチをpushし、`gh workflow run dry-run.yml --ref 作業ブランチ名` でそのコミットを検証します。テストはXserverへ転送しません。
+
+`gh run view 実行ID --json headSha,conclusion,url` で、成功したSHAと反映するSHAが完全一致することを確認し、`git push origin 検証済みの完全SHA:refs/heads/main` で通常のfast-forwardを行います。mainが先に進んだ場合は取り込んでから再検証します。完了の引き継ぎには、テストURL、配信実行URL、公開URL、`deploy-version.txt` の値を残します。
