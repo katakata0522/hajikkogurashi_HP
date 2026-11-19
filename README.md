@@ -100,6 +100,6 @@ Xserver に置くのは、基本的にこのリポジトリ直下の静的ファ
 復元が必要ならPHP廃止PR全体を作業ブランチでrevertし、CI合格後に通常のXserverデプロイで反映します。
 ## 自動テスト後のmain反映
 
-通常は作業ブランチのPRで `hp-release-checks` を確認します。直接反映を選ぶ場合は、最新の `origin/main` を含む作業ブランチをpushし、`gh workflow run dry-run.yml --ref 作業ブランチ名` でそのコミットを検証します。テストはXserverへ転送しません。
+通常は作業ブランチのPRで `hp-release-checks` を確認します。直接反映を選ぶ場合は、最新の `origin/main` を含むコミットを `git push origin HEAD:refs/heads/verified/作業名` で送ります。このpushで必須テストが自動起動します。手動起動は診断用です。
 
 `gh run view 実行ID --json headSha,conclusion,url` で、成功したSHAと反映するSHAが完全一致することを確認し、`git push origin 検証済みの完全SHA:refs/heads/main` で通常のfast-forwardを行います。mainが先に進んだ場合は取り込んでから再検証します。完了の引き継ぎには、テストURL、配信実行URL、公開URL、`deploy-version.txt` の値を残します。
