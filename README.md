@@ -103,3 +103,9 @@ Xserver に置くのは、基本的にこのリポジトリ直下の静的ファ
 通常は作業ブランチのPRで `hp-release-checks` を確認します。直接反映を選ぶ場合は、最新の `origin/main` を含むコミットを `git push origin HEAD:refs/heads/verified/作業名` で送ります。このpushで必須テストが自動起動します。手動起動は診断用です。
 
 `gh run view 実行ID --json headSha,conclusion,url` で、成功したSHAと反映するSHAが完全一致することを確認し、`git push origin 検証済みの完全SHA:refs/heads/main` で通常のfast-forwardを行います。mainが先に進んだ場合は取り込んでから再検証します。完了の引き継ぎには、テストURL、配信実行URL、公開URL、`deploy-version.txt` の値を残します。
+
+## 配信が失敗した後の動き
+
+main が更新されるたびに、GitHub Actions の「Deploy Static Site to Xserver」が直前の配信結果を確認します。失敗・中断した場合は、次の更新が README だけでも最新の main を検証して全体を再配信します。次の更新を待たずに復旧する場合は、失敗したステップの原因を確認してから、このワークフローを main で手動実行します。
+
+配信の完了は、公開中の `deploy-version.txt` とミニゲームの実URLを検査した後に記録します。直前の成功記録と公開版が一致し、そこから公開対象が変わっていなければ転送を省略します。その場合、本番のSHAは最後に公開した版のままです。担当を引き継ぐときは、Actionsの実行サマリーと、検証したSHAを名前に含む `hp-verified-v1-…` 成果物を確認してください。
