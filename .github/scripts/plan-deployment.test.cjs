@@ -7,6 +7,7 @@ const { mkdtempSync, writeFileSync, rmSync } = require('node:fs');
 const { tmpdir } = require('node:os');
 const { join } = require('node:path');
 const { plan, publicChanges } = require('./plan-deployment.cjs');
+const { classify } = require('./detect-deploy-impact.cjs');
 
 const repo = 'example/site';
 const prior = 'a'.repeat(40);
@@ -145,6 +146,13 @@ test('手動・復旧・変更なしの配信は候補を検索せず、照会�
   } });
   assert.equal(result.mode, 'deploy');
   assert.ok(!result.candidate);
+});
+
+test('配信の検証条件を定義する共通スクリプトだけの変更でもmainで新しい判定を通す', () => {
+  for (const path of ['.github/scripts/regression-runtime.sh', '.github/scripts/check-static-site.sh',
+    '.github/actions/check-minigames/action.yml']) {
+    assert.equal(classify([path]).deployNeeded, true, path);
+  }
 });
 
 test('実際のGit履歴で公開差分、後続文書、削除、拡張子の大文字を区別する', t => {

@@ -21,10 +21,10 @@ function classifyPath(rawPath) {
     return { path, deploy: true, reason: 'unsafe-path' };
   }
 
-  // Changing the production workflow can alter what is generated or mirrored,
-  // so treat it as a deployment input even though .github itself is not public.
+  // A change to a production gate should exercise the new gate on main.
   if (['.github/workflows/deploy.yml', '.github/scripts/plan-deployment.cjs',
-       '.github/scripts/detect-deploy-impact.cjs'].includes(path)) {
+       '.github/scripts/detect-deploy-impact.cjs', '.github/scripts/regression-runtime.sh',
+       '.github/scripts/check-static-site.sh', '.github/actions/check-minigames/action.yml'].includes(path)) {
     return { path, deploy: true, reason: 'deployment-workflow' };
   }
 

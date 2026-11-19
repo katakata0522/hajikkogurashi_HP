@@ -12,7 +12,6 @@ case "$1" in
       exit 1
     fi
     chrome_version=$("$chrome_path" --version)
-    echo "$chrome_version"
     printf 'CHROME_PATH=%s\n' "$chrome_path" >> "$GITHUB_ENV"
     tools="$chrome_version $(npm --version)"
     ;;
@@ -20,8 +19,10 @@ case "$1" in
 esac
 
 fingerprint=''
+node_version=$(node --version)
+printf '%s check environment: image=%s/%s, runner=%s/%s, node=%s, tools=%s\n' \
+  "$1" "${ImageOS:-unknown}" "${ImageVersion:-unknown}" "${RUNNER_OS:-unknown}" "${RUNNER_ARCH:-unknown}" "$node_version" "$tools"
 if [[ -n ${ImageOS:-} && -n ${ImageVersion:-} && -n ${RUNNER_OS:-} && -n ${RUNNER_ARCH:-} ]]; then
-  node_version=$(node --version)
   fingerprint=$(printf '%s\n' "$1" "$ImageOS" "$ImageVersion" "$RUNNER_OS" "$RUNNER_ARCH" "$node_version" "$tools" | sha256sum)
   fingerprint=${fingerprint%% *}
 fi
@@ -32,6 +33,7 @@ if [[ -n "$fingerprint" && "$fingerprint" == "${VERIFIED_FINGERPRINT:-}" ]]; the
   reuse=true
   printf 'Reused %s checks for `%s`: %s\n' "$1" "$GITHUB_SHA" "$VERIFIED_RUN_URL" | tee -a "$GITHUB_STEP_SUMMARY"
 elif [[ -n ${VERIFIED_RUN_URL:-} ]]; then
-  printf 'Running %s checks locally: runner or tool versions differ from the candidate.\n' "$1"
+  printf 'Running %s checks locally (candidate %s, current %s). Candidate environment: %s\n' \
+    "$1" "${VERIFIED_FINGERPRINT:-unknown}" "${fingerprint:-unknown}" "$VERIFIED_RUN_URL" | tee -a "$GITHUB_STEP_SUMMARY"
 fi
 printf 'reuse=%s\n' "$reuse" >> "$GITHUB_OUTPUT"
