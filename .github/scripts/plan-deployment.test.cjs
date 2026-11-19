@@ -20,9 +20,12 @@ const receipt = { name: 'hp-verified-v1-2-' + prior, expired: false, size_in_byt
 
 function fixture({ runs = [success], artifacts = [receipt], total = artifacts.length,
                    main = head, live = prior, changed = () => false } = {}) {
-  const api = route => {
+  const api = (route, filter) => {
     if (route.endsWith('/git/ref/heads/main')) return { object: { sha: main } };
-    if (route.includes('/workflows/deploy.yml/runs?')) return { workflow_runs: runs };
+    if (route.includes('/workflows/deploy.yml/runs?')) {
+      assert.match(filter, /select\(\.run_number == 8\)/);
+      return runs;
+    }
     assert.match(route, /\/runs\/82\/artifacts\?/);
     return { artifacts, total_count: total };
   };
@@ -50,7 +53,7 @@ test('失敗・中断・検証中は、転送途中で版表示が変わり次�
 });
 
 test('証跡の欠落・期限切れ・実行回違い・曖昧さ・本番版の相違では省略しない', async () => {
-  for (const fields of [{ runs: [] }, { artifacts: [] }, { artifacts: [{ ...receipt, expired: true }] },
+  for (const fields of [{ runs: [] }, { runs: [success, success] }, { artifacts: [] }, { artifacts: [{ ...receipt, expired: true }] },
     { artifacts: [{ ...receipt, name: 'hp-verified-v1-1-' + prior }] }, { artifacts: [receipt, receipt] },
     { artifacts: [{ ...receipt, size_in_bytes: 0 }] }, { total: 101 }, { live: head }]) {
     assert.equal((await plan(env, fixture(fields))).mode, 'deploy');
