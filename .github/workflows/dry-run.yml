@@ -1,13 +1,10 @@
 name: Static Site Check
 
 on:
+  workflow_dispatch:
   pull_request:
     branches:
       - main
-    paths-ignore:
-      - '**.md'
-      - '.gitignore'
-      - '.gitattributes'
 
 permissions:
   contents: read
@@ -20,8 +17,28 @@ jobs:
   static-check:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    outputs:
+      browser: ${{ steps.scope.outputs.browser }}
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Select browser checks against main
+        id: scope
+        env:
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          base="${PR_BASE:-origin/main}"
+          git merge-base --is-ancestor "$base" HEAD
+          if git diff --quiet "$base" HEAD -- . ':(exclude,glob)**/*.md' ':(exclude).gitignore' ':(exclude).gitattributes'; then
+            echo 'browser=false' >> "$GITHUB_OUTPUT"
+          else
+            result=$?
+            test "$result" -eq 1
+            echo 'browser=true' >> "$GITHUB_OUTPUT"
+          fi
       - name: Run site smoke tests
         run: |
           pwsh -File ./scripts/static-site-smoke-test.ps1
@@ -37,6 +54,8 @@ jobs:
           node --check ./.github/scripts/detect-deploy-impact.cjs
 
   minigame-check:
+    needs: static-check
+    if: needs.static-check.outputs.browser == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -79,3 +98,23 @@ jobs:
           retention-days: 7
           compression-level: 0
           include-hidden-files: false
+
+  release-checks:
+    name: hp-release-checks
+    if: always()
+    needs: [static-check, minigame-check]
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Require selected checks for this revision
+        env:
+          STATIC: ${{ needs.static-check.result }}
+          BROWSER: ${{ needs.static-check.outputs.browser }}
+          BROWSER_RESULT: ${{ needs.minigame-check.result }}
+        run: |
+          set -eu
+          test "$STATIC" = success
+          case "$BROWSER:$BROWSER_RESULT" in
+            true:success|false:skipped) ;;
+            *) echo "::error::browser=$BROWSER result=$BROWSER_RESULT"; exit 1 ;;
+          esac
