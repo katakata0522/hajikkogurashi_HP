@@ -23,7 +23,8 @@ function classifyPath(rawPath) {
 
   // Changing the production workflow can alter what is generated or mirrored,
   // so treat it as a deployment input even though .github itself is not public.
-  if (path === '.github/workflows/deploy.yml') {
+  if (['.github/workflows/deploy.yml', '.github/scripts/plan-deployment.cjs',
+       '.github/scripts/detect-deploy-impact.cjs'].includes(path)) {
     return { path, deploy: true, reason: 'deployment-workflow' };
   }
 
@@ -61,7 +62,7 @@ function classifyPath(rawPath) {
     return { path, deploy: false, reason: 'non-public' };
   }
 
-  if (/\.(?:md|py)$/i.test(path)) {
+  if (/\.(?:md|py)$/.test(path)) {
     return { path, deploy: false, reason: 'non-public' };
   }
 
@@ -77,6 +78,9 @@ function classify(paths) {
   };
 }
 
-const input = fs.readFileSync(0, 'utf8');
-const paths = input.split(/\r?\n/).filter((line) => line.trim());
-process.stdout.write(`${JSON.stringify(classify(paths), null, 2)}\n`);
+if (require.main === module) {
+  const input = fs.readFileSync(0, 'utf8');
+  const paths = input.split(/\r?\n/).filter((line) => line.trim());
+  process.stdout.write(`${JSON.stringify(classify(paths), null, 2)}\n`);
+}
+module.exports = { classify };

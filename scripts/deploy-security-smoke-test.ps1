@@ -16,7 +16,7 @@ $requiredOnce = @(
     'persist-credentials: false',
     'cancel-in-progress: false',
     '- name: Detect deployment impact',
-    'deploy_needed=',
+    'node .github/scripts/plan-deployment.cjs',
     '- name: Skip production deployment',
     'No public artifact or deploy-time build input changed; Xserver deployment is skipped.',
     'umask 077',

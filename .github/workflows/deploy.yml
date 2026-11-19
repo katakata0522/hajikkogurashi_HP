@@ -5,17 +5,15 @@ on:
   push:
     branches:
       - main
-    paths-ignore:
-      - '**.md'
-      - '.gitignore'
-      - '.gitattributes'
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: deploy-hajikkogurashi-hp-main
   cancel-in-progress: false
+  queue: max
 
 jobs:
   # workflow_dispatchで作業ブランチを選んでも本番Xserverへの書き込みは禁止。
@@ -28,55 +26,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
-          fetch-depth: 2
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Detect deployment impact
         id: changes
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          deploy_needed="true"
-          changed_files=""
-
-          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
-            echo "Manual dispatch: production deploy is required as a fail-safe."
-          else
-            before_sha="$(jq -r '.before // empty' "$GITHUB_EVENT_PATH" 2>/dev/null || true)"
-            zero_sha="0000000000000000000000000000000000000000"
-
-            if [[ "$before_sha" =~ ^[0-9a-f]{40}$ ]] && [ "$before_sha" != "$zero_sha" ] && git cat-file -e "$before_sha^{commit}" 2>/dev/null; then
-              changed_files="$(git diff --name-only --no-renames "$before_sha" "$GITHUB_SHA" 2>/dev/null || true)"
-
-              if [ -n "$changed_files" ]; then
-                echo "Changed files:"
-                printf '%s\n' "$changed_files"
-
-                if impact_json="$(printf '%s\n' "$changed_files" | node .github/scripts/detect-deploy-impact.cjs)"; then
-                  printf '%s\n' "$impact_json" | jq .
-                  deploy_needed="$(jq -r '.deployNeeded' <<< "$impact_json")"
-                  if [ "$deploy_needed" != "true" ] && [ "$deploy_needed" != "false" ]; then
-                    echo "::warning::Deploy impact classifier returned an invalid value; deploying as a fail-safe."
-                    deploy_needed="true"
-                  fi
-                else
-                  echo "::warning::Deploy impact classifier failed; deploying as a fail-safe."
-                  deploy_needed="true"
-                fi
-              else
-                echo "::warning::No changed files were detected; deploying as a fail-safe."
-              fi
-            else
-              echo "::warning::Push base commit is unavailable in the checkout; deploying as a fail-safe."
-            fi
-          fi
-
-          echo "deploy_needed=$deploy_needed" >> "$GITHUB_OUTPUT"
-          echo "Production deploy: $deploy_needed"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node .github/scripts/plan-deployment.cjs
 
       - name: Skip production deployment
-        if: steps.changes.outputs.deploy_needed != 'true'
+        if: steps.changes.outputs.mode == 'unchanged'
         run: echo "No public artifact or deploy-time build input changed; Xserver deployment is skipped."
 
       - name: Validate static site
@@ -255,3 +215,17 @@ jobs:
         if: always() && steps.changes.outputs.deploy_needed == 'true'
         shell: bash
         run: rm -f ~/.ssh/id_deploy ~/.ssh/known_hosts
+
+      # 転送前に配置する版表示と、全ての公開後検査を通った証跡を区別する。
+      - name: Record verified production revision
+        if: success() && steps.changes.outputs.verified_sha != ''
+        env:
+          VERIFIED_SHA: ${{ steps.changes.outputs.verified_sha }}
+        run: printf '%s\n' "$VERIFIED_SHA" > "$RUNNER_TEMP/hp-verified.txt"
+      - name: Preserve verified production revision
+        if: success() && steps.changes.outputs.verified_sha != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: hp-verified-v1-${{ github.run_attempt }}-${{ steps.changes.outputs.verified_sha }}
+          path: ${{ runner.temp }}/hp-verified.txt
+          if-no-files-found: error

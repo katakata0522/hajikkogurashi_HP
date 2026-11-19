@@ -52,6 +52,7 @@ jobs:
           pwsh -File ./scripts/viewport-accessibility-smoke-test.ps1
           pwsh -File ./scripts/deploy-security-smoke-test.ps1
           pwsh -File ./scripts/deploy-impact-smoke-test.ps1
+          node --test .github/scripts/plan-deployment.test.cjs
           bash -n ./.github/scripts/rsync-transient-retry.sh
           node --check ./.github/scripts/detect-deploy-impact.cjs
 
