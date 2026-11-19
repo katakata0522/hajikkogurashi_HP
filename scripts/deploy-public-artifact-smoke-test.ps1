@@ -2,12 +2,22 @@ $ErrorActionPreference = 'Stop'
 
 $root = Split-Path -Parent $PSScriptRoot
 $deployPath = Join-Path $root '.github/workflows/deploy.yml'
+$candidatePath = Join-Path $root '.github/workflows/dry-run.yml'
+$stagingPath = Join-Path $root '.github/scripts/stage-public.sh'
 $gitignorePath = Join-Path $root '.gitignore'
 
 $deploy = Get-Content -LiteralPath $deployPath -Raw
+$candidate = Get-Content -LiteralPath $candidatePath -Raw
+$staging = Get-Content -LiteralPath $stagingPath -Raw
 $gitignore = Get-Content -LiteralPath $gitignorePath
 
-$requiredDeploySnippets = @(
+foreach ($workflow in @($candidate, $deploy)) {
+    if (-not $workflow.Contains('bash .github/scripts/stage-public.sh')) {
+        throw 'Candidate and deployment must stage public files using the same script'
+    }
+}
+
+$requiredStagingSnippets = @(
     'PUBLIC_DIR="$RUNNER_TEMP/corner-neighbor-public"',
     '--exclude "node_modules/"',
     '--exclude "_codex_screens/"',
@@ -16,14 +26,17 @@ $requiredDeploySnippets = @(
     '--exclude "assets/css/custom.dev.css"',
     '--exclude "assets/css/components/"',
     '--exclude "assets/js/ie/"',
-    '--exclude "*.py"',
-    '"$PUBLIC_DIR/" $XS_USER@$XS_HOST:$XS_REMOTE_DIR'
+    '--exclude "*.py"'
 )
 
-foreach ($snippet in $requiredDeploySnippets) {
-    if (-not $deploy.Contains($snippet)) {
-        throw "deploy.yml is missing public-artifact safeguard: $snippet"
+foreach ($snippet in $requiredStagingSnippets) {
+    if (-not $staging.Contains($snippet)) {
+        throw "Public staging is missing safeguard: $snippet"
     }
+}
+
+if (-not $deploy.Contains('"$PUBLIC_DIR/" $XS_USER@$XS_HOST:$XS_REMOTE_DIR')) {
+    throw 'The production transfer must use the validated public directory'
 }
 
 if ($deploy.Contains('./ $XS_USER@$XS_HOST:$XS_REMOTE_DIR')) {

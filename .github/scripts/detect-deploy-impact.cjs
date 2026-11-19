@@ -24,7 +24,7 @@ function classifyPath(rawPath) {
   // A change to a production gate should exercise the new gate on main.
   if (['.github/workflows/deploy.yml', '.github/scripts/plan-deployment.cjs',
        '.github/scripts/detect-deploy-impact.cjs', '.github/scripts/regression-runtime.sh',
-       '.github/scripts/check-static-site.sh', '.github/actions/check-minigames/action.yml'].includes(path)) {
+       '.github/scripts/check-static-site.sh', '.github/scripts/stage-public.sh', '.github/actions/check-minigames/action.yml'].includes(path)) {
     return { path, deploy: true, reason: 'deployment-workflow' };
   }
 

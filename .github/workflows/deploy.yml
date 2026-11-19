@@ -65,18 +65,6 @@ jobs:
         if: steps.changes.outputs.deploy_needed == 'true'
         run: npm ci --ignore-scripts --no-audit --no-fund
 
-      - name: Resolve runner Chrome for predeploy regression
-        id: browser
-        if: steps.changes.outputs.deploy_needed == 'true'
-        env:
-          VERIFIED_FINGERPRINT: ${{ steps.changes.outputs.browser_runtime }}
-          VERIFIED_RUN_URL: ${{ steps.changes.outputs.candidate_run }}
-        run: bash .github/scripts/regression-runtime.sh browser
-
-      - name: Validate minigames and mail before deploy
-        if: steps.changes.outputs.deploy_needed == 'true' && steps.browser.outputs.reuse != 'true'
-        uses: ./.github/actions/check-minigames
-
       - name: Generate sitemap.xml
         if: steps.changes.outputs.deploy_needed == 'true'
         run: pwsh -File ./scripts/generate-sitemap.ps1
@@ -88,44 +76,19 @@ jobs:
 
       - name: Prepare public deployment artifact
         if: steps.changes.outputs.deploy_needed == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          PUBLIC_DIR="$RUNNER_TEMP/corner-neighbor-public"
-          rm -rf "$PUBLIC_DIR"
-          mkdir -p "$PUBLIC_DIR"
+        id: public
+        env:
+          VERIFIED_DIGEST: ${{ steps.changes.outputs.public_digest }}
+          VERIFIED_RUN_URL: ${{ steps.changes.outputs.candidate_run }}
+        run: bash .github/scripts/stage-public.sh
 
-          rsync -a \
-            --exclude ".git/" \
-            --exclude ".github/" \
-            --exclude "scripts/" \
-            --exclude "node_modules/" \
-            --exclude "_codex_screens/" \
-            --exclude "package.json" \
-            --exclude "package-lock.json" \
-            --exclude "playwright-report/" \
-            --exclude "test-results/" \
-            --exclude "assets/css/custom.dev.css" \
-            --exclude "assets/css/components/" \
-            --exclude "assets/js/ie/" \
-            --exclude "*.py" \
-            --exclude "*.md" \
-            --exclude ".gitignore" \
-            --exclude ".gitattributes" \
-            --exclude ".gitlab-ci.yml" \
-            ./ "$PUBLIC_DIR/"
+      - name: Resolve runner Chrome for predeploy regression
+        if: steps.changes.outputs.deploy_needed == 'true' && steps.public.outputs.reuse != 'true'
+        run: bash .github/scripts/regression-runtime.sh browser
 
-          test -f "$PUBLIC_DIR/index.html"
-          test -f "$PUBLIC_DIR/deploy-version.txt"
-          test -f "$PUBLIC_DIR/assets/css/custom.css"
-          test ! -e "$PUBLIC_DIR/node_modules"
-          test ! -e "$PUBLIC_DIR/_codex_screens"
-          test ! -e "$PUBLIC_DIR/package.json"
-          test ! -e "$PUBLIC_DIR/package-lock.json"
-          test ! -e "$PUBLIC_DIR/assets/css/custom.dev.css"
-          test ! -e "$PUBLIC_DIR/assets/css/components"
-          test ! -e "$PUBLIC_DIR/assets/js/ie"
-          echo "PUBLIC_DIR=$PUBLIC_DIR" >> "$GITHUB_ENV"
+      - name: Validate minigames and mail before deploy
+        if: steps.changes.outputs.deploy_needed == 'true' && steps.public.outputs.reuse != 'true'
+        uses: ./.github/actions/check-minigames
 
       - name: Setup SSH
         if: steps.changes.outputs.deploy_needed == 'true'

@@ -22,8 +22,8 @@ const candidateRun = { id: 93, run_attempt: 2, path: '.github/workflows/dry-run.
   head_repository: { full_name: repo }, head_branch: 'verified/release', event: 'push',
   status: 'completed', conclusion: 'success' };
 const staticRuntime = '1'.repeat(64);
-const browserRuntime = '2'.repeat(64);
-const passingChecks = { name: `hp-regressions-v1-2-${head}-${staticRuntime}-${browserRuntime}`,
+const publicDigest = '2'.repeat(64);
+const passingChecks = { name: `hp-regressions-v2-2-${head}-${staticRuntime}-${publicDigest}`,
   expired: false, size_in_bytes: 210 };
 
 function fixture({ runs = [success], artifacts = [receipt], total = artifacts.length,
@@ -92,11 +92,11 @@ test('手動・再実行は最新mainのみ配信し、古い実行は証跡も�
   }
 });
 
-test('通常配信では同じSHAの検証済みpushの実行回と両環境を引き継ぐ', async () => {
+test('通常配信では同じSHAの検証済みpushの実行回・静的検査環境・公開ファイルのハッシュを引き継ぐ', async () => {
   const deps = fixture({ changed: () => true, candidates: [candidateRun], checks: [passingChecks] });
   const result = await plan(env, deps);
   assert.equal(result.mode, 'deploy');
-  assert.deepEqual(result.candidate, { staticRuntime, browserRuntime,
+  assert.deepEqual(result.candidate, { staticRuntime, publicDigest,
     url: 'https://github.com/example/site/actions/runs/93/attempts/2' });
 });
 
@@ -117,6 +117,7 @@ test('fork・PR・別SHA・別ワークフロー・新しい失敗・未完了�
 test('スキップ・別実行回・期限切れ・不完全な検査の記録では本番前にテストする', async () => {
   for (const fields of [{ checks: [] }, { checks: [{ ...passingChecks, name: 'minigame-screenshots-93-2' }] },
     { checks: [{ ...passingChecks, expired: true }] }, { checks: [{ ...passingChecks, size_in_bytes: 0 }] },
+    { checks: [{ ...passingChecks, name: passingChecks.name.replace('regressions-v2-', 'regressions-v1-') }] },
     { checks: [{ ...passingChecks, name: passingChecks.name.replace('-2-', '-1-') }] },
     { checks: [{ ...passingChecks, name: passingChecks.name.replace(head, prior) }] },
     { checks: [{ ...passingChecks, name: passingChecks.name.slice(0, -1) }] },
@@ -149,7 +150,7 @@ test('手動・復旧・変更なしの配信は候補を検索せず、照会�
 });
 
 test('配信の検証条件を定義する共通スクリプトだけの変更でもmainで新しい判定を通す', () => {
-  for (const path of ['.github/scripts/regression-runtime.sh', '.github/scripts/check-static-site.sh',
+  for (const path of ['.github/scripts/regression-runtime.sh', '.github/scripts/check-static-site.sh', '.github/scripts/stage-public.sh',
     '.github/actions/check-minigames/action.yml']) {
     assert.equal(classify([path]).deployNeeded, true, path);
   }

@@ -70,11 +70,11 @@ function candidateChecks(env, api) {
   // PR runs can test a merge ref different from their REST head_sha. Never reuse them here.
   const result = api(`${actions}/runs/${candidate.id}/artifacts?per_page=100`);
   if (result.artifacts.length !== result.total_count) return null;
-  const name = new RegExp(`^hp-regressions-v1-${candidate.run_attempt}-${env.GITHUB_SHA}-([0-9a-f]{64})-([0-9a-f]{64})$`);
+  const name = new RegExp(`^hp-regressions-v2-${candidate.run_attempt}-${env.GITHUB_SHA}-([0-9a-f]{64})-([0-9a-f]{64})$`);
   const receipts = result.artifacts.filter(a => !a.expired && a.size_in_bytes > 0)
     .map(a => name.exec(a.name)).filter(Boolean);
   if (receipts.length !== 1) return null;
-  return { staticRuntime: receipts[0][1], browserRuntime: receipts[0][2],
+  return { staticRuntime: receipts[0][1], publicDigest: receipts[0][2],
     url: `https://github.com/${env.GITHUB_REPOSITORY}/actions/runs/${candidate.id}/attempts/${candidate.run_attempt}` };
 }
 
@@ -93,7 +93,7 @@ async function plan(env, { api = gh, readLive = liveRevision, changed = publicCh
     if (await readLive() !== verified) return deploy('公開中の版と前回の検証記録が異なります。');
     if (changed(verified, head)) {
       const candidate = env.GITHUB_EVENT_NAME === 'push' ? candidateChecks(env, api) : null;
-      return { ...deploy(candidate ? '検証済み候補と配信環境を照合します。' : '一致する候補の検証記録がないため配信前に検証します。'), candidate };
+      return { ...deploy(candidate ? '検証済み候補の静的検査環境とブラウザーで検証した公開ファイルを照合します。' : '一致する候補の検証記録がないため配信前に検証します。'), candidate };
     }
     return { mode: 'unchanged', verified, reason: '本番の検証記録・版表示が一致し、公開対象に累積差分はありません。' };
   } catch (error) {
@@ -111,7 +111,7 @@ async function main() {
   }
   const result = await plan(process.env);
   const output = { mode: result.mode, deploy_needed: result.mode === 'deploy', verified_sha: result.verified || '',
-    static_runtime: result.candidate?.staticRuntime || '', browser_runtime: result.candidate?.browserRuntime || '',
+    static_runtime: result.candidate?.staticRuntime || '', public_digest: result.candidate?.publicDigest || '',
     candidate_run: result.candidate?.url || '' };
   appendFileSync(process.env.GITHUB_OUTPUT, Object.entries(output).map(([key, value]) => `${key}=${value}\n`).join(''));
   console.log(result.reason);
